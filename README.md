@@ -3,6 +3,8 @@
     <img
       alt="VLibras"
       src="https://www.librasol.com.br/wp-content/uploads/2015/04/avatar.png"
+       height="304"
+       width="187"
     />
   </a>
 </div>
