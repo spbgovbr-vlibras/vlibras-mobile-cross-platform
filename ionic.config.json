@@ -1,0 +1,7 @@
+{
+  "name": "VLibrasMobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
