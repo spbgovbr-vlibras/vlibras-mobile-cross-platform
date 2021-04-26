@@ -1,5 +1,6 @@
 import React from 'react';
 
+// eslint-disable-next-line import/order
 import {
   IonContent,
   IonHeader,
@@ -8,9 +9,11 @@ import {
   IonToolbar,
 } from '@ionic/react';
 
+// eslint-disable-next-line import/no-unresolved
 import { ExploreContainer } from 'components';
 
 import { Strings } from './strings';
+
 import './styles.css';
 
 function Home() {

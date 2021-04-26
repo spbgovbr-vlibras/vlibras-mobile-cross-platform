@@ -1,0 +1,211 @@
+.ion-icon-share-social{
+    --color:#1447A6;   
+}
+.toolbar-title{
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 125%;
+    color:#1447A6;
+}
+.toolbar-icon{
+    color: #1447A6;
+}
+.toolbar{
+    width: 100%;
+    height: 56px;
+}
+.about-container{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    justify-content: flex-start;
+
+    margin: 0;
+
+}
+.container-img{
+    background-color: #1447A6;
+    width: 360px;
+    height: 115px;
+    left: 0px;
+    top: 58px;
+    mix-blend-mode: overlay;
+    opacity: 0.15;
+    
+    
+    
+}
+.about-content{
+    padding: 0 32px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.nova-classe{
+    background-color: #D6E5F9;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    
+
+    padding: 10px 10px 0 10px;
+    
+}
+.box-text-suite{
+    display: inline-block;
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 14px;
+
+    margin-right: 18px;
+
+    color:black;
+}
+.box-text-vlibras{
+
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 36px;
+
+    color: #1447A6;
+}
+.characters{
+    width: 154px;
+    height: 109px;
+}
+.text-vlibras{
+    --color:#4B4B4B;
+    
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 21px;
+
+    padding: 41px 0;
+    width: 100%;
+
+    
+    /* or 21px */
+
+}
+.text-vlibras-color{
+    color: #4B4B4B;
+}
+.about-container-characters{
+    margin-right: 10px;
+}
+.about-container-realizadores{
+    width: 100%;
+    
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 125%;
+
+    margin-bottom: 8px;
+    /* identical to box height, or 17px */
+
+    --color: #000000;
+}
+.about-image-realizadores{
+    width: 100%;
+    object-fit: cover;
+}
+.about-container-realizadores-footer{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    flex-direction: row;
+    margin-top: 20px;
+}
+.about-container-redes-sociais{
+    width: 100%;
+    
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 125%;
+    margin-top: 40px;
+    /* identical to box height, or 17px */
+
+    --color: #000000;
+}
+.about-container-redes-sociais-footer{
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    flex-direction:row;
+    margin-top: 16px;
+    gap: 14px;
+    
+}
+.logo-camara-deputados{
+    width: 120px;
+    height: 35px;
+
+    mix-blend-mode: normal;
+}
+.logo-lavid{
+    width: 56px;
+    height: 35px;
+
+    mix-blend-mode: normal;
+}
+.logo-ufpb{
+    width: 21px;
+    height: 35px;
+    
+    mix-blend-mode: normal;
+}
+.logo-rnp{
+    width: 68px;
+    height: 35px;
+    
+    mix-blend-mode: normal;
+}
+.text-redes-sociais{
+    width: 91px;
+    height: 18px;
+
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 125%;
+    /* identical to box height, or 17px */
+
+
+    --color: #000000;
+}
+.logo-instagram{
+    
+    width: 100%;
+    height: 24px;
+    
+    --color: #939293;
+}
+.logo-facebook{
+    width: 100%;
+    border-radius: 0px;
+
+    --color: #939293;
+    
+}
+.logo-youtube{
+    width: 100%;
+    border-radius: 0px;
+
+    --color:#939293;
+
+}
