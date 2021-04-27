@@ -1,18 +1,20 @@
 .ion-icon-share-social{
     --color:#1447A6;   
 }
-.toolbar-title{
+.about-toolbar-title{
     font-family: Roboto;
     font-style: normal;
     font-weight: bold;
     font-size: 18px;
     line-height: 125%;
+    margin-left: -9px;
+
     color:#1447A6;
 }
-.toolbar-icon{
+.about-toolbar-icon{
     color: #1447A6;
 }
-.toolbar{
+.about-toolbar{
     width: 100%;
     height: 56px;
 }
@@ -26,36 +28,22 @@
     margin: 0;
 
 }
-.container-img{
-    background-color: #1447A6;
-    width: 360px;
-    height: 115px;
-    left: 0px;
-    top: 58px;
-    mix-blend-mode: overlay;
-    opacity: 0.15;
-    
-    
-    
-}
 .about-content{
     padding: 0 32px;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
-.nova-classe{
+.about-box-content{
     background-color: #D6E5F9;
     width: 100%;
     display: flex;
     justify-content: flex-end;
     flex-direction: row;
     
-
     padding: 10px 10px 0 10px;
-    
 }
-.box-text-suite{
+.about-box-text-suite{
     display: inline-block;
     font-family: Rawline;
     font-style: normal;
@@ -67,7 +55,7 @@
 
     color:black;
 }
-.box-text-vlibras{
+.about-box-text-vlibras{
 
     font-family: Rawline;
     font-style: normal;
@@ -77,12 +65,8 @@
 
     color: #1447A6;
 }
-.characters{
-    width: 154px;
-    height: 109px;
-}
-.text-vlibras{
-    --color:#4B4B4B;
+.about-content-text-vlibras{
+    color:#4B4B4B;
     
     font-family: Rawline;
     font-style: normal;
@@ -91,14 +75,8 @@
     line-height: 21px;
 
     padding: 41px 0;
-    width: 100%;
-
-    
+    width: 100%;    
     /* or 21px */
-
-}
-.text-vlibras-color{
-    color: #4B4B4B;
 }
 .about-container-characters{
     margin-right: 10px;

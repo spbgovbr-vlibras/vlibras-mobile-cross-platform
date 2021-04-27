@@ -34,12 +34,14 @@ function About() {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar class="toolbar">
-          <IonTitle class="toolbar-title">{Strings.TOOLBAR_TITLE}</IonTitle>
+        <IonToolbar class="about-toolbar">
+          <IonTitle class="about-toolbar-title">
+            {Strings.TOOLBAR_TITLE}
+          </IonTitle>
 
           <IonButtons slot="start">
             <IonButton>
-              <IonIcon icon={menu} class="toolbar-icon" />
+              <IonIcon icon={menu} class="about-toolbar-icon" />
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
@@ -50,18 +52,18 @@ function About() {
         </IonToolbar>
       </IonHeader>
       <div className="about-container">
-        <div className="nova-classe">
-          <h1 className="box-text-suite">
+        <div className="about-box-content">
+          <h1 className="about-box-text-suite">
             {Strings.CHARACTERS_TEXT_SUITE}
             <br />
-            <span className="box-text-vlibras">
+            <span className="about-box-text-vlibras">
               {Strings.CHARACTERS_TEXT_VLIBRAS}
             </span>
           </h1>
           <IonImg class="about-container-characters" src={logoAvatares} />
         </div>
         <div className="about-content">
-          <div className="text-vlibras">
+          <div className="about-content-text-vlibras">
             <IonText>{Strings.TEXT_VLIBRAS}</IonText>
           </div>
           <div className="about-container-realizadores">
