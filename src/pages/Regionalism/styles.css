@@ -1,0 +1,210 @@
+.Regionalism-Title {
+    position: relative;
+    left: 15.56%;
+    right: 53.61%;
+    top: 2.5%;
+    bottom: 93.91%;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 125%;
+    /* identical to box height, or 22px */
+    /* Primary - dark */
+    color: #1447A6;
+}
+
+.Regionalism-InfoBasic {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    /* or 20px */
+    color: #747474;
+}
+
+.Regionalism-Toolbar-Icon {
+    position: relative;
+    left: 5.28%;
+    right: 89.72%;
+    top: 3.44%;
+    bottom: 94.69%;
+    /* Primary - dark */
+}
+
+.about-icon-save {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    position: relative;
+    width: 78px;
+    height: 39px;
+    left: 250px;
+    top: 577px;
+    border-radius: 24px;
+}
+
+.Regionalism-Acre {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Alagoas {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Amapá {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Amazonas {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Bahia {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Brasil {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Ceará {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-DistritoFederal {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-EspiritoSanto {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Goiás {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.Regionalism-Maranhão {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.button-save {}
+
+.Regionalism-Footer {}
+
+.Regionalism-Icon-Save {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+    flex: 1;
+    padding: 16px 32px;
+}
+
+.Regionalism-List {
+    padding-bottom: 16px;
+}
+
+ion-radio {
+    --color-checked: blue;
+}
+
+.Regionalism-Item {
+    --background-focused: #ededed;
+    --inner-padding-end: 32px;
+    -inner-padding-start: 16px;
+}
+
+.Regionalism-Save {
+    --border-radius: 24px;
+    --padding-end: 16px;
+    --padding-start: 16px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --background-color: #1447a6;
+}
+
+.Regionalism-Cancel {
+    --background: transparent;
+    --box-shadow: 0;
+    --color: #1447a6;
+}
