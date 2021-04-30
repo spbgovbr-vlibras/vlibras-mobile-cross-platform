@@ -41,17 +41,43 @@ import {
 import { Strings } from './strings';
 import './styles.css';
 
+interface RegionalismItem {
+  name: string;
+  url: any;
+}
+
+const states: Array<RegionalismItem> = [
+  { name: 'BR - Padrão Nacional', url: logoBrasil },
+  { name: 'Acre', url: logoAcre },
+  { name: 'Alagoas', url: logoAlagoas },
+  { name: 'Amazonas', url: logoAmapa },
+  { name: 'Bahia', url: logoBahia },
+  { name: 'Ceará', url: logoCeara },
+  { name: 'Distrito Federal', url: logoDF },
+  { name: 'Espirito Santo', url: logoEspiritoSanto },
+  { name: 'Goiás', url: logoGoiás },
+  { name: 'Maranhão', url: logoMaranhao },
+];
+
 function Regionalism() {
+  const renderItem = (item: RegionalismItem) => (
+    <IonItem class="regionalism-item">
+      <IonImg src={item.url} />
+      <IonText class="regionalism-text">{item.name}</IonText>
+      <IonRadio slot="end" value={item.name} />
+    </IonItem>
+  );
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonText class="Regionalism-Title">
+          <IonText class="regionalism-title">
             {Strings.REGIONALISM_TITLE}
           </IonText>
           <IonButtons slot="start">
             <IonButton>
-              <IonIcon icon={menu} class="Regionalism-Toolbar-Icon" />
+              <IonIcon icon={menu} class="regionalism-toolbar-icon" />
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -64,88 +90,20 @@ function Regionalism() {
         </IonFooter>
       </IonHeader>
       <IonContent slot="right">
-        <div className="Regionalism-List">
+        <div className="regionalism-list">
           <IonList lines="none">
             <IonListHeader>
-              <IonText class="Regionalism-InfoBasic">
+              <IonText class="regionalism-infobasic">
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
             <IonRadioGroup value={1} onIonChange={e => 'none'}>
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoBrasil} />
-                <IonText class="Regionalism-Brasil">Brasil</IonText>
-                <IonRadio slot="end" value="Brasil" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoAcre} />
-                <IonText class="Regionalism-Acre">Acre</IonText>
-                <IonRadio slot="end" value="Acre" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoAlagoas} />
-                <IonText class="Regionalism-Alagoas">Alagoas</IonText>
-                <IonRadio slot="end" value="Alagoas" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoAmapa} />
-                <IonText class="Regionalism-Amapá">Amapá</IonText>
-                <IonRadio slot="end" value="Amapá" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoAmazonas} />
-                <IonText class="Regionalism-Amazonas">Amazonas</IonText>
-                <IonRadio slot="end" value="Amazonas" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoBahia} />
-                <IonText class="Regionalism-Bahia">Bahia</IonText>
-                <IonRadio slot="end" value="Bahia" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoCeara} />
-                <IonText class="Regionalism-Ceará">Ceará</IonText>
-                <IonRadio slot="end" value="Ceará" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoDF} />
-                <IonText class="Regionalism-DistritoFederal">
-                  Distrito Federal
-                </IonText>
-                <IonRadio slot="end" value="Distrito Federal" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoEspiritoSanto} />
-                <IonText class="Regionalism-EspiritoSanto">
-                  EspiritoSanto
-                </IonText>
-                <IonRadio slot="end" value="EspiritoSanto" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoGoiás} />
-                <IonText class="Regionalism-Goiás">Goiás</IonText>
-                <IonRadio slot="end" value="Góias" />
-              </IonItem>
-
-              <IonItem class="Regionalism-Item">
-                <IonImg src={logoMaranhao} />
-                <IonText class="Regionalism-Maranhão"> Maranhão</IonText>
-                <IonRadio slot="end" value="Maranhão" />
-              </IonItem>
+              {states.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
-          <div className="Regionalism-Icon-Save">
-            <IonButton class="Regionalism-Cancel">Cancelar</IonButton>
-            <IonButton class="Regionalism-Save">Salvar</IonButton>
+          <div className="regionalism-icon-save">
+            <IonButton class="regionalism-cancel">Cancelar</IonButton>
+            <IonButton class="regionalism-save">Salvar</IonButton>
           </div>
         </div>
       </IonContent>
