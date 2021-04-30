@@ -15,7 +15,6 @@ import {
 import { shareSocial, menu } from 'ionicons/icons';
 
 import {
-  LogoIcaro,
   logoAvatares,
   logoCamaraDeputados,
   logoFacebook,
@@ -25,8 +24,8 @@ import {
   logoRnp,
   logoUfpb,
   logoYoutube,
-  vlibrasBackground,
-} from '../../assets';
+} from 'assets';
+
 import { Strings } from './strings';
 import './styles.css';
 
@@ -51,7 +50,7 @@ function About() {
           </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <div className="about-container">
+      <IonContent>
         <div className="about-box-content">
           <h1 className="about-box-text-suite">
             {Strings.CHARACTERS_TEXT_SUITE}
@@ -85,7 +84,7 @@ function About() {
             </div>
           </div>
         </div>
-      </div>
+      </IonContent>
     </IonPage>
   );
 }
