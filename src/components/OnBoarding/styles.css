@@ -1,0 +1,85 @@
+.onboarding-modal {
+  background: rgba(0, 0, 0, 0.75);
+  margin-top: 55px;
+}
+
+.onboarding-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 440px;
+}
+
+.onboarding-modal .ion-page {
+  padding: 16px 20px;
+}
+
+.onboarding-modal p {
+  font-family: Rawline;
+}
+
+.onboarding-modal .modal-onboarding-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 27px;
+  color: var(--ion-color-modal-title);
+  margin: 0;
+}
+
+.onboarding-modal .modal-onboarding-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  color: var(--ion-color-modal-body);
+}
+
+.onboarding-modal .icaro-preview {
+  width: 180px;
+  margin: auto;
+}
+
+.onboarding-modal .jump-button {
+  --background: none;
+  color: var(--ion-color-modal-title);
+  text-decoration: underline var(--ion-color-modal-title);
+  position: absolute;
+  left: 6px;
+  bottom: 10px;
+  --box-shadow: none;
+}
+
+.onboarding-modal .primary-modal-button {
+  --background: var(--ion-color-modal-title);
+  color: white;
+  height: 30px;
+}
+
+.onboarding-modal .goback-modal-button,
+.onboarding-modal .goback-modal-button.ion-activated {
+  --background: none;
+  color: var(--ion-color-modal-title);
+  height: 30px;
+  border: 1px solid var(--ion-color-modal-title);
+  border-radius: 24px;
+}
+
+.onboarding-modal .buttons-area .button {
+  font-size: 14px;
+  line-height: 20.3px;
+  --border-radius: 24px;
+  text-transform: none;
+}
+
+.onboarding-modal .buttons-area {
+  display: flex;
+  justify-content: center;
+  --font-variant: normal;
+}
+
+.onboarding-modal .modal-description {
+  height: 65px;
+}
+
+.sc-ion-modal-md-h,
+.sc-ion-modal-ios-h {
+  padding: 0 16px;
+}
