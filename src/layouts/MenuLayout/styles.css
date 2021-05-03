@@ -1,0 +1,18 @@
+.menu-toolbar-title {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 125%;
+  color: #1447a6;
+}
+
+.menu-icon-drawer {
+  color: #1447a6;
+}
+
+.menu-icon-share {
+  width: 18px;
+  height: 18px;
+  color: #4B4B4B;
+}
