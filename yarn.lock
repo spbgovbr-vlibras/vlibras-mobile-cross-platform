@@ -1262,6 +1262,15 @@
     ionicons "^5.5.1"
     tslib "^2.1.0"
 
+"@ionic/core@^5.6.6":
+  version "5.6.6"
+  resolved "https://registry.yarnpkg.com/@ionic/core/-/core-5.6.6.tgz#6392fdececca8c955c2309d05dfff8c467d8dc0b"
+  integrity sha512-EbVIXOTVVPxBo7hsarBpRSFNsQ22wBFtWkKmrmliieknG5LUkf5WZBpj4EENQhzYA6c+//7/nfhcD9pWgtAofA==
+  dependencies:
+    "@stencil/core" "^2.4.0"
+    ionicons "^5.5.1"
+    tslib "^2.1.0"
+
 "@ionic/react-router@^5.5.0":
   version "5.6.3"
   resolved "https://registry.yarnpkg.com/@ionic/react-router/-/react-router-5.6.3.tgz#186f5268c9f8fe65037a2a09eb5a79c94fe88b4d"
