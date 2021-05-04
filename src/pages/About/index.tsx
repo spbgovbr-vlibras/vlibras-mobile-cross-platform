@@ -1,21 +1,8 @@
 import React from 'react';
 
-import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonImg,
-  IonPage,
-  IonText,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
-import { shareSocial, menu } from 'ionicons/icons';
+import { IonContent, IonImg, IonText } from '@ionic/react';
 
 import {
-  LogoIcaro,
   logoAvatares,
   logoCamaraDeputados,
   logoFacebook,
@@ -25,33 +12,17 @@ import {
   logoRnp,
   logoUfpb,
   logoYoutube,
-  vlibrasBackground,
-} from '../../assets';
+} from 'assets';
+import { MenuLayout } from 'layouts';
+
 import { Strings } from './strings';
+
 import './styles.css';
 
 function About() {
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar class="about-toolbar">
-          <IonTitle class="about-toolbar-title">
-            {Strings.TOOLBAR_TITLE}
-          </IonTitle>
-
-          <IonButtons slot="start">
-            <IonButton>
-              <IonIcon icon={menu} class="about-toolbar-icon" />
-            </IonButton>
-          </IonButtons>
-          <IonButtons slot="end">
-            <IonButton>
-              <IonIcon icon={shareSocial} />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <div className="about-container">
+    <MenuLayout title={Strings.TOOLBAR_TITLE}>
+      <IonContent>
         <div className="about-box-content">
           <h1 className="about-box-text-suite">
             {Strings.CHARACTERS_TEXT_SUITE}
@@ -85,8 +56,8 @@ function About() {
             </div>
           </div>
         </div>
-      </div>
-    </IonPage>
+      </IonContent>
+    </MenuLayout>
   );
 }
 

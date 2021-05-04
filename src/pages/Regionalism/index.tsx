@@ -2,32 +2,20 @@ import React from 'react';
 
 import {
   IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
   IonList,
   IonRadioGroup,
   IonListHeader,
-  IonLabel,
   IonItem,
   IonRadio,
-  IonItemDivider,
   IonText,
   IonImg,
   IonButton,
-  IonButtons,
-  IonIcon,
-  IonFooter,
-  IonBackButton,
 } from '@ionic/react';
-import { menu, save, trash } from 'ionicons/icons';
 
 import {
   logoAcre,
   logoAlagoas,
   logoAmapa,
-  logoAmazonas,
   logoBahia,
   logoBrasil,
   logoCeara,
@@ -35,10 +23,11 @@ import {
   logoEspiritoSanto,
   logoGoiás,
   logoMaranhao,
-  logoSalvar,
-  logoCancelar,
-} from '../../assets';
+} from 'assets';
+import { MenuLayout } from 'layouts';
+
 import { Strings } from './strings';
+
 import './styles.css';
 
 interface RegionalismItem {
@@ -69,26 +58,7 @@ function Regionalism() {
   );
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonText class="regionalism-title">
-            {Strings.REGIONALISM_TITLE}
-          </IonText>
-          <IonButtons slot="start">
-            <IonButton>
-              <IonIcon icon={menu} class="regionalism-toolbar-icon" />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-        <IonFooter>
-          <IonButtons slot="start">
-            <IonButton>
-              <IonIcon icon={logoSalvar} />
-            </IonButton>
-          </IonButtons>
-        </IonFooter>
-      </IonHeader>
+    <MenuLayout title={Strings.REGIONALISM_TITLE}>
       <IonContent slot="right">
         <div className="regionalism-list">
           <IonList lines="none">
@@ -107,7 +77,7 @@ function Regionalism() {
           </div>
         </div>
       </IonContent>
-    </IonPage>
+    </MenuLayout>
   );
 }
 

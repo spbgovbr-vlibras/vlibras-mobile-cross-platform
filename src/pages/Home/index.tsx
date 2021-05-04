@@ -1,16 +1,10 @@
 import React from 'react';
 
 // eslint-disable-next-line import/order
-import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+import { IonContent, IonPage } from '@ionic/react';
 
-// eslint-disable-next-line import/no-unresolved
 import { ExploreContainer } from 'components';
+import { MenuLayout } from 'layouts';
 
 import { Strings } from './strings';
 
@@ -18,16 +12,11 @@ import './styles.css';
 
 function Home() {
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{Strings.TOOLBAR_TITLE}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+    <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent fullscreen>
         <ExploreContainer name={Strings.CONTENT_TITLE} />
       </IonContent>
-    </IonPage>
+    </MenuLayout>
   );
 }
 

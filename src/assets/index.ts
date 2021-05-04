@@ -23,6 +23,8 @@ import logoRealizadores from './images/realizadores1.png';
 import logoRnp from './images/rnp_logo.png';
 import logoSalvar from './images/Salvar.png';
 import vlibrasBackground from './images/suit-vlibras-background.png';
+import logoTranslator1 from './images/translate_logo1.png';
+import logoTranslator2 from './images/translate_logo2.png';
 import logoUfpb from './images/ufpb_logo.png';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
@@ -52,4 +54,6 @@ export {
   logoGoiás,
   logoMaranhao,
   logoSalvar,
+  logoTranslator1,
+  logoTranslator2,
 };
