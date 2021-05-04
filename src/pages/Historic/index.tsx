@@ -48,13 +48,22 @@ function Historic() {
       </IonHeader>
       <div className="historic-container">
         <div className="historic-container-ion-chips">
-          <IonChip class="historic-container-ion-chips-1">
+          <IonChip
+            class="historic-container-ion-chips-1"
+            onClick={() => console.log('Geral')}
+          >
             {Strings.CHIP_TEXT_1}
           </IonChip>
-          <IonChip class="historic-container-ion-chips-2">
+          <IonChip
+            class="historic-container-ion-chips-2"
+            onClick={() => console.log('PT-BR')}
+          >
             {Strings.CHIP_TEXT_2}
           </IonChip>
-          <IonChip class="historic-container-ion-chips-3">
+          <IonChip
+            class="historic-container-ion-chips-3"
+            onClick={() => console.log('Libras')}
+          >
             {Strings.CHIP_TEXT_3}
           </IonChip>
         </div>
