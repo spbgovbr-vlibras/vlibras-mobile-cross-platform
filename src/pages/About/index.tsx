@@ -12,9 +12,8 @@ import {
   logoRnp,
   logoUfpb,
   logoYoutube,
-} from 'assets';
-import { MenuLayout } from 'layouts';
-
+} from '../../assets';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
