@@ -3,4 +3,5 @@ export default {
   ABOUT: '/about',
   HISTORY: '/history',
   REGIONALISM: '/regionalism',
+  TRANSLATOR: '/translator',
 };

@@ -72,8 +72,12 @@ function Regionalism() {
             </IonRadioGroup>
           </IonList>
           <div className="regionalism-icon-save">
-            <IonButton class="regionalism-cancel">Cancelar</IonButton>
-            <IonButton class="regionalism-save">Salvar</IonButton>
+            <IonButton class="regionalism-cancel">
+              {Strings.BUTTON_CANCEL}
+            </IonButton>
+            <IonButton class="regionalism-save">
+              {Strings.BUTTON_SAVE}
+            </IonButton>
           </div>
         </div>
       </IonContent>
