@@ -1,14 +1,6 @@
 import React from 'react';
 
-import {
-  IonContent,
-  IonItem,
-  IonText,
-  IonImg,
-  IonButton,
-  IonTextarea,
-  IonIcon,
-} from '@ionic/react';
+import { IonText, IonImg, IonButton, IonTextarea, IonIcon } from '@ionic/react';
 import { mic } from 'ionicons/icons';
 
 import { logoMãos } from 'assets';
