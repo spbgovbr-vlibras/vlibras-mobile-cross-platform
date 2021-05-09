@@ -1,33 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { IonModal, IonButton } from '@ionic/react';
+import { IonModal } from '@ionic/react';
 
 import Presentation from './Steps/Presentation';
 import StepOne from './Steps/StepOne';
 import StepTwo from './Steps/StepTwo';
 import StepThree from './Steps/StepThree';
 import StepFour from './Steps/StepFour';
+import Domain from '../Domain';
 
 import './styles.css';
 const ModalExample = () => {
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [chooseRender, setChooseRender] = useState(<></>);
+  const [showDomain, setShowDomain] = useState(false);
 
   useEffect(() => {
     switch (currentStep) {
       case 0:
         setChooseRender(
-          <Presentation
-            setShowModal={setShowModal}
-            setCurrentStep={setCurrentStep}
-            jump={closeModal}
-          />,
+          <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />,
         );
         break;
       case 1:
         setChooseRender(
           <StepOne
-            setShowModal={setShowModal}
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
@@ -37,7 +34,6 @@ const ModalExample = () => {
       case 2:
         setChooseRender(
           <StepTwo
-            setShowModal={setShowModal}
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
@@ -47,7 +43,6 @@ const ModalExample = () => {
       case 3:
         setChooseRender(
           <StepThree
-            setShowModal={setShowModal}
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
@@ -72,6 +67,7 @@ const ModalExample = () => {
   const closeModal = () => {
     setShowModal(false);
     setCurrentStep(0);
+    setShowDomain(true);
   };
 
   return (
@@ -84,7 +80,7 @@ const ModalExample = () => {
       >
         {chooseRender}
       </IonModal>
-      <IonButton onClick={() => setShowModal(true)}>Show Modal</IonButton>
+      {showDomain && <Domain />}
     </>
   );
 };

@@ -2,28 +2,24 @@ import Bullets from 'components/Bullets';
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
+import { Strings } from '../strings';
 
 interface StepThreeProps {
-  setShowModal: Dispatch<SetStateAction<boolean>>;
   setCurrentStep: Dispatch<SetStateAction<number>>;
   active: number;
   jump: MouseEventHandler<HTMLIonButtonElement>;
 }
 
 const StepThree: React.FunctionComponent<StepThreeProps> = ({
-  setShowModal,
   setCurrentStep,
   active,
   jump,
 }) => {
   return (
     <>
-      <p className="modal-onboarding-title">Passo 3</p>
+      <p className="modal-onboarding-title"> {Strings.STEPTHREE_TITLE} </p>
       <div className="modal-description">
-        <p className="modal-onboarding-body">
-          Grave um sinal por vez para o sistema obter uma boa qualidade de
-          tradução.
-        </p>
+        <p className="modal-onboarding-body">{Strings.STEPTHREE_DESCRIPTION}</p>
       </div>
       <IonImg src={IcaroPreview} className="icaro-preview" />
       <Bullets active={active} />

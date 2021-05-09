@@ -1,6 +1,7 @@
 .onboarding-modal {
   background: rgba(0, 0, 0, 0.75);
   margin-top: 55px;
+  font-family: Rawline;
 }
 
 .onboarding-modal .modal-wrapper {
@@ -10,10 +11,6 @@
 
 .onboarding-modal .ion-page {
   padding: 16px 20px;
-}
-
-.onboarding-modal p {
-  font-family: Rawline;
 }
 
 .onboarding-modal .modal-onboarding-title {
@@ -79,7 +76,7 @@
   height: 65px;
 }
 
-.sc-ion-modal-md-h,
-.sc-ion-modal-ios-h {
+.onboarding-modal.sc-ion-modal-md-h,
+.onboarding-modal.sc-ion-modal-ios-h {
   padding: 0 16px;
 }

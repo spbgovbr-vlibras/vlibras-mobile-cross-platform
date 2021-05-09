@@ -2,28 +2,20 @@ import Bullets from 'components/Bullets';
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
+import { Strings } from '../strings';
 
 interface StepOneProps {
-  setShowModal: Dispatch<SetStateAction<boolean>>;
   setCurrentStep: Dispatch<SetStateAction<number>>;
   active: number;
   jump: MouseEventHandler<HTMLIonButtonElement>;
 }
 
-const StepOne: React.FunctionComponent<StepOneProps> = ({
-  setShowModal,
-  setCurrentStep,
-  active,
-  jump,
-}) => {
+const StepOne = ({ setCurrentStep, active, jump }: StepOneProps) => {
   return (
     <>
-      <p className="modal-onboarding-title">Passo 1</p>
+      <p className="modal-onboarding-title"> {Strings.STEPONE_TITLE} </p>
       <div className="modal-description">
-        <p className="modal-onboarding-body">
-          Defina um domínio para a tradução. Ele representa o contexto ou
-          temática das palavras que serão traduzidas.
-        </p>
+        <p className="modal-onboarding-body">{Strings.STEPONE_DESCRIPTION}</p>
       </div>
       <IonImg src={IcaroPreview} className="icaro-preview" />
       <Bullets active={active} />

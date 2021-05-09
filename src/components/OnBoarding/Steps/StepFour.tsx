@@ -2,6 +2,7 @@ import Bullets from 'components/Bullets';
 import React, { Dispatch, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
+import { Strings } from '../strings';
 
 interface StepFourProps {
   setShowModal: Dispatch<SetStateAction<boolean>>;
@@ -20,12 +21,9 @@ const StepFour: React.FunctionComponent<StepFourProps> = ({
 
   return (
     <>
-      <p className="modal-onboarding-title">Passo 4</p>
+      <p className="modal-onboarding-title">{Strings.STEPFOUR_TITLE}</p>
       <div className="modal-description">
-        <p className="modal-onboarding-body">
-          Grave até 5 sinais de forma consecutiva. Para ver o resultado, clique
-          em traduzir.
-        </p>
+        <p className="modal-onboarding-body">{Strings.STEPFOUR_DESCRIPTION}</p>
       </div>
       <IonImg src={IcaroPreview} className="icaro-preview" />
       <Bullets active={active} />

@@ -6,6 +6,7 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  IonButton,
 } from '@ionic/react';
 
 import { OnBoarding } from 'components';

@@ -2,28 +2,20 @@ import Bullets from 'components/Bullets';
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
+import { Strings } from '../strings';
 
 interface StepTwoProps {
-  setShowModal: Dispatch<SetStateAction<boolean>>;
   setCurrentStep: Dispatch<SetStateAction<number>>;
   active: number;
   jump: MouseEventHandler<HTMLIonButtonElement>;
 }
 
-const StepTwo: React.FunctionComponent<StepTwoProps> = ({
-  setShowModal,
-  setCurrentStep,
-  active,
-  jump,
-}) => {
+const StepTwo = ({ setCurrentStep, active, jump }: StepTwoProps) => {
   return (
     <>
-      <p className="modal-onboarding-title">Passo 2</p>
+      <p className="modal-onboarding-title"> {Strings.STEPTWO_TITLE} </p>
       <div className="modal-description">
-        <p className="modal-onboarding-body">
-          A pessoa que está falando em Libras deve aparecer completamente na
-          imagem da câmera.
-        </p>
+        <p className="modal-onboarding-body">{Strings.STEPTWO_DESCRIPTION}</p>
       </div>
       <IonImg src={IcaroPreview} className="icaro-preview" />
       <Bullets active={active} />
