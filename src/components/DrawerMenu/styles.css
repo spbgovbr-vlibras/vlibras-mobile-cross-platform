@@ -1,0 +1,62 @@
+.drawer-menu-container {
+  padding: 40px 0 24px 0;
+}
+
+.drawer-menu-image-header {
+  width: 111px;
+  height: 38px;
+  margin: 16px 32px 0 32px;
+}
+
+.drawer-menu-divider {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.drawer-menu-title-header {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  color: #939293;
+  margin: 16px 8px 8px 8px;
+}
+
+
+.drawer-menu-item {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 125%;
+
+  --color: #4b4b4b;
+
+  border-radius: 4px;
+  margin: 0 8px;
+
+  --background-activated: #D6E5F9;
+  --color-activated: #1447A6;
+  --background-activated-opacity: 1;
+  --background-focused: #D6E5F9;
+}
+
+.drawer-menu-item-activated {
+  --background: #D6E5F9;
+  --color: #1447A6;
+}
+
+.drawer-menu-item-label {
+  margin-left: 18px;
+}
+
+.drawer-menu-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 32px;
+}
