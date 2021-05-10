@@ -19,10 +19,27 @@ import logoInstagram from './images/instagram_logo.png';
 import logoLavid from './images/lavid_logo.png';
 import LogoIcaro from './images/logo-icaro.png';
 import logoMaranhao from './images/Maranhão.png';
+import logoMatoGrosso from './images/MatoGrosso.png';
+import logoMatoGrossoDoSul from './images/MatoGrossoDoSul.png';
+import logoMinasGerais from './images/MinasGerais.png';
+import logoPará from './images/Para.png';
+import logoParaiba from './images/Paraiba.png';
+import logoParaná from './images/Paraná.png';
+import logoPernambuco from './images/Pernambuco.png';
+import logoPiaui from './images/Piaui.png';
 import logoRealizadores from './images/realizadores1.png';
+import logoRioDeJaneiro from './images/Riodejaneiro.png';
+import logoRioGrandeDoNorte from './images/RioGrandeDoNorte.png';
+import logoRioGrandeDoSul from './images/RioGrandeDoSul.png';
 import logoRnp from './images/rnp_logo.png';
+import logoRondonia from './images/Rondonia.png';
+import logoRoraima from './images/Roraima.png';
 import logoSalvar from './images/Salvar.png';
+import logoSantaCatarina from './images/SantaCatarina.png';
+import logoSãoPaulo from './images/SaoPaulo.png';
+import logoSergipe from './images/Sergipe.png';
 import vlibrasBackground from './images/suit-vlibras-background.png';
+import logoTocantins from './images/Tocantins.png';
 import logoTranslator1 from './images/translate_logo1.png';
 import logoTranslator2 from './images/translate_logo2.png';
 import logoUfpb from './images/ufpb_logo.png';
@@ -58,4 +75,21 @@ export {
   logoTranslator1,
   logoTranslator2,
   logoMãos,
+  logoMatoGrosso,
+  logoMatoGrossoDoSul,
+  logoMinasGerais,
+  logoPará,
+  logoParaiba,
+  logoParaná,
+  logoPernambuco,
+  logoPiaui,
+  logoRioDeJaneiro,
+  logoRioGrandeDoNorte,
+  logoRioGrandeDoSul,
+  logoRondonia,
+  logoRoraima,
+  logoSantaCatarina,
+  logoSãoPaulo,
+  logoSergipe,
+  logoTocantins,
 };
