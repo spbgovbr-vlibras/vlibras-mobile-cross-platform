@@ -1,4 +1,11 @@
+/* eslint-disable import/order */
 /* ----------------- Exports icons -----------------------  [MA] */
+
+import IconTranslate from './icons/IconTranslate';
+import IconDictionary from './icons/IconDictionary';
+import IconRegionalism from './icons/IconRegionalism';
+import IconIcaro from './icons/IconIcaro';
+import IconTutorial from './icons/IconTutorial';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -27,6 +34,7 @@ import logoParaiba from './images/Paraiba.png';
 import logoParaná from './images/Paraná.png';
 import logoPernambuco from './images/Pernambuco.png';
 import logoPiaui from './images/Piaui.png';
+import LogoVlibrasIcaro from './images/logo-vlibras-icaro.png';
 import logoRealizadores from './images/realizadores1.png';
 import logoRioDeJaneiro from './images/Riodejaneiro.png';
 import logoRioGrandeDoNorte from './images/RioGrandeDoNorte.png';
@@ -43,7 +51,7 @@ import logoTocantins from './images/Tocantins.png';
 import logoTranslator1 from './images/translate_logo1.png';
 import logoTranslator2 from './images/translate_logo2.png';
 import logoUfpb from './images/ufpb_logo.png';
-import logoMãos from './images/Union.png';
+import logoMaos from './images/Union.png';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
 
@@ -74,7 +82,7 @@ export {
   logoSalvar,
   logoTranslator1,
   logoTranslator2,
-  logoMãos,
+  logoMaos,
   logoMatoGrosso,
   logoMatoGrossoDoSul,
   logoMinasGerais,
@@ -92,4 +100,10 @@ export {
   logoSãoPaulo,
   logoSergipe,
   logoTocantins,
+  LogoVlibrasIcaro,
+  IconTranslate,
+  IconRegionalism,
+  IconDictionary,
+  IconIcaro,
+  IconTutorial,
 };

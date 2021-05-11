@@ -4,4 +4,6 @@ export default {
   HISTORY: '/history',
   REGIONALISM: '/regionalism',
   TRANSLATOR: '/translator',
+  TUTORIAL: '/tutorial',
+  DICTIONARY: '/dictionary',
 };
