@@ -1,7 +1,6 @@
 import React from 'react';
 
-// eslint-disable-next-line import/order
-import { IonContent, IonPage } from '@ionic/react';
+import { IonContent } from '@ionic/react';
 
 import { ExploreContainer } from '../../components';
 import { MenuLayout } from '../../layouts';
