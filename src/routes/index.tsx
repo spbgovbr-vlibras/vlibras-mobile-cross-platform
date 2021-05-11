@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom';
 
 import { DrawerMenu } from 'components';
 import paths from 'constants/paths';
-import { About, Home, Historic } from 'pages';
+import { About, Home, Historic, Regionalism, Translator } from 'pages';
 
 const CONTENT_ID = '@vlibras/mobile';
 
@@ -19,6 +19,8 @@ function Routes() {
           <Route exact component={Home} path={paths.HOME} />
           <Route exact component={Historic} path={paths.HISTORY} />
           <Route exact component={About} path={paths.ABOUT} />
+          <Route exact component={Regionalism} path={paths.REGIONALISM} />
+          <Route exact component={Translator} path={paths.TRANSLATOR} />
         </IonReactRouter>
       </IonRouterOutlet>
     </>
