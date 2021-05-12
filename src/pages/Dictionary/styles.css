@@ -96,6 +96,8 @@
 }
 .dictionary-container-box-ion-text-area {
   --padding-bottom: 0px;
+
+  font-family: Rawline;
 }
 .dictionary-container-ion-chips-box {
   display: flex;
