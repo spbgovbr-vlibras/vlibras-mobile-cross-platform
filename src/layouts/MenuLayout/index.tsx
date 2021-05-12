@@ -10,7 +10,7 @@ import {
   IonToolbar,
   IonPage,
 } from '@ionic/react';
-import { shareSocial, menu } from 'ionicons/icons';
+import { menu } from 'ionicons/icons';
 
 import './styles.css';
 
@@ -31,11 +31,6 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           <IonButtons slot="start">
             <IonButton onClick={openMenu}>
               <IonIcon icon={menu} className="menu-icon-drawer" />
-            </IonButton>
-          </IonButtons>
-          <IonButtons slot="end">
-            <IonButton>
-              <IonIcon icon={shareSocial} className="menu-icon-share" />
             </IonButton>
           </IonButtons>
         </IonToolbar>
