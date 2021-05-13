@@ -41,9 +41,8 @@ import {
   logoSergipe,
   logoTocantins,
   logoAmazonas,
-} from 'assets';
-import { MenuLayout } from 'layouts';
-
+} from '../../assets';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';

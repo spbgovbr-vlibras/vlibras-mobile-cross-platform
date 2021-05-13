@@ -3,9 +3,8 @@ import React from 'react';
 import { IonText, IonButton, IonTextarea, IonIcon } from '@ionic/react';
 import { mic } from 'ionicons/icons';
 
-import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
-import { MenuLayout } from 'layouts';
-
+import IconHandsTranslate from '../../assets/icons/IconHandsTranslate';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';

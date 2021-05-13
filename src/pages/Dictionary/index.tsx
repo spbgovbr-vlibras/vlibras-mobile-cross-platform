@@ -1,38 +1,61 @@
 import React from 'react';
 
 import {
+  IonButton,
   IonChip,
   IonContent,
   IonIcon,
   IonImg,
   IonItem,
+  IonList,
+  IonListHeader,
   IonText,
   IonTextarea,
 } from '@ionic/react';
-import { closeCircleOutline, mic } from 'ionicons/icons';
 
+import MicIcon from '../../assets/icons/MicIcon';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
 
+interface DictionaryWord {
+  word: string;
+  /* Category: STRING */
+}
+
+const words: Array<DictionaryWord> = [
+  { word: 'ACONSELHAR' },
+  { word: 'ACAUTELAR' },
+  { word: 'AFILIAR' },
+];
+
 function Dictionary() {
+  const renderWord = (item: DictionaryWord) => (
+    <IonItem class="dictionary-word-item">
+      <IonText class="dictionary-words-style">{item.word}</IonText>
+    </IonItem>
+  );
+
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
         <div className="dictionary-container">
-          <div>
-            <IonItem className="dictionary-container-box-ion-text">
+          <div className="dictionary-box">
+            <div className="dictionary-input-box">
               <IonTextarea
+                className="dictionary-textarea"
                 placeholder={Strings.TEXT_PLACEHOLDER}
-                rows={2}
-                className="dictionary-container-box-ion-text-area"
+                autofocus
+                rows={1}
+                wrap="soft"
+                required
+                onIonChange={e => e.detail.value!}
               />
-              <IonIcon
-                icon={mic}
-                class="dictionary-container-box-ion-mic-icon"
-              />
-            </IonItem>
+              <button type="button" className="dictionary-mic-button ">
+                <MicIcon color="#B9B9B9" />
+              </button>
+            </div>
           </div>
           <div className="dictionary-container-ion-chips">
             <IonChip class="dictionary-container-ion-chips-suggestions-1">
@@ -51,12 +74,10 @@ function Dictionary() {
               {Strings.CHIP_TEXT_SUGGESTIONS_5}
             </IonChip>
           </div>
-          <div className="dictionary-container-ion-text-suggestions">
-            <IonText>{Strings.DICTIONARY_TEXT_1}</IonText>
-            <IonText>{Strings.DICTIONARY_TEXT_2}</IonText>
-            <IonText>{Strings.DICTIONARY_TEXT_3}</IonText>
-            <IonText>{Strings.DICTIONARY_TEXT_4}</IonText>
-            <IonText>{Strings.DICTIONARY_TEXT_5}</IonText>
+          <div className="dictionary-words-container">
+            <IonList lines="none" class="dictionary-words-list">
+              {words.map(item => renderWord(item))}
+            </IonList>
           </div>
         </div>
       </IonContent>
