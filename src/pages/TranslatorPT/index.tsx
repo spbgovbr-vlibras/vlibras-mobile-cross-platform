@@ -17,11 +17,6 @@ import './styles.css';
 function TranslatorPT() {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{Strings.TOOLBAR_TITLE}</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent>
         <OnBoarding />
       </IonContent>

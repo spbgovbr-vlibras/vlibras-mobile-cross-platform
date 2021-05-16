@@ -14,6 +14,7 @@ import {
   Dictionary,
   Regionalism,
   Translator,
+  TranslatorPT,
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
@@ -30,6 +31,7 @@ function Routes() {
           <Route exact component={Dictionary} path={paths.DICTIONARY} />
           <Route exact component={Regionalism} path={paths.REGIONALISM} />
           <Route exact component={Translator} path={paths.TRANSLATOR} />
+          <Route exact component={TranslatorPT} path={paths.TRANSLATORPT} />
         </IonReactRouter>
       </IonRouterOutlet>
     </>
