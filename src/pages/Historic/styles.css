@@ -1,0 +1,175 @@
+.historic-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.historic-container-ion-chips {
+  display: flex;
+  flex-direction: row;
+  margin-left: 16px;
+}
+
+.historic-container-ion-chips-1 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 100%;
+
+  color: #1447a6;
+  background: #ededed;
+}
+
+.historic-container-ion-chips-2 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+
+  color: #4b4b4b;
+  background: #ededed;
+}
+
+.historic-container-ion-chips-3 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+
+  color: #4b4b4b;
+  background: #ededed;
+}
+
+.historic-container-ion-img-1 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 4px;
+  margin-left: 18px;
+  margin-top: 19px;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  /* identical to box height, or 15px */
+
+  color: #1447a6;
+}
+
+.historic-container-ion-img-translator-1 {
+  width: 17px;
+}
+
+.historic-container-ion-img-2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 4px;
+  margin-top: 8px;
+  margin-right: 16px;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  /* identical to box height, or 15px */
+
+  color: #1447a6;
+}
+
+.historic-container-ion-img-translator-2 {
+  width: 17px;
+}
+
+.historic-container-box-ion-text {
+  display: flex;
+  justify-items: center;
+
+  margin-top: 9px;
+  margin-right: 16px;
+  margin-left: 16px;
+  height: 71px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  color: #747474;
+}
+
+.historic-container-box-ion-item {
+  display: flex;
+  justify-items: center;
+
+  width: 100%;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 125%;
+  /* or 17px */
+
+  color: #747474;
+}
+
+.historic-container-box-ion-text-area {
+  --padding-top: 0px;
+  --padding-end: 0;
+  --padding-bottom: 14px;
+  /*default: 11px;*/
+  /*--padding-start: 8px;*/
+
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: inherit;
+}
+
+.historic-container-ion-chips-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  margin-top: 8px;
+  margin-right: 16px;
+  margin-left: 16px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  color: #747474;
+}
+
+.historic-container-ion-chips-box-text-1 {
+  font-family: Rawline;
+  background: #ededed;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.historic-container-ion-chips-box-text-2 {
+  font-family: Rawline;
+  background: #ededed;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.historic-container-ion-chips-box-text-3 {
+  font-family: Rawline;
+  background: #ededed;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}

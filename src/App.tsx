@@ -1,9 +1,8 @@
 import React from 'react';
 
 import { IonApp } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
 
-import { Home, TranslatorPT } from './pages';
+import Routes from './routes';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -27,9 +26,7 @@ import './theme/variables.css';
 function App() {
   return (
     <IonApp>
-      <IonReactRouter>
-        <TranslatorPT />
-      </IonReactRouter>
+      <Routes />
     </IonApp>
   );
 }
