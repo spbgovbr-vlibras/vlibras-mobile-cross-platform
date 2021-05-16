@@ -2,9 +2,8 @@ import React from 'react';
 
 import { IonContent } from '@ionic/react';
 
-import { ExploreContainer } from 'components';
-import { MenuLayout } from 'layouts';
-
+import { ExploreContainer } from '../../components';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';

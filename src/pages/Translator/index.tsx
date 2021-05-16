@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { IonText, IonImg, IonButton, IonTextarea, IonIcon } from '@ionic/react';
+import { IonText, IonButton, IonTextarea, IonIcon } from '@ionic/react';
 import { mic } from 'ionicons/icons';
 
-import { logoMaos } from 'assets';
-import { MenuLayout } from 'layouts';
-
+import IconHandsTranslate from '../../assets/icons/IconHandsTranslate';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -36,7 +35,7 @@ function Translator() {
         </div>
         <div className="translator-item-button-save">
           <IonButton class="translator-button-save">
-            <IonImg class="translator-button-hands" src={logoMaos} />
+            <IconHandsTranslate color="white" />
             {Strings.TRANSLATOR_TEXT_BUTTON}
           </IonButton>
         </div>

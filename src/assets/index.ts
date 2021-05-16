@@ -6,6 +6,7 @@ import IconDictionary from './icons/IconDictionary';
 import IconRegionalism from './icons/IconRegionalism';
 import IconIcaro from './icons/IconIcaro';
 import IconTutorial from './icons/IconTutorial';
+import IconHandsTranslate from './icons/IconHandsTranslate';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
