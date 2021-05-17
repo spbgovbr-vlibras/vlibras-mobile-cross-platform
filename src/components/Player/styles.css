@@ -1,0 +1,37 @@
+.player-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.player-action-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 72px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  background: #FFF;
+}
+
+.player-action-button {
+  border: none;
+  background: #1447A6;
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+
+}
+
+.player-action-button-microphone {
+  margin-right: 28px;
+  margin-left: 4px;
+}
+
+.player-action-button-insert {
+  margin-right: 4px;
+  margin-left: 38px;
+}

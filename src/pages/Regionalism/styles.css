@@ -1,0 +1,82 @@
+.regionalism-title {
+    position: relative;
+    left: 15.56%;
+    right: 53.61%;
+    top: 2.5%;
+    bottom: 93.91%;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 125%;
+    /* identical to box height, or 22px */
+    /* Primary - dark */
+    color: #1447A6;
+}
+
+.regionalism-infobasic {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    /* or 20px */
+    color: #747474;
+}
+
+.regionalism-toolbar-icon {
+    position: relative;
+    left: 5.28%;
+    right: 89.72%;
+    top: 3.44%;
+    bottom: 94.69%;
+    /* Primary - dark */
+}
+
+.regionalism-text {
+    font-family: Rawline;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16.8px;
+    line-height: 100%;
+    /* identical to box height, or 17px */
+    color: #747474;
+    text-indent: 10px;
+}
+
+.regionalism-icon-save {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+    flex: 1;
+    padding: 16px 32px;
+}
+
+.regionalism-list {
+    padding-bottom: 16px;
+}
+
+ion-radio {
+    --color-checked: #1447a6;
+}
+
+.regionalism-item {
+    --background-focused: #ededed;
+    --inner-padding-end: 32px;
+    -inner-padding-start: 16px;
+}
+
+.regionalism-save {
+    --border-radius: 24px;
+    --padding-end: 16px;
+    --padding-start: 16px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --background-color: #1447a6;
+}
+
+.regionalism-cancel {
+    --background: transparent;
+    --box-shadow: 0;
+    --color: #1447a6;
+}

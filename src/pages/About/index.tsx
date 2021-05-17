@@ -12,9 +12,8 @@ import {
   logoRnp,
   logoUfpb,
   logoYoutube,
-} from 'assets';
-import { MenuLayout } from 'layouts';
-
+} from '../../assets';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -49,9 +48,18 @@ function About() {
             <div className="about-container-redes-sociais">
               <IonText>{Strings.TEXT_REDES_SOCIAIS}</IonText>
               <div className="about-container-redes-sociais-footer">
-                <IonImg src={logoInstagram} />
-                <IonImg src={logoFacebook} />
-                <IonImg src={logoYoutube} />
+                <IonImg
+                  src={logoInstagram}
+                  className="about-image-social-media"
+                />
+                <IonImg
+                  src={logoFacebook}
+                  className="about-image-social-media"
+                />
+                <IonImg
+                  src={logoYoutube}
+                  className="about-image-social-media"
+                />
               </div>
             </div>
           </div>

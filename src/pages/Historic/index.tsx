@@ -9,9 +9,8 @@ import {
   IonTextarea,
 } from '@ionic/react';
 
-import { logoTranslator1, logoTranslator2 } from 'assets';
-import { MenuLayout } from 'layouts';
-
+import { logoTranslator1, logoTranslator2 } from '../../assets';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
