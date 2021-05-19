@@ -25,19 +25,19 @@ const StepThree: React.FunctionComponent<StepThreeProps> = ({
       <Bullets active={active} />
       <div className="buttons-area">
         <IonButton className="jump-button" onClick={jump}>
-          Pular
+          {Strings.BUTTON_JUMP}
         </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(2)}
         >
-          Voltar
+          {Strings.BUTTON_BACK}
         </IonButton>
         <IonButton
           className="primary-modal-button"
           onClick={() => setCurrentStep(4)}
         >
-          Avançar
+          {Strings.BUTTON_NEXT}
         </IonButton>
       </div>
     </>

@@ -20,13 +20,13 @@ const Presentation = ({ setCurrentStep, jump }: PresentationProps) => {
       <IonImg src={IcaroPreview} className="icaro-preview" />
       <div className="buttons-area">
         <IonButton className="jump-button" onClick={jump}>
-          Pular
+          {Strings.BUTTON_JUMP}
         </IonButton>
         <IonButton
           className="primary-modal-button"
           onClick={() => setCurrentStep(1)}
         >
-          Ver passos
+          {Strings.BUTTON_PROCEED}
         </IonButton>
       </div>
     </>

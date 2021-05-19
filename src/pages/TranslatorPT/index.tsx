@@ -9,6 +9,8 @@ import {
   IonButton,
 } from '@ionic/react';
 
+import { RNCamera, FaceDetector } from 'react-native-camera';
+
 import { OnBoarding } from 'components';
 
 import { Strings } from './strings';
@@ -18,7 +20,12 @@ function TranslatorPT() {
   return (
     <IonPage>
       <IonContent>
-        <OnBoarding />
+        {/* <OnBoarding /> */}
+
+        <div className="container">
+          <div className="video-recording"></div>
+          <div className="area-recording"></div>
+        </div>
       </IonContent>
     </IonPage>
   );

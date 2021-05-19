@@ -1,5 +1,5 @@
 .onboarding-modal {
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--ion-color-grey-75);
   margin-top: 55px;
   font-family: Rawline;
 }
@@ -46,7 +46,7 @@
 
 .onboarding-modal .primary-modal-button {
   --background: var(--ion-color-modal-title);
-  color: white;
+  color: var(--ion-color-primary-contrast);
   height: 30px;
 }
 

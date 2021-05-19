@@ -4,15 +4,14 @@ interface BulletsProps {
   active: number;
 }
 
-const Bullets: React.FunctionComponent<BulletsProps> = ({ active }) => {
+const Bullets = ({ active }: BulletsProps) => {
   const loadBullets = () => {
-    return [1, 2, 3, 4].map(item => {
-      return item <= active ? (
-        <div className={`bullet active`} key={item}></div>
-      ) : (
-        <div className={`bullet`} key={item}></div>
-      );
-    });
+    return [1, 2, 3, 4].map(item => (
+      <div
+        className={`bullet` + (item <= active ? ' active' : '')}
+        key={item}
+      ></div>
+    ));
   };
 
   return <div className="bullet-container">{loadBullets()}</div>;

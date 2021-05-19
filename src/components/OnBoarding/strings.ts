@@ -8,7 +8,12 @@ export const Strings = {
     STEPTHREE_TITLE: 'Passo 3',
     STEPTHREE_DESCRIPTION: 'Grave um sinal por vez para o sistema obter uma boa qualidade de tradução.',
     STEPFOUR_TITLE: 'Passo 4',
-    STEPFOUR_DESCRIPTION: 'Grave até 5 sinais de forma consecutiva. Para ver o resultado, clique em traduzir.'
+    STEPFOUR_DESCRIPTION: 'Grave até 5 sinais de forma consecutiva. Para ver o resultado, clique em traduzir.',
+    BUTTON_JUMP: 'Pular',
+    BUTTON_PROCEED: 'Ver passos',
+    BUTTON_NEXT: 'Avançar',
+    BUTTON_BACK: 'Voltar',
+    BUTTON_START: 'Iniciar'
 
   };
   

@@ -29,16 +29,16 @@ const StepFour: React.FunctionComponent<StepFourProps> = ({
       <Bullets active={active} />
       <div className="buttons-area">
         <IonButton className="jump-button" onClick={jump}>
-          Pular
+          {Strings.BUTTON_JUMP}
         </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(3)}
         >
-          Voltar
+          {Strings.BUTTON_BACK}
         </IonButton>
         <IonButton className="primary-modal-button" onClick={jump}>
-          Iniciar
+          {Strings.BUTTON_START}
         </IonButton>
       </div>
     </>
