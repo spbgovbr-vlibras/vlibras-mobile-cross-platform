@@ -82,6 +82,7 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-modal-body: #4b4b4b;
   --ion-color-bullet-deactived: #d6e5f9;
   --ion-color-bullet-actived: var(--ion-color-modal-title);
+  --ion-color-grey-75: rgba(0, 0, 0, 0.75);
 }
 
 @media (prefers-color-scheme: dark) {
