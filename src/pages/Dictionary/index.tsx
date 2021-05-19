@@ -1,14 +1,10 @@
 import React from 'react';
 
 import {
-  IonButton,
   IonChip,
   IonContent,
-  IonIcon,
-  IonImg,
   IonItem,
   IonList,
-  IonListHeader,
   IonText,
   IonTextarea,
 } from '@ionic/react';

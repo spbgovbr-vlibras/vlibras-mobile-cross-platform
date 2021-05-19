@@ -23,8 +23,8 @@ function Routes() {
   return (
     <>
       <DrawerMenu contentId={CONTENT_ID} />
-      <IonRouterOutlet id={CONTENT_ID}>
-        <IonReactRouter>
+      <IonReactRouter>
+        <IonRouterOutlet id={CONTENT_ID}>
           <Route exact component={Home} path={paths.HOME} />
           <Route exact component={Historic} path={paths.HISTORY} />
           <Route exact component={About} path={paths.ABOUT} />
@@ -32,8 +32,8 @@ function Routes() {
           <Route exact component={Regionalism} path={paths.REGIONALISM} />
           <Route exact component={Translator} path={paths.TRANSLATOR} />
           <Route exact component={TranslatorPT} path={paths.TRANSLATORPT} />
-        </IonReactRouter>
-      </IonRouterOutlet>
+        </IonRouterOutlet>
+      </IonReactRouter>
     </>
   );
 }

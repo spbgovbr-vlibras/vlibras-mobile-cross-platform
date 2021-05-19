@@ -16,3 +16,21 @@
   height: 18px;
   color: #4B4B4B;
 }
+
+.menu-container-end {
+  display: flex;
+  flex-direction: row;
+  justify-items: center;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.menu-item-text {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 125%;
+  color: #969696;
+  margin-right: 8px;
+}

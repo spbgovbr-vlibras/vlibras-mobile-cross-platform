@@ -7,6 +7,10 @@ import IconRegionalism from './icons/IconRegionalism';
 import IconIcaro from './icons/IconIcaro';
 import IconTutorial from './icons/IconTutorial';
 import IconHandsTranslate from './icons/IconHandsTranslate';
+import IconMic from './icons/MicIcon';
+import IconHistory from './icons/IconHistory';
+import IconCloseCircle from './icons/IconCloseCircle';
+import IconShare from './icons/IconShare';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -108,5 +112,10 @@ export {
   IconDictionary,
   IconIcaro,
   IconTutorial,
-  IcaroPreview
+  IcaroPreview,
+  IconMic,
+  IconHistory,
+  IconCloseCircle,
+  IconHandsTranslate,
+  IconShare
 };
