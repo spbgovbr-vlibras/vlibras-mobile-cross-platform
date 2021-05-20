@@ -8,6 +8,7 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
+  IonItem,
 } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
 
@@ -32,7 +33,9 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
       case paths.HOME:
         return (
           <>
-            <span className="menu-item-text">PT-BR</span>
+            <IonItem routerLink={paths.TRANSLATORPT}>
+              <span className="menu-item-text"> PT-BR </span>
+            </IonItem>
             <IconTranslate color="#2365DE" />
           </>
         );

@@ -11,7 +11,7 @@ import {
 
 import { RNCamera, FaceDetector } from 'react-native-camera';
 
-import { OnBoarding } from 'components';
+import { OnBoarding, VideoOutputModal } from 'components';
 
 import { Strings } from './strings';
 import './styles.css';
@@ -21,6 +21,19 @@ function TranslatorPT() {
     <IonPage>
       <IonContent>
         {/* <OnBoarding /> */}
+        <VideoOutputModal
+          outputs={[
+            'febre',
+            'hospital',
+            'leptospirose',
+            'paralelepípedo',
+            'remédio',
+            'teste',
+            'cloroquina',
+            'tique-teco',
+          ]}
+          showButtons={true}
+        />
 
         <div className="container">
           <div className="video-recording"></div>

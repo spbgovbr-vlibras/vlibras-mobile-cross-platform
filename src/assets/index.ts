@@ -60,6 +60,9 @@ import logoUfpb from './images/ufpb_logo.png';
 import logoMaos from './images/Union.png';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
+import logoPlay from './images/icon_play.svg';
+import logoClose from './images/x-circle.svg';
+import logoAnswer from './images/responder-icon.svg';
 
 export {
   LogoIcaro,
@@ -117,5 +120,8 @@ export {
   IconHistory,
   IconCloseCircle,
   IconHandsTranslate,
-  IconShare
+  IconShare,
+  logoPlay,
+  logoClose,
+  logoAnswer
 };
