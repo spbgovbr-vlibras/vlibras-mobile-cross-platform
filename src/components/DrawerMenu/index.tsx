@@ -18,10 +18,9 @@ import {
   IconRegionalism,
   IconIcaro,
   IconTutorial,
-} from 'assets';
-import { SVGProps } from 'assets/icons/types';
-import paths from 'constants/paths';
-
+} from '../../assets';
+import { SVGProps } from '../../assets/icons/types';
+import paths from '../../constants/paths';
 import { Strings } from './strings';
 
 import './styles.css';

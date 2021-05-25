@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useDebugValue, useState } from 'react';
 
 import {
   IonButton,
@@ -9,9 +9,12 @@ import {
   IonItem,
   IonList,
   IonListHeader,
+  IonSearchbar,
   IonText,
   IonTextarea,
 } from '@ionic/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { debounce, DictionaryIteratee } from 'lodash';
 
 import MicIcon from '../../assets/icons/MicIcon';
 import { MenuLayout } from '../../layouts';
@@ -37,24 +40,55 @@ function Dictionary() {
     </IonItem>
   );
 
+  const TIME_DEBOUNCE_MS = 0;
+  const [dictionary, setDictionary] = useState(words);
+  const [isMicVisible, setIsMicVisible] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const hideMic = document.getElementsByClassName(
+    'dictionary-mic-button',
+  ) as HTMLCollectionOf<HTMLElement>;
+
+  const onSearch = useCallback(value => {
+    const input = words.filter(item => item.word.includes(value.toUpperCase()));
+    setDictionary(input);
+  }, []);
+
+  const debouncedSearch = useCallback(debounce(onSearch, TIME_DEBOUNCE_MS), [
+    onSearch,
+  ]);
+
+  const onInputChange = useCallback(
+    evt => {
+      setSearchText(evt.target.value);
+      if (!evt.target.value) {
+        setIsMicVisible(true);
+      } else {
+        setIsMicVisible(false);
+        onSearch(evt.target.value);
+      }
+    },
+    [debouncedSearch],
+  );
+
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
-            <div className="dictionary-input-box">
-              <IonTextarea
+            <div className="dictionary-searchbar">
+              <IonSearchbar
                 className="dictionary-textarea"
                 placeholder={Strings.TEXT_PLACEHOLDER}
-                autofocus
-                rows={1}
-                wrap="soft"
-                required
-                onIonChange={e => e.detail.value!}
+                value={searchText}
+                onIonChange={onInputChange}
+                inputmode="text"
+                searchIcon="none"
               />
-              <button type="button" className="dictionary-mic-button ">
-                <MicIcon color="#B9B9B9" />
-              </button>
+              {isMicVisible && (
+                <button type="button" className="dictionary-mic-button ">
+                  <MicIcon color="#B9B9B9" />
+                </button>
+              )}
             </div>
           </div>
           <div className="dictionary-container-ion-chips">
@@ -76,7 +110,7 @@ function Dictionary() {
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" class="dictionary-words-list">
-              {words.map(item => renderWord(item))}
+              {dictionary.map(item => renderWord(item))}
             </IonList>
           </div>
         </div>
