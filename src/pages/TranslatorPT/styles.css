@@ -2,3 +2,15 @@
   display: flex;
   justify-content: center;
 }
+
+.area-recording {
+  padding: 32px;
+}
+
+.home-vide-info {
+  text-align: right;
+  background-color: #FAFAFA;
+  padding: 32px;
+  color: black;
+  word-break: break-all;
+}

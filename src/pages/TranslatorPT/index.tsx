@@ -16,7 +16,6 @@ import {
 } from '@ionic/react';
 
 import { OnBoarding, VideoOutputModal } from 'components';
-import { File } from '@ionic-native/file';
 
 import { Strings } from './strings';
 import './styles.css';
@@ -29,11 +28,8 @@ function TranslatorPT() {
     try {
       const options = { limit: 1, duration: 30 };
       const mediafile = await VideoCapturePlus.captureVideo(options);
-      const fileResolved = await File.resolveLocalFilesystemUrl(
-        mediafile[0].fullPath.replace('/private', 'file://'),
-      );
       setMetadata(mediafile);
-      setVideoSrc(fileResolved.nativeURL);
+      setVideoSrc(mediafile[0].fullPath);
     } catch (error) {
       setMetadata(error);
     }
