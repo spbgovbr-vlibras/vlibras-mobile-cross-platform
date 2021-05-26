@@ -1,6 +1,6 @@
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
-import { IcaroPreview } from '../../../assets';
+import { gifStepZero } from '../../../assets';
 import { Strings } from '../strings';
 
 interface PresentationProps {
@@ -17,7 +17,7 @@ const Presentation = ({ setCurrentStep, jump }: PresentationProps) => {
           {Strings.PRESENTATION_DESCRIPTION}
         </p>
       </div>
-      <IonImg src={IcaroPreview} className="icaro-preview" />
+      <IonImg src={gifStepZero} className="icaro-preview" />
       <div className="buttons-area">
         <IonButton className="jump-button" onClick={jump}>
           {Strings.BUTTON_JUMP}

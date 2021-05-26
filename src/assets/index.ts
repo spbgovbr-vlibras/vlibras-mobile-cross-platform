@@ -12,6 +12,13 @@ import IconHistory from './icons/IconHistory';
 import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 
+/* ----------------- Exports gifs -----------------------  */
+import gifStepZero from './gifs/passo0.gif';
+import gifStepOne from './gifs/passo1.gif';
+import gifStepTwo from './gifs/passo2.gif';
+import gifStepThree from './gifs/passo3.gif'; 
+import gifStepFour from './gifs/passo4.gif';
+
 /* ----------------- Exports images -----------------------  [MA] */
 
 import logoAcre from './images/Acre.png';
@@ -123,5 +130,10 @@ export {
   IconShare,
   logoPlay,
   logoClose,
-  logoAnswer
+  logoAnswer,
+  gifStepZero,
+  gifStepOne,
+  gifStepTwo,
+  gifStepThree,
+  gifStepFour
 };

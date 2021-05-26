@@ -14,7 +14,7 @@
 .menu-icon-share {
   width: 18px;
   height: 18px;
-  color: #4B4B4B;
+  color: #4b4b4b;
 }
 
 .menu-container-end {
@@ -33,4 +33,6 @@
   line-height: 125%;
   color: #969696;
   margin-right: 8px;
+  --padding-end: 0px;
+  --inner-padding-end: 0px;
 }

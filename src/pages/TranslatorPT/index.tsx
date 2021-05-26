@@ -16,6 +16,7 @@ import {
 } from '@ionic/react';
 
 import { OnBoarding, VideoOutputModal } from 'components';
+import { MenuLayout } from '../../layouts';
 
 import { Strings } from './strings';
 import './styles.css';
@@ -36,9 +37,9 @@ function TranslatorPT() {
   }
 
   return (
-    <IonPage>
+    <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
-        {/* <OnBoarding /> */}
+        <OnBoarding />
         {/* <VideoOutputModal
           outputs={[
             'febre',
@@ -65,7 +66,7 @@ function TranslatorPT() {
           </div>
         </div>
       </IonContent>
-    </IonPage>
+    </MenuLayout>
   );
 }
 

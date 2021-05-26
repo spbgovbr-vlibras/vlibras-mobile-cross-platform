@@ -31,10 +31,17 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
       case paths.HOME:
+      case paths.TRANSLATORPT:
         return (
           <>
-            <IonItem routerLink={paths.TRANSLATORPT}>
-              <span className="menu-item-text"> PT-BR </span>
+            <IonItem
+              detailIcon={'false'}
+              lines={'none'}
+              mode={'md'}
+              routerLink={paths.TRANSLATORPT}
+              className="menu-item-text"
+            >
+              PT-BR
             </IonItem>
             <IconTranslate color="#2365DE" />
           </>

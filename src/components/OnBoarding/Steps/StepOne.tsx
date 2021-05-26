@@ -3,6 +3,7 @@ import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
 import { Strings } from '../strings';
+import { gifStepOne } from '../../../assets';
 
 interface StepOneProps {
   setCurrentStep: Dispatch<SetStateAction<number>>;
@@ -17,7 +18,7 @@ const StepOne = ({ setCurrentStep, active, jump }: StepOneProps) => {
       <div className="modal-description">
         <p className="modal-onboarding-body">{Strings.STEPONE_DESCRIPTION}</p>
       </div>
-      <IonImg src={IcaroPreview} className="icaro-preview" />
+      <IonImg src={gifStepOne} className="icaro-preview" />
       <Bullets active={active} />
       <div className="buttons-area">
         <IonButton className="jump-button" onClick={jump}>
