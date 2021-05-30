@@ -7,5 +7,6 @@ export default {
   TUTORIAL: '/tutorial',
   DICTIONARY: '/dictionary',
   TRANSLATORPT: '/translator-recording',
-  DOMAIN: '/domain'
+  DOMAIN: '/domain',
+  ONBOARDING: '/onboarding'
 };

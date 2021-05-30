@@ -25,7 +25,7 @@ const Domain = () => {
       '--background': '#ededed',
     },
     activeColor: {
-      '--font-color': '#1447a6',
+      color: '#1447a6',
     },
   };
 

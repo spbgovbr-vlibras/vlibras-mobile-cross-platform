@@ -13,7 +13,8 @@ export const Strings = {
     BUTTON_PROCEED: 'Ver passos',
     BUTTON_NEXT: 'Avançar',
     BUTTON_BACK: 'Voltar',
-    BUTTON_START: 'Definir domínio'
+    BUTTON_START: 'Definir domínio',
+    TOOLBAR_TITLE: 'Tradutor'
 
   };
   

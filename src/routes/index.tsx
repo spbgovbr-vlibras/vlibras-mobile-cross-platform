@@ -16,6 +16,7 @@ import {
   Translator,
   TranslatorPT,
   Domain,
+  OnBoarding,
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
@@ -34,6 +35,7 @@ function Routes() {
           <Route exact component={Translator} path={paths.TRANSLATOR} />
           <Route exact component={TranslatorPT} path={paths.TRANSLATORPT} />
           <Route exact component={Domain} path={paths.DOMAIN} />
+          <Route exact component={OnBoarding} path={paths.ONBOARDING} />
         </IonRouterOutlet>
       </IonReactRouter>
     </>

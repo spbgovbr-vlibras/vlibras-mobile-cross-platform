@@ -35,7 +35,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           <>
             <span
               className="menu-item-text"
-              onClick={() => history.push(paths.TRANSLATORPT)}
+              onClick={() => history.push(paths.ONBOARDING)}
             >
               PT-BR
             </span>
@@ -43,6 +43,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           </>
         );
       case paths.TRANSLATORPT:
+      case paths.ONBOARDING:
         return (
           <>
             <span

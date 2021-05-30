@@ -1,0 +1,43 @@
+.main-area-recorder {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin: auto;
+  height: 75%;
+}
+
+.main-area-recorder img {
+  z-index: -1;
+  margin: auto;
+}
+
+.title-recorder {
+  font-family: Rawline;
+  text-align: center;
+  height: 100%;
+}
+
+.recorder-area {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.recorder-area .history-recorder {
+  position: absolute;
+  margin-left: 180px;
+  margin-top: 24px;
+}
+
+.fixed-area-recorder {
+  position: fixed;
+  bottom: 35px;
+  width: 100%;
+}
+
+.area-button-recorder p {
+  font-family: Rawline;
+  font-size: 12px;
+  margin: 0px;
+  text-align: center;
+}

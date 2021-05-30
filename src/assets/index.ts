@@ -70,6 +70,9 @@ import logoYoutube from './images/youtube_logo.png';
 import logoPlay from './images/icon_play.svg';
 import logoClose from './images/x-circle.svg';
 import logoAnswer from './images/responder-icon.svg';
+import logoRecordButton from './images/record-button.svg';
+import logoHistory from './images/history.svg';
+import logoTranslate from './images/translate.svg';
 
 export {
   LogoIcaro,
@@ -135,5 +138,8 @@ export {
   gifStepOne,
   gifStepTwo,
   gifStepThree,
-  gifStepFour
+  gifStepFour,
+  logoRecordButton,
+  logoHistory,
+  logoTranslate
 };

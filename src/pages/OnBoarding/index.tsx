@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { IonModal } from '@ionic/react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { IonModal, IonPage } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import paths from '../../constants/paths';
 
@@ -8,13 +8,19 @@ import StepOne from './Steps/StepOne';
 import StepTwo from './Steps/StepTwo';
 import StepThree from './Steps/StepThree';
 import StepFour from './Steps/StepFour';
+import { MenuLayout } from '../../layouts';
+import { Strings } from './strings';
 
 import './styles.css';
-const ModalExample = () => {
+
+// interface OnBoardingProps {
+//   setShowRecorderArea: Dispatch<SetStateAction<boolean>>;
+// }
+
+const OnBoarding = () => {
   const [showModal, setShowModal] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [chooseRender, setChooseRender] = useState(<></>);
-  const [showDomain, setShowDomain] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -69,16 +75,14 @@ const ModalExample = () => {
   const closeModal = () => {
     setShowModal(false);
     setCurrentStep(0);
-    setShowDomain(true);
     history.push(paths.DOMAIN);
   };
 
   return (
-    <>
+    <MenuLayout title={Strings.TOOLBAR_TITLE}>
       {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
-      {/* {showDomain && <Domain />} */}
-    </>
+    </MenuLayout>
   );
 };
 
-export default ModalExample;
+export default OnBoarding;

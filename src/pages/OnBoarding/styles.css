@@ -4,6 +4,8 @@
 
 .onboarding-modal {
   padding: 40px;
+  margin: auto;
+  margin-top: 0;
 }
 
 .onboarding-modal .title-area {
