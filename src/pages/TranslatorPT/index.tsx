@@ -53,7 +53,7 @@ function TranslatorPT() {
           ]}
           showButtons={true}
         /> */}
-
+        {/* 
         <div className="container">
           <div className="video-recording"></div>
           <div className="area-recording">
@@ -64,7 +64,7 @@ function TranslatorPT() {
             <p className="home-vide-info">{JSON.stringify(metadata)}</p>
             <p className="home-vide-info">{videoSrc}</p>
           </div>
-        </div>
+        </div> */}
       </IonContent>
     </MenuLayout>
   );

@@ -14,16 +14,18 @@ interface StepOneProps {
 const StepOne = ({ setCurrentStep, active, jump }: StepOneProps) => {
   return (
     <>
-      <p className="modal-onboarding-title"> {Strings.STEPONE_TITLE} </p>
+      <div className="title-area">
+        <p className="modal-onboarding-title"> {Strings.STEPONE_TITLE} </p>
+        <IonButton className="jump-button" onClick={jump}>
+          {Strings.BUTTON_JUMP}
+        </IonButton>
+      </div>
       <div className="modal-description">
         <p className="modal-onboarding-body">{Strings.STEPONE_DESCRIPTION}</p>
       </div>
       <IonImg src={gifStepOne} className="icaro-preview" />
       <Bullets active={active} />
       <div className="buttons-area">
-        <IonButton className="jump-button" onClick={jump}>
-          {Strings.BUTTON_JUMP}
-        </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(0)}

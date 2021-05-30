@@ -1,25 +1,33 @@
 .onboarding-modal {
-  background: var(--ion-color-grey-75);
-  margin-top: 55px;
   font-family: Rawline;
 }
 
-.onboarding-modal .modal-wrapper {
-  border-radius: 8px;
-  height: 440px;
+.onboarding-modal {
+  padding: 40px;
 }
 
-.onboarding-modal .ion-page {
-  padding: 16px 20px;
+.onboarding-modal .title-area {
+  display: inline-flex;
+  width: 100%;
+}
+
+.onboarding-modal .jump-button {
+  --background: none;
+  color: var(--ion-color-modal-title);
+  text-decoration: underline var(--ion-color-modal-title);
+  --box-shadow: none;
+  font-size: 14px;
+  text-transform: none;
+  margin-left: auto;
 }
 
 .onboarding-modal .modal-onboarding-title {
-  text-align: center;
   font-weight: 700;
   font-size: 18px;
   line-height: 27px;
   color: var(--ion-color-modal-title);
   margin: 0;
+  align-self: center;
 }
 
 .onboarding-modal .modal-onboarding-body {
@@ -30,53 +38,45 @@
 }
 
 .onboarding-modal .icaro-preview {
-  width: 180px;
+  width: 200px;
   margin: auto;
-}
-
-.onboarding-modal .jump-button {
-  --background: none;
-  color: var(--ion-color-modal-title);
-  text-decoration: underline var(--ion-color-modal-title);
-  position: absolute;
-  left: 6px;
-  bottom: 10px;
-  --box-shadow: none;
+  margin-top: 20px;
 }
 
 .onboarding-modal .primary-modal-button {
   --background: var(--ion-color-modal-title);
   color: var(--ion-color-primary-contrast);
-  height: 30px;
+  height: 38px;
 }
 
 .onboarding-modal .goback-modal-button,
 .onboarding-modal .goback-modal-button.ion-activated {
   --background: none;
   color: var(--ion-color-modal-title);
-  height: 30px;
+  height: 38px;
   border: 1px solid var(--ion-color-modal-title);
   border-radius: 24px;
 }
 
 .onboarding-modal .buttons-area .button {
   font-size: 14px;
-  line-height: 20.3px;
+  line-height: 14px;
   --border-radius: 24px;
   text-transform: none;
+  margin: 0px 8px;
+  letter-spacing: normal;
 }
 
 .onboarding-modal .buttons-area {
   display: flex;
   justify-content: center;
   --font-variant: normal;
+  position: fixed;
+  bottom: 50px;
+  left: 0;
+  width: 100%;
 }
 
 .onboarding-modal .modal-description {
   height: 65px;
-}
-
-.onboarding-modal.sc-ion-modal-md-h,
-.onboarding-modal.sc-ion-modal-ios-h {
-  padding: 0 16px;
 }

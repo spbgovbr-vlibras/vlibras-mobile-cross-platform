@@ -11,7 +11,12 @@ interface PresentationProps {
 const Presentation = ({ setCurrentStep, jump }: PresentationProps) => {
   return (
     <>
-      <p className="modal-onboarding-title"> {Strings.PRESENTATION_TITLE} </p>
+      <div className="title-area">
+        <p className="modal-onboarding-title"> {Strings.PRESENTATION_TITLE} </p>
+        <IonButton className="jump-button" onClick={jump}>
+          {Strings.BUTTON_JUMP}
+        </IonButton>
+      </div>
       <div className="modal-description">
         <p className="modal-onboarding-body">
           {Strings.PRESENTATION_DESCRIPTION}
@@ -19,9 +24,6 @@ const Presentation = ({ setCurrentStep, jump }: PresentationProps) => {
       </div>
       <IonImg src={gifStepZero} className="icaro-preview" />
       <div className="buttons-area">
-        <IonButton className="jump-button" onClick={jump}>
-          {Strings.BUTTON_JUMP}
-        </IonButton>
         <IonButton
           className="primary-modal-button"
           onClick={() => setCurrentStep(1)}

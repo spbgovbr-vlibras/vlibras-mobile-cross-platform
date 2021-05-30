@@ -18,16 +18,18 @@ const StepThree: React.FunctionComponent<StepThreeProps> = ({
 }) => {
   return (
     <>
-      <p className="modal-onboarding-title"> {Strings.STEPTHREE_TITLE} </p>
+      <div className="title-area">
+        <p className="modal-onboarding-title"> {Strings.STEPTHREE_TITLE} </p>
+        <IonButton className="jump-button" onClick={jump}>
+          {Strings.BUTTON_JUMP}
+        </IonButton>
+      </div>
       <div className="modal-description">
         <p className="modal-onboarding-body">{Strings.STEPTHREE_DESCRIPTION}</p>
       </div>
       <IonImg src={gifStepThree} className="icaro-preview" />
       <Bullets active={active} />
       <div className="buttons-area">
-        <IonButton className="jump-button" onClick={jump}>
-          {Strings.BUTTON_JUMP}
-        </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(2)}

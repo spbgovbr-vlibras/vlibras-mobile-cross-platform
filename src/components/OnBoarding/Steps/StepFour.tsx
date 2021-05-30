@@ -22,16 +22,19 @@ const StepFour: React.FunctionComponent<StepFourProps> = ({
 
   return (
     <>
-      <p className="modal-onboarding-title">{Strings.STEPFOUR_TITLE}</p>
+      <div className="title-area">
+        <p className="modal-onboarding-title">{Strings.STEPFOUR_TITLE}</p>
+        <IonButton className="jump-button" onClick={jump}>
+          {Strings.BUTTON_JUMP}
+        </IonButton>
+      </div>
+
       <div className="modal-description">
         <p className="modal-onboarding-body">{Strings.STEPFOUR_DESCRIPTION}</p>
       </div>
       <IonImg src={gifStepFour} className="icaro-preview" />
       <Bullets active={active} />
       <div className="buttons-area">
-        <IonButton className="jump-button" onClick={jump}>
-          {Strings.BUTTON_JUMP}
-        </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(3)}

@@ -14,16 +14,19 @@ interface StepTwoProps {
 const StepTwo = ({ setCurrentStep, active, jump }: StepTwoProps) => {
   return (
     <>
-      <p className="modal-onboarding-title"> {Strings.STEPTWO_TITLE} </p>
+      <div className="title-area">
+        <p className="modal-onboarding-title"> {Strings.STEPTWO_TITLE} </p>
+        <IonButton className="jump-button" onClick={jump}>
+          {Strings.BUTTON_JUMP}
+        </IonButton>
+      </div>
+
       <div className="modal-description">
         <p className="modal-onboarding-body">{Strings.STEPTWO_DESCRIPTION}</p>
       </div>
       <IonImg src={gifStepTwo} className="icaro-preview" />
       <Bullets active={active} />
       <div className="buttons-area">
-        <IonButton className="jump-button" onClick={jump}>
-          {Strings.BUTTON_JUMP}
-        </IonButton>
         <IonButton
           className="goback-modal-button"
           onClick={() => setCurrentStep(1)}

@@ -72,14 +72,7 @@ const ModalExample = () => {
 
   return (
     <>
-      <IonModal
-        isOpen={showModal}
-        cssClass="onboarding-modal"
-        swipeToClose={true}
-        onDidDismiss={closeModal}
-      >
-        {chooseRender}
-      </IonModal>
+      {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
       {showDomain && <Domain />}
     </>
   );
