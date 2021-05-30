@@ -1,25 +1,21 @@
 import Bullets from 'components/Bullets';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
 import { IonButton, IonImg } from '@ionic/react';
 import { IcaroPreview } from '../../../assets';
 import { Strings } from '../strings';
 import { gifStepFour } from '../../../assets';
 
 interface StepFourProps {
-  setShowModal: Dispatch<SetStateAction<boolean>>;
   setCurrentStep: Dispatch<SetStateAction<number>>;
   active: number;
+  jump: MouseEventHandler<HTMLIonButtonElement>;
 }
 
 const StepFour: React.FunctionComponent<StepFourProps> = ({
-  setShowModal,
   setCurrentStep,
   active,
+  jump,
 }) => {
-  const jump = () => {
-    setShowModal(false);
-  };
-
   return (
     <>
       <div className="title-area">

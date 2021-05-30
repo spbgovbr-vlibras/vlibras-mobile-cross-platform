@@ -8,9 +8,8 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
-  IonItem,
 } from '@ionic/react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
@@ -23,6 +22,7 @@ interface MenuLayoutProps {
 
 const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const location = useLocation();
+  const history = useHistory();
 
   function openMenu() {
     menuController.open();
@@ -31,18 +31,26 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
       case paths.HOME:
+        return (
+          <>
+            <span
+              className="menu-item-text"
+              onClick={() => history.push(paths.TRANSLATORPT)}
+            >
+              PT-BR
+            </span>
+            <IconTranslate color="#2365DE" />
+          </>
+        );
       case paths.TRANSLATORPT:
         return (
           <>
-            <IonItem
-              detailIcon={'false'}
-              lines={'none'}
-              mode={'md'}
-              routerLink={paths.TRANSLATORPT}
+            <span
               className="menu-item-text"
+              onClick={() => history.push(paths.HOME)}
             >
-              PT-BR
-            </IonItem>
+              LIBRAS
+            </span>
             <IconTranslate color="#2365DE" />
           </>
         );
