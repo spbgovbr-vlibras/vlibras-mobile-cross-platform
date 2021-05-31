@@ -8,5 +8,6 @@ export default {
   DICTIONARY: '/dictionary',
   TRANSLATORPT: '/translator-recording',
   DOMAIN: '/domain',
-  ONBOARDING: '/onboarding'
+  ONBOARDING: '/onboarding',
+  SIGNALCAPTURE: '/signal-capture'
 };

@@ -70,9 +70,14 @@ import logoYoutube from './images/youtube_logo.png';
 import logoPlay from './images/icon_play.svg';
 import logoClose from './images/x-circle.svg';
 import logoAnswer from './images/responder-icon.svg';
-import logoRecordButton from './images/record-button.svg';
 import logoHistory from './images/history.svg';
 import logoTranslate from './images/translate.svg';
+import logoCapture from './images/capture.svg';
+import logoCaptureV2 from './images/capturev2.svg';
+import logoTranslateVideo from './images/translate-video.svg';
+import logoTrashBtn from './images/botao-lixo.svg';
+import logoCaptureDisable from './images/capture-disable.svg';
+
 
 export {
   LogoIcaro,
@@ -139,7 +144,11 @@ export {
   gifStepTwo,
   gifStepThree,
   gifStepFour,
-  logoRecordButton,
   logoHistory,
-  logoTranslate
+  logoTranslate,
+  logoCapture,
+  logoCaptureV2,
+  logoTranslateVideo,
+  logoTrashBtn,
+  logoCaptureDisable
 };

@@ -13,10 +13,6 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-// interface OnBoardingProps {
-//   setShowRecorderArea: Dispatch<SetStateAction<boolean>>;
-// }
-
 const OnBoarding = () => {
   const [showModal, setShowModal] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);

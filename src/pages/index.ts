@@ -7,3 +7,4 @@ export { default as Dictionary } from './Dictionary';
 export { default as Translator } from './Translator';
 export { default as Domain } from './Domain';
 export { default as OnBoarding } from './OnBoarding';
+export { default as SignalCapture } from './SignalCapture';

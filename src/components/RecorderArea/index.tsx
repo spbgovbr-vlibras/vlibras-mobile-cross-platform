@@ -1,5 +1,7 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { logoRecordButton, logoHistory, logoTranslate } from '../../assets';
+import { logoCapture, logoHistory, logoTranslate } from '../../assets';
+import { useHistory } from 'react-router-dom';
+import paths from '../../constants/paths';
 
 import {
   VideoCapturePlus,
@@ -18,11 +20,16 @@ const RecorderArea = ({
   videosRecorded,
   setVideosRecorded,
 }: RecorderAreaProps) => {
+  const history = useHistory();
+
   const takeVideo = async () => {
     try {
       const options = { limit: 1, duration: 30 };
       const mediafile = await VideoCapturePlus.captureVideo(options);
+      //@ts-ignore TODO cleanup this debug output
+      localStorage.setItem('firstVideo', JSON.stringify(mediafile));
       setVideosRecorded(mediafile);
+      history.push(paths.SIGNALCAPTURE);
     } catch (error) {
       setVideosRecorded(error);
     }
@@ -39,8 +46,9 @@ const RecorderArea = ({
           <div className="area-button-recorder">
             <img
               className="button-recorder"
-              src={logoRecordButton}
+              src={logoCapture}
               onClick={takeVideo}
+              // onClick={() => history.push(paths.SIGNALCAPTURE)}
             ></img>
             <p> Câmera </p>
           </div>
