@@ -8,13 +8,22 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 72px;
+  height: 78px;
   width: 100%;
   display: flex;
+  flex-direction: column;
+  justify-items: flex-end;
+  z-index: 1;
+  background: transparent;
+}
+
+.play-action-content {
+  display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  background: #FFF;
+  height: 72px;
+  background: white;
 }
 
 .player-action-button {
@@ -34,4 +43,22 @@
 .player-action-button-insert {
   margin-right: 4px;
   margin-left: 38px;
+}
+
+.player-progress-container {
+  width: 100%;
+  height: 6px;
+  background: #D6E5F9;
+  visibility: hidden;
+}
+
+.player-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #003F86;
+}
+
+.player-action-button-transparent {
+  background: transparent;
+  border: none;
 }

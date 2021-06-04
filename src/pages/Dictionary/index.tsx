@@ -9,8 +9,9 @@ import {
   IonTextarea,
 } from '@ionic/react';
 
-import MicIcon from '../../assets/icons/MicIcon';
-import { MenuLayout } from '../../layouts';
+import { IconMic } from 'assets';
+import { MenuLayout } from 'layouts';
+
 import { Strings } from './strings';
 
 import './styles.css';
@@ -49,7 +50,7 @@ function Dictionary() {
                 onIonChange={e => e.detail.value!}
               />
               <button type="button" className="dictionary-mic-button ">
-                <MicIcon color="#B9B9B9" />
+                <IconMic color="#B9B9B9" />
               </button>
             </div>
           </div>
