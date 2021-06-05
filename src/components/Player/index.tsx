@@ -47,6 +47,52 @@ function Player() {
     unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
   };
 
+  /**
+   * Event called when it is playing an animation.
+   * Return glosa length and in which glosa is playing
+   */
+  // (window as any).CounterGlosa = (counter: number, glosaLength: number) => {
+  //   console.log(counter, glosaLength);
+  // }
+
+  /**
+   * Event called when user changes player state (play, pause, repeat...)
+   */
+  // (window as any).onPlayingStateChange = (
+  //   _isPlaying: string,
+  //   isPaused: string,
+  //   isPlayingIntervalAnimation: string,
+  //   isLoading: string,
+  //   isRepeatable: string,
+  // ) => {
+  //   console.log(
+  //     isPaused,
+  //     _isPlaying,
+  //     isPlayingIntervalAnimation,
+  //     isLoading,
+  //     isRepeatable,
+  //   );
+  // };
+
+  // playNow => Event to play an animation
+  // _glosa => phrase or word that will play
+  // unityContent.send(PLAYER_MANAGER, 'playNow', _glosa);
+
+  // setPauseState => Event to pause an animation
+  // Third parameter to pause (1) or not (0)
+  // unityContent.send(PLAYER_MANAGER, 'setPauseState', 1 or 0);
+
+  // setSubtitlesState => Event to show subtitle
+  // Third parameter to show (1) or not (0)
+  // unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 1 or 0)
+
+  // setSlider => Event to change animation speed
+  // _speed => Third parameter is the speed
+  // unityContent.send(PLAYER_MANAGER, 'setSlider', _speed);
+
+  // Change => Event to change the avatar
+  // unityContent.send(PLAYER_MANAGER, 'Change')
+
   function handleProgressFinished() {
     setIsPlaying(false);
     setHasFinished(true);
