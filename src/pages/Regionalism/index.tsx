@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { RadioGroupChangeEventDetail } from '@ionic/core';
 import {
   IonContent,
   IonList,
@@ -11,79 +12,27 @@ import {
   IonImg,
   IonButton,
 } from '@ionic/react';
+import { useSelector, useDispatch } from 'react-redux';
 
-import {
-  logoAcre,
-  logoAlagoas,
-  logoAmapa,
-  logoBahia,
-  logoBrasil,
-  logoCeara,
-  logoDF,
-  logoEspiritoSanto,
-  logoGoiás,
-  logoMaranhao,
-  logoMatoGrosso,
-  logoMatoGrossoDoSul,
-  logoMinasGerais,
-  logoPará,
-  logoParaiba,
-  logoParaná,
-  logoPernambuco,
-  logoPiaui,
-  logoRioDeJaneiro,
-  logoRioGrandeDoNorte,
-  logoRioGrandeDoSul,
-  logoRondonia,
-  logoRoraima,
-  logoSantaCatarina,
-  logoSãoPaulo,
-  logoSergipe,
-  logoTocantins,
-  logoAmazonas,
-} from '../../assets';
-import { MenuLayout } from '../../layouts';
+import regionalismData from 'data/regionalism';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/regionalism';
+
 import { Strings } from './strings';
 
 import './styles.css';
 
-interface RegionalismItem {
+export interface RegionalismItem {
   name: string;
   url: any;
 }
 
-const states: Array<RegionalismItem> = [
-  { name: 'BR - Padrão Nacional', url: logoBrasil },
-  { name: 'Acre', url: logoAcre },
-  { name: 'Alagoas', url: logoAlagoas },
-  { name: 'Amapá', url: logoAmapa },
-  { name: 'Amazonas', url: logoAmazonas },
-  { name: 'Bahia', url: logoBahia },
-  { name: 'Ceará', url: logoCeara },
-  { name: 'Distrito Federal', url: logoDF },
-  { name: 'Espirito Santo', url: logoEspiritoSanto },
-  { name: 'Goiás', url: logoGoiás },
-  { name: 'Maranhão', url: logoMaranhao },
-  { name: 'Mato Grosso', url: logoMatoGrosso },
-  { name: 'Mato Grosso do Sul', url: logoMatoGrossoDoSul },
-  { name: 'Minas Gerais', url: logoMinasGerais },
-  { name: 'Pará', url: logoPará },
-  { name: 'Paraíba', url: logoParaiba },
-  { name: 'Paraná', url: logoParaná },
-  { name: 'Pernambuco', url: logoPernambuco },
-  { name: 'Piaui', url: logoPiaui },
-  { name: 'Rio de Janeiro', url: logoRioDeJaneiro },
-  { name: 'Rio Grande do Norte', url: logoRioGrandeDoNorte },
-  { name: 'Rio Grande do Sul', url: logoRioGrandeDoSul },
-  { name: 'Rondônia', url: logoRondonia },
-  { name: 'Roraima', url: logoRoraima },
-  { name: 'Santa Catarina', url: logoSantaCatarina },
-  { name: 'São Paulo', url: logoSãoPaulo },
-  { name: 'Sergipe', url: logoSergipe },
-  { name: 'Tocantins', url: logoTocantins },
-];
-
 function Regionalism() {
+  const dispatch = useDispatch();
+  const currentRegionalism = useSelector(
+    ({ regionalism }: RootState) => regionalism.current,
+  );
   const renderItem = (item: RegionalismItem) => (
     <IonItem class="regionalism-item">
       <IonImg src={item.url} />
@@ -91,7 +40,10 @@ function Regionalism() {
       <IonRadio slot="end" value={item.name} />
     </IonItem>
   );
-
+  function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
+    dispatch(Creators.setCurrentRegionalism(evt.detail.value));
+  }
+  console.log(currentRegionalism);
   return (
     <MenuLayout title={Strings.REGIONALISM_TITLE}>
       <IonContent slot="right">
@@ -102,8 +54,11 @@ function Regionalism() {
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
-            <IonRadioGroup value={1} onIonChange={e => 'none'}>
-              {states.map(item => renderItem(item))}
+            <IonRadioGroup
+              value={currentRegionalism}
+              onIonChange={handleOnChange}
+            >
+              {regionalismData.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
           <div className="regionalism-icon-save">
@@ -119,5 +74,4 @@ function Regionalism() {
     </MenuLayout>
   );
 }
-
 export default Regionalism;
