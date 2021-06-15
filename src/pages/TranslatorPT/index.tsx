@@ -26,20 +26,6 @@ function TranslatorPT() {
           videosRecorded={videosRecorded}
           setVideosRecorded={setVideosRecorded}
         />
-
-        {/* <VideoOutputModal
-          outputs={[
-            'febre',
-            'hospital',
-            'leptospirose',
-            'paralelepípedo',
-            'remédio',
-            'teste',
-            'cloroquina',
-            'tique-teco',
-          ]}
-          showButtons={true}
-        /> */}
       </IonContent>
     </MenuLayout>
   );

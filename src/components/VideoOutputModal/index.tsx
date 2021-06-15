@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonModal, IonButton } from '@ionic/react';
 import { logoPlay, logoClose, logoMaos, logoAnswer } from '../../assets';
 import './styles.css';
@@ -11,6 +11,8 @@ const PLAYER_MANAGER = 'PlayerManager';
 interface VideoOutputModalProps {
   outputs: any;
   showButtons: boolean;
+  showModal: boolean;
+  setShowModal: any;
 }
 
 const unityContent = new UnityContent(
@@ -21,8 +23,12 @@ const unityContent = new UnityContent(
   },
 );
 
-const VideoOutputModal = ({ outputs, showButtons }: VideoOutputModalProps) => {
-  const [showModal, setShowModal] = useState(true);
+const VideoOutputModal = ({
+  outputs,
+  showButtons,
+  setShowModal,
+  showModal,
+}: VideoOutputModalProps) => {
   const [openPlayer, setOpenPlayer] = useState(false);
 
   const closeModal = () => {

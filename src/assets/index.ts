@@ -18,6 +18,7 @@ import gifStepOne from './gifs/passo1.gif';
 import gifStepTwo from './gifs/passo2.gif';
 import gifStepThree from './gifs/passo3.gif'; 
 import gifStepFour from './gifs/passo4.gif';
+import gifTranslating from './gifs/translating.gif'
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -64,7 +65,7 @@ import logoTocantins from './images/Tocantins.png';
 import logoTranslator1 from './images/translate_logo1.png';
 import logoTranslator2 from './images/translate_logo2.png';
 import logoUfpb from './images/ufpb_logo.png';
-import logoMaos from './images/Union.png';
+import logoMaos from './images/union.svg';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
 import logoPlay from './images/icon_play.svg';
@@ -150,5 +151,6 @@ export {
   logoCaptureV2,
   logoTranslateVideo,
   logoTrashBtn,
-  logoCaptureDisable
+  logoCaptureDisable,
+  gifTranslating
 };

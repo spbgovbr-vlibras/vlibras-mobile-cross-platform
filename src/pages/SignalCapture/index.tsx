@@ -48,7 +48,11 @@ const SignalCapture = () => {
         const options = { limit: 1, duration: 30 };
         const mediafile = await VideoCapturePlus.captureVideo(options);
         setVideosRecorded([...videosRecorded, ...mediafile]);
-        history.push(paths.SIGNALCAPTURE);
+        localStorage.setItem(
+          'allVideos',
+          JSON.stringify([...videosRecorded, ...mediafile]),
+        );
+        // history.push(paths.SIGNALCAPTURE);
       } catch (error) {
         console.log(error);
       }
@@ -76,6 +80,11 @@ const SignalCapture = () => {
         </div>
       </IonItem>
     ));
+  };
+
+  const translateVideo = async () => {
+    sessionStorage.setItem('allVideos', videosRecorded);
+    history.push(paths.TRANSLATORPT);
   };
 
   return (
@@ -109,7 +118,11 @@ const SignalCapture = () => {
             <p> Câmera </p>
           </div>
           <div className="area-button-recorder">
-            <img className="button-recorder" src={logoTranslateVideo}></img>
+            <img
+              className="button-recorder"
+              src={logoTranslateVideo}
+              onClick={translateVideo}
+            ></img>
             <p> Traduzir </p>
           </div>
         </div>
