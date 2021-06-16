@@ -3,6 +3,9 @@ import { IonModal, IonButton } from '@ionic/react';
 import { logoPlay, logoClose, logoMaos, logoAnswer } from '../../assets';
 import './styles.css';
 import Player from 'components/Player';
+import { Creators } from 'store/ducks/video';
+import { useDispatch } from 'react-redux';
+
 import Unity, { UnityContent } from 'react-unity-webgl';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
@@ -30,9 +33,11 @@ const VideoOutputModal = ({
   showModal,
 }: VideoOutputModalProps) => {
   const [openPlayer, setOpenPlayer] = useState(false);
+  const dispatch = useDispatch();
 
   const closeModal = () => {
     setShowModal(false);
+    dispatch(Creators.setCurrentArrayVideo([]));
   };
 
   const playWord = (value: string) => {

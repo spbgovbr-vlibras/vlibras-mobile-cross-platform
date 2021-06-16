@@ -16,16 +16,10 @@ import { Strings } from './strings';
 import './styles.css';
 
 function TranslatorPT() {
-  const [showRecorderArea, setShowRecorderArea] = React.useState(false);
-  const [videosRecorded, setVideosRecorded] = React.useState([]);
-
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
-        <RecorderArea
-          videosRecorded={videosRecorded}
-          setVideosRecorded={setVideosRecorded}
-        />
+        <RecorderArea />
       </IonContent>
     </MenuLayout>
   );

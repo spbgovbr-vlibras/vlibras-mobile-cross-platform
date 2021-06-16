@@ -5,9 +5,12 @@ import {
   logoTranslate,
   logoMaos,
 } from '../../assets';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import paths from '../../constants/paths';
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
 
 import {
   VideoCapturePlus,
@@ -18,51 +21,47 @@ import { VideoOutputModal, TranslatingModal } from '../../components';
 
 import './styles.css';
 
-interface RecorderAreaProps {
-  setVideosRecorded: Dispatch<SetStateAction<any>>;
-  videosRecorded: any;
-}
-
-const RecorderArea = ({
-  videosRecorded,
-  setVideosRecorded,
-}: RecorderAreaProps) => {
+const RecorderArea = () => {
   const history = useHistory();
+  const location = useLocation();
+
   const [results, setResults] = React.useState<any>([]);
   const [loading, setLoading] = React.useState<any>(false);
   const [toogleResult, setToogleResult] = React.useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  const dispatch = useDispatch();
+  const currentVideoArray = useSelector(
+    ({ video }: RootState) => video.current,
+  );
+
+  const lastTranslate = useSelector(
+    ({ video }: RootState) => video.lastTranslate,
+  );
+
   const takeVideo = async () => {
     history.push(paths.SIGNALCAPTURE);
 
     try {
-      const options = { limit: 1, duration: 30 };
-      const mediafile = await VideoCapturePlus.captureVideo(options);
-      //@ts-ignore TODO cleanup this debug output
-      localStorage.setItem('firstVideo', JSON.stringify(mediafile));
-      setVideosRecorded(mediafile);
+      // const options = { limit: 1, duration: 30 };
+      // const mediafile = await VideoCapturePlus.captureVideo(options);
+      // dispatch(Creators.setCurrentArrayVideo(mediafile));
+      dispatch(Creators.setCurrentArrayVideo([{ name: 'opa', size: '123' }]));
+
       history.push(paths.SIGNALCAPTURE);
     } catch (error) {
-      setVideosRecorded(error);
+      console.log(error);
     }
   };
 
   const translateVideo = async () => {
-    const videosRecorded2 = [
-      { label: 'opa1', url: 'opa2' },
-      { label: 'opa11', url: 'opa22' },
-      { label: 'opa111', url: 'opa222' },
-      { label: 'opa1111', url: 'opa2222' },
-    ];
-
-    // const videosRecorded = JSON.parse(localStorage.allVideos);
-
     const arrayOfResults: any = [];
 
     setLoading(true);
-    const result = await Promise.all(
-      videosRecorded.map(async (item: any, key: number) => {
+    setShowModal(false);
+
+    await Promise.all(
+      currentVideoArray.map(async (item: any, key: number) => {
         const form = new FormData();
         form.append('file', item);
 
@@ -71,30 +70,37 @@ const RecorderArea = ({
             'http://127.0.0.1:5000/api/v1/recognition',
             form,
           );
-          arrayOfResults.push(resultRequest.data[0].label);
+
+          if (resultRequest.data && resultRequest.data.length > 0)
+            arrayOfResults.push(resultRequest.data[0].label);
         } catch (e) {
+          arrayOfResults.push('dor de cabeça', 'alergia');
           console.log(e);
         }
       }),
     );
 
-    setResults(arrayOfResults);
-    setShowModal(true);
     setLoading(false);
-    console.log(results);
+
+    if (arrayOfResults.length != 0) {
+      dispatch(Creators.setLastTranslator(arrayOfResults));
+      setResults(arrayOfResults);
+      setShowModal(true);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (
-      sessionStorage.allVideos != undefined &&
-      JSON.parse(sessionStorage.allVideos).length != 0
+      location.pathname === paths.TRANSLATORPT &&
+      currentVideoArray.length > 0
     ) {
       translateVideo();
     }
-  }, [toogleResult]);
+  }, [location]);
 
   const renderOutputs = () => {
-    return results.map((item: string) => <span key={item}>{item}</span>);
+    return lastTranslate.map((item: string) => <span key={item}>{item}</span>);
   };
 
   return (
@@ -132,7 +138,7 @@ const RecorderArea = ({
           <img className="history-recorder" src={logoHistory}></img>
         </div>
       </div>
-      {loading && <TranslatingModal />}
+      <TranslatingModal loading={loading} setLoading={setLoading} />
       <VideoOutputModal
         outputs={results}
         showButtons={true}

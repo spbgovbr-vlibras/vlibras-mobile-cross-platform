@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { IonModal, IonPage } from '@ionic/react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import paths from '../../constants/paths';
 
 import Presentation from './Steps/Presentation';
@@ -18,6 +18,11 @@ const OnBoarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [chooseRender, setChooseRender] = useState(<></>);
   const history = useHistory();
+  const location = useLocation();
+
+  useEffect(() => {
+    setShowModal(true);
+  }, [location]);
 
   useEffect(() => {
     switch (currentStep) {
@@ -76,6 +81,7 @@ const OnBoarding = () => {
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
+      {showModal.toString()}
       {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
     </MenuLayout>
   );

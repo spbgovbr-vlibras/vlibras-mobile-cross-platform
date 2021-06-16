@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { IconCloseCircle } from 'assets';
 import { useHistory } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+
 import {
   logoCaptureV2,
   logoTranslateVideo,
@@ -37,22 +41,28 @@ import { Strings } from './strings';
 import './styles.css';
 
 const SignalCapture = () => {
-  const history = useHistory();
-  const [videosRecorded, setVideosRecorded] = React.useState<any>(
-    JSON.parse(localStorage.firstVideo),
+  const dispatch = useDispatch();
+  const currentVideoArray = useSelector(
+    ({ video }: RootState) => video.current,
   );
 
+  const history = useHistory();
+
   const takeVideo = async () => {
-    if (videosRecorded.length < 5) {
+    if (currentVideoArray.length < 5) {
       try {
-        const options = { limit: 1, duration: 30 };
-        const mediafile = await VideoCapturePlus.captureVideo(options);
-        setVideosRecorded([...videosRecorded, ...mediafile]);
-        localStorage.setItem(
-          'allVideos',
-          JSON.stringify([...videosRecorded, ...mediafile]),
+        // const options = { limit: 1, duration: 30 };
+        // const mediafile = await VideoCapturePlus.captureVideo(options);
+        // dispatch(
+        //   Creators.setCurrentArrayVideo([...currentVideoArray, ...mediafile]),
+        // );
+
+        dispatch(
+          Creators.setCurrentArrayVideo([
+            ...currentVideoArray,
+            { label: 'opa2', size: '456' },
+          ]),
         );
-        // history.push(paths.SIGNALCAPTURE);
       } catch (error) {
         console.log(error);
       }
@@ -60,15 +70,15 @@ const SignalCapture = () => {
   };
 
   const removeRecord = (index: any) => {
-    const filteredArray = videosRecorded.filter(
+    const filteredArray = currentVideoArray.filter(
       (value: {}, i: any) => i !== index,
     );
 
-    setVideosRecorded(filteredArray);
+    dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
 
   const renderRecordedItens = () => {
-    return videosRecorded.map((item: any, key: number) => (
+    return currentVideoArray.map((item: any, key: number) => (
       <IonItem className="item-recorder" key={key}>
         <div className="video-thumb"> </div>
         <div className="video-metadata">
@@ -83,7 +93,6 @@ const SignalCapture = () => {
   };
 
   const translateVideo = async () => {
-    sessionStorage.setItem('allVideos', videosRecorded);
     history.push(paths.TRANSLATORPT);
   };
 
@@ -103,7 +112,7 @@ const SignalCapture = () => {
       </IonHeader>
       <IonContent>
         <div className="list-captures">
-          <p className="progress-recorder"> {videosRecorded.length} de 5 </p>
+          <p className="progress-recorder"> {currentVideoArray.length} de 5 </p>
           <div className="list-recorded-itens">{renderRecordedItens()}</div>
         </div>
         <div className="new-recorder-area">
@@ -111,7 +120,9 @@ const SignalCapture = () => {
             <img
               className="button-recorder"
               src={
-                videosRecorded.length < 5 ? logoCaptureV2 : logoCaptureDisable
+                currentVideoArray.length < 5
+                  ? logoCaptureV2
+                  : logoCaptureDisable
               }
               onClick={takeVideo}
             ></img>
