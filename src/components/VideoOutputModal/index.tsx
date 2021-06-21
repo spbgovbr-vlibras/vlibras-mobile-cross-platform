@@ -16,6 +16,7 @@ interface VideoOutputModalProps {
   showButtons: boolean;
   showModal: boolean;
   setShowModal: any;
+  playerIntermedium: boolean;
 }
 
 const unityContent = new UnityContent(
@@ -31,8 +32,9 @@ const VideoOutputModal = ({
   showButtons,
   setShowModal,
   showModal,
+  playerIntermedium,
 }: VideoOutputModalProps) => {
-  const [openPlayer, setOpenPlayer] = useState(false);
+  const [openPlayer, setOpenPlayer] = useState(playerIntermedium);
   const dispatch = useDispatch();
 
   const closeModal = () => {
@@ -61,11 +63,24 @@ const VideoOutputModal = ({
     unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
   };
 
+  useEffect(() => {
+    if (showModal) {
+      unityContent.send(PLAYER_MANAGER, 'initRandomAnimationsProcess');
+      unityContent.send(PLAYER_MANAGER, 'setURL', '');
+      unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
+      unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
+    }
+  }, [outputs, showModal]);
+
   return (
     <>
       <IonModal
         isOpen={showModal}
-        cssClass={'videooutput-modal' + (openPlayer ? ' player' : '')}
+        cssClass={
+          'videooutput-modal' +
+          (openPlayer ? ' player' : '') +
+          (!showButtons ? ' buttons-off' : '')
+        }
         swipeToClose={true}
         onDidDismiss={closeModal}
       >

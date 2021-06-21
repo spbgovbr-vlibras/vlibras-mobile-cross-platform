@@ -81,7 +81,6 @@ const OnBoarding = () => {
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
-      {showModal.toString()}
       {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
     </MenuLayout>
   );

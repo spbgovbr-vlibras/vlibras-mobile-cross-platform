@@ -153,23 +153,33 @@
   color: #747474;
 }
 
-.historic-container-ion-chips-box-text-1 {
+.historic-container-ion-chips-box-text {
   font-family: Rawline;
   background: #ededed;
   margin-top: 8px;
   margin-bottom: 8px;
 }
 
-.historic-container-ion-chips-box-text-2 {
-  font-family: Rawline;
-  background: #ededed;
-  margin-top: 8px;
-  margin-bottom: 8px;
+.historic-container .container-outputs {
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  border-radius: 4px;
+  padding: 10px 8px;
+  overflow: hidden;
+  overflow-x: auto;
+  white-space: nowrap;
+  margin: 5px 15px;
 }
 
-.historic-container-ion-chips-box-text-3 {
+.historic-container .container-outputs span {
   font-family: Rawline;
   background: #ededed;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  color: #565656;
+  font-size: 14px;
+  line-height: 17.5px;
+  border-radius: 48px;
+  padding: 6px 12px;
+  margin-left: 3px;
+  cursor: pointer;
+  display: inline-block;
 }

@@ -10,7 +10,8 @@ import {
   IonLabel,
 } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
-
+import { useSelector } from 'react-redux';
+import { RootState } from 'store';
 import {
   LogoVlibrasIcaro,
   IconTranslate,
@@ -18,6 +19,7 @@ import {
   IconRegionalism,
   IconIcaro,
   IconTutorial,
+  IconDomain,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
@@ -46,6 +48,12 @@ function getColor(value: string, expected: string): string {
 function DrawerMenu({ contentId }: DrawerMenuProps) {
   const location = useLocation();
 
+  const isVideoScreen = useSelector(
+    ({ video }: RootState) => video.isVideoScreen,
+  );
+
+  const domain = useSelector(({ video }: RootState) => video.domain);
+
   const renderItemTab = (
     tab: string,
     title: string,
@@ -63,6 +71,13 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
       <span className="drawer-menu-item-label">{title}</span>
+
+      {title === Strings.TITLE_MENU_DOMAIN && (
+        <>
+          <p className="drawer-menu-sub-item"> {domain} </p>
+          <div className="arrow-down"> </div>
+        </>
+      )}
     </IonItem>
   );
 
@@ -98,12 +113,19 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
               {Strings.HEADER_TITLE_DEFINITIONS}
             </IonLabel>
           </IonListHeader>
-          {renderItemTab(
-            paths.REGIONALISM,
-            Strings.TITLE_MENU_REGIONALISM,
-            IconRegionalism,
-            true,
-          )}
+          {isVideoScreen
+            ? renderItemTab(
+                paths.DOMAIN,
+                Strings.TITLE_MENU_DOMAIN,
+                IconDomain,
+                true,
+              )
+            : renderItemTab(
+                paths.REGIONALISM,
+                Strings.TITLE_MENU_REGIONALISM,
+                IconRegionalism,
+                true,
+              )}
         </IonList>
         <IonList lines="none">
           {renderItemTab(

@@ -24,7 +24,6 @@
   margin: 16px 8px 8px 8px;
 }
 
-
 .drawer-menu-item {
   font-family: Rawline;
   font-style: normal;
@@ -39,8 +38,8 @@
 }
 
 .drawer-menu-item-activated {
-  --background: #D6E5F9;
-  --color: #1447A6;
+  --background: #d6e5f9;
+  --color: #1447a6;
 }
 
 .drawer-menu-item-label {
@@ -54,4 +53,18 @@
   justify-content: space-between;
   width: 100%;
   padding-bottom: 32px;
+}
+
+.drawer-menu-sub-item {
+  text-align: right;
+  flex: auto;
+  color: #1447a6;
+  margin-right: 7px;
+}
+
+.arrow-down {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #4b4b4b;
+  margin-top: 2px;
 }

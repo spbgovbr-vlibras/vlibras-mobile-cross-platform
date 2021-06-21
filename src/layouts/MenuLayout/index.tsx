@@ -10,6 +10,9 @@ import {
   IonMenuButton,
 } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+import { useDispatch } from 'react-redux';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
@@ -23,9 +26,15 @@ interface MenuLayoutProps {
 const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const location = useLocation();
   const history = useHistory();
+  const dispatch = useDispatch();
 
   function openMenu() {
     menuController.open();
+  }
+
+  function switchBetweenTranslators(path: string, videoScreen: boolean) {
+    dispatch(Creators.setIsVideoScreen(videoScreen));
+    history.push(path);
   }
 
   const ToolbarAction = useMemo(() => {
@@ -35,20 +44,20 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           <>
             <span
               className="menu-item-text"
-              onClick={() => history.push(paths.ONBOARDING)}
+              onClick={() => switchBetweenTranslators(paths.ONBOARDING, true)}
             >
               PT-BR
             </span>
             <IconTranslate color="#2365DE" />
           </>
         );
-      case paths.TRANSLATORPT:
+      case paths.RECORDERAREA:
       case paths.ONBOARDING:
         return (
           <>
             <span
               className="menu-item-text"
-              onClick={() => history.push(paths.HOME)}
+              onClick={() => switchBetweenTranslators(paths.HOME, false)}
             >
               LIBRAS
             </span>

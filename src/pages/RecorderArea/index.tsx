@@ -12,6 +12,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
+import { IonContent } from '@ionic/react';
+import { MenuLayout } from '../../layouts';
+import { Strings } from './strings';
+
 import {
   VideoCapturePlus,
   VideoCapturePlusOptions,
@@ -35,7 +39,7 @@ const RecorderArea = () => {
     ({ video }: RootState) => video.current,
   );
 
-  const lastTranslate = useSelector(
+  const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
 
@@ -92,7 +96,7 @@ const RecorderArea = () => {
 
   useEffect(() => {
     if (
-      location.pathname === paths.TRANSLATORPT &&
+      location.pathname === paths.RECORDERAREA &&
       currentVideoArray.length > 0
     ) {
       translateVideo();
@@ -100,52 +104,69 @@ const RecorderArea = () => {
   }, [location]);
 
   const renderOutputs = () => {
-    return lastTranslate.map((item: string) => <span key={item}>{item}</span>);
+    return lastTranslation.map((item: string) => (
+      <span key={item}>{item}</span>
+    ));
   };
 
   return (
-    <>
-      <div
-        className="main-area-recorder"
-        onClick={() => setToogleResult(!toogleResult)}
-      >
-        {results.length != 0 && (
-          <>
-            <div className="title-area">
-              <img className="logo-icon" src={logoMaos} />
-              <p className="title"> Ultima tradução </p>
-            </div>
-            <div className="list-outputs">
-              <div className="container-outputs">{renderOutputs()}</div>
-            </div>
-          </>
-        )}
+    <MenuLayout title={Strings.TOOLBAR_TITLE}>
+      <IonContent>
+        <div
+          className="main-area-recorder"
+          onClick={() => setToogleResult(!toogleResult)}
+        >
+          {results.length != 0 && (
+            <>
+              <div className="title-area">
+                <img className="logo-icon" src={logoMaos} />
+                <p className="title"> Ultima tradução </p>
+              </div>
+              <div
+                className="list-outputs"
+                onClick={() => history.push(paths.HISTORY)}
+              >
+                <div className="container-outputs">{renderOutputs()}</div>
+              </div>
+            </>
+          )}
 
-        <img src={logoTranslate} className="bg-img"></img>
-      </div>
-      <div className="fixed-area-recorder">
-        <p className="title-recorder">Use a câmera para gravar novos sinais</p>
-        <div className="recorder-area">
-          <div className="area-button-recorder">
-            <img
-              className="button-recorder"
-              src={logoCapture}
-              onClick={takeVideo}
-              // onClick={() => history.push(paths.SIGNALCAPTURE)}
-            ></img>
-            <p> Câmera </p>
-          </div>
-          <img className="history-recorder" src={logoHistory}></img>
+          <img
+            src={logoTranslate}
+            className={results.length != 0 ? 'bg-img bg-opacity' : 'bg-img'}
+          ></img>
         </div>
-      </div>
-      <TranslatingModal loading={loading} setLoading={setLoading} />
-      <VideoOutputModal
-        outputs={results}
-        showButtons={true}
-        showModal={showModal}
-        setShowModal={setShowModal}
-      />
-    </>
+        <div className="fixed-area-recorder">
+          <p className="title-recorder">
+            Use a câmera para gravar novos sinais
+          </p>
+          <div className="recorder-area">
+            <div className="area-button-recorder">
+              <img
+                className="button-recorder"
+                src={logoCapture}
+                onClick={takeVideo}
+                // onClick={() => history.push(paths.SIGNALCAPTURE)}
+              ></img>
+              <p> Câmera </p>
+            </div>
+            <img
+              className="history-recorder"
+              src={logoHistory}
+              onClick={() => history.push(paths.HISTORY)}
+            ></img>
+          </div>
+        </div>
+        <TranslatingModal loading={loading} setLoading={setLoading} />
+        <VideoOutputModal
+          outputs={results}
+          showButtons={true}
+          showModal={showModal}
+          setShowModal={setShowModal}
+          playerIntermedium={false}
+        />
+      </IonContent>
+    </MenuLayout>
   );
 };
 

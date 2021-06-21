@@ -11,6 +11,7 @@ import IconMic from './icons/MicIcon';
 import IconHistory from './icons/IconHistory';
 import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
+import IconDomain from './icons/IconDomain';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -152,5 +153,6 @@ export {
   logoTranslateVideo,
   logoTrashBtn,
   logoCaptureDisable,
-  gifTranslating
+  gifTranslating,
+  IconDomain
 };

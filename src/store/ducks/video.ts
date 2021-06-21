@@ -6,23 +6,32 @@ import { createAction, ActionType } from 'typesafe-actions';
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
   SET_LAST_TRANSLATOR: '@video/SET_LAST_TRANSLATOR',
-
+  SET_DOMAIN: '@video/SET_DOMAIN',
+  SET_IS_VIDEO_SCREEN: '@video/SET_IS_VIDEO_SCREEN',
+  SET_TRANSLATION_HISTORIC: '@video/SET_TRANSLATION_HISTORIC',
 };
 
 export interface VideoState {
   current: any;
   lastTranslate: any;
+  translationsHistoric: any;
+  domain: string;
+  isVideoScreen: boolean;
 }
 
 const INITIAL_STATE: VideoState = {
   current: [],
-  lastTranslate: []
+  lastTranslate: [],
+  domain: 'Saúde',
+  isVideoScreen: false,
+  translationsHistoric: []
 };
 
 export const Creators = {
   setCurrentArrayVideo: createAction(Types.SET_ARRAY_VIDEOS)<any>(),
   setLastTranslator: createAction(Types.SET_LAST_TRANSLATOR)<any>(),
-
+  setDomain: createAction(Types.SET_DOMAIN)<any>(),
+  setIsVideoScreen: createAction(Types.SET_IS_VIDEO_SCREEN)<any>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -39,8 +48,14 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         break;
       case Types.SET_LAST_TRANSLATOR:
         draft.lastTranslate = payload;
+        draft.translationsHistoric = [...draft.translationsHistoric, payload]
         break;
-
+      case Types.SET_DOMAIN:
+        draft.domain = payload;
+        break;
+      case Types.SET_IS_VIDEO_SCREEN:
+        draft.isVideoScreen = payload;
+        break;
       default:
         break;
     }

@@ -93,7 +93,7 @@ const SignalCapture = () => {
   };
 
   const translateVideo = async () => {
-    history.push(paths.TRANSLATORPT);
+    history.push(paths.RECORDERAREA);
   };
 
   return (
