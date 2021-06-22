@@ -1,4 +1,4 @@
-import React, { useCallback, useDebugValue, useState } from 'react';
+import React, { useCallback, useDebugValue, useEffect, useState } from 'react';
 
 import {
   IonButton,
@@ -18,30 +18,21 @@ import { debounce, DictionaryIteratee } from 'lodash';
 
 import MicIcon from '../../assets/icons/MicIcon';
 import { MenuLayout } from '../../layouts';
+import api from '../../services/api';
 import { Strings } from './strings';
 
 import './styles.css';
 
-interface DictionaryWord {
-  word: string;
-  /* Category: STRING */
-}
-
-const words: Array<DictionaryWord> = [
-  { word: 'ACONSELHAR' },
-  { word: 'ACAUTELAR' },
-  { word: 'AFILIAR' },
-];
-
 function Dictionary() {
-  const renderWord = (item: DictionaryWord) => (
+  const renderWord = (item: string) => (
     <IonItem class="dictionary-word-item">
-      <IonText class="dictionary-words-style">{item.word}</IonText>
+      <IonText class="dictionary-words-style">{item}</IonText>
     </IonItem>
   );
 
   const TIME_DEBOUNCE_MS = 0;
-  const [dictionary, setDictionary] = useState(words);
+  const [dictionary, setDictionary] = useState<string[]>([]);
+  const [words, setWords] = useState<string[]>([]);
   const [isMicVisible, setIsMicVisible] = useState(true);
   const [searchText, setSearchText] = useState('');
   const hideMic = document.getElementsByClassName(
@@ -49,7 +40,7 @@ function Dictionary() {
   ) as HTMLCollectionOf<HTMLElement>;
 
   const onSearch = useCallback(value => {
-    const input = words.filter(item => item.word.includes(value.toUpperCase()));
+    const input = words.filter(item => item.includes(value.toUpperCase()));
     setDictionary(input);
   }, []);
 
@@ -69,6 +60,18 @@ function Dictionary() {
     },
     [debouncedSearch],
   );
+
+  useEffect(() => {
+    api
+      .get('/api/signs')
+      .then(response => {
+        setDictionary(response.data);
+        setWords(response.data);
+      })
+      .catch(err => {
+        console.error(`Segue o retorno:${err}`);
+      });
+  }, []);
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
