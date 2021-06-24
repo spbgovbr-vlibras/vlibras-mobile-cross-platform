@@ -16,7 +16,6 @@ import {
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { debounce, DictionaryIteratee } from 'lodash';
 
-import MicIcon from '../../assets/icons/MicIcon';
 import { MenuLayout } from '../../layouts';
 import api from '../../services/api';
 import { Strings } from './strings';
@@ -78,21 +77,15 @@ function Dictionary() {
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
-            <div className="dictionary-searchbar">
-              <IonSearchbar
-                className="dictionary-textarea"
-                placeholder={Strings.TEXT_PLACEHOLDER}
-                value={searchText}
-                onIonChange={onInputChange}
-                inputmode="text"
-                searchIcon="none"
-              />
-              {isMicVisible && (
-                <button type="button" className="dictionary-mic-button ">
-                  <MicIcon color="#B9B9B9" />
-                </button>
-              )}
-            </div>
+            <IonSearchbar
+              className="dictionary-textarea"
+              placeholder={Strings.TEXT_PLACEHOLDER}
+              value={searchText}
+              onIonChange={onInputChange}
+              inputmode="text"
+              searchIcon="none"
+            />
+            {isMicVisible}
           </div>
           <div className="dictionary-container-ion-chips">
             <IonChip class="dictionary-container-ion-chips-suggestions-1">

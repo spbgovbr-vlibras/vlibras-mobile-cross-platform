@@ -14,6 +14,7 @@
   padding: 16px;
   padding-top: 0px;
   padding-bottom: 0px;
+
 }
 
 .dictionary-input-box {
@@ -24,16 +25,18 @@
   border: 1px solid #1447a6;
 }
 .dictionary-textarea {
-  border: 1px solid #B9B9B9;
+  /*border: 1px solid #B9B9B9;*/
   box-sizing: border-box;
   border-radius: 4px;
   font-family: Rawline;
   z-index: 0;
   color: #000;
+  
   --placeholder-color: #B9B9B9;
 
   margin-top: 8px;
   /*height: 100%;*/
+
   /*SearchBar*/
   height: 44px;
   width: 100%;
@@ -49,6 +52,12 @@
 
   /*SearchBar Icon*/
   background-image: none!important;
+}
+.sc-ion-searchbar-md-h{
+  border: 1px solid #B9B9B9;
+  box-sizing: border-box;
+  border-radius: 4px;
+  --box-shadow: none;
 }
 .searchbar-input {
   padding-left: 9px !important;
