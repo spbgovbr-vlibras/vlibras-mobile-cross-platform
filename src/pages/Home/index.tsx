@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { IonContent } from '@ionic/react';
+import { Player } from 'components';
+import { MenuLayout } from 'layouts';
 
-import { ExploreContainer } from '../../components';
-import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -11,9 +10,7 @@ import './styles.css';
 function Home() {
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
-      <IonContent fullscreen>
-        <ExploreContainer name={Strings.CONTENT_TITLE} />
-      </IonContent>
+      <Player />
     </MenuLayout>
   );
 }

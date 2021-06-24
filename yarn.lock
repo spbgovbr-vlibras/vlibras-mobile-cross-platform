@@ -1164,6 +1164,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@capacitor/android@^2.4.7":
+  version "2.4.7"
+  resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-2.4.7.tgz#c7edc5322dbd1db79c61b1f4e579b7b81024ce5d"
+  integrity sha512-7jcmwheo94dJEOX1z4r3SlZrL+MvESav1xsUwC5ydLFZCpuvBKJ0szbDNWzCAglgpXmW9hC0WdwYBErgDrDPRg==
+
 "@capacitor/cli@2.4.7":
   version "2.4.7"
   resolved "https://registry.yarnpkg.com/@capacitor/cli/-/cli-2.4.7.tgz#690089689b25cb22a25eb930b1dd04af757f2f95"
@@ -1821,10 +1826,18 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@*", "@types/jest@^26.0.20":
+"@types/jest@*":
   version "26.0.22"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.22.tgz#8308a1debdf1b807aa47be2838acdcd91e88fbe6"
   integrity sha512-eeWwWjlqxvBxc4oQdkueW5OF/gtfSceKk4OnOAGlUSwS/liBRtZppbJuz1YkgbrbfGOoeBHun9fOvXnjNwrSOw==
+  dependencies:
+    jest-diff "^26.0.0"
+    pretty-format "^26.0.0"
+
+"@types/jest@^26.0.23":
+  version "26.0.23"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.23.tgz#a1b7eab3c503b80451d019efb588ec63522ee4e7"
+  integrity sha512-ZHLmWMJ9jJ9PTiT58juykZpL7KjwJywFN3Rr2pTSkyQfydf/rk22yS7W8p5DaVUMQ2BQC7oYiU3FjbTM/mYrOA==
   dependencies:
     jest-diff "^26.0.0"
     pretty-format "^26.0.0"

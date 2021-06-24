@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
-  IonButton,
   IonButtons,
   IonHeader,
-  IonIcon,
   IonTitle,
   IonToolbar,
   IonPage,
+  IonMenuButton,
+  IonLabel,
 } from '@ionic/react';
-import { menu } from 'ionicons/icons';
+import { useLocation } from 'react-router-dom';
+
+import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
+import paths from 'constants/paths';
+
+import { Strings } from './strings';
 
 import './styles.css';
 
@@ -19,9 +24,32 @@ interface MenuLayoutProps {
 }
 
 const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
+  const location = useLocation();
+
   function openMenu() {
     menuController.open();
   }
+
+  const ToolbarAction = useMemo(() => {
+    switch (location.pathname) {
+      case paths.HOME:
+        return (
+          <>
+            <IonLabel className="menu-item-text">{Strings.MENU_PT_BR}</IonLabel>
+            <IconTranslate color="#2365DE" />
+          </>
+        );
+      case paths.HISTORY:
+      case paths.DICTIONARY:
+        return <IconCloseCircle color="#2365DE" />;
+
+      case paths.ABOUT:
+        return <IconShare color="#4B4B4B" />;
+
+      default:
+        return null;
+    }
+  }, [location]);
 
   return (
     <IonPage>
@@ -29,9 +57,14 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">{title}</IonTitle>
           <IonButtons slot="start">
-            <IonButton onClick={openMenu}>
-              <IonIcon icon={menu} className="menu-icon-drawer" />
-            </IonButton>
+            <IonMenuButton
+              autoHide
+              onClick={openMenu}
+              className="menu-icon-drawer"
+            />
+          </IonButtons>
+          <IonButtons slot="end">
+            <div className="menu-container-end">{ToolbarAction}</div>
           </IonButtons>
         </IonToolbar>
       </IonHeader>

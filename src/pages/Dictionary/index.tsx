@@ -1,11 +1,8 @@
 import React, { useCallback, useDebugValue, useEffect, useState } from 'react';
 
 import {
-  IonButton,
   IonChip,
   IonContent,
-  IonIcon,
-  IonImg,
   IonItem,
   IonList,
   IonListHeader,

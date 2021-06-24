@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { menuController } from '@ionic/core';
 import {
   IonMenu,
   IonHeader,
@@ -10,6 +9,7 @@ import {
   IonListHeader,
   IonLabel,
 } from '@ionic/react';
+import { useLocation } from 'react-router-dom';
 
 import {
   LogoVlibrasIcaro,
@@ -43,12 +43,7 @@ function getColor(value: string, expected: string): string {
 }
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
-  const [currentTab, setCurrentTab] = useState(paths.HOME);
-
-  function navigate(route: string) {
-    setCurrentTab(route);
-    menuController.close();
-  }
+  const location = useLocation();
 
   const renderItemTab = (
     tab: string,
@@ -57,13 +52,14 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     selectable: boolean,
   ) => (
     <IonItem
-      className={selectable ? getClassName(tab, currentTab) : DEFAULT_COLOR}
-      button
+      className={
+        selectable ? getClassName(tab, location.pathname) : DEFAULT_COLOR
+      }
       detail={false}
-      onClick={() => navigate(tab)}
+      routerLink={tab}
     >
       <IconComponent
-        color={selectable ? getColor(tab, currentTab) : DEFAULT_COLOR}
+        color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
       <span className="drawer-menu-item-label">{title}</span>
     </IonItem>
