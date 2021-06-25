@@ -1,58 +1,93 @@
-import React from 'react';
+import React, { useCallback, useDebugValue, useEffect, useState } from 'react';
 
+// eslint-disable-next-line import/order
 import {
+  IonButton,
   IonChip,
   IonContent,
+  IonIcon,
+  IonImg,
   IonItem,
   IonList,
+  IonListHeader,
+  IonSearchbar,
   IonText,
   IonTextarea,
 } from '@ionic/react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 
-import { IconMic } from 'assets';
-import { MenuLayout } from 'layouts';
+import { debounce } from 'lodash';
 
+import { MenuLayout } from '../../layouts';
+import api from '../../services/api';
 import { Strings } from './strings';
 
 import './styles.css';
 
-interface DictionaryWord {
-  word: string;
-  /* Category: STRING */
-}
-
-const words: Array<DictionaryWord> = [
-  { word: 'ACONSELHAR' },
-  { word: 'ACAUTELAR' },
-  { word: 'AFILIAR' },
-];
-
 function Dictionary() {
-  const renderWord = (item: DictionaryWord) => (
+  const renderWord = (item: string) => (
     <IonItem class="dictionary-word-item">
-      <IonText class="dictionary-words-style">{item.word}</IonText>
+      <IonText class="dictionary-words-style">{item}</IonText>
     </IonItem>
   );
+
+  const TIME_DEBOUNCE_MS = 0;
+  const [dictionary, setDictionary] = useState<string[]>([]);
+  const [words, setWords] = useState<string[]>([]);
+  const [isMicVisible, setIsMicVisible] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const hideMic = document.getElementsByClassName(
+    'dictionary-mic-button',
+  ) as HTMLCollectionOf<HTMLElement>;
+
+  const onSearch = useCallback(value => {
+    const input = words.filter(item => item.includes(value.toUpperCase()));
+    setDictionary(input);
+  }, []);
+
+  const debouncedSearch = useCallback(debounce(onSearch, TIME_DEBOUNCE_MS), [
+    onSearch,
+  ]);
+
+  const onInputChange = useCallback(
+    evt => {
+      setSearchText(evt.target.value);
+      if (!evt.target.value) {
+        setIsMicVisible(true);
+      } else {
+        setIsMicVisible(false);
+        onSearch(evt.target.value);
+      }
+    },
+    [debouncedSearch],
+  );
+
+  useEffect(() => {
+    api
+      .get('/api/signs')
+      .then(response => {
+        setDictionary(response.data);
+        setWords(response.data);
+      })
+      .catch(err => {
+        console.error(`Segue o retorno:${err}`);
+      });
+  }, []);
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
-            <div className="dictionary-input-box">
-              <IonTextarea
-                className="dictionary-textarea"
-                placeholder={Strings.TEXT_PLACEHOLDER}
-                autofocus
-                rows={1}
-                wrap="soft"
-                required
-                onIonChange={e => e.detail.value!}
-              />
-              <button type="button" className="dictionary-mic-button ">
-                <IconMic color="#B9B9B9" />
-              </button>
-            </div>
+            <IonSearchbar
+              className="dictionary-textarea"
+              placeholder={Strings.TEXT_PLACEHOLDER}
+              value={searchText}
+              onIonChange={onInputChange}
+              inputmode="text"
+              searchIcon="none"
+            />
+            {isMicVisible}
           </div>
           <div className="dictionary-container-ion-chips">
             <IonChip class="dictionary-container-ion-chips-suggestions-1">
@@ -73,7 +108,7 @@ function Dictionary() {
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" class="dictionary-words-list">
-              {words.map(item => renderWord(item))}
+              {dictionary.map(item => renderWord(item))}
             </IonList>
           </div>
         </div>
