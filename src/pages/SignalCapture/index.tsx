@@ -27,6 +27,7 @@ import {
   IonMenuButton,
   IonPage,
   IonContent,
+  IonAlert,
 } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
 import paths from '../../constants/paths';
@@ -39,12 +40,21 @@ import {
 
 import { Strings } from './strings';
 import './styles.css';
+import { key } from 'ionicons/icons';
+import Translator from 'pages/Translator';
+import Regionalism from 'pages/Regionalism';
+import TranslatorPT from 'pages/TranslatorPT';
 
 const SignalCapture = () => {
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [showAlertpage, setShowAlertPage] = useState(false);
+
+  const [toDelete, setToDelete ] = useState([]);
 
   const history = useHistory();
 
@@ -68,14 +78,33 @@ const SignalCapture = () => {
       }
     }
   };
+function popupCancel(){
+
+  setShowAlertPage(true)
+
+} 
+const popupRemove = (index: any) => {
+
+setShowAlert(true)
+setToDelete(index)
+
+
+}
 
   const removeRecord = (index: any) => {
     const filteredArray = currentVideoArray.filter(
       (value: {}, i: any) => i !== index,
+      
     );
+console.log('Passei aqui');
+
+  console.log('Aqui tbm');
 
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
+    
   };
+
+
 
   const renderRecordedItens = () => {
     return currentVideoArray.map((item: any, key: number) => (
@@ -86,9 +115,14 @@ const SignalCapture = () => {
           <p className="size"> {item.size} kb </p>
         </div>
         <div className="video-icon-delete">
-          <img src={logoTrashBtn} onClick={() => removeRecord(key)} />
+      
+          <img src={logoTrashBtn} onClick={() => popupRemove(key)} />
+
         </div>
+        
       </IonItem>
+
+      
     ));
   };
 
@@ -103,7 +137,7 @@ const SignalCapture = () => {
           <IonTitle className="menu-toolbar-title-signalcap">
             {Strings.TITLE_MENU}
           </IonTitle>
-          <IonButtons slot="end">
+          <IonButtons slot="end" onClick={ popupCancel} >
             <div className="menu-container-end">
               <IconCloseCircle color="#969696" />
             </div>
@@ -117,6 +151,9 @@ const SignalCapture = () => {
         </div>
         <div className="new-recorder-area">
           <div className="area-button-recorder">
+            <div>
+              <span className="tooltiptext">Grave novos sinais</span>
+            </div>
             <img
               className="button-recorder"
               src={
@@ -137,6 +174,65 @@ const SignalCapture = () => {
             <p> Traduzir </p>
           </div>
         </div>
+        <IonAlert
+  isOpen={showAlert}
+  cssClass='popup-box' 
+  header={Strings.TITLE_POPUPCANCEL}
+  message={Strings.MESSAGE_POPUPCANCEL}
+  buttons={[
+    {
+      text: Strings.BUTTON_NAME_YES,
+      cssClass: 'popup-yes',
+      handler: () => {
+        removeRecord(toDelete);
+        console.log('Confirm Yes');
+        setShowAlert(false);
+      }
+    },
+    {
+      text: Strings.BUTTON_NAME_NO,
+      cssClass: 'popup-no',
+      role: 'cancel',
+      handler: () => {
+        setShowAlert(false);
+        console.log('Confirm No');
+      }
+    }
+  ]}
+  /> 
+          <IonAlert
+  isOpen={showAlertpage}
+  cssClass='popup-box-cancel' 
+  header={Strings.TITLE_POPUP_REMOVE}
+  message={Strings.MESSAGE_POPUP_REMOVE}
+  buttons={[
+    {
+      text: Strings.BUTTON_NAME_YES,
+      cssClass: 'popup-yes',
+      handler: () => {
+        console.log('Confirm Yes');
+        setShowAlertPage(false);
+        history.push(paths.TRANSLATORPT);
+        dispatch(
+          Creators.setCurrentArrayVideo([
+            
+          ]),
+        );
+
+      }
+    },
+    {
+      text: Strings.BUTTON_NAME_NO,
+      cssClass: 'popup-no',
+      role: 'cancel',
+      handler: () => {
+        console.log('Confirm No');
+        setShowAlertPage(false);
+
+      }
+    }
+  ]}
+  /> 
       </IonContent>
     </IonPage>
   );
