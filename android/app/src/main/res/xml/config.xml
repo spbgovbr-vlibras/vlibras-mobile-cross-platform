@@ -11,5 +11,9 @@
     <param name="android-package" value="nl.xservices.plugins.videocaptureplus.VideoCapturePlus"/>
   </feature>
 
+  <feature name="VideoEditor">
+    <param name="android-package" value="org.apache.cordova.videoeditor.VideoEditor"/>
+  </feature>
+
   
 </widget>

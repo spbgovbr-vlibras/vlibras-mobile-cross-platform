@@ -11,10 +11,16 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
+import { File, DirectoryEntry } from '@ionic-native/file';
+import { CameraResultType, Capacitor } from '@capacitor/core';
 
 import { IonContent } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
+import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
 
 import {
   VideoCapturePlus,
@@ -33,6 +39,7 @@ const RecorderArea = () => {
   const [loading, setLoading] = React.useState<any>(false);
   const [toogleResult, setToogleResult] = React.useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [log, setLog] = useState('alo');
 
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
@@ -47,12 +54,84 @@ const RecorderArea = () => {
     history.push(paths.SIGNALCAPTURE);
 
     try {
-      // const options = { limit: 1, duration: 30 };
-      // const mediafile = await VideoCapturePlus.captureVideo(options);
-      // dispatch(Creators.setCurrentArrayVideo(mediafile));
-      dispatch(Creators.setCurrentArrayVideo([{ name: 'opa', size: '123' }]));
+      const options = { limit: 1, duration: 30 };
+      let mediafile = await VideoCapturePlus.captureVideo(options);
 
-      history.push(paths.SIGNALCAPTURE);
+      let media = mediafile[0] as MediaFile;
+      let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
+      let resolvedPath: DirectoryEntry;
+
+      // if (Capacitor.getPlatform() === 'ios') {
+      resolvedPath = await File.resolveDirectoryUrl(path);
+      // } else {
+      //   resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+      // }
+
+      File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
+        (buffer: any) => {
+          // get the buffer and make a blob to be saved
+          let imgBlob = new Blob([buffer], {
+            type: media.type,
+          });
+
+          const fname = `thumb-${currentVideoArray.length}`;
+
+          let thumbnailoption: CreateThumbnailOptions = {
+            fileUri: resolvedPath.nativeURL + media.name,
+            quality: 100,
+            atTime: 1,
+            outputFileName: fname,
+          };
+
+          VideoEditor.createThumbnail(thumbnailoption)
+            .then(async (thumbnailPath: any) => {
+              let pathThumbs = thumbnailPath.substring(
+                0,
+                thumbnailPath.lastIndexOf('/'),
+              );
+              let resolvedPathThumb: DirectoryEntry;
+              resolvedPathThumb = await File.resolveDirectoryUrl(
+                'file://' + pathThumbs,
+              );
+
+              File.readAsDataURL(
+                resolvedPathThumb.nativeURL,
+                fname + '.jpg',
+              ).then(
+                (thumbPath: any) => {
+                  VideoEditor.getVideoInfo({
+                    fileUri: resolvedPath.nativeURL + media.name,
+                  }).then(
+                    info => {
+                      dispatch(
+                        Creators.setCurrentArrayVideo([
+                          [
+                            ...mediafile,
+                            imgBlob,
+                            { thumbBlob: thumbPath },
+                            { duration: Math.trunc(info.duration) },
+                          ],
+                        ]),
+                      );
+                      history.push(paths.SIGNALCAPTURE);
+                    },
+                    err => {
+                      setLog(err);
+                    },
+                  );
+                },
+                error => setLog(error),
+              );
+            })
+            .catch((err: any) => {
+              setLog(err);
+            });
+        },
+        (error: any) => console.log(error),
+      );
+
+      // dispatch(Creators.setCurrentArrayVideo([{ name: 'opa', size: '123' }]));
+      // history.push(paths.SIGNALCAPTURE);
     } catch (error) {
       console.log(error);
     }
@@ -67,18 +146,28 @@ const RecorderArea = () => {
     await Promise.all(
       currentVideoArray.map(async (item: any, key: number) => {
         const form = new FormData();
-        form.append('file', item);
+        form.append('file', item[1]);
 
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognition',
+            // 'http://127.0.0.1:5000/api/v1/recognition',
+            'http://lavid.nsa.root.sx:3000/api/v1/recognition',
             form,
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                Accept: 'application/json',
+              },
+            },
           );
 
+          setLog(JSON.stringify(resultRequest));
           if (resultRequest.data && resultRequest.data.length > 0)
             arrayOfResults.push(resultRequest.data[0].label);
         } catch (e) {
           arrayOfResults.push('dor de cabeça', 'alergia');
+          setLog(JSON.stringify(e));
+
           console.log(e);
         }
       }),
@@ -104,9 +193,11 @@ const RecorderArea = () => {
   }, [location]);
 
   const renderOutputs = () => {
-    return lastTranslation.map((item: string) => (
-      <span key={item}>{item}</span>
-    ));
+    console.log(lastTranslation, 'render');
+    return lastTranslation.map((item: string, key: string) => {
+      console.log(item);
+      return <span key={key}>{item}</span>;
+    });
   };
 
   return (
@@ -130,7 +221,6 @@ const RecorderArea = () => {
               </div>
             </>
           )}
-
           <img
             src={logoTranslate}
             className={results.length != 0 ? 'bg-img bg-opacity' : 'bg-img'}

@@ -49,8 +49,8 @@ const VideoOutputModal = ({
   };
 
   const renderOutputs = () => {
-    return outputs.map((item: string) => (
-      <span onClick={() => playWord(item)} key={item}>
+    return outputs.map((item: string, key: string) => (
+      <span onClick={() => playWord(item)} key={key}>
         {item}
       </span>
     ));

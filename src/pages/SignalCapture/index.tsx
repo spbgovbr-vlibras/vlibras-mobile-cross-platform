@@ -30,6 +30,13 @@ import {
 } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
 import paths from '../../constants/paths';
+import { CameraResultType, Capacitor } from '@capacitor/core';
+import { File, DirectoryEntry } from '@ionic-native/file';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
 
 import {
   VideoCapturePlus,
@@ -45,26 +52,101 @@ const SignalCapture = () => {
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
+  const [log, setLog] = useState<any>('alo');
+  const [thumb, setThumb] = useState(
+    'file://storage/emulated/0/Android/data/lavid.ufpb.vlibras.mobile/files/files/videos/thumbailImage.jpg',
+  );
 
   const history = useHistory();
 
   const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
-        // const options = { limit: 1, duration: 30 };
-        // const mediafile = await VideoCapturePlus.captureVideo(options);
-        // dispatch(
-        //   Creators.setCurrentArrayVideo([...currentVideoArray, ...mediafile]),
-        // );
+        const options = { limit: 1, duration: 30 };
+        const mediafile = await VideoCapturePlus.captureVideo(options);
 
-        dispatch(
-          Creators.setCurrentArrayVideo([
-            ...currentVideoArray,
-            { label: 'opa2', size: '456' },
-          ]),
+        let media = mediafile[0] as MediaFile;
+        let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
+        let resolvedPath: DirectoryEntry;
+
+        // if (Capacitor.getPlatform() === 'ios') {
+        resolvedPath = await File.resolveDirectoryUrl(path);
+        // } else {
+        //   resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+        // }
+
+        File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
+          (buffer: any) => {
+            // get the buffer and make a blob to be saved
+            let imgBlob = new Blob([buffer], {
+              type: media.type,
+            });
+
+            const fname = `thumb-${currentVideoArray.length}`;
+
+            let thumbnailoption: CreateThumbnailOptions = {
+              fileUri: resolvedPath.nativeURL + media.name,
+              quality: 100,
+              atTime: 1,
+              outputFileName: fname,
+            };
+
+            VideoEditor.createThumbnail(thumbnailoption)
+              .then(async (thumbnailPath: any) => {
+                let pathThumbs = thumbnailPath.substring(
+                  0,
+                  thumbnailPath.lastIndexOf('/'),
+                );
+                let resolvedPathThumb: DirectoryEntry;
+                resolvedPathThumb = await File.resolveDirectoryUrl(
+                  'file://' + pathThumbs,
+                );
+
+                File.readAsDataURL(
+                  resolvedPathThumb.nativeURL,
+                  fname + '.jpg',
+                ).then(
+                  (thumbPath: any) => {
+                    VideoEditor.getVideoInfo({
+                      fileUri: resolvedPath.nativeURL + media.name,
+                    }).then(
+                      info => {
+                        dispatch(
+                          Creators.setCurrentArrayVideo([
+                            ...currentVideoArray,
+                            [
+                              ...mediafile,
+                              imgBlob,
+                              { thumbBlob: thumbPath },
+                              { duration: Math.trunc(info.duration) },
+                            ],
+                          ]),
+                        );
+                        history.push(paths.SIGNALCAPTURE);
+                      },
+                      err => {
+                        setLog(err);
+                      },
+                    );
+                  },
+                  error => setLog(error),
+                );
+              })
+              .catch((err: any) => {
+                setLog(err);
+              });
+          },
+          (error: any) => console.log(error),
         );
+
+        // dispatch(
+        //   Creators.setCurrentArrayVideo([
+        //     ...currentVideoArray,
+        //     { label: 'opa2', size: '456' },
+        //   ]),
+        // );
       } catch (error) {
-        console.log(error);
+        console.log(error + 'error geral');
       }
     }
   };
@@ -77,19 +159,63 @@ const SignalCapture = () => {
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
 
+  // const createThumbnail = (videodata: string, fname: string) => {
+  //   let thumbnailoption: CreateThumbnailOptions = {
+  //     fileUri: videodata,
+  //     quality: 100,
+  //     atTime: 1,
+  //     outputFileName: fname,
+  //   };
+
+  //   try {
+  //     VideoEditor.createThumbnail(thumbnailoption)
+  //       .then(async (thumbnailPath: any) => {
+  //         console.log('Thumbnail Responce =>', thumbnailPath);
+
+  //         let path = thumbnailPath.substring(0, thumbnailPath.lastIndexOf('/'));
+  //         let resolvedPath: DirectoryEntry;
+
+  //         resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+
+  //         File.readAsDataURL(resolvedPath.nativeURL, fname + '.jpg').then(
+  //           (path: any) => {
+  //             return path;
+  //           },
+  //           error => '',
+  //         );
+
+  //         // return 'https://www.oficinadanet.com.br/imagens/post/24347/330xNxfundo-transparente.jpg.pagespeed.ic.c7297c4891.jpg';
+
+  //         // return resolvedPath.nativeURL + 'thumbnailImage.jpg';
+  //         // thumbnailPath = thumbnailPath.replace('thumbnailImage.jpg', '');
+  //       })
+  //       .catch((err: any) => {
+  //         return '';
+  //         setLog(err);
+  //       });
+  //   } catch (e) {
+  //     return '';
+  //   }
+  // };
+
   const renderRecordedItens = () => {
-    return currentVideoArray.map((item: any, key: number) => (
-      <IonItem className="item-recorder" key={key}>
-        <div className="video-thumb"> </div>
-        <div className="video-metadata">
-          <p className="name"> Sinal {key + 1}</p>
-          <p className="size"> {item.size} kb </p>
-        </div>
-        <div className="video-icon-delete">
-          <img src={logoTrashBtn} onClick={() => removeRecord(key)} />
-        </div>
-      </IonItem>
-    ));
+    // setLog(JSON.stringify(currentVideoArray));
+    return currentVideoArray.map((item: any, key: number) => {
+      return (
+        <IonItem className="item-recorder" key={key}>
+          <img className="video-thumb" src={item[2].thumbBlob} />
+
+          <div className="video-metadata">
+            <p className="name"> Sinal {key + 1}</p>
+            <p className="size"> {item[3].duration} seg </p>
+          </div>
+
+          <div className="video-icon-delete">
+            <img src={logoTrashBtn} onClick={() => removeRecord(key)} />
+          </div>
+        </IonItem>
+      );
+    });
   };
 
   const translateVideo = async () => {
