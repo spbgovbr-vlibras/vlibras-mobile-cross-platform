@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { IonText, IonButton, IonTextarea, IonIcon } from '@ionic/react';
-import { mic } from 'ionicons/icons';
+import { IonText, IonButton, IonTextarea } from '@ionic/react';
 
 import IconHandsTranslate from '../../assets/icons/IconHandsTranslate';
 import { MenuLayout } from '../../layouts';
@@ -28,9 +27,6 @@ function Translator() {
               required
               onIonChange={e => e.detail.value!}
             />
-            <button type="button" className="translator-button-mic ">
-              <IonIcon class="translator-background-mic" icon={mic} />
-            </button>
           </div>
         </div>
         <div className="translator-item-button-save">
