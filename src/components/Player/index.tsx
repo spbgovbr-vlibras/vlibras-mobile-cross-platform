@@ -1,131 +1,134 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
-import Unity, { UnityContent } from 'react-unity-webgl';
+import Unity from 'react-unity-webgl';
 
 import {
   IconDictionary,
   IconMic,
   IconHistory,
   IconEdit,
-  IconRefresh,
+  IconPauseOutlined,
   IconClose,
   IconSubtitle,
   IconRunning,
   IconPause,
 } from 'assets';
+import { PlayerKeys } from 'constants/player';
+import PlayerService from 'services/unity';
 
 import './styles.css';
 
-const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
-const PLAYER_MANAGER = 'PlayerManager';
+type BooleanParamsPlayer = 'True' | 'False';
 
-const unityContent = new UnityContent(
-  'player/playerweb.json',
-  'player/UnityLoader.js',
-  {
-    adjustOnWindowResize: true,
-  },
-);
+const playerService = PlayerService.getService();
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
   VARAINT_WHITE: '#939293',
+  VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
+const UNDEFINED_GLOSS = -1;
 const DELAY_PROGRESS = 10;
 const MAX_PROGRESS = 100;
+const GLOSS_TEXT = 'A suite VLibras é um conjunto de ferramentas gratuitas';
+
+function toBoolean(flag: BooleanParamsPlayer): boolean {
+  return flag === 'True';
+}
+
+function toInteger(flag: boolean): number {
+  return flag ? 1 : 0;
+}
 
 function Player() {
+  // Dynamic states [MA]
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasFinished, setHasFinished] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isShowSubtitle, setIsShowSubtitle] = useState(true);
+
+  // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
-  (window as any).onLoadPlayer = () => {
-    unityContent.send(PLAYER_MANAGER, 'initRandomAnimationsProcess');
-    unityContent.send(PLAYER_MANAGER, 'setURL', '');
-    unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
+  window.onPlayingStateChange = (
+    _isPlaying: BooleanParamsPlayer,
+    _isPaused: BooleanParamsPlayer,
+    _isPlayingIntervalAnimation: BooleanParamsPlayer,
+    _isLoading: BooleanParamsPlayer,
+    _isRepeatable: BooleanParamsPlayer,
+  ) => {
+    setIsPlaying(toBoolean(_isPlaying));
+    setIsPaused(toBoolean(_isPaused));
+    setLoading(toBoolean(_isLoading));
   };
 
-  /**
-   * Event called when it is playing an animation.
-   * Return glosa length and in which glosa is playing
-   */
-  // (window as any).CounterGlosa = (counter: number, glosaLength: number) => {
-  //   console.log(counter, glosaLength);
-  // }
+  //
+  let glossLen = UNDEFINED_GLOSS;
 
-  /**
-   * Event called when user changes player state (play, pause, repeat...)
-   */
-  // (window as any).onPlayingStateChange = (
-  //   _isPlaying: string,
-  //   isPaused: string,
-  //   isPlayingIntervalAnimation: string,
-  //   isLoading: string,
-  //   isRepeatable: string,
-  // ) => {
-  //   console.log(
-  //     isPaused,
-  //     _isPlaying,
-  //     isPlayingIntervalAnimation,
-  //     isLoading,
-  //     isRepeatable,
-  //   );
-  // };
+  window.CounterGloss = (counter: number, glossLength: number) => {
+    if (glossLen === UNDEFINED_GLOSS) {
+      glossLen = counter;
+      console.log(glossLen);
+    }
 
-  // playNow => Event to play an animation
-  // _glosa => phrase or word that will play
-  // unityContent.send(PLAYER_MANAGER, 'playNow', _glosa);
+    const progress = ((glossLen - counter - 1) / glossLen) * 100;
 
-  // setPauseState => Event to pause an animation
-  // Third parameter to pause (1) or not (0)
-  // unityContent.send(PLAYER_MANAGER, 'setPauseState', 1 or 0);
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${
+        progress > MAX_PROGRESS ? MAX_PROGRESS : progress
+      }%`;
+    }
+  };
 
-  // setSubtitlesState => Event to show subtitle
-  // Third parameter to show (1) or not (0)
-  // unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 1 or 0)
-
-  // setSlider => Event to change animation speed
-  // _speed => Third parameter is the speed
-  // unityContent.send(PLAYER_MANAGER, 'setSlider', _speed);
-
-  // Change => Event to change the avatar
-  // unityContent.send(PLAYER_MANAGER, 'Change')
-
-  function handleProgressFinished() {
-    setIsPlaying(false);
-    setHasFinished(true);
-  }
-
-  function handleProgressPlaying() {
-    progressContainerRef.current!.style.visibility = 'visible';
-    setIsPlaying(true);
-    setHasFinished(false);
-  }
-
-  function handleResetActionButton() {
-    setIsPlaying(false);
-    setHasFinished(false);
-    progressContainerRef.current!.style.visibility = 'hidden';
-  }
+  window.FinishWelcome = (_flag: boolean) => {
+    // To avoid non-reference errors [MA]
+  };
 
   // TODO: Improve this function to perform better [MA]
-  function triggerProgress() {
-    let width = 1;
-    const id = setInterval(() => {
-      if (width >= MAX_PROGRESS) {
-        clearInterval(id);
-        handleProgressFinished();
-      } else {
-        handleProgressPlaying();
-        width += 1;
-        progressBarRef.current!.style.width = `${width}%`;
-      }
-    }, DELAY_PROGRESS);
+  // function triggerProgress() {
+  //   let width = 1;
+  //   progressBarRef.current!.style.visibility = 'visible';
+  //   const id = setInterval(() => {
+  //     if (width >= MAX_PROGRESS) {
+  //       clearInterval(id);
+  //     } else {
+  //       width += 1;
+  //       progressBarRef.current!.style.width = `${width}%`;
+  //     }
+  //   }, DELAY_PROGRESS);
+  // }
+
+  function handlePlay(gloss: string) {
+    if (progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'visible';
+    }
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
 
-  const ActionButtons = useMemo(() => {
+  function handlePause() {
+    playerService.send(
+      PlayerKeys.PLAYER_MANAGER,
+      PlayerKeys.SET_PAUSE_STATE,
+      toInteger(!isPaused),
+    );
+  }
+
+  function handleChangeAvatar() {
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
+  }
+
+  function handleSubtitle() {
+    playerService.send(
+      PlayerKeys.PLAYER_MANAGER,
+      PlayerKeys.SET_SUBTITLE_STATE,
+      toInteger(!isShowSubtitle),
+    );
+    setIsShowSubtitle(!isShowSubtitle);
+  }
+
+  const renderPlayerButtons = () => {
     if (isPlaying) {
       return (
         <>
@@ -135,49 +138,63 @@ function Player() {
           <button
             className="player-action-button player-action-button-insert"
             type="button"
-            onClick={triggerProgress}
+            onClick={handlePause}
           >
-            <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
+            {isPaused ? (
+              <IconPauseOutlined color={buttonColors.VARIANT_BLUE} size={24} />
+            ) : (
+              <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
+            )}
           </button>
           <button
             className="player-action-button player-action-button-microphone"
             type="button"
-            onClick={handleResetActionButton}
           >
             <IconClose color={buttonColors.VARIANT_BLUE} size={32} />
           </button>
-          <button className="player-action-button-transparent" type="button">
-            <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={handleSubtitle}
+          >
+            <IconSubtitle
+              color={
+                isShowSubtitle
+                  ? buttonColors.VARIANT_WHITE_ACTIVE
+                  : buttonColors.VARAINT_WHITE
+              }
+              size={32}
+            />
           </button>
         </>
       );
     }
-    if (hasFinished) {
-      return (
-        <>
-          <button className="player-action-button-transparent" type="button">
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
-          </button>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={triggerProgress}
-          >
-            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
-          <button
-            className="player-action-button player-action-button-microphone"
-            type="button"
-            onClick={handleResetActionButton}
-          >
-            <IconClose color={buttonColors.VARIANT_BLUE} size={32} />
-          </button>
-          <button className="player-action-button-transparent" type="button">
-            <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
-          </button>
-        </>
-      );
-    }
+    // if (hasFinished) {
+    //   return (
+    //     <>
+    //       <button className="player-action-button-transparent" type="button">
+    //         <IconRunning color={buttonColors.VARAINT_WHITE} />
+    //       </button>
+    //       <button
+    //         className="player-action-button player-action-button-insert"
+    //         type="button"
+    //         onClick={triggerProgress}
+    //       >
+    //         <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
+    //       </button>
+    //       <button
+    //         className="player-action-button player-action-button-microphone"
+    //         type="button"
+    //         onClick={handleResetActionButton}
+    //       >
+    //         <IconClose color={buttonColors.VARIANT_BLUE} size={32} />
+    //       </button>
+    //       <button className="player-action-button-transparent" type="button">
+    //         <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
+    //       </button>
+    //     </>
+    //   );
+    // }
     return (
       <>
         <button className="player-action-button-transparent" type="button">
@@ -186,7 +203,7 @@ function Player() {
         <button
           className="player-action-button player-action-button-insert"
           type="button"
-          onClick={triggerProgress}
+          onClick={() => handlePlay(GLOSS_TEXT)}
         >
           <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
         </button>
@@ -201,16 +218,16 @@ function Player() {
         </button>
       </>
     );
-  }, [isPlaying, hasFinished]);
+  };
 
   return (
     <div className="player-container">
-      <Unity unityContent={unityContent} />
+      <Unity unityContent={playerService.getUnity()} />
       <div className="player-action-container">
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
-        <div className="play-action-content">{ActionButtons}</div>
+        <div className="play-action-content">{renderPlayerButtons()}</div>
       </div>
     </div>
   );

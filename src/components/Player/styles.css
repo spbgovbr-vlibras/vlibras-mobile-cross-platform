@@ -53,7 +53,7 @@
 }
 
 .player-progress-bar {
-  width: 100%;
+  width: 0;
   height: 6px;
   background: #003F86;
 }

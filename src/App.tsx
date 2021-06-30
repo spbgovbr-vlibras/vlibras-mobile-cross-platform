@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { IonApp } from '@ionic/react';
-
-import Routes from './routes';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -20,10 +18,19 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
+import Routes from './routes';
+import PlayerService from './services/unity';
+
 /* Theme variables */
 import './theme/variables.css';
 
+const playerService = PlayerService.getService();
+
 function App() {
+  useEffect(() => {
+    playerService.load();
+  }, []);
+
   return (
     <IonApp>
       <Routes />

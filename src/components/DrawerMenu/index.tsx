@@ -54,7 +54,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   ) => (
     <IonItem
       className={
-        selectable ? getClassName(tab, location.pathname) : DEFAULT_COLOR
+        selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
       routerLink={tab}

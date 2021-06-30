@@ -17,6 +17,7 @@ import IconPause from './icons/IconPause';
 import IconRefresh from './icons/IconRefresh';
 import IconRunning from './icons/IconRunning';
 import IconSubtitle from './icons/IconSubtitle';
+import IconPauseOutlined from './icons/IconPauseOutlined';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -128,4 +129,5 @@ export {
   IconRefresh,
   IconRunning,
   IconSubtitle,
+  IconPauseOutlined,
 };
