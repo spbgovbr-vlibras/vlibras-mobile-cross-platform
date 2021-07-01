@@ -8,11 +8,14 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
+  IonLabel,
 } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
+
+import { Strings } from './strings';
 
 import './styles.css';
 
@@ -32,7 +35,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
       case paths.HOME:
         return (
           <>
-            <span className="menu-item-text">PT-BR</span>
+            <IonLabel className="menu-item-text">{Strings.MENU_PT_BR}</IonLabel>
             <IconTranslate color="#2365DE" />
           </>
         );

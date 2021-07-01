@@ -18,8 +18,10 @@
     "@types/react-dom": "^16.9.10",
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
+    "axios": "^0.21.1",
     "immer": "^9.0.3",
     "ionicons": "^5.4.0",
+    "lodash": "^4.17.21",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.4",
@@ -64,6 +66,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "2.4.7",
+    "@types/lodash": "^4.14.170",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
     "eslint": "^7.23.0",

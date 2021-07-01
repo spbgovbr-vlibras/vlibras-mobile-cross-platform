@@ -13,7 +13,7 @@ export interface RegionalismState {
 }
 
 const INITIAL_STATE: RegionalismState = {
-  current: ' ',
+  current: '',
 };
 
 export const Creators = {
