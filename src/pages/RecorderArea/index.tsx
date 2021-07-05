@@ -55,7 +55,7 @@ const RecorderArea = () => {
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     //mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -75,7 +75,7 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideo2 = async () => {
+  const takeVideo = async () => {
     try {
       const options = { limit: 1, duration: 30 };
       let mediafile = await VideoCapturePlus.captureVideo(options);

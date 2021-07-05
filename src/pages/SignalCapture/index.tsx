@@ -70,7 +70,7 @@ const SignalCapture = () => {
 
   const history = useHistory();
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     //mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -90,7 +90,7 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideo2 = async () => {
+  const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30 };

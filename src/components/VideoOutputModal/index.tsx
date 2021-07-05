@@ -7,6 +7,8 @@ import { Creators } from 'store/ducks/video';
 import { useDispatch } from 'react-redux';
 
 import Unity, { UnityContent } from 'react-unity-webgl';
+import paths from 'constants/paths';
+import { useHistory } from 'react-router-dom';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -36,6 +38,7 @@ const VideoOutputModal = ({
 }: VideoOutputModalProps) => {
   const [openPlayer, setOpenPlayer] = useState(playerIntermedium);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const closeModal = () => {
     setShowModal(false);
@@ -105,7 +108,13 @@ const VideoOutputModal = ({
         )}
         {showButtons && (
           <div className="list-buttons">
-            <IonButton className="answer-button">
+            <IonButton
+              className="answer-button"
+              onClick={() => {
+                setShowModal(false);
+                history.push(paths.TRANSLATOR);
+              }}
+            >
               <img src={logoAnswer}></img>
               Responder
             </IonButton>
