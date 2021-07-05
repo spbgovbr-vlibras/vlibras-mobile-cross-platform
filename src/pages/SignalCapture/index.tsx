@@ -44,6 +44,8 @@ import {
   MediaFile,
 } from '@ionic-native/video-capture-plus';
 
+import { ErrorModal } from '../../components';
+
 import { Strings } from './strings';
 import './styles.css';
 
@@ -56,8 +58,29 @@ const SignalCapture = () => {
   const [thumb, setThumb] = useState(
     'file://storage/emulated/0/Android/data/lavid.ufpb.vlibras.mobile/files/files/videos/thumbailImage.jpg',
   );
+  const [showErrorModal, setShowErrorModal] = useState([false, '']);
 
   const history = useHistory();
+
+  const takeVideoMock = async () => {
+    //mock
+    if (currentVideoArray.length < 5) {
+      dispatch(
+        Creators.setCurrentArrayVideo([
+          ...currentVideoArray,
+          [
+            { name: 'opa', size: '123' },
+            new Blob([]),
+            {
+              thumbBlob:
+                'https://w7.pngwing.com/pngs/708/19/png-transparent-star-star-angle-triangle-symmetry-thumbnail.png',
+            },
+            { duration: Math.trunc(5.4) },
+          ],
+        ]),
+      );
+    }
+  };
 
   const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
@@ -69,15 +92,10 @@ const SignalCapture = () => {
         let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
         let resolvedPath: DirectoryEntry;
 
-        // if (Capacitor.getPlatform() === 'ios') {
         resolvedPath = await File.resolveDirectoryUrl(path);
-        // } else {
-        //   resolvedPath = await File.resolveDirectoryUrl('file://' + path);
-        // }
 
         File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
           (buffer: any) => {
-            // get the buffer and make a blob to be saved
             let imgBlob = new Blob([buffer], {
               type: media.type,
             });
@@ -125,28 +143,32 @@ const SignalCapture = () => {
                         history.push(paths.SIGNALCAPTURE);
                       },
                       err => {
-                        setLog(err);
+                        setShowErrorModal([
+                          true,
+                          'Não foi possível obter informações do vídeo',
+                        ]);
                       },
                     );
                   },
-                  error => setLog(error),
+                  error =>
+                    setShowErrorModal([
+                      true,
+                      'Não foi possível carregar a prévia do vídeo',
+                    ]),
                 );
               })
               .catch((err: any) => {
-                setLog(err);
+                setShowErrorModal([
+                  true,
+                  'Não foi possível criar a prévia do vídeo',
+                ]);
               });
           },
-          (error: any) => console.log(error),
+          (error: any) =>
+            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
         );
-
-        // dispatch(
-        //   Creators.setCurrentArrayVideo([
-        //     ...currentVideoArray,
-        //     { label: 'opa2', size: '456' },
-        //   ]),
-        // );
       } catch (error) {
-        console.log(error + 'error geral');
+        setShowErrorModal([true, 'Erro ao abrir câmera']);
       }
     }
   };
@@ -158,45 +180,6 @@ const SignalCapture = () => {
 
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
-
-  // const createThumbnail = (videodata: string, fname: string) => {
-  //   let thumbnailoption: CreateThumbnailOptions = {
-  //     fileUri: videodata,
-  //     quality: 100,
-  //     atTime: 1,
-  //     outputFileName: fname,
-  //   };
-
-  //   try {
-  //     VideoEditor.createThumbnail(thumbnailoption)
-  //       .then(async (thumbnailPath: any) => {
-  //         console.log('Thumbnail Responce =>', thumbnailPath);
-
-  //         let path = thumbnailPath.substring(0, thumbnailPath.lastIndexOf('/'));
-  //         let resolvedPath: DirectoryEntry;
-
-  //         resolvedPath = await File.resolveDirectoryUrl('file://' + path);
-
-  //         File.readAsDataURL(resolvedPath.nativeURL, fname + '.jpg').then(
-  //           (path: any) => {
-  //             return path;
-  //           },
-  //           error => '',
-  //         );
-
-  //         // return 'https://www.oficinadanet.com.br/imagens/post/24347/330xNxfundo-transparente.jpg.pagespeed.ic.c7297c4891.jpg';
-
-  //         // return resolvedPath.nativeURL + 'thumbnailImage.jpg';
-  //         // thumbnailPath = thumbnailPath.replace('thumbnailImage.jpg', '');
-  //       })
-  //       .catch((err: any) => {
-  //         return '';
-  //         setLog(err);
-  //       });
-  //   } catch (e) {
-  //     return '';
-  //   }
-  // };
 
   const renderRecordedItens = () => {
     // setLog(JSON.stringify(currentVideoArray));
@@ -263,6 +246,12 @@ const SignalCapture = () => {
             <p> Traduzir </p>
           </div>
         </div>
+
+        <ErrorModal
+          show={showErrorModal[0]}
+          setShow={setShowErrorModal}
+          errorMsg={showErrorModal[1]}
+        />
       </IonContent>
     </IonPage>
   );

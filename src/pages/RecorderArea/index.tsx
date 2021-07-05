@@ -27,7 +27,11 @@ import {
   VideoCapturePlusOptions,
   MediaFile,
 } from '@ionic-native/video-capture-plus';
-import { VideoOutputModal, TranslatingModal } from '../../components';
+import {
+  VideoOutputModal,
+  TranslatingModal,
+  ErrorModal,
+} from '../../components';
 
 import './styles.css';
 
@@ -39,7 +43,9 @@ const RecorderArea = () => {
   const [loading, setLoading] = React.useState<any>(false);
   const [toogleResult, setToogleResult] = React.useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [log, setLog] = useState('alo');
+  const [showErrorModal, setShowErrorModal] = useState([false, '']);
+
+  const [log, setLog] = useState('');
 
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
@@ -49,10 +55,27 @@ const RecorderArea = () => {
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
+  const takeVideoMock = async () => {
+    //mock
+    if (currentVideoArray.length < 5) {
+      dispatch(
+        Creators.setCurrentArrayVideo([
+          [
+            { name: 'opa', size: '123' },
+            new Blob([]),
+            {
+              thumbBlob:
+                'https://w7.pngwing.com/pngs/708/19/png-transparent-star-star-angle-triangle-symmetry-thumbnail.png',
+            },
+            { duration: Math.trunc(5.4) },
+          ],
+        ]),
+      );
+      history.push(paths.SIGNALCAPTURE);
+    }
+  };
 
   const takeVideo = async () => {
-    history.push(paths.SIGNALCAPTURE);
-
     try {
       const options = { limit: 1, duration: 30 };
       let mediafile = await VideoCapturePlus.captureVideo(options);
@@ -61,15 +84,10 @@ const RecorderArea = () => {
       let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
       let resolvedPath: DirectoryEntry;
 
-      // if (Capacitor.getPlatform() === 'ios') {
       resolvedPath = await File.resolveDirectoryUrl(path);
-      // } else {
-      //   resolvedPath = await File.resolveDirectoryUrl('file://' + path);
-      // }
 
       File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
         (buffer: any) => {
-          // get the buffer and make a blob to be saved
           let imgBlob = new Blob([buffer], {
             type: media.type,
           });
@@ -116,23 +134,32 @@ const RecorderArea = () => {
                       history.push(paths.SIGNALCAPTURE);
                     },
                     err => {
-                      setLog(err);
+                      setShowErrorModal([
+                        true,
+                        'Não foi possível obter informações do vídeo',
+                      ]);
                     },
                   );
                 },
-                error => setLog(error),
+                error =>
+                  setShowErrorModal([
+                    true,
+                    'Não foi possível carregar a prévia do vídeo',
+                  ]),
               );
             })
             .catch((err: any) => {
-              setLog(err);
+              setShowErrorModal([
+                true,
+                'Não foi possível criar a prévia do vídeo',
+              ]);
             });
         },
-        (error: any) => console.log(error),
+        (error: any) =>
+          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
       );
-
-      // dispatch(Creators.setCurrentArrayVideo([{ name: 'opa', size: '123' }]));
-      // history.push(paths.SIGNALCAPTURE);
     } catch (error) {
+      setShowErrorModal([true, 'Erro ao abrir câmera']);
       console.log(error);
     }
   };
@@ -161,12 +188,12 @@ const RecorderArea = () => {
             },
           );
 
-          setLog(JSON.stringify(resultRequest));
           if (resultRequest.data && resultRequest.data.length > 0)
             arrayOfResults.push(resultRequest.data[0].label);
+          else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
-          arrayOfResults.push('dor de cabeça', 'alergia');
-          setLog(JSON.stringify(e));
+          // arrayOfResults.push('dor de cabeça', 'alergia');
+          setShowErrorModal([true, 'Erro ao enviar vídeo']);
 
           console.log(e);
         }
@@ -193,9 +220,7 @@ const RecorderArea = () => {
   }, [location]);
 
   const renderOutputs = () => {
-    console.log(lastTranslation, 'render');
     return lastTranslation.map((item: string, key: string) => {
-      console.log(item);
       return <span key={key}>{item}</span>;
     });
   };
@@ -254,6 +279,11 @@ const RecorderArea = () => {
           showModal={showModal}
           setShowModal={setShowModal}
           playerIntermedium={false}
+        />
+        <ErrorModal
+          show={showErrorModal[0]}
+          setShow={setShowErrorModal}
+          errorMsg={showErrorModal[1]}
         />
       </IonContent>
     </MenuLayout>
