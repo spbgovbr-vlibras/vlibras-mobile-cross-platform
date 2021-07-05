@@ -75,28 +75,28 @@
 .area-button-recorder {
   position: relative;
   display: inline-block;
-  }
+}
 
 /* Tooltip text */
 .area-button-recorder .tooltiptext {
   visibility: hidden;
-  width: 170px;
+  width: 130px;
   background-color: #555;
   color: #fff;
   text-align: center;
   padding: 5px 0;
   border-radius: 30px;
+  font-family: Rawline;
+  font-size: 12px;
 
   /* Posição do tooltip text */
   position: absolute;
   bottom: 110%;
-  left: 20%;
-  margin-left: -60px;
+  left: -30px;
 
   /* transição do tooltip */
   opacity: 1;
   transition-duration: 2s;
-   
 }
 
 /* Mostra o tooltip text quando o mouse passa por cima do tooltip container */
@@ -104,8 +104,7 @@
   visibility: visible;
   opacity: 1;
 }
-.alert-message.sc-ion-alert-md {
-
+.popup-box-signal-cap .alert-message.sc-ion-alert-md {
   font-family: Rawline;
   font-size: 12px;
   font-style: normal;
@@ -114,20 +113,20 @@
   letter-spacing: 0em;
   text-align: center;
   /* Altera a mensagem do popup*/
-  position:absolute;
+  position: absolute;
   display: flex;
   align-items: center;
-  text-align:left;
+  justify-content: center;
   padding-bottom: 3px;
   bottom: 45%;
-  
-  color: #A3A3A3;
-  
+  width: 100%;
 }
 
+.popup-box-signal-cap.sc-ion-alert-md-h {
+  --backdrop-opacity: var(--ion-backdrop-opacity, 0.8);
+}
 
-.alert-title.sc-ion-alert-md {
-
+.popup-box-signal-cap .alert-title.sc-ion-alert-md {
   font-family: Rawline;
   font-size: 18px;
   font-style: normal;
@@ -135,18 +134,17 @@
   line-height: 27px;
   letter-spacing: 0em;
   text-align: center;
-  
-/* Altera o titulo do popup */
 
-align-items: center;
-text-align: center;
-justify-content: center;
+  /* Altera o titulo do popup */
 
-color: #000000;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+
+  color: #000000;
 }
 
-
-.alert-wrapper.sc-ion-alert-md {
+.popup-box-signal-cap .alert-wrapper.sc-ion-alert-md {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-direction: column;
@@ -161,46 +159,44 @@ color: #000000;
   contain: content;
   opacity: 0;
   z-index: 10;
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 8px;
-  position: absolute;  
+  position: absolute;
   font-size: 18px;
   width: 224px;
   height: 128px;
   /* Altera a box */
-
-  
 }
-.alert-button-group.sc-ion-alert-md{
+.popup-box-signal-cap .alert-button-group.sc-ion-alert-md {
   justify-content: center;
-  padding-right:35px;
- 
+  padding-right: 35px;
 }
 
-.popup-yes.alert-button.sc-ion-alert-md{
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md {
   color: gray;
   height: 24px;
-  width: 39px;
+  width: 45px;
   left: 16px;
-  top: 4px;
-                                                                        
+  top: 18px;
+  font-family: Rawline;
+  font-weight: 700;
+  color: var(--ion-color-modal-title);
+  font-size: 16px;
 }
-.popup-no.alert-button.sc-ion-alert-md{
+
+.popup-box-signal-cap .popup-no.alert-button.sc-ion-alert-md {
   color: gray;
   height: 24px;
-  width: 39px;
-  left: 16px;
-  top: 4px;
-                                                                        
+  width: 45px;
+  left: 22px;
+  top: 18px;
+  font-family: Rawline;
+  font-weight: 700;
+  font-size: 16px;
 }
-.popup-yes.alert-button.sc-ion-alert-md:focus{
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
   color: blue;
 }
-.popup-yes.alert-button.sc-ion-alert-md:focus{
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
   color: blue;
-}
-
-.alert-message .sc-ion-alert-md {
-
-
 }

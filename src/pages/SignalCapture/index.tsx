@@ -70,7 +70,7 @@ const SignalCapture = () => {
 
   const history = useHistory();
 
-  const takeVideoMock = async () => {
+  const takeVideo = async () => {
     //mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -90,7 +90,7 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideo = async () => {
+  const takeVideo2 = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30 };
@@ -275,7 +275,7 @@ const SignalCapture = () => {
         />
         <IonAlert
           isOpen={showAlert}
-          cssClass="popup-box"
+          cssClass="popup-box-signal-cap"
           header={Strings.TITLE_POPUPCANCEL}
           message={Strings.MESSAGE_POPUPCANCEL}
           buttons={[
@@ -301,7 +301,7 @@ const SignalCapture = () => {
         />
         <IonAlert
           isOpen={showAlertpage}
-          cssClass="popup-box-cancel"
+          cssClass="popup-box-signal-cap"
           header={Strings.TITLE_POPUP_REMOVE}
           message={Strings.MESSAGE_POPUP_REMOVE}
           buttons={[
@@ -310,9 +310,9 @@ const SignalCapture = () => {
               cssClass: 'popup-yes',
               handler: () => {
                 console.log('Confirm Yes');
+                dispatch(Creators.setCurrentArrayVideo([]));
                 setShowAlertPage(false);
                 history.push(paths.RECORDERAREA);
-                dispatch(Creators.setCurrentArrayVideo([]));
               },
             },
             {
