@@ -1164,6 +1164,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@capacitor/android@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-3.0.1.tgz#77deddbde7c3624fdf4b40d3446ac31261f53771"
+  integrity sha512-+bKm0J1/oSln8VlVRfC25AWn+lLFwvC3Q8OeIA7DyI36RPi8WMkGfVPvZ3EIywUKBquj7mVuEXXhiZyM+YlDeQ==
+
 "@capacitor/cli@2.4.7":
   version "2.4.7"
   resolved "https://registry.yarnpkg.com/@capacitor/cli/-/cli-2.4.7.tgz#690089689b25cb22a25eb930b1dd04af757f2f95"
@@ -1187,6 +1192,11 @@
   integrity sha512-ZPzXXQ4EPwR/ZhNDkmlxyzw4FvquIl/ROj8HMMM0MEd4xZfM8ulNGPIL6br9TWdlFLGBKq40eymPZjKaivGnig==
   dependencies:
     tslib "^1.9.0"
+
+"@capacitor/ios@^2.4.7":
+  version "2.4.7"
+  resolved "https://registry.yarnpkg.com/@capacitor/ios/-/ios-2.4.7.tgz#03eecc5348d2ac84e62fc17ae37cc266bcc6a437"
+  integrity sha512-XKYU67ZM+yY4/vDJ3ZVfs+phjtWK8TcKwq75fGoxB9PKXuCmMi5bihPuA3Xs/sIFXuozpnaYnspp0eTRJ7bG0w==
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
@@ -1252,6 +1262,27 @@
   integrity sha512-tAag0jEcjwH+P2quUfipd7liWCNX2F8NvYjQp2wtInsZxnMlypdw0FtAOLxtvvkO+GSRRbmNi8m/5y42PQJYCQ==
   dependencies:
     "@hapi/hoek" "^8.3.0"
+
+"@ionic-native/core@^5.33.0":
+  version "5.33.1"
+  resolved "https://registry.yarnpkg.com/@ionic-native/core/-/core-5.33.1.tgz#f77dda25dc98bd5352f49fb0048097833cd97d3b"
+  integrity sha512-BmjQqMzm6JE2V9Kj07cTA27frm516KMAViSpRNi4MQxPm9lHp9mxBGFDa4pqS/C0G8lA2kVh40fEZA0nOH9w+g==
+  dependencies:
+    "@types/cordova" latest
+
+"@ionic-native/file@^5.33.0":
+  version "5.33.1"
+  resolved "https://registry.yarnpkg.com/@ionic-native/file/-/file-5.33.1.tgz#8e178989b669f77468f740bbab85b47e77fd679c"
+  integrity sha512-N6tvCmLBYnY+fDeEhI+7kYHuIVcZ/JtrhRIepJ9qpF82DTvMg0fXy5XToKZ5hqthbKAwci8//A8Etp0oBzjx+w==
+  dependencies:
+    "@types/cordova" latest
+
+"@ionic-native/video-capture-plus@^5.33.0":
+  version "5.33.1"
+  resolved "https://registry.yarnpkg.com/@ionic-native/video-capture-plus/-/video-capture-plus-5.33.1.tgz#7d0ca4230c9817cad4e69ddd431ad4a149ac0622"
+  integrity sha512-S3vHmA84OeFMc10mGR+qNAwk+Z8/IteN2gsF5y12A2I36WiMSoGjLwQk2S5qk8USECu+WN55CV/U2r6rSheYyA==
+  dependencies:
+    "@types/cordova" latest
 
 "@ionic/core@5.6.3":
   version "5.6.3"
@@ -1768,6 +1799,11 @@
   integrity sha512-Vs0hm0vPahPMYi9tDjtP66llufgO3ST16WXaSTtDGEl9cewAl3AibmxWw6TINOqHPT9z0uABKAYjT9jNSg4npw==
   dependencies:
     "@babel/types" "^7.3.0"
+
+"@types/cordova@latest":
+  version "0.0.34"
+  resolved "https://registry.yarnpkg.com/@types/cordova/-/cordova-0.0.34.tgz#ea7addf74ecec3d7629827a0c39e2c9addc73d04"
+  integrity sha1-6nrd907Ow9dimCegw54smt3HPQQ=
 
 "@types/eslint@^7.2.6":
   version "7.2.8"
@@ -2680,6 +2716,13 @@ axe-core@^4.0.2:
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.1.4.tgz#f19cd99a84ee32a318b9c5b5bb8ed373ad94f143"
   integrity sha512-Pdgfv6iP0gNx9ejRGa3zE7Xgkj/iclXqLfe7BnatdZz0QnLZ3jrRHUVH8wNSdN68w05Sk3ShGTb3ydktMTooig==
+
+axios@^0.21.1:
+  version "0.21.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
+  integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
+  dependencies:
+    follow-redirects "^1.10.0"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -3696,6 +3739,21 @@ copy-descriptor@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
+
+cordova-plugin-compat@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-compat/-/cordova-plugin-compat-1.2.0.tgz#0bc65757276ebd920c012ce920e274177576373e"
+  integrity sha1-C8ZXVyduvZIMASzpIOJ0F3V2Nz4=
+
+cordova-plugin-file@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-file/-/cordova-plugin-file-6.0.2.tgz#f3911479f8357e9aacb5576674f8d95b31a1fb20"
+  integrity sha512-m7cughw327CjONN/qjzsTpSesLaeybksQh420/gRuSXJX5Zt9NfgsSbqqKDon6jnQ9Mm7h7imgyO2uJ34XMBtA==
+
+cordova-plugin-video-capture-plus@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-video-capture-plus/-/cordova-plugin-video-capture-plus-1.0.0.tgz#6a47aa611403c128f7f753eb534074b218f8050d"
+  integrity sha512-Ldxm2sn54Ghy0y35Lspt3y6Vckm9LKD0ImA/uPP1uYTk+QI1MZkRV3xrt1NzGCUIxlaw2c1VfQAXSNAug/+pog==
 
 core-js-compat@^3.6.2, core-js-compat@^3.8.1, core-js-compat@^3.9.0:
   version "3.10.0"
@@ -5288,6 +5346,11 @@ follow-redirects@^1.0.0:
   version "1.13.3"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.3.tgz#e5598ad50174c1bc4e872301e82ac2cd97f90267"
   integrity sha512-DUgl6+HDzB0iEptNQEXLx/KhTmDb8tZUHSeLqpnjpknR70H0nC2t9N73BK6fN4hOvJ84pKlIQVQ4k5FFlBedKA==
+
+follow-redirects@^1.10.0:
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.1.tgz#d9114ded0a1cfdd334e164e6662ad02bfd91ff43"
+  integrity sha512-HWqDgT7ZEkqRzBvc2s64vSZ/hfOceEol3ac/7tKwzuvEyWx3/4UegXh5oBOIotkGsObyk3xznnSRVADBgWSQVg==
 
 for-in@^1.0.2:
   version "1.0.2"
