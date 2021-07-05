@@ -8,6 +8,7 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
+  IonLabel,
 } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { RootState } from 'store';
@@ -16,6 +17,8 @@ import { useDispatch } from 'react-redux';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
+
+import { Strings } from './strings';
 
 import './styles.css';
 
@@ -46,7 +49,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
               className="menu-item-text"
               onClick={() => switchBetweenTranslators(paths.ONBOARDING, true)}
             >
-              PT-BR
+              {Strings.MENU_PT_BR}
             </span>
             <IconTranslate color="#2365DE" />
           </>

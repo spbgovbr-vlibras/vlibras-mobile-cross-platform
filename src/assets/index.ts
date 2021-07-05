@@ -7,7 +7,7 @@ import IconRegionalism from './icons/IconRegionalism';
 import IconIcaro from './icons/IconIcaro';
 import IconTutorial from './icons/IconTutorial';
 import IconHandsTranslate from './icons/IconHandsTranslate';
-import IconMic from './icons/MicIcon';
+import IconMic from './icons/IconMic';
 import IconHistory from './icons/IconHistory';
 import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
@@ -20,6 +20,13 @@ import gifStepTwo from './gifs/passo2.gif';
 import gifStepThree from './gifs/passo3.gif'; 
 import gifStepFour from './gifs/passo4.gif';
 import gifTranslating from './gifs/translating.gif'
+import IconEdit from './icons/IconEdit';
+import IconClose from './icons/IconClose';
+import IconPause from './icons/IconPause';
+import IconRefresh from './icons/IconRefresh';
+import IconRunning from './icons/IconRunning';
+import IconSubtitle from './icons/IconSubtitle';
+import IconPauseOutlined from './icons/IconPauseOutlined';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -154,5 +161,12 @@ export {
   logoTrashBtn,
   logoCaptureDisable,
   gifTranslating,
-  IconDomain
+  IconDomain,
+  IconEdit,
+  IconClose,
+  IconPause,
+  IconRefresh,
+  IconRunning,
+  IconSubtitle,
+  IconPauseOutlined
 };
