@@ -96,15 +96,6 @@ function Dictionary() {
             <IonChip class="dictionary-container-ion-chips-suggestions-2">
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-3">
-              {Strings.CHIP_TEXT_SUGGESTIONS_3}
-            </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-4">
-              {Strings.CHIP_TEXT_SUGGESTIONS_4}
-            </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-5">
-              {Strings.CHIP_TEXT_SUGGESTIONS_5}
-            </IonChip>
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" class="dictionary-words-list">
