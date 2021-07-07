@@ -1,3 +1,7 @@
+/* eslint-disable import/order */
+
+import paths from 'constants/paths';
+
 import React, { useMemo } from 'react';
 
 import { menuController } from '@ionic/core';
@@ -10,10 +14,8 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
-import { useLocation } from 'react-router-dom';
-
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
-import paths from 'constants/paths';
+import { useLocation } from 'react-router-dom';
 
 import { Strings } from './strings';
 

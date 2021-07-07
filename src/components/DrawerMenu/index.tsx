@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 import React from 'react';
 
 import {
@@ -8,16 +9,17 @@ import {
   IonItem,
   IonListHeader,
   IonLabel,
+  IonIcon,
 } from '@ionic/react';
 import { useLocation } from 'react-router-dom';
 
 import {
-  LogoVlibrasIcaro,
   IconTranslate,
   IconDictionary,
   IconRegionalism,
   IconIcaro,
   IconTutorial,
+  Vlibraslogo,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
@@ -69,7 +71,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   return (
     <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
       <IonHeader className="drawer-menu-container" mode="ios">
-        <IonImg className="drawer-menu-image-header" src={LogoVlibrasIcaro} />
+        <div className="drawer-menu-header-logo">
+          <IonImg className="drawer-menu-image-header" src={Vlibraslogo} />
+          <IonLabel className="drawer-menu-header-label">
+            {Strings.HEADER_VLIBRAS_LABEL}
+          </IonLabel>
+        </div>
         <IonList lines="none">
           <IonListHeader>
             <IonLabel className="drawer-menu-title-header">
