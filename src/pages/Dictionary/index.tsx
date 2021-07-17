@@ -32,11 +32,7 @@ function Dictionary() {
   const TIME_DEBOUNCE_MS = 0;
   const [dictionary, setDictionary] = useState<string[]>([]);
   const [words, setWords] = useState<string[]>([]);
-  const [isMicVisible, setIsMicVisible] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const hideMic = document.getElementsByClassName(
-    'dictionary-mic-button',
-  ) as HTMLCollectionOf<HTMLElement>;
 
   const onSearch = useCallback(value => {
     const input = words.filter(item => item.includes(value.toUpperCase()));
@@ -50,12 +46,7 @@ function Dictionary() {
   const onInputChange = useCallback(
     evt => {
       setSearchText(evt.target.value);
-      if (!evt.target.value) {
-        setIsMicVisible(true);
-      } else {
-        setIsMicVisible(false);
-        onSearch(evt.target.value);
-      }
+      onSearch(evt.target.value);
     },
     [debouncedSearch],
   );
@@ -85,7 +76,6 @@ function Dictionary() {
               inputmode="text"
               searchIcon="none"
             />
-            {isMicVisible}
           </div>
           <div className="dictionary-container-ion-chips">
             <IonChip class="dictionary-container-ion-chips-suggestions-1">
@@ -93,15 +83,6 @@ function Dictionary() {
             </IonChip>
             <IonChip class="dictionary-container-ion-chips-suggestions-2">
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
-            </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-3">
-              {Strings.CHIP_TEXT_SUGGESTIONS_3}
-            </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-4">
-              {Strings.CHIP_TEXT_SUGGESTIONS_4}
-            </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-5">
-              {Strings.CHIP_TEXT_SUGGESTIONS_5}
             </IonChip>
           </div>
           <div className="dictionary-words-container">

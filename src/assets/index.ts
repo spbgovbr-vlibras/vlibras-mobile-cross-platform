@@ -66,6 +66,7 @@ import logoUfpb from './images/ufpb_logo.png';
 import logoMaos from './images/Union.png';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
+import Vlibraslogo from './images/vlibraslogo.png';
 
 export {
   LogoIcaro,
@@ -113,6 +114,7 @@ export {
   logoSergipe,
   logoTocantins,
   LogoVlibrasIcaro,
+  Vlibraslogo,
   IconTranslate,
   IconRegionalism,
   IconDictionary,

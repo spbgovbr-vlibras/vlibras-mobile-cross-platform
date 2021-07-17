@@ -67,17 +67,6 @@
   width: 16px;
   height: 24px;
 }
-.dictionary-mic-button{
-    background: none;
-    position: absolute;
-    top: 19.5px;
-    right: 23.5px;
-    z-index: 1;
-    /*display: flex;
-    flex: 1;*/
-    justify-content: flex-end;
-    
-}
 .dictionary-container-ion-chips {
   display: flex;
   flex-direction: row;
@@ -99,37 +88,6 @@
 }
 
 .dictionary-container-ion-chips-suggestions-2 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
-
-  color: #4b4b4b;
-  background: #ededed;
-}
-
-.dictionary-container-ion-chips-suggestions-3 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
-
-  color: #4b4b4b;
-  background: #ededed;
-}
-.dictionary-container-ion-chips-suggestions-4 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
-
-  color: #4b4b4b;
-  background: #ededed;
-}
-.dictionary-container-ion-chips-suggestions-5 {
   font-family: Rawline;
   font-style: normal;
   font-weight: normal;

@@ -14,11 +14,10 @@ import {
 } from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import regionalismData from 'data/regionalism';
-import { MenuLayout } from 'layouts';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/regionalism';
-
+import regionalismData from '../../data/regionalism';
+import { MenuLayout } from '../../layouts';
+import { RootState } from '../../store';
+import { Creators } from '../../store/ducks/regionalism';
 import { Strings } from './strings';
 
 import './styles.css';

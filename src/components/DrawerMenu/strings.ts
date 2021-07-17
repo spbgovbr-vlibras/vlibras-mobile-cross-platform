@@ -7,4 +7,5 @@ export const Strings = {
   TITLE_MENU_ABOUT: 'Sobre o Vlibras',
   HEADER_TITLE_SERVICES: 'Serviços',
   HEADER_TITLE_DEFINITIONS: 'Pré-definições',
+  HEADER_VLIBRAS_LABEL: 'VLIBRAS',
 };
