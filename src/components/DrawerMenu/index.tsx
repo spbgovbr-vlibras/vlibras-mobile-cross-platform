@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { menuController } from '@ionic/core';
 import {
   IonMenu,
   IonHeader,
@@ -9,7 +10,7 @@ import {
   IonListHeader,
   IonLabel,
 } from '@ionic/react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import {
   LogoVlibrasIcaro,
@@ -45,6 +46,12 @@ function getColor(value: string, expected: string): string {
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
   const location = useLocation();
+  const history = useHistory();
+
+  function navLink(path: string) {
+    history.push(path);
+    menuController.close();
+  }
 
   const renderItemTab = (
     tab: string,
@@ -57,7 +64,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      routerLink={tab}
+      onClick={() => navLink(tab)}
     >
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}

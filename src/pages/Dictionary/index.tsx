@@ -1,6 +1,5 @@
 import React, { useCallback, useDebugValue, useEffect, useState } from 'react';
 
-// eslint-disable-next-line import/order
 import {
   IonButton,
   IonChip,
@@ -14,12 +13,11 @@ import {
   IonText,
   IonTextarea,
 } from '@ionic/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-
 import { debounce } from 'lodash';
 
-import { MenuLayout } from '../../layouts';
-import api from '../../services/api';
+import { MenuLayout } from 'layouts';
+import api from 'services/api';
+
 import { Strings } from './strings';
 
 import './styles.css';

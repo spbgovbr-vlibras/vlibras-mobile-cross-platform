@@ -10,7 +10,7 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
@@ -25,6 +25,7 @@ interface MenuLayoutProps {
 
 const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const location = useLocation();
+  const history = useHistory();
 
   function openMenu() {
     menuController.open();
@@ -40,8 +41,13 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           </>
         );
       case paths.HISTORY:
+      case paths.TRANSLATOR:
       case paths.DICTIONARY:
-        return <IconCloseCircle color="#2365DE" />;
+        return (
+          <button onClick={() => history.goBack()} type="button">
+            <IconCloseCircle color="#2365DE" />
+          </button>
+        );
 
       case paths.ABOUT:
         return <IconShare color="#4B4B4B" />;
@@ -49,7 +55,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
       default:
         return null;
     }
-  }, [location]);
+  }, [location, history]);
 
   return (
     <IonPage>
