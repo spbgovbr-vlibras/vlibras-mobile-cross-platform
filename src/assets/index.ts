@@ -76,6 +76,7 @@ import logoUfpb from './images/ufpb_logo.png';
 import logoMaos from './images/union.svg';
 import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
+<<<<<<< HEAD
 import logoPlay from './images/icon_play.svg';
 import logoClose from './images/x-circle.svg';
 import logoAnswer from './images/responder-icon.svg';
@@ -87,6 +88,9 @@ import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
 
+=======
+import Vlibraslogo from './images/vlibraslogo.png';
+>>>>>>> dev
 
 export {
   LogoIcaro,
@@ -134,6 +138,7 @@ export {
   logoSergipe,
   logoTocantins,
   LogoVlibrasIcaro,
+  Vlibraslogo,
   IconTranslate,
   IconRegionalism,
   IconDictionary,

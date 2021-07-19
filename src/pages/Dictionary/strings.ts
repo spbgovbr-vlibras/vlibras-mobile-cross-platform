@@ -8,7 +8,4 @@ export const Strings = {
   TEXT_PLACEHOLDER: 'Buscar sinal',
   CHIP_TEXT_SUGGESTIONS_1: 'A-Z',
   CHIP_TEXT_SUGGESTIONS_2: 'Recentes',
-  CHIP_TEXT_SUGGESTIONS_3: 'Saúde',
-  CHIP_TEXT_SUGGESTIONS_4: 'Educação',
-  CHIP_TEXT_SUGGESTIONS_5: 'Trânsito',
 };

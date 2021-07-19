@@ -33,11 +33,11 @@ function App() {
   }, []);
 
   return (
-    <Provider store={store}>
-      <IonApp>
+    <IonApp>
+      <Provider store={store}>
         <Routes />
-      </IonApp>
-    </Provider>
+      </Provider>
+    </IonApp>
   );
 }
 

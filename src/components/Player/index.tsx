@@ -1,18 +1,18 @@
 import React, { useRef, useState } from 'react';
 
+import { useHistory } from 'react-router';
 import Unity from 'react-unity-webgl';
 
 import {
   IconDictionary,
-  IconMic,
   IconHistory,
   IconEdit,
   IconPauseOutlined,
-  IconClose,
   IconSubtitle,
   IconRunning,
   IconPause,
 } from 'assets';
+import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import PlayerService from 'services/unity';
 
@@ -42,6 +42,8 @@ function toInteger(flag: boolean): number {
 }
 
 function Player() {
+  const history = useHistory();
+
   // Dynamic states [MA]
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -68,10 +70,11 @@ function Player() {
   let glossLen = UNDEFINED_GLOSS;
 
   window.CounterGloss = (counter: number, glossLength: number) => {
-    if (glossLen === UNDEFINED_GLOSS) {
+    if (glossLen === UNDEFINED_GLOSS && GLOSS_TEXT.length < counter) {
       glossLen = counter;
-      console.log(glossLen);
     }
+
+    console.log(GLOSS_TEXT.split(' ').length);
 
     const progress = ((glossLen - counter - 1) / glossLen) * 100;
 
@@ -147,12 +150,6 @@ function Player() {
             )}
           </button>
           <button
-            className="player-action-button player-action-button-microphone"
-            type="button"
-          >
-            <IconClose color={buttonColors.VARIANT_BLUE} size={32} />
-          </button>
-          <button
             className="player-action-button-transparent"
             type="button"
             onClick={handleSubtitle}
@@ -173,24 +170,17 @@ function Player() {
     //   return (
     //     <>
     //       <button className="player-action-button-transparent" type="button">
-    //         <IconRunning color={buttonColors.VARAINT_WHITE} />
+    //         <IconDictionary color={buttonColors.VARAINT_WHITE} />
     //       </button>
     //       <button
     //         className="player-action-button player-action-button-insert"
     //         type="button"
-    //         onClick={triggerProgress}
+    //         onClick={() => handlePlay(GLOSS_TEXT)}
     //       >
     //         <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
     //       </button>
-    //       <button
-    //         className="player-action-button player-action-button-microphone"
-    //         type="button"
-    //         onClick={handleResetActionButton}
-    //       >
-    //         <IconClose color={buttonColors.VARIANT_BLUE} size={32} />
-    //       </button>
     //       <button className="player-action-button-transparent" type="button">
-    //         <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
+    //         <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
     //       </button>
     //     </>
     //   );
@@ -203,17 +193,15 @@ function Player() {
         <button
           className="player-action-button player-action-button-insert"
           type="button"
-          onClick={() => handlePlay(GLOSS_TEXT)}
+          onClick={() => history.push(paths.TRANSLATOR)}
         >
           <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
         </button>
         <button
-          className="player-action-button player-action-button-microphone"
+          className="player-action-button-transparent"
           type="button"
+          onClick={() => history.push(paths.HISTORY)}
         >
-          <IconMic color={buttonColors.VARIANT_BLUE} size={24} />
-        </button>
-        <button className="player-action-button-transparent" type="button">
           <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
         </button>
       </>

@@ -68,8 +68,13 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           </>
         );
       case paths.HISTORY:
+      case paths.TRANSLATOR:
       case paths.DICTIONARY:
-        return <IconCloseCircle color="#2365DE" />;
+        return (
+          <button onClick={() => history.goBack()} type="button">
+            <IconCloseCircle color="#2365DE" />
+          </button>
+        );
 
       case paths.ABOUT:
         return <IconShare color="#4B4B4B" />;
@@ -77,7 +82,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
       default:
         return null;
     }
-  }, [location]);
+  }, [location, history]);
 
   return (
     <IonPage>

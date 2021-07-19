@@ -25,6 +25,10 @@
   margin-right: 16px;
 }
 
+.menu-container-end button {
+  background: none;
+}
+
 .menu-item-text {
   font-family: Rawline;
   font-style: normal;

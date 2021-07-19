@@ -1,5 +1,7 @@
+/* eslint-disable import/order */
 import React from 'react';
 
+import { menuController } from '@ionic/core';
 import {
   IonMenu,
   IonHeader,
@@ -8,18 +10,27 @@ import {
   IonItem,
   IonListHeader,
   IonLabel,
+  IonIcon,
 } from '@ionic/react';
+<<<<<<< HEAD
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
+=======
+import { useHistory, useLocation } from 'react-router-dom';
+
+>>>>>>> dev
 import {
-  LogoVlibrasIcaro,
   IconTranslate,
   IconDictionary,
   IconRegionalism,
   IconIcaro,
   IconTutorial,
+<<<<<<< HEAD
   IconDomain,
+=======
+  Vlibraslogo,
+>>>>>>> dev
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
@@ -47,6 +58,12 @@ function getColor(value: string, expected: string): string {
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
   const location = useLocation();
+  const history = useHistory();
+
+  function navLink(path: string) {
+    history.push(path);
+    menuController.close();
+  }
 
   const isVideoScreen = useSelector(
     ({ video }: RootState) => video.isVideoScreen,
@@ -65,7 +82,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      routerLink={tab}
+      onClick={() => navLink(tab)}
     >
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
@@ -84,7 +101,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   return (
     <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
       <IonHeader className="drawer-menu-container" mode="ios">
-        <IonImg className="drawer-menu-image-header" src={LogoVlibrasIcaro} />
+        <div className="drawer-menu-header-logo">
+          <IonImg className="drawer-menu-image-header" src={Vlibraslogo} />
+          <IonLabel className="drawer-menu-header-label">
+            {Strings.HEADER_VLIBRAS_LABEL}
+          </IonLabel>
+        </div>
         <IonList lines="none">
           <IonListHeader>
             <IonLabel className="drawer-menu-title-header">
