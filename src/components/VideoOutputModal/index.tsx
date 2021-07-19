@@ -22,8 +22,8 @@ interface VideoOutputModalProps {
 }
 
 const unityContent = new UnityContent(
-  'player/playerweb.json',
-  'player/UnityLoader.js',
+  'Build-Final/Build/Build Final.json',
+  'Build-Final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
@@ -64,6 +64,7 @@ const VideoOutputModal = ({
     unityContent.send(PLAYER_MANAGER, 'setURL', '');
     unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
     unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
+    unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 0);
   };
 
   useEffect(() => {
@@ -72,6 +73,7 @@ const VideoOutputModal = ({
       unityContent.send(PLAYER_MANAGER, 'setURL', '');
       unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
       unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
+      unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 0);
     }
   }, [outputs, showModal]);
 

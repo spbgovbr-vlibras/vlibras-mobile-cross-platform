@@ -78,6 +78,7 @@ import logoAvatares from './images/vlibras-characters.png';
 import logoYoutube from './images/youtube_logo.png';
 import logoPlay from './images/icon_play.svg';
 import logoClose from './images/x-circle.svg';
+import logoWarning from './images/x-warning.svg';
 import logoAnswer from './images/responder-icon.svg';
 import logoHistory from './images/history.svg';
 import logoTranslate from './images/translate.svg';
@@ -170,5 +171,6 @@ export {
   IconRefresh,
   IconRunning,
   IconSubtitle,
-  IconPauseOutlined
+  IconPauseOutlined,
+  logoWarning
 };
