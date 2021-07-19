@@ -12,25 +12,18 @@ import {
   IonLabel,
   IonIcon,
 } from '@ionic/react';
-<<<<<<< HEAD
-import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
-=======
 import { useHistory, useLocation } from 'react-router-dom';
 
->>>>>>> dev
 import {
   IconTranslate,
   IconDictionary,
   IconRegionalism,
   IconIcaro,
   IconTutorial,
-<<<<<<< HEAD
   IconDomain,
-=======
   Vlibraslogo,
->>>>>>> dev
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
