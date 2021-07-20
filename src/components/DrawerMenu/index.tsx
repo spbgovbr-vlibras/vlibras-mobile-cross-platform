@@ -147,3 +147,42 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
 }
 
 export default DrawerMenu;
+
+/* const NavigationButton = (tab: string,
+  title: string,
+  IconComponent: React.ComponentType<SVGProps>,
+  selectable: boolean,) => {
+  let history = useHistory();
+
+   function renderItemTab (tab: string,
+  title: string,
+  IconComponent: React.ComponentType<SVGProps>,
+  selectable: boolean,){
+<IonItem
+    className={
+      selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
+    }
+    detail={false}
+    //routerLink={tab}
+  >
+    <IconComponent
+      color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
+    />
+    <span className="drawer-menu-item-label">{title}</span>
+
+    {title === Strings.TITLE_MENU_DOMAIN && (
+      <>
+        <p className="drawer-menu-sub-item"> {domain} </p>
+        <div className="arrow-down"> </div>
+      </>
+    )}
+  </IonItem>
+
+  function handleClick(tab:string) {
+        history.push(tab);
+      }
+
+  handleClick(tab);
+ 
+} 
+*/ 

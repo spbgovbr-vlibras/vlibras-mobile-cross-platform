@@ -5,16 +5,23 @@ import { createAction, ActionType } from 'typesafe-actions';
 
 export const Types = {
   SET_CURRENT_REGIONALISM: '@regionalism/SET_CURRENT_REGIONALISM',
+// A action que vai ser disparada
 };
 
 export interface RegionalismState {
   current: string;
-  // estado da aplicação
+  // estado da aplicação(?)
+  //data type
+  //formato da informação que vai estar dentro do reducer
 }
 
 const INITIAL_STATE: RegionalismState = {
-  current: '',
+  current: ' ',
+  //State Type
+  // o formato que vai ser armazenado pelo reducer
 };
+
+//colocar tudo isso aqui em uma pasta chamada type que fica todos os types do redux do codigo
 
 export const Creators = {
   setCurrentRegionalism: createAction(Types.SET_CURRENT_REGIONALISM)<string>(),
