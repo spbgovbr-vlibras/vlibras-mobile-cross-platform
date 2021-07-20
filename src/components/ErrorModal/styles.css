@@ -1,0 +1,40 @@
+.error-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.error-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 200px;
+  margin: 0px 70px;
+}
+
+.error-modal .ion-page {
+  padding: 16px 20px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.error-modal .modal-title {
+  color: var(--ion-color-modal-title);
+
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+
+.error-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+
+.error-modal .loading {
+  width: 50px;
+  height: 50px;
+}
