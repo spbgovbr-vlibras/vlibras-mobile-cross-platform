@@ -9,7 +9,6 @@ export const Types = {
 
 export interface RegionalismState {
   current: string;
-  // estado da aplicação
 }
 
 const INITIAL_STATE: RegionalismState = {
@@ -31,7 +30,6 @@ const reducer: Reducer<RegionalismState, ActionTypes> = (
     switch (type) {
       case Types.SET_CURRENT_REGIONALISM:
         draft.current = payload;
-
         break;
 
       default:

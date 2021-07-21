@@ -2,7 +2,7 @@ import React from 'react';
 
 import { IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Route } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 
 import { DrawerMenu } from 'components';
 
@@ -20,19 +20,19 @@ const CONTENT_ID = '@vlibras/mobile';
 
 function Routes() {
   return (
-    <>
-      <DrawerMenu contentId={CONTENT_ID} />
+    <BrowserRouter>
       <IonReactRouter>
+        <DrawerMenu contentId={CONTENT_ID} />
         <IonRouterOutlet id={CONTENT_ID}>
           <Route exact component={Home} path={paths.HOME} />
-          <Route exact component={Historic} path={paths.HISTORY} />
-          <Route exact component={About} path={paths.ABOUT} />
-          <Route exact component={Dictionary} path={paths.DICTIONARY} />
-          <Route exact component={Regionalism} path={paths.REGIONALISM} />
-          <Route exact component={Translator} path={paths.TRANSLATOR} />
+          <Route component={Historic} path={paths.HISTORY} />
+          <Route component={About} path={paths.ABOUT} />
+          <Route component={Dictionary} path={paths.DICTIONARY} />
+          <Route component={Regionalism} path={paths.REGIONALISM} />
+          <Route component={Translator} path={paths.TRANSLATOR} />
         </IonRouterOutlet>
       </IonReactRouter>
-    </>
+    </BrowserRouter>
   );
 }
 

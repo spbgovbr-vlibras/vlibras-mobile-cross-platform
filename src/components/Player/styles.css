@@ -41,8 +41,7 @@
 }
 
 .player-action-button-insert {
-  margin-right: 4px;
-  margin-left: 38px;
+  margin: 0 60px;
 }
 
 .player-progress-container {
