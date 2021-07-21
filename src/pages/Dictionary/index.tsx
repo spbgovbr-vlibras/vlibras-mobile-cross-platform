@@ -1,45 +1,41 @@
-import React, { useCallback, useDebugValue, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-// eslint-disable-next-line import/order
 import {
-  IonButton,
   IonChip,
   IonContent,
-  IonIcon,
-  IonImg,
   IonItem,
   IonList,
-  IonListHeader,
   IonSearchbar,
   IonText,
-  IonTextarea,
 } from '@ionic/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-
 import { debounce } from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { MenuLayout } from '../../layouts';
-import api from '../../services/api';
+import { MenuLayout } from 'layouts';
+import { Words } from 'models/dictionary';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/dictionary';
+
 import { Strings } from './strings';
 
 import './styles.css';
 
 function Dictionary() {
-  const renderWord = (item: string) => (
+  const dispatch = useDispatch();
+  const dictionary = useSelector(
+    ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
+  );
+  const renderWord = (item: Words) => (
     <IonItem class="dictionary-word-item">
-      <IonText class="dictionary-words-style">{item}</IonText>
+      <IonText class="dictionary-words-style">{item.name}</IonText>
     </IonItem>
   );
 
   const TIME_DEBOUNCE_MS = 0;
-  const [dictionary, setDictionary] = useState<string[]>([]);
-  const [words, setWords] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
 
-  const onSearch = useCallback(value => {
-    const input = words.filter(item => item.includes(value.toUpperCase()));
-    setDictionary(input);
-  }, []);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const onSearch = useCallback(value => {}, []);
 
   const debouncedSearch = useCallback(debounce(onSearch, TIME_DEBOUNCE_MS), [
     onSearch,
@@ -54,15 +50,7 @@ function Dictionary() {
   );
 
   useEffect(() => {
-    api
-      .get('/api/signs')
-      .then(response => {
-        setDictionary(response.data);
-        setWords(response.data);
-      })
-      .catch(err => {
-        console.error(`Segue o retorno:${err}`);
-      });
+    dispatch(Creators.fetchWords.request({ page: 1, limit: 10 }));
   }, []);
 
   return (
