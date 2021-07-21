@@ -2,6 +2,7 @@
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
+import regionalismData from 'data/regionalism';
 
 export const Types = {
   SET_CURRENT_REGIONALISM: '@regionalism/SET_CURRENT_REGIONALISM',
@@ -12,7 +13,7 @@ export interface RegionalismState {
 }
 
 const INITIAL_STATE: RegionalismState = {
-  current: '',
+  current: regionalismData[0].name,
 };
 
 export const Creators = {
