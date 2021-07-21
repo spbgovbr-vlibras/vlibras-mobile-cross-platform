@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
 import { IonText, IonButton, IonTextarea, IonContent } from '@ionic/react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import { PlayerKeys } from 'constants/player';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
+import paths from '../../constants/paths';
 
 import { Strings } from './strings';
 
@@ -19,7 +20,7 @@ function Translator() {
   const history = useHistory();
 
   function translate() {
-    history.goBack();
+    history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 

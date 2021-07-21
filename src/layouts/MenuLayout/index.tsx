@@ -35,19 +35,15 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
     menuController.open();
   }
 
-  function switchBetweenTranslators(path: string, videoScreen: boolean) {
-    dispatch(Creators.setIsVideoScreen(videoScreen));
-    history.push(path);
-  }
-
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
       case paths.HOME:
+        dispatch(Creators.setIsVideoScreen(false));
         return (
           <>
             <span
               className="menu-item-text"
-              onClick={() => switchBetweenTranslators(paths.ONBOARDING, true)}
+              onClick={() => history.push(paths.ONBOARDING)}
             >
               {Strings.MENU_PT_BR}
             </span>
@@ -56,11 +52,12 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         );
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
+        dispatch(Creators.setIsVideoScreen(true));
         return (
           <>
             <span
               className="menu-item-text"
-              onClick={() => switchBetweenTranslators(paths.HOME, false)}
+              onClick={() => history.push(paths.HOME)}
             >
               LIBRAS
             </span>

@@ -27,17 +27,24 @@ function Historic() {
   const [results, setResults] = useState([]);
 
   const renderItems = () => {
-    return translationsHistoric.map((item: any) => {
-      return (
-        <div
-          className="container-outputs"
-          onClick={() => openModalOutput(item)}
-        >
-          {item.map((value: string, key: string) => (
-            <span key={key}>{value}</span>
-          ))}
-        </div>
-      );
+    const datesMapped = Object.keys(translationsHistoric).reverse();
+
+    return datesMapped.map(column => {
+      return translationsHistoric[column].map((item: any, key: any) => {
+        return (
+          <div>
+            {key === 0 && <p className="date-desc"> {column} </p>}
+            <div
+              className="container-outputs"
+              onClick={() => openModalOutput(item)}
+            >
+              {item.map((value: string, key: string) => (
+                <span key={key}>{value}</span>
+              ))}
+            </div>
+          </div>
+        );
+      });
     });
   };
 

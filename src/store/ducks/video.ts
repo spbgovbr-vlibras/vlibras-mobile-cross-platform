@@ -2,6 +2,7 @@
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
+import dateFormat from 'utils/dateFormat';
 
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
@@ -24,7 +25,7 @@ const INITIAL_STATE: VideoState = {
   lastTranslate: [],
   domain: 'Saúde',
   isVideoScreen: false,
-  translationsHistoric: []
+  translationsHistoric: {}
 };
 
 export const Creators = {
@@ -47,8 +48,15 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.current = payload;
         break;
       case Types.SET_LAST_TRANSLATOR:
-        draft.lastTranslate = payload;
-        draft.translationsHistoric = [...draft.translationsHistoric, payload]
+        draft.lastTranslate = payload.data;
+
+        const dateFormatted = dateFormat(payload.date)
+        if (draft.translationsHistoric[dateFormatted]) {
+          draft.translationsHistoric[dateFormatted].unshift(payload.data)
+        } else {
+          draft.translationsHistoric[dateFormatted] = [payload.data]
+        }
+
         break;
       case Types.SET_DOMAIN:
         draft.domain = payload;

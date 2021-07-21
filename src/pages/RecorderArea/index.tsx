@@ -55,7 +55,7 @@ const RecorderArea = () => {
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
-  const takeVideoMock = async () => {
+  const takeVideo = async () => {
     //mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -75,7 +75,7 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideo = async () => {
+  const takeVideoOficial = async () => {
     try {
       const options = { limit: 1, duration: 30 };
       let mediafile = await VideoCapturePlus.captureVideo(options);
@@ -192,9 +192,7 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
           else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
-          // arrayOfResults.push('dor de cabeça', 'alergia');
           setShowErrorModal([true, 'Erro ao enviar vídeo']);
-
           console.log(e);
         }
       }),
@@ -203,7 +201,13 @@ const RecorderArea = () => {
     setLoading(false);
 
     if (arrayOfResults.length != 0) {
-      dispatch(Creators.setLastTranslator(arrayOfResults));
+      const today = new Date();
+      dispatch(
+        Creators.setLastTranslator({
+          data: arrayOfResults,
+          date: today.toLocaleDateString('pt-BR'),
+        }),
+      );
       setResults(arrayOfResults);
       setShowModal(true);
       setLoading(false);
