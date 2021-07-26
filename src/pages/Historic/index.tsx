@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   IonChip,
@@ -11,6 +11,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
 import { VideoOutputModal } from '../../components';
+import { NativeStorage } from '@ionic-native/native-storage';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { MenuLayout } from '../../layouts';
@@ -25,12 +26,32 @@ function Historic() {
 
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
+  const [log, setLog] = useState([]);
+
+  const [historyStorage, setHistoryStorage] = useState<any>({});
+
+  const promiseHistory = NativeStorage.getItem('history').then(
+    data => data,
+    error => {
+      setLog(error);
+      return {};
+    },
+  );
+
+  const loadHistory = async () => {
+    const resultPromise = await promiseHistory;
+    setHistoryStorage(resultPromise);
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
 
   const renderItems = () => {
-    const datesMapped = Object.keys(translationsHistoric).reverse();
+    const datesMapped = Object.keys(historyStorage).reverse();
 
     return datesMapped.map(column => {
-      return translationsHistoric[column].map((item: any, key: any) => {
+      return historyStorage[column].map((item: any, key: any) => {
         return (
           <div>
             {key === 0 && <p className="date-desc"> {column} </p>}
@@ -92,6 +113,8 @@ function Historic() {
             <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
           </div>
           {renderItems()}
+
+          {log}
 
           <VideoOutputModal
             outputs={results}
