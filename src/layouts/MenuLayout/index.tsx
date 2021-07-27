@@ -11,6 +11,9 @@ import {
   IonLabel,
 } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+import { useDispatch } from 'react-redux';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
@@ -26,6 +29,7 @@ interface MenuLayoutProps {
 const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const location = useLocation();
   const history = useHistory();
+  const dispatch = useDispatch();
 
   function openMenu() {
     menuController.open();
@@ -34,9 +38,29 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
       case paths.HOME:
+        dispatch(Creators.setIsVideoScreen(false));
         return (
           <>
-            <IonLabel className="menu-item-text">{Strings.MENU_PT_BR}</IonLabel>
+            <span
+              className="menu-item-text"
+              onClick={() => history.push(paths.ONBOARDING)}
+            >
+              {Strings.MENU_PT_BR}
+            </span>
+            <IconTranslate color="#2365DE" />
+          </>
+        );
+      case paths.RECORDERAREA:
+      case paths.ONBOARDING:
+        dispatch(Creators.setIsVideoScreen(true));
+        return (
+          <>
+            <span
+              className="menu-item-text"
+              onClick={() => history.push(paths.HOME)}
+            >
+              LIBRAS
+            </span>
             <IconTranslate color="#2365DE" />
           </>
         );
@@ -58,7 +82,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   }, [location, history]);
 
   return (
-    <IonPage>
+    <IonPage className="menu-layout-container">
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">{title}</IonTitle>

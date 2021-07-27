@@ -7,6 +7,10 @@
   color: #1447a6;
 }
 
+.menu-layout-container {
+  background-color: white;
+}
+
 .menu-icon-drawer {
   color: #1447a6;
 }
@@ -14,7 +18,7 @@
 .menu-icon-share {
   width: 18px;
   height: 18px;
-  color: #4B4B4B;
+  color: #4b4b4b;
 }
 
 .menu-container-end {

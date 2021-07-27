@@ -1,0 +1,202 @@
+.menu-toolbar-title-signalcap {
+  font-family: Roboto;
+  font-size: 18px;
+  text-align: center;
+  margin-left: 24px;
+  color: #969696;
+  font-weight: 700;
+}
+
+.new-recorder-area {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  background: white;
+  padding: 15px;
+}
+
+.new-recorder-area .area-button-recorder {
+  margin: 10px;
+}
+
+.list-captures {
+  background: #e5e5e5;
+  height: 100%;
+  padding: 5px 16px;
+}
+
+.progress-recorder {
+  font-family: Rawline;
+  font-size: 14px;
+  color: #565656;
+  margin-top: 0px;
+}
+
+.item-recorder {
+  margin: 10px 0px;
+  height: 70px;
+  background: white;
+  --inner-border-width: 0px;
+  border-radius: 8px;
+  box-shadow: 5px 5px 2px #e0e0e0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.video-thumb {
+  width: 45px;
+  height: 45px;
+}
+
+.video-metadata {
+  font-family: Roboto;
+  margin-left: 15px;
+}
+.video-metadata .name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.video-metadata .size {
+  font-size: 13px;
+  color: #969696;
+  margin-top: -10px;
+}
+
+.video-icon-delete {
+  position: absolute;
+  right: 20px;
+}
+.area-button-recorder {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.area-button-recorder .tooltiptext {
+  visibility: hidden;
+  width: 130px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 30px;
+  font-family: Rawline;
+  font-size: 12px;
+
+  /* Posição do tooltip text */
+  position: absolute;
+  bottom: 110%;
+  left: -30px;
+
+  /* transição do tooltip */
+  opacity: 1;
+  transition-duration: 2s;
+}
+
+/* Mostra o tooltip text quando o mouse passa por cima do tooltip container */
+.area-button-recorder:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+.popup-box-signal-cap .alert-message.sc-ion-alert-md {
+  font-family: Rawline;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px;
+  letter-spacing: 0em;
+  text-align: center;
+  /* Altera a mensagem do popup*/
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 3px;
+  bottom: 45%;
+  width: 100%;
+}
+
+.popup-box-signal-cap.sc-ion-alert-md-h {
+  --backdrop-opacity: var(--ion-backdrop-opacity, 0.8);
+}
+
+.popup-box-signal-cap .alert-title.sc-ion-alert-md {
+  font-family: Rawline;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 27px;
+  letter-spacing: 0em;
+  text-align: center;
+
+  /* Altera o titulo do popup */
+
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+
+  color: #000000;
+}
+
+.popup-box-signal-cap .alert-wrapper.sc-ion-alert-md {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: var(--width);
+  min-width: var(--min-width);
+  max-width: var(--max-width);
+  height: var(--height);
+  min-height: var(--min-height);
+  max-height: var(--max-height);
+  background: var(--background);
+  contain: content;
+  opacity: 0;
+  z-index: 10;
+  background: #ffffff;
+  border-radius: 8px;
+  position: absolute;
+  font-size: 18px;
+  width: 224px;
+  height: 128px;
+  /* Altera a box */
+}
+.popup-box-signal-cap .alert-button-group.sc-ion-alert-md {
+  justify-content: center;
+  padding-right: 35px;
+}
+
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md {
+  color: gray;
+  height: 24px;
+  width: 45px;
+  left: 16px;
+  top: 18px;
+  font-family: Rawline;
+  font-weight: 700;
+  color: var(--ion-color-modal-title);
+  font-size: 16px;
+}
+
+.popup-box-signal-cap .popup-no.alert-button.sc-ion-alert-md {
+  color: gray;
+  height: 24px;
+  width: 45px;
+  left: 22px;
+  top: 18px;
+  font-family: Rawline;
+  font-weight: 700;
+  font-size: 16px;
+}
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
+  color: blue;
+}
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
+  color: blue;
+}

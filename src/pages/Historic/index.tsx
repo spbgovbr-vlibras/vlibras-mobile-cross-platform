@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   IonChip,
@@ -8,6 +8,10 @@ import {
   IonText,
   IonTextarea,
 } from '@ionic/react';
+import { useSelector } from 'react-redux';
+import { RootState } from 'store';
+import { VideoOutputModal } from '../../components';
+import { NativeStorage } from '@ionic-native/native-storage';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { MenuLayout } from '../../layouts';
@@ -16,6 +20,60 @@ import { Strings } from './strings';
 import './styles.css';
 
 function Historic() {
+  const translationsHistoric = useSelector(
+    ({ video }: RootState) => video.translationsHistoric,
+  );
+
+  const [showModal, setShowModal] = useState(false);
+  const [results, setResults] = useState([]);
+  const [log, setLog] = useState([]);
+
+  const [historyStorage, setHistoryStorage] = useState<any>({});
+
+  const promiseHistory = NativeStorage.getItem('history').then(
+    data => data,
+    error => {
+      setLog(error);
+      return {};
+    },
+  );
+
+  const loadHistory = async () => {
+    const resultPromise = await promiseHistory;
+    setHistoryStorage(resultPromise);
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const renderItems = () => {
+    const datesMapped = Object.keys(historyStorage).reverse();
+
+    return datesMapped.map(column => {
+      return historyStorage[column].map((item: any, key: any) => {
+        return (
+          <div>
+            {key === 0 && <p className="date-desc"> {column} </p>}
+            <div
+              className="container-outputs"
+              onClick={() => openModalOutput(item)}
+            >
+              {item.map((value: string, key: string) => (
+                <span key={key}>{value}</span>
+              ))}
+            </div>
+          </div>
+        );
+      });
+    });
+  };
+
+  const openModalOutput = (actualItem: any) => {
+    setShowModal(true);
+    setResults(actualItem);
+  };
+
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
@@ -54,17 +112,17 @@ function Historic() {
             />
             <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
           </div>
-          <div className="historic-container-ion-chips-box">
-            <IonChip class="historic-container-ion-chips-box-text-1">
-              {Strings.CHIP_TEXT__LIBRAS_1}
-            </IonChip>
-            <IonChip class="historic-container-ion-chips-box-text-2">
-              {Strings.CHIP_TEXT__LIBRAS_2}
-            </IonChip>
-            <IonChip class="historic-container-ion-chips-box-text-3">
-              {Strings.CHIP_TEXT__LIBRAS_3}
-            </IonChip>
-          </div>
+          {renderItems()}
+
+          {log}
+
+          <VideoOutputModal
+            outputs={results}
+            showButtons={false}
+            showModal={showModal}
+            setShowModal={setShowModal}
+            playerIntermedium={true}
+          />
         </div>
       </IonContent>
     </MenuLayout>

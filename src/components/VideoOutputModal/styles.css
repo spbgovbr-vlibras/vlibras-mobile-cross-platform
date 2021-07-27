@@ -1,0 +1,118 @@
+.videooutput-modal {
+  background: var(--ion-color-grey-65);
+  align-items: flex-end;
+}
+
+.videooutput-modal .modal-wrapper {
+  border-radius: 16px 16px 0px 0px;
+  height: 220px;
+  bottom: 0;
+}
+
+.videooutput-modal.player .modal-wrapper {
+  height: 420px;
+}
+
+.videooutput-modal.buttons-off .modal-wrapper {
+  height: 350px;
+}
+
+.videooutput-modal .ion-page {
+  padding: 16px 20px;
+}
+
+.videooutput-modal .modal-title {
+  font-weight: 700;
+  color: #4b4b4b;
+  font-size: 15px;
+  line-height: 20px;
+  font-family: Roboto;
+  text-align: center;
+}
+
+.videooutput-modal .modal-title img {
+  width: 24px;
+  height: 24px;
+  float: right;
+  cursor: pointer;
+}
+
+.videooutput-modal .container-outputs {
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  border-radius: 4px;
+  padding: 10px 8px;
+  overflow: hidden;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.videooutput-modal .container-outputs span {
+  font-family: Rawline;
+  border: 0.5px solid #1447a6;
+  background: #fff5cc;
+  color: #1447a6;
+  font-size: 14px;
+  line-height: 17.5px;
+  border-radius: 48px;
+  padding: 6px 12px;
+  margin-left: 3px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.videooutput-modal .list-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.videooutput-modal .list-buttons button img {
+  width: 20px;
+  height: 20px;
+}
+
+.videooutput-modal .list-buttons ion-button {
+  font-family: Roboto;
+  width: 20px;
+  height: 20px;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 23.2px;
+  text-align: center;
+  width: 140px;
+  height: 40px;
+  --border-radius: 24px;
+  margin: 5px;
+  margin-top: 20px;
+  text-transform: none;
+  letter-spacing: 0px;
+}
+
+.videooutput-modal .list-buttons ion-button img {
+  margin-right: 8px;
+}
+
+.videooutput-modal .list-buttons ion-button .logo-union {
+  filter: brightness(10);
+}
+
+.videooutput-modal .list-buttons .answer-button {
+  --background: #d6e5f9;
+  color: #1447a6;
+}
+
+.videooutput-modal .list-buttons .newsign-button {
+  --background: #1447a6;
+  color: white;
+}
+
+.videooutput-modal .player {
+  height: 200px;
+}
+
+.videooutput-modal .player-video-output {
+  border: 1px solid #1447a6 !important;
+  width: 70% !important;
+  margin: auto !important;
+  border-radius: 1px !important;
+}

@@ -6,4 +6,8 @@ export default {
   TRANSLATOR: '/translator',
   TUTORIAL: '/tutorial',
   DICTIONARY: '/dictionary',
+  RECORDERAREA: '/recorder-area',
+  DOMAIN: '/domain',
+  ONBOARDING: '/onboarding',
+  SIGNALCAPTURE: '/signal-capture'
 };

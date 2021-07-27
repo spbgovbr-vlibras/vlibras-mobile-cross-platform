@@ -14,6 +14,10 @@ import {
   Dictionary,
   Regionalism,
   Translator,
+  Domain,
+  OnBoarding,
+  SignalCapture,
+  RecorderArea,
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
@@ -30,6 +34,10 @@ function Routes() {
           <Route component={Dictionary} path={paths.DICTIONARY} />
           <Route component={Regionalism} path={paths.REGIONALISM} />
           <Route component={Translator} path={paths.TRANSLATOR} />
+          <Route component={RecorderArea} path={paths.RECORDERAREA} />
+          <Route component={Domain} path={paths.DOMAIN} />
+          <Route component={OnBoarding} path={paths.ONBOARDING} />
+          <Route component={SignalCapture} path={paths.SIGNALCAPTURE} />
         </IonRouterOutlet>
       </IonReactRouter>
     </BrowserRouter>

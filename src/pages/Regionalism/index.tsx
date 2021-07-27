@@ -17,9 +17,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 import regionalismData from 'data/regionalism';
-import { MenuLayout } from '../../layouts';
-import { RootState } from '../../store';
-import { Creators } from '../../store/ducks/regionalism';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/regionalism';
 import { Strings } from './strings';
 
 
@@ -34,6 +34,7 @@ function Regionalism() {
   const dispatch = useDispatch();
   const location = useLocation();
   const history = useHistory();
+
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current,
   );
@@ -49,12 +50,11 @@ function Regionalism() {
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
     setregionalism(evt.detail.value)
   }
+  
   function SaveRegionalism() {
     dispatch(Creators.setCurrentRegionalism(regionalism));
     history.goBack()
-
   }
-  console.log(currentRegionalism);
 
   return (
     <MenuLayout title={Strings.REGIONALISM_TITLE}>
@@ -67,7 +67,7 @@ function Regionalism() {
               </IonText>
             </IonListHeader>
             <IonRadioGroup
-              value={Regionalism}
+              value={regionalism}
               onIonChange={handleOnChange}
             >
             
