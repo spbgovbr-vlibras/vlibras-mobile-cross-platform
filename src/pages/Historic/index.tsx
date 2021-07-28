@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from 'store';
 import { VideoOutputModal } from '../../components';
 import { NativeStorage } from '@ionic-native/native-storage';
+import dateFormat from 'utils/dateFormat';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { MenuLayout } from '../../layouts';
@@ -48,24 +49,36 @@ function Historic() {
   }, []);
 
   const renderItems = () => {
-    const datesMapped = Object.keys(historyStorage).reverse();
+    //if you are mocking the app to use it on ur browser,
+    //you must use the object translationsHistoric instead historyStorage
+
+    // const datesMapped = Object.keys(historyStorage).reverse();
+    console.log(translationsHistoric);
+    const datesMapped = Object.keys(translationsHistoric).reverse();
 
     return datesMapped.map(column => {
-      return historyStorage[column].map((item: any, key: any) => {
-        return (
-          <div>
-            {key === 0 && <p className="date-desc"> {column} </p>}
-            <div
-              className="container-outputs"
-              onClick={() => openModalOutput(item)}
-            >
-              {item.map((value: string, key: string) => (
-                <span key={key}>{value}</span>
-              ))}
-            </div>
-          </div>
+      if (translationsHistoric[column]['video']) {
+        return translationsHistoric[column]['video'].map(
+          (item: any, key: any) => {
+            // return historyStorage[column].map((item: any, key: any) => {
+            return (
+              <div>
+                {key === 0 && (
+                  <p className="date-desc"> {dateFormat(column)} </p>
+                )}
+                <div
+                  className="container-outputs"
+                  onClick={() => openModalOutput(item)}
+                >
+                  {item.map((value: string, key: string) => (
+                    <span key={key}>{value}</span>
+                  ))}
+                </div>
+              </div>
+            );
+          },
         );
-      });
+      }
     });
   };
 
@@ -113,9 +126,6 @@ function Historic() {
             <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
           </div>
           {renderItems()}
-
-          {log}
-
           <VideoOutputModal
             outputs={results}
             showButtons={false}

@@ -177,8 +177,8 @@ const RecorderArea = () => {
 
         try {
           const resultRequest = await axios.post(
-            // 'http://127.0.0.1:5000/api/v1/recognition',
-            'http://lavid.nsa.root.sx:3000/api/v1/recognition',
+            'http://127.0.0.1:5000/api/v1/recognition',
+            // 'http://lavid.nsa.root.sx:3000/api/v1/recognition',
             form,
             {
               headers: {
@@ -206,6 +206,7 @@ const RecorderArea = () => {
         Creators.setLastTranslator({
           data: arrayOfResults,
           date: today.toLocaleDateString('pt-BR'),
+          key: 'video',
         }),
       );
       setResults(arrayOfResults);

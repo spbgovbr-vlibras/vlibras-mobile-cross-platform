@@ -2,8 +2,7 @@
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
-import dateFormat from 'utils/dateFormat';
-import { NativeStorage } from '@ionic-native/native-storage';
+import { reloadHistory } from 'utils/setHistory';
 
 
 export const Types = {
@@ -39,30 +38,6 @@ export const Creators = {
 
 export type ActionTypes = ActionType<typeof Creators>;
 
-const loadHistory = async (payloadDate: any, payloadData: any) => {
-  const promiseHistory = NativeStorage.getItem('history').then(
-    data => data,
-    error => {
-      return {};
-    },
-  );
-
-  const resultPromise = await promiseHistory;
-  const dateFormatted = dateFormat(payloadDate)
-
-  if (resultPromise[dateFormatted]) {
-    resultPromise[dateFormatted].unshift(payloadData)
-  } else {
-    resultPromise[dateFormatted] = [payloadData]
-  }
-
-  NativeStorage.setItem('history', resultPromise)
-  .then(
-  () => console.log(NativeStorage.getItem('myitem')),
-  error => console.error('Error storing item', error)
-  );
-
-}
 
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
@@ -75,8 +50,23 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.current = payload;
         break;
       case Types.SET_LAST_TRANSLATOR:
-        draft.lastTranslate = payload.data;
-        loadHistory(payload.date, payload.data);
+        // draft.lastTranslate = payload.data;
+        draft.lastTranslate = ['alo']; //mock
+
+        reloadHistory(payload.date, payload.data, payload.key);
+ 
+        //mock
+        if (draft.translationsHistoric[payload.date]) {  
+          if (draft.translationsHistoric[payload.date][payload.key]) {
+            draft.translationsHistoric[payload.date][payload.key].unshift(payload.data)
+          } else {
+            draft.translationsHistoric[payload.date][payload.key] = []
+            draft.translationsHistoric[payload.date][payload.key].unshift(payload.data)
+          }
+        } else {
+          draft.translationsHistoric[payload.date] = {}
+          draft.translationsHistoric[payload.date][payload.key] = [payload.data]          
+        }
  
         break;
       case Types.SET_DOMAIN:
