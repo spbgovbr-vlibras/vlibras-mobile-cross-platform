@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IonModal, IonButton } from '@ionic/react';
-import { logoPlay, logoClose, logoMaos, logoAnswer } from '../../assets';
+import { logoPlay, logoClose, cameraBlue, logoAnswer } from '../../assets';
 import './styles.css';
 import Player from 'components/Player';
 import { Creators } from 'store/ducks/video';
@@ -117,11 +117,11 @@ const VideoOutputModal = ({
                 history.push(paths.TRANSLATOR);
               }}
             >
-              <img src={logoAnswer}></img>
+              <img className="answer-button-logo" src={logoAnswer}></img>
               Responder
             </IonButton>
             <IonButton className="newsign-button" onClick={closeModal}>
-              <img className="logo-union" src={logoMaos}></img> Novo Sinal
+              <img className="logo-union" src={cameraBlue}></img> Novo Sinal
             </IonButton>
           </div>
         )}

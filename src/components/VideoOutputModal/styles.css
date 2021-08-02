@@ -92,13 +92,15 @@
   margin-right: 8px;
 }
 
-.videooutput-modal .list-buttons ion-button .logo-union {
-  filter: brightness(10);
+.videooutput-modal .list-buttons .answer-button {
+  --background: none;
+  color: var(--ion-color-grey-75);
+  border: 1px solid var(--ion-color-grey-1);
+  border-radius: 24px;
 }
 
-.videooutput-modal .list-buttons .answer-button {
-  --background: #d6e5f9;
-  color: #1447a6;
+.videooutput-modal .list-buttons .answer-button-logo {
+  filter: brightness(0);
 }
 
 .videooutput-modal .list-buttons .newsign-button {

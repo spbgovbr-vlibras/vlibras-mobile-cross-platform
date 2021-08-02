@@ -12,6 +12,8 @@ import IconHistory from './icons/IconHistory';
 import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
+import IconArrowLeft from './icons/IconArrowLeft';
+
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -83,10 +85,11 @@ import logoAnswer from './images/responder-icon.svg';
 import logoHistory from './images/history.svg';
 import logoTranslate from './images/translate.svg';
 import logoCapture from './images/capture.svg';
-import logoCaptureV2 from './images/capturev2.svg';
+import logoCaptureV2 from './images/captureSinal.svg';
 import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
+import cameraBlue from './images/camera-blue.svg';
 
 import Vlibraslogo from './images/vlibraslogo.png';
 
@@ -172,5 +175,7 @@ export {
   IconRunning,
   IconSubtitle,
   IconPauseOutlined,
-  logoWarning
+  logoWarning,
+  IconArrowLeft,
+  cameraBlue
 };

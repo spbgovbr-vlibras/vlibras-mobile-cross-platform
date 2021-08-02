@@ -9,12 +9,20 @@ import {
   IonLabel,
   IonItem,
   IonRadio,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonContent,
 } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
 import paths from '../../constants/paths';
 import { Creators } from 'store/ducks/video';
 import { RootState } from 'store';
 import { useSelector, useDispatch } from 'react-redux';
+
+import { IconArrowLeft } from '../../assets';
 
 import { Strings } from './strings';
 import './styles.css';
@@ -62,27 +70,43 @@ const Domain = () => {
   };
 
   return (
-    <MenuLayout title={Strings.TITLE_MENU}>
-      <IonList className="ion-list-domain">
-        <IonRadioGroup
-          className="ion-radio"
-          value={domain}
-          onIonChange={e => setDomain(e.detail.value)}
-        >
-          <IonListHeader>
-            <IonLabel className="title-domain">
-              Escolha o domínio para as traduções
-            </IonLabel>
-          </IonListHeader>
+    <IonPage>
+      <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <IonTitle className="menu-toolbar-title-signalcap">
+            {Strings.TITLE_MENU}
+          </IonTitle>
 
-          {renderItems()}
-        </IonRadioGroup>
-      </IonList>
+          <IonButtons slot="start">
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#969696" />
+            </div>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <IonList className="ion-list-domain">
+          <IonRadioGroup
+            className="ion-radio"
+            value={domain}
+            onIonChange={e => setDomain(e.detail.value)}
+          >
+            <IonListHeader>
+              <IonLabel className="title-domain">
+                Escolha o domínio para as traduções
+              </IonLabel>
+            </IonListHeader>
 
-      <IonButton className="save-domain" onClick={saveDomain}>
-        Salvar domínio
-      </IonButton>
-    </MenuLayout>
+            {renderItems()}
+          </IonRadioGroup>
+        </IonList>
+        <div className="button-container-domain">
+          <IonButton className="save-domain" onClick={saveDomain}>
+            Salvar domínio
+          </IonButton>
+        </div>
+      </IonContent>
+    </IonPage>
   );
 };
 

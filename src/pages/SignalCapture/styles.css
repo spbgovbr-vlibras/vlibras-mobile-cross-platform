@@ -1,10 +1,10 @@
 .menu-toolbar-title-signalcap {
   font-family: Roboto;
   font-size: 18px;
-  text-align: center;
-  margin-left: 24px;
-  color: #969696;
+  text-align: left;
+  color: var(--ion-color-modal-title);
   font-weight: 700;
+  left: -25px;
 }
 
 .new-recorder-area {
@@ -164,7 +164,7 @@
   position: absolute;
   font-size: 18px;
   width: 224px;
-  height: 128px;
+  height: 138px;
   /* Altera a box */
 }
 .popup-box-signal-cap .alert-button-group.sc-ion-alert-md {
@@ -173,30 +173,39 @@
 }
 
 .popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md {
-  color: gray;
+  color: #4e4e4e;
   height: 24px;
   width: 45px;
-  left: 16px;
+  left: 18px;
   top: 18px;
   font-family: Rawline;
-  font-weight: 700;
-  color: var(--ion-color-modal-title);
-  font-size: 16px;
+  font-size: 14px;
+  text-transform: none;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  padding: 15px 25px;
 }
 
 .popup-box-signal-cap .popup-no.alert-button.sc-ion-alert-md {
-  color: gray;
+  color: #4e4e4e;
   height: 24px;
   width: 45px;
-  left: 22px;
+  left: 18px;
   top: 18px;
   font-family: Rawline;
-  font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
+  text-transform: none;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  padding: 15px 25px;
 }
-.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
-  color: blue;
+
+.popup-box-signal-cap .popup-no.alert-button.sc-ion-alert-md span,
+.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md span {
+  margin-left: 13px;
 }
-.popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
-  color: blue;
+
+.arrow-left-container-start {
+  margin-left: 14px;
+  margin-top: 5px;
 }
