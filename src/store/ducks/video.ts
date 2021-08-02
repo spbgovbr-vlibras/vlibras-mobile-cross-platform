@@ -50,22 +50,24 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.current = payload;
         break;
       case Types.SET_LAST_TRANSLATOR:
-        // draft.lastTranslate = payload.data;
-        draft.lastTranslate = ['alo']; //mock
+        draft.lastTranslate = payload.data;
+        // draft.lastTranslate = ['alo']; //mock
 
-        reloadHistory(payload.date, payload.data, payload.key);
+        const {date, data, key} = payload;
+
+        reloadHistory(date, data, key);
  
         //mock
-        if (draft.translationsHistoric[payload.date]) {  
-          if (draft.translationsHistoric[payload.date][payload.key]) {
-            draft.translationsHistoric[payload.date][payload.key].unshift(payload.data)
+        if (draft.translationsHistoric[date]) {  
+          if (draft.translationsHistoric[date][key]) {
+            draft.translationsHistoric[date][key].unshift(data)
           } else {
-            draft.translationsHistoric[payload.date][payload.key] = []
-            draft.translationsHistoric[payload.date][payload.key].unshift(payload.data)
+            draft.translationsHistoric[date][key] = []
+            draft.translationsHistoric[date][key].unshift(data)
           }
         } else {
-          draft.translationsHistoric[payload.date] = {}
-          draft.translationsHistoric[payload.date][payload.key] = [payload.data]          
+          draft.translationsHistoric[date] = {}
+          draft.translationsHistoric[date][key] = [data]          
         }
  
         break;

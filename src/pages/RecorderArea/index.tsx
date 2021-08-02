@@ -287,8 +287,8 @@ const RecorderArea = () => {
         />
         <ErrorModal
           show={showErrorModal[0]}
-          setShow={setShowErrorModal}
           errorMsg={showErrorModal[1]}
+          setShow={setShowErrorModal}
         />
       </IonContent>
     </MenuLayout>
