@@ -82,7 +82,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
   }, [location, history]);
 
   return (
-    <IonPage>
+    <IonPage className="menu-layout-container">
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">{title}</IonTitle>

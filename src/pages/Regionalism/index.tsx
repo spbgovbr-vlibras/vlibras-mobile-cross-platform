@@ -13,12 +13,15 @@ import {
   IonButton,
 } from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
-import regionalismData from '../../data/regionalism';
-import { MenuLayout } from '../../layouts';
-import { RootState } from '../../store';
-import { Creators } from '../../store/ducks/regionalism';
+import regionalismData from 'data/regionalism';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/regionalism';
 import { Strings } from './strings';
+
 
 import './styles.css';
 
@@ -29,9 +32,14 @@ export interface RegionalismItem {
 
 function Regionalism() {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const history = useHistory();
+
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current,
   );
+  const [regionalism,setregionalism] = useState(currentRegionalism); 
+
   const renderItem = (item: RegionalismItem) => (
     <IonItem class="regionalism-item">
       <IonImg src={item.url} />
@@ -40,9 +48,14 @@ function Regionalism() {
     </IonItem>
   );
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
-    dispatch(Creators.setCurrentRegionalism(evt.detail.value));
+    setregionalism(evt.detail.value)
   }
-  console.log(currentRegionalism);
+  
+  function SaveRegionalism() {
+    dispatch(Creators.setCurrentRegionalism(regionalism));
+    history.goBack()
+  }
+
   return (
     <MenuLayout title={Strings.REGIONALISM_TITLE}>
       <IonContent slot="right">
@@ -54,17 +67,18 @@ function Regionalism() {
               </IonText>
             </IonListHeader>
             <IonRadioGroup
-              value={currentRegionalism}
+              value={regionalism}
               onIonChange={handleOnChange}
             >
+            
               {regionalismData.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
           <div className="regionalism-icon-save">
-            <IonButton class="regionalism-cancel">
+            <IonButton class="regionalism-cancel" onClick={()=>history.goBack()}>
               {Strings.BUTTON_CANCEL}
             </IonButton>
-            <IonButton class="regionalism-save">
+            <IonButton class="regionalism-save" onClick={()=>SaveRegionalism()}>
               {Strings.BUTTON_SAVE}
             </IonButton>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { IonModal, IonPage } from '@ionic/react';
+import { IonContent, IonModal, IonPage } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import paths from '../../constants/paths';
 
@@ -81,7 +81,9 @@ const OnBoarding = () => {
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
-      {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
+      <IonContent>
+        {showModal && <div className="onboarding-modal"> {chooseRender}</div>}
+      </IonContent>
     </MenuLayout>
   );
 };
