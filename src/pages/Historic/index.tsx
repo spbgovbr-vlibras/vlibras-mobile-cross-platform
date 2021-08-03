@@ -82,6 +82,96 @@ function Historic() {
     });
   };
 
+  const formatArrayDate = (arrayHistoric: any) => {
+    const dates = Object.keys(arrayHistoric).reverse();
+    const formattedObjDate: any = {};
+
+    dates.map(element => {
+      if (formattedObjDate[dateFormat(element)]) {
+        formattedObjDate[dateFormat(element)]['video'].push(
+          arrayHistoric[element]['video'],
+        );
+        formattedObjDate[dateFormat(element)]['text'].push(
+          arrayHistoric[element]['text'],
+        );
+      } else {
+        formattedObjDate[dateFormat(element)] = arrayHistoric[element];
+      }
+    });
+
+    return formattedObjDate;
+  };
+
+  const renderAllItems = () => {
+    const formattedHistoric = formatArrayDate(translationsHistoric);
+    const datesMapped = Object.keys(formattedHistoric).reverse();
+    let doesntHaveKey: number;
+
+    return datesMapped.map(column => {
+      doesntHaveKey = 0;
+      return ['video', 'text'].map((key, keyOfKeys) => {
+        if (formattedHistoric[column][key]) {
+          return formattedHistoric[column][key].map(
+            (item: any, elementKey: any) => {
+              return (
+                <div>
+                  {elementKey === 0 &&
+                    (keyOfKeys == 0 || doesntHaveKey == 1) && (
+                      <p className="date-desc"> {column} </p>
+                    )}
+                  {key == 'video' ? (
+                    <>
+                      {elementKey === 0 && (
+                        <div className="historic-container-ion-img-2">
+                          <IonImg
+                            src={logoTranslator2}
+                            class="historic-container-ion-img-translator-2"
+                          />
+                          <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
+                        </div>
+                      )}
+                      <div
+                        className="container-outputs"
+                        onClick={() => openModalOutput(item)}
+                      >
+                        {item.map((value: string, keyWord: string) => (
+                          <span key={keyWord}>{value}</span>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {elementKey === 0 && (
+                        <div className="historic-container-ion-img-1">
+                          <IonImg
+                            src={logoTranslator1}
+                            class="historic-container-ion-img-translator-1"
+                          />
+                          <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
+                        </div>
+                      )}
+                      <div className="historic-container-box-ion-text">
+                        <IonItem class="historic-container-box-ion-item">
+                          <IonTextarea
+                            placeholder={item}
+                            class="historic-container-box-ion-text-area"
+                          />
+                        </IonItem>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            },
+          );
+        } else {
+          doesntHaveKey = 1;
+          return <></>;
+        }
+      });
+    });
+  };
+
   const openModalOutput = (actualItem: any) => {
     setShowModal(true);
     setResults(actualItem);
@@ -102,30 +192,8 @@ function Historic() {
               {Strings.CHIP_TEXT_3}
             </IonChip>
           </div>
-          <div className="historic-container-ion-img-1">
-            <IonImg
-              src={logoTranslator1}
-              class="historic-container-ion-img-translator-1"
-            />
-            <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
-          </div>
-          <div className="historic-container-box-ion-text">
-            <IonItem class="historic-container-box-ion-item">
-              <IonTextarea
-                placeholder={Strings.TEXT_AREA}
-                rows={10}
-                class="historic-container-box-ion-text-area"
-              />
-            </IonItem>
-          </div>
-          <div className="historic-container-ion-img-2">
-            <IonImg
-              src={logoTranslator2}
-              class="historic-container-ion-img-translator-2"
-            />
-            <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
-          </div>
-          {renderItems()}
+
+          {renderAllItems()}
           <VideoOutputModal
             outputs={results}
             showButtons={false}

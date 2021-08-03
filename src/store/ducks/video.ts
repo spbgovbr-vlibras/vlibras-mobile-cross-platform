@@ -50,8 +50,8 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.current = payload;
         break;
       case Types.SET_LAST_TRANSLATOR:
-        draft.lastTranslate = payload.data;
-        // draft.lastTranslate = ['alo']; //mock
+        // draft.lastTranslate = payload.data;
+        draft.lastTranslate = ['alo']; //mock
 
         const {date, data, key} = payload;
 
