@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 
-import {
-  IonText,
-  IonButton,
-  IonTextarea,
-  IonContent,
-  IonInput,
-} from '@ionic/react';
+import { IonText, IonButton, IonTextarea, IonContent } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
@@ -15,9 +9,8 @@ import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
 import paths from '../../constants/paths';
 import { reloadHistory } from 'utils/setHistory';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Creators } from 'store/ducks/video';
-import { RootState } from 'store';
 
 import { Strings } from './strings';
 
@@ -30,8 +23,6 @@ function Translator() {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const dateText = useSelector(({ video }: RootState) => video.dateText);
-
   function translate() {
     const today = new Date().toLocaleDateString('pt-BR');
 
@@ -41,8 +32,7 @@ function Translator() {
     dispatch(
       Creators.setLastTranslator({
         data: text,
-        // date: today,
-        date: dateText,
+        date: today,
         key: 'text',
       }),
     );
@@ -72,12 +62,6 @@ function Translator() {
               />
             </div>
           </div>
-          <IonInput
-            placeholder="Enter Input"
-            onIonChange={(e: any) =>
-              dispatch(Creators.setDateText(e.detail.value))
-            }
-          ></IonInput>
           <div className="translator-item-button-save">
             <IonButton class="translator-button-save" onClick={translate}>
               <IconHandsTranslate color="white" />

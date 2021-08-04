@@ -52,8 +52,6 @@ const RecorderArea = () => {
     ({ video }: RootState) => video.current,
   );
 
-  const dateText = useSelector(({ video }: RootState) => video.dateText);
-
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
@@ -211,8 +209,7 @@ const RecorderArea = () => {
       dispatch(
         Creators.setLastTranslator({
           data: arrayOfResults,
-          // date: today.toLocaleDateString('pt-BR'),
-          date: dateText,
+          date: today.toLocaleDateString('pt-BR'),
           key: 'video',
         }),
       );
