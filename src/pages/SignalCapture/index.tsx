@@ -29,6 +29,7 @@ import {
   IonPage,
   IonContent,
   IonAlert,
+  IonInput,
 } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
 import paths from '../../constants/paths';
@@ -242,6 +243,18 @@ const SignalCapture = () => {
           <p className="progress-recorder"> {currentVideoArray.length} de 5 </p>
           <div className="list-recorded-itens">{renderRecordedItens()}</div>
         </div>
+
+        <input
+          type="text"
+          onChange={text => dispatch(Creators.setDateText(text))}
+        ></input>
+        <IonInput
+          placeholder="Enter Input"
+          onIonChange={(e: any) =>
+            dispatch(Creators.setDateText(e.detail.value))
+          }
+        ></IonInput>
+
         <div className="new-recorder-area">
           <div className="area-button-recorder">
             <div>

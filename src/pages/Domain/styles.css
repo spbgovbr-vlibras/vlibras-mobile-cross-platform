@@ -47,6 +47,8 @@
   font-weight: 700;
   bottom: 80px;
   position: fixed;
+  text-transform: none;
+  letter-spacing: 0px;
 
   /* margin-bottom: 50px; */
 }

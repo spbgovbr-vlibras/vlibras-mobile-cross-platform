@@ -30,6 +30,10 @@ function Historic() {
   const [log, setLog] = useState([]);
 
   const [historyStorage, setHistoryStorage] = useState<any>({});
+  const [keysToShow, setKeysToShow] = useState(['text', 'video']);
+  const [activeKey, setActiveKey] = useState(0);
+
+  const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const promiseHistory = NativeStorage.getItem('history').then(
     data => data,
@@ -83,17 +87,21 @@ function Historic() {
   };
 
   const formatArrayDate = (arrayHistoric: any) => {
-    const dates = Object.keys(arrayHistoric).reverse();
+    const dates = Object.keys(arrayHistoric);
     const formattedObjDate: any = {};
 
     dates.map(element => {
       if (formattedObjDate[dateFormat(element)]) {
-        formattedObjDate[dateFormat(element)]['video'].push(
-          arrayHistoric[element]['video'],
-        );
-        formattedObjDate[dateFormat(element)]['text'].push(
-          arrayHistoric[element]['text'],
-        );
+        if (formattedObjDate[dateFormat(element)]['video']) {
+          formattedObjDate[dateFormat(element)]['video'].push(
+            arrayHistoric[element]['video'],
+          );
+        }
+        if (formattedObjDate[dateFormat(element)]['text']) {
+          formattedObjDate[dateFormat(element)]['text'].push(
+            arrayHistoric[element]['text'],
+          );
+        }
       } else {
         formattedObjDate[dateFormat(element)] = arrayHistoric[element];
       }
@@ -107,9 +115,12 @@ function Historic() {
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 
+    console.log(formattedHistoric);
+    console.log(datesMapped);
+
     return datesMapped.map(column => {
       doesntHaveKey = 0;
-      return ['video', 'text'].map((key, keyOfKeys) => {
+      return keysToShow.map((key, keyOfKeys) => {
         if (formattedHistoric[column][key]) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
@@ -123,9 +134,9 @@ function Historic() {
                     <>
                       {elementKey === 0 && (
                         <div className="historic-container-ion-img-2">
-                          <IonImg
+                          <img
                             src={logoTranslator2}
-                            class="historic-container-ion-img-translator-2"
+                            className="historic-container-ion-img-translator-2"
                           />
                           <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
                         </div>
@@ -143,9 +154,9 @@ function Historic() {
                     <>
                       {elementKey === 0 && (
                         <div className="historic-container-ion-img-1">
-                          <IonImg
+                          <img
                             src={logoTranslator1}
-                            class="historic-container-ion-img-translator-1"
+                            className="historic-container-ion-img-translator-1"
                           />
                           <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
                         </div>
@@ -155,6 +166,7 @@ function Historic() {
                           <IonTextarea
                             placeholder={item}
                             class="historic-container-box-ion-text-area"
+                            // disabled={true}
                           />
                         </IonItem>
                       </div>
@@ -177,23 +189,52 @@ function Historic() {
     setResults(actualItem);
   };
 
+  const setScreenKey = (param: number) => {
+    setActiveKey(param);
+    switch (param) {
+      case 0:
+        setKeysToShow(['text', 'video']);
+        break;
+      case 1:
+        setKeysToShow(['text']);
+        break;
+      case 2:
+        setKeysToShow(['video']);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
         <div className="historic-container">
           <div className="historic-container-ion-chips">
-            <IonChip class="historic-container-ion-chips-1">
+            <IonChip
+              class={'historic-container-ion-chip'}
+              onClick={() => setScreenKey(0)}
+              style={activeKey === 0 ? style : {}}
+            >
               {Strings.CHIP_TEXT_1}
             </IonChip>
-            <IonChip class="historic-container-ion-chips-2">
+            <IonChip
+              class="historic-container-ion-chip"
+              onClick={() => setScreenKey(1)}
+              style={activeKey === 1 ? style : {}}
+            >
               {Strings.CHIP_TEXT_2}
             </IonChip>
-            <IonChip class="historic-container-ion-chips-3">
+            <IonChip
+              class="historic-container-ion-chip"
+              onClick={() => setScreenKey(2)}
+              style={activeKey === 2 ? style : {}}
+            >
               {Strings.CHIP_TEXT_3}
             </IonChip>
           </div>
 
-          {renderAllItems()}
+          <div className="container-render-historic">{renderAllItems()}</div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}

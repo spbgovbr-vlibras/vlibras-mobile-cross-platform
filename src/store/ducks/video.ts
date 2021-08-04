@@ -11,6 +11,7 @@ export const Types = {
   SET_DOMAIN: '@video/SET_DOMAIN',
   SET_IS_VIDEO_SCREEN: '@video/SET_IS_VIDEO_SCREEN',
   SET_TRANSLATION_HISTORIC: '@video/SET_TRANSLATION_HISTORIC',
+  SET_DATE_TEXT: '@video/SET_DATE_TEXT'
 };
 
 export interface VideoState {
@@ -19,6 +20,7 @@ export interface VideoState {
   translationsHistoric: any;
   domain: string;
   isVideoScreen: boolean;
+  dateText: string;
 }
 
 const INITIAL_STATE: VideoState = {
@@ -26,7 +28,8 @@ const INITIAL_STATE: VideoState = {
   lastTranslate: [],
   domain: 'Saúde',
   isVideoScreen: false,
-  translationsHistoric: {}
+  translationsHistoric: {},
+  dateText: "opa"
 };
 
 export const Creators = {
@@ -34,6 +37,8 @@ export const Creators = {
   setLastTranslator: createAction(Types.SET_LAST_TRANSLATOR)<any>(),
   setDomain: createAction(Types.SET_DOMAIN)<any>(),
   setIsVideoScreen: createAction(Types.SET_IS_VIDEO_SCREEN)<any>(),
+  setDateText: createAction(Types.SET_DATE_TEXT)<any>(),
+
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -76,6 +81,9 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         break;
       case Types.SET_IS_VIDEO_SCREEN:
         draft.isVideoScreen = payload;
+        break;
+      case Types.SET_DATE_TEXT:
+        draft.dateText = payload;
         break;
       default:
         break;
