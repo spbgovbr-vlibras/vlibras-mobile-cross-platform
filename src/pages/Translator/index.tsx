@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 
-import { IonText, IonButton, IonTextarea, IonContent } from '@ionic/react';
+import {
+  IonText,
+  IonButton,
+  IonTextarea,
+  IonContent,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+} from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
@@ -15,6 +25,7 @@ import { Creators } from 'store/ducks/video';
 import { Strings } from './strings';
 
 import './styles.css';
+import { IconArrowLeft } from 'assets';
 
 const playerService = PlayerService.getService();
 
@@ -26,23 +37,36 @@ function Translator() {
   function translate() {
     const today = new Date().toLocaleDateString('pt-BR');
 
-    // reloadHistory(today, text, 'text');
+    reloadHistory(today, text, 'text');
 
     //mock
-    dispatch(
-      Creators.setLastTranslator({
-        data: text,
-        date: today,
-        key: 'text',
-      }),
-    );
+    // dispatch(
+    //   Creators.setLastTranslator({
+    //     data: text,
+    //     date: today,
+    //     key: 'text',
+    //   }),
+    // );
 
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
   return (
-    <MenuLayout title={Strings.TRANSLATOR_TITLE}>
+    <IonPage>
+      <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <IonTitle className="menu-toolbar-title-signalcap">
+            {Strings.TRANSLATOR_TITLE}
+          </IonTitle>
+
+          <IonButtons slot="start" onClick={() => history.goBack()}>
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#969696" />
+            </div>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
         <div className="scroll-content">
           <div className="translator-box">
@@ -70,7 +94,7 @@ function Translator() {
           </div>
         </div>
       </IonContent>
-    </MenuLayout>
+    </IonPage>
   );
 }
 export default Translator;

@@ -111,7 +111,7 @@ function Historic() {
   };
 
   const renderAllItems = () => {
-    const formattedHistoric = formatArrayDate(translationsHistoric);
+    const formattedHistoric = formatArrayDate(historyStorage);
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 

@@ -195,21 +195,33 @@ const SignalCapture = () => {
   };
 
   const renderRecordedItens = () => {
-    // setLog(JSON.stringify(currentVideoArray));
-    return currentVideoArray.map((item: any, key: number) => {
+    const fillNTimes = 5 - currentVideoArray.length;
+    let copyCurrentVideo = [...currentVideoArray];
+
+    for (let index = 0; index < fillNTimes; index++) {
+      copyCurrentVideo.push([]);
+    }
+
+    return copyCurrentVideo.map((item: any, key: number) => {
       return (
-        <IonItem className="item-recorder" key={key}>
-          <img className="video-thumb" src={item[2].thumbBlob} />
+        <>
+          {item.length != 0 ? (
+            <IonItem className="item-recorder" key={key}>
+              <img className="video-thumb" src={item[2].thumbBlob} />
 
-          <div className="video-metadata">
-            <p className="name"> Sinal {key + 1}</p>
-            <p className="size"> {item[3].duration} seg </p>
-          </div>
+              <div className="video-metadata">
+                <p className="name"> Sinal {key + 1}</p>
+                <p className="size"> {item[3].duration} seg </p>
+              </div>
 
-          <div className="video-icon-delete">
-            <img src={logoTrashBtn} onClick={() => popupRemove(key)} />
-          </div>
-        </IonItem>
+              <div className="video-icon-delete">
+                <img src={logoTrashBtn} onClick={() => popupRemove(key)} />
+              </div>
+            </IonItem>
+          ) : (
+            <div className="item-recorder shadowing"></div>
+          )}
+        </>
       );
     });
   };
@@ -225,11 +237,6 @@ const SignalCapture = () => {
           <IonTitle className="menu-toolbar-title-signalcap">
             {Strings.TITLE_MENU}
           </IonTitle>
-          {/* <IonButtons slot="end" onClick={popupCancel}>
-            <div className="menu-container-end">
-              <IconCloseCircle color="#969696" />
-            </div>
-          </IonButtons> */}
           <IonButtons slot="start" onClick={popupCancel}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#969696" />

@@ -40,7 +40,7 @@
 }
 
 .onboarding-modal .icaro-preview {
-  width: 200px;
+  width: 80%;
   margin: auto;
   margin-top: 20px;
 }
@@ -54,10 +54,12 @@
 .onboarding-modal .goback-modal-button,
 .onboarding-modal .goback-modal-button.ion-activated {
   --background: none;
-  color: var(--ion-color-modal-title);
+  color: #4e4e4e;
+  font-weight: 600;
   height: 38px;
-  border: 1px solid var(--ion-color-modal-title);
+  border: 1px solid #e0e0e0;
   border-radius: 24px;
+  --box-shadow: 0;
 }
 
 .onboarding-modal .buttons-area .button {
@@ -67,6 +69,7 @@
   text-transform: none;
   margin: 0px 8px;
   letter-spacing: normal;
+  --box-shadow: 0;
 }
 
 .onboarding-modal .buttons-area {
@@ -82,3 +85,8 @@
 .onboarding-modal .modal-description {
   height: 65px;
 }
+
+/* .container-icaro-gif img {
+  max-width: 100%;
+  height: auto;
+  width: auto\9; /* ie8 */

@@ -12,7 +12,7 @@ export const Strings = {
     BUTTON_JUMP: 'Pular',
     BUTTON_PROCEED: 'Ver passos',
     BUTTON_NEXT: 'Avançar',
-    BUTTON_BACK: 'Voltar',
+    BUTTON_BACK: 'Anterior',
     BUTTON_START: 'Definir domínio',
     TOOLBAR_TITLE: 'Tradutor'
 

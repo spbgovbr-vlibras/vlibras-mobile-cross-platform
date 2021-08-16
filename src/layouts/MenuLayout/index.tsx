@@ -65,7 +65,6 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
           </>
         );
       case paths.HISTORY:
-      case paths.TRANSLATOR:
       case paths.DICTIONARY:
         return (
           <button onClick={() => history.goBack()} type="button">

@@ -75,7 +75,7 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoOficial = async () => {
+  const takeVideoMock = async () => {
     try {
       const options = { limit: 1, duration: 30 };
       let mediafile = await VideoCapturePlus.captureVideo(options);
@@ -174,11 +174,9 @@ const RecorderArea = () => {
       currentVideoArray.map(async (item: any, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
-        console.log(item[1]);
-
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognition',
+            'http://127.0.0.1:5000/api/v1/recognitin',
             //'http://lavid.nsa.root.sx:3000/api/v1/recognition',
             form,
             {
@@ -195,14 +193,19 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
           else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
-          setLog(JSON.stringify(e));
+          setTimeout(function () {
+            setLoading(false);
+          }, 200);
+          setLog(JSON.stringify(e.response));
           setShowErrorModal([true, 'Erro ao enviar vídeo']);
           console.log(e);
         }
       }),
     );
 
-    setLoading(false);
+    setTimeout(function () {
+      setLoading(false);
+    }, 200);
 
     if (arrayOfResults.length != 0) {
       const today = new Date();
@@ -264,7 +267,7 @@ const RecorderArea = () => {
           <p className="title-recorder">
             Use a câmera para gravar novos sinais
           </p>
-          {log}
+          <div style={{ fontSize: '9px' }}> {log} </div>
           <div className="recorder-area">
             <div className="area-button-recorder">
               <img
