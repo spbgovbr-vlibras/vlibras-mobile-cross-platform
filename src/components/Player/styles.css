@@ -61,3 +61,14 @@
   background: transparent;
   border: none;
 }
+
+.player-thumbsup-button{
+  display: flex;
+  flex:1;
+  flex-direction: column;
+  position: absolute;
+
+  margin-top: 350px;
+  margin-left: 316px;
+
+}

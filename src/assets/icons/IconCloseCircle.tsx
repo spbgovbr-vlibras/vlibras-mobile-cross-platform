@@ -14,6 +14,7 @@ const IconCloseCircle = ({
     viewBox={viewBox}
     fill="none"
     style={style}
+    color={color}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
