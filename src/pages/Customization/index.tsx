@@ -48,11 +48,11 @@ export interface CustomizationEye {
 function Customization() {
 
   //States show
-  const[colorbody,setcolorbody]= useState('');
-  const[coloreye,setcoloreye]= useState('');
-  const[colorhair,setcolorhair]= useState('');
-  const[colorshirt,setcolorshirt]= useState('');
-  const[colorpants,setcolorpants]= useState('');
+  const[colorbody,setcolorbody]= useState('#FEF8F2');
+  const[coloreye,setcoloreye]= useState('#619FFB');
+  const[colorhair,setcolorhair]= useState('#FB8C00');
+  const[colorshirt,setcolorshirt]= useState('#FB8C00');
+  const[colorpants,setcolorpants]= useState('#FB8C00');
 
 
   const[showbody,setshowbody]= useState(true);
