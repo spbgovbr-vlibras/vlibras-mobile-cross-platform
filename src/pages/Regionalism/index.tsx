@@ -52,7 +52,7 @@ function Regionalism() {
   }
   
   function SaveRegionalism() {
-    dispatch(Creators.setCurrentRegionalism(regionalism));
+    dispatch(Creators.setCurrentRegionalism(regionalism)); // create esta no regionalism ts
     history.goBack()
   }
 

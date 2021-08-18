@@ -9,5 +9,6 @@ export default {
   RECORDERAREA: '/recorder-area',
   DOMAIN: '/domain',
   ONBOARDING: '/onboarding',
-  SIGNALCAPTURE: '/signal-capture'
+  SIGNALCAPTURE: '/signal-capture',
+  CUSTOMIZATION:  '/customization'
 };

@@ -23,6 +23,7 @@ import {
   IconIcaro,
   IconTutorial,
   IconDomain,
+  IconCustomization,
   Vlibraslogo,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
@@ -62,7 +63,9 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     ({ video }: RootState) => video.isVideoScreen,
   );
 
+  
   const domain = useSelector(({ video }: RootState) => video.domain);
+  const current = useSelector (( state: RootState) => state.regionalism.current);
 
   const renderItemTab = (
     tab: string,
@@ -88,6 +91,13 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           <div className="arrow-down"> </div>
         </>
       )}
+            {title === Strings.TITLE_MENU_REGIONALISM && (
+        <>
+          <p className="drawer-menu-sub-item"> {current} </p>
+          <div className="arrow-down"> </div>
+        </>
+      )}
+      
     </IonItem>
   );
 
@@ -140,7 +150,15 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 Strings.TITLE_MENU_REGIONALISM,
                 IconRegionalism,
                 true,
-              )}
+              )              
+              }{
+                renderItemTab(
+                  paths.CUSTOMIZATION,
+                  Strings.TITLE_MENU_CUSTOMIZATION,
+                  IconCustomization,
+                  true,
+                )
+              }
         </IonList>
         <IonList lines="none">
           {renderItemTab(

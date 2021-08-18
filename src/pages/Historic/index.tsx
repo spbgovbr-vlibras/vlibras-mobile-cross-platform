@@ -166,6 +166,10 @@ function Historic() {
                           <IonTextarea
                             placeholder={item}
                             class="historic-container-box-ion-text-area"
+                             autoGrow={true} 
+                             rows={undefined}
+                             cols={undefined}
+                             wrap= { "soft" }
                             // disabled={true}
                           />
                         </IonItem>

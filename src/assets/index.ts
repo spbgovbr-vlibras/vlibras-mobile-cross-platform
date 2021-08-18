@@ -13,7 +13,12 @@ import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
 import IconArrowLeft from './icons/IconArrowLeft';
-
+import IconEye from './icons/IconEye';
+import IconPants from './icons/IconPants';
+import IconShirt from './icons/IconShirt';
+import IconHair from './icons/IconHair';
+import IconBody from './icons/IconBody';
+import IconCustomization from './icons/IconCustomization';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -90,6 +95,11 @@ import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
 import cameraBlue from './images/camera-blue.svg';
+import logoOlho from './images/olho.png';
+import logoCabelo from './images/cabelo.png';
+import logoCorpo from './images/corpo.png';
+import logoCamisa from  './images/camisa.png';
+import logoCalca from './images/calça.png';
 
 import Vlibraslogo from './images/vlibraslogo.png';
 
@@ -177,5 +187,16 @@ export {
   IconPauseOutlined,
   logoWarning,
   IconArrowLeft,
-  cameraBlue
+  cameraBlue,
+  logoOlho,
+  logoCabelo,
+  logoCalca,
+  logoCorpo,
+  logoCamisa,
+  IconEye,
+  IconPants,
+  IconHair,
+  IconBody,
+  IconShirt,
+  IconCustomization,
 };

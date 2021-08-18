@@ -8,3 +8,4 @@ export { default as Domain } from './Domain';
 export { default as OnBoarding } from './OnBoarding';
 export { default as SignalCapture } from './SignalCapture';
 export { default as RecorderArea } from './RecorderArea';
+export { default as Customization } from './Customization';
