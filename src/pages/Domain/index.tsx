@@ -77,7 +77,7 @@ const Domain = () => {
             {Strings.TITLE_MENU}
           </IonTitle>
 
-          <IonButtons slot="start">
+          <IonButtons slot="start" onClick={() => history.goBack()}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#969696" />
             </div>
