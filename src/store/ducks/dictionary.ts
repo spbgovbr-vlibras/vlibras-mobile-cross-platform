@@ -8,6 +8,7 @@ import { Words } from 'models/dictionary';
 export interface MetaDataParams {
   limit: number;
   page: number;
+  name?: string;
 }
 
 export interface MetaData {

@@ -26,7 +26,6 @@ function Translator() {
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     dispatch(Creators.setTranslatorText(text))
-    console.log('Texto:' + text);
   }
 
   return (

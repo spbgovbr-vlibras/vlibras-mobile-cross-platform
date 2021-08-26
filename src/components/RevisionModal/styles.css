@@ -94,8 +94,8 @@
 }
 
 .revision-modal .chip-area {
-  margin-top: 180px;
-  margin-left: 40px;
+  margin-top: 100px;
+  margin-left: 35px;
   margin-bottom: 40px;
 }
 .revision-modal .chip-1 {
@@ -152,22 +152,69 @@
   justify-content: space-between;
 }
 
-.revision-modal .suggestion-box-header {
+.revision-modal .suggestion-text-header {
   font-family: Roboto;
   font-style: normal;
   font-weight: 300;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 125%;
   /* identical to box height, or 15px */
 
-  color: #ffffff;
-
-  margin-left: 13px;
+  color: #454237;
 }
 
-.revision-modal .suggestion-box-close-button{ 
+.revision-modal .suggestion-box-close-button {
   background-color: #4e4e4e;
   margin-left: 42px;
   border-radius: 16px 16px 16px 16px;
   padding-top: 8px;
+}
+
+.revision-modal-suggestion-words-list {
+  display: flex;
+  flex-direction: row;
+  padding: 0 0 0 0;
+
+  font-family: Rawline;
+  color: #fff;
+
+  overflow-x: scroll;
+}
+
+.revision-modal-words-style {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16.8px;
+  line-height: 130%;
+
+  color: #1447a6;
+}
+.revision-modal-word-item {
+  --padding-start: 0px;
+  --min-height: 0px;
+
+  max-width: 150px;
+  margin-right: 10px;
+}
+
+.revision-modal .suggestion-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 0 0;
+
+  margin-top: 12px;
+}
+
+.revision-modal .suggestion-chips-box {
+  display: flex;
+  flex-direction: row;
+  padding: 0 0 0 0;
+
+  margin-top: 9px;
+}
+
+.revision-modal .suggestion-chips {
+  background: #ededed;
+  border-radius: 47px;
 }
