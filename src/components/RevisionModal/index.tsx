@@ -26,13 +26,21 @@ import { debounce } from 'lodash';
 import { current } from 'immer';
 import PlayerService from 'services/unity';
 import { PlayerKeys } from 'constants/player';
+import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
 
 interface RevisionModalProps {
   show: boolean;
   setShow: any;
+  showSuggestionFeedbackModal: boolean;
+  setSuggestionFeedbackModal: any;
 }
 
-const RevisionModal = ({ show, setShow }: RevisionModalProps) => {
+const RevisionModal = ({
+  show,
+  setShow,
+  showSuggestionFeedbackModal,
+  setSuggestionFeedbackModal,
+}: RevisionModalProps) => {
   const handleOpenModal = () => {
     setShow(true);
   };
@@ -45,6 +53,11 @@ const RevisionModal = ({ show, setShow }: RevisionModalProps) => {
       auxValueText,
     );
   };
+
+  const handleOpenSuggestionFeedbackModal = () => {
+    setShow(false);
+    setSuggestionFeedbackModal(true);
+  };
   const playerService = PlayerService.getService();
 
   const TIME_DEBOUNCE_MS = 0;
@@ -52,16 +65,19 @@ const RevisionModal = ({ show, setShow }: RevisionModalProps) => {
   const currentTranslatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText,
   );
-  
+
   //Aux var for the TextArea value
-  const [auxValueText,setAuxValueText] = useState('');
+  const [auxValueText, setAuxValueText] = useState('');
 
   const dictionary = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
   );
   const renderWord = (item: Words) => (
     <div className="revision-modal-word-item">
-      <IonChip class="suggestion-chips" onClick={() => setAuxValueText(item.name)}>
+      <IonChip
+        class="suggestion-chips"
+        onClick={() => setAuxValueText(item.name)}
+      >
         {item.name}
       </IonChip>
     </div>
@@ -143,10 +159,16 @@ const RevisionModal = ({ show, setShow }: RevisionModalProps) => {
             <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
-            <IonChip class="chip-2">{Strings.CHIP_TEXT_2}</IonChip>
+            <IonChip class="chip-2" onClick={handleOpenSuggestionFeedbackModal}>
+              {Strings.CHIP_TEXT_2}
+            </IonChip>
           </div>
         </div>
       </IonModal>
+      <SuggestionFeedbackModal
+        showSuggestionFeedbackModal={showSuggestionFeedbackModal}
+        setShowSuggestionFeedbackModal={setSuggestionFeedbackModal}
+      ></SuggestionFeedbackModal>
     </div>
   );
 };

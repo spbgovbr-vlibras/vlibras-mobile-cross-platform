@@ -64,6 +64,8 @@ function Player() {
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
+    useState(false);
 
   window.onPlayingStateChange = (
     _isPlaying: BooleanParamsPlayer,
@@ -246,6 +248,8 @@ function Player() {
         setShowNo={setShowNoModal}
         showSuggestionModal={showSuggestionModal}
         setShowSuggestionModal={setShowSuggestionModal}
+        showSuggestionFeedbackModal={showSuggestionFeedbackModal}
+        setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
       />
     </div>
   );

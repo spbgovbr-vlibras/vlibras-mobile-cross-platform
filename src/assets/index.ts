@@ -14,6 +14,7 @@ import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
 import IconThumbUp from './icons/IconThumbUp';
 import IconThumbDown from './icons/IconThumbDown';
+import IconArrowUpRight from './icons/IconArrowUpRight';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -176,5 +177,6 @@ export {
   IconPauseOutlined,
   IconThumbUp,
   IconThumbDown,
+  IconArrowUpRight,
   logoWarning
 };
