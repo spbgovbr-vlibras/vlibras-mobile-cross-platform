@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 
 import Unity, { UnityContent } from 'react-unity-webgl';
 import paths from 'constants/paths';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -39,10 +39,15 @@ const VideoOutputModal = ({
   const [openPlayer, setOpenPlayer] = useState(playerIntermedium);
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
 
   const closeModal = () => {
     setShowModal(false);
     dispatch(Creators.setCurrentArrayVideo([]));
+
+    if (location.pathname == paths.RECORDERAREA) {
+      setOpenPlayer(false);
+    }
   };
 
   const playWord = (value: string) => {

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   logoCapture,
   logoHistory,
@@ -12,7 +12,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 import { File, DirectoryEntry } from '@ionic-native/file';
-import { CameraResultType, Capacitor } from '@capacitor/core';
 
 import { IonContent } from '@ionic/react';
 import { MenuLayout } from '../../layouts';
@@ -55,6 +54,19 @@ const RecorderArea = () => {
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
+
+  const orderArrayByKey = (arrayOfResults: any, arrayOfKeys: any) => {
+    let newResultArray = new Array(arrayOfResults.length);
+
+    arrayOfKeys.map((elem: number, key: number) => {
+      newResultArray[elem] = arrayOfResults[key];
+    });
+
+    console.log(arrayOfResults, arrayOfKeys, newResultArray);
+
+    return newResultArray;
+  };
+
   const takeVideo = async () => {
     //mock
     if (currentVideoArray.length < 5) {
@@ -75,9 +87,9 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoMock = async () => {
+  const takeVideoOf = async () => {
     try {
-      const options = { limit: 1, duration: 30 };
+      const options = { limit: 1, duration: 30, highquality: true };
       let mediafile = await VideoCapturePlus.captureVideo(options);
 
       let media = mediafile[0] as MediaFile;
@@ -166,6 +178,7 @@ const RecorderArea = () => {
 
   const translateVideo = async () => {
     const arrayOfResults: any = [];
+    const arrayOfKeys: any = [];
 
     setLoading(true);
     setShowModal(false);
@@ -176,7 +189,7 @@ const RecorderArea = () => {
         form.append('file', item[1]);
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognitin',
+            'http://127.0.0.1:5000/api/v1/recognition',
             //'http://lavid.nsa.root.sx:3000/api/v1/recognition',
             form,
             {
@@ -189,15 +202,22 @@ const RecorderArea = () => {
             },
           );
 
-          if (resultRequest.data && resultRequest.data.length > 0)
+          if (resultRequest.data && resultRequest.data.length > 0) {
             arrayOfResults.push(resultRequest.data[0].label);
-          else setShowErrorModal([true, 'Erro ao obter resultados']);
+            arrayOfKeys.push(key);
+          }
+          // else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
-          setTimeout(function () {
-            setLoading(false);
-          }, 200);
-          setLog(JSON.stringify(e.response));
-          setShowErrorModal([true, 'Erro ao enviar vídeo']);
+          // setTimeout(function () {
+          //   setLoading(false);
+          // }, 200);
+          // setLog(JSON.stringify(e.response.data));
+          // console.log(e.response);
+          // if (e.response && e.response.data.detail.message) {
+          //   setShowErrorModal([true, e.response.data.detail.message]);
+          // } else {
+          //   setShowErrorModal([true, 'Erro ao enviar vídeo']);
+          // }
           console.log(e);
         }
       }),
@@ -207,18 +227,29 @@ const RecorderArea = () => {
       setLoading(false);
     }, 200);
 
-    if (arrayOfResults.length != 0) {
-      const today = new Date();
-      dispatch(
-        Creators.setLastTranslator({
-          data: arrayOfResults,
-          date: today.toLocaleDateString('pt-BR'),
-          key: 'video',
-        }),
-      );
-      setResults(arrayOfResults);
-      setShowModal(true);
-      setLoading(false);
+    const translatedLabels = orderArrayByKey(arrayOfResults, arrayOfKeys);
+    console.log(translatedLabels);
+    if (translatedLabels.length != 0) {
+      if (translatedLabels.length === currentVideoArray.length) {
+        const today = new Date();
+        dispatch(
+          Creators.setLastTranslator({
+            data: translatedLabels,
+            date: today.toLocaleDateString('pt-BR'),
+            key: 'video',
+          }),
+        );
+        setResults(translatedLabels);
+        setShowModal(true);
+        setLoading(false);
+      } else if (translatedLabels.length < currentVideoArray.length) {
+        setShowErrorModal([
+          true,
+          'Não foi possível traduzir todos os vídeos. Tente novamente!',
+        ]);
+      }
+    } else {
+      setShowErrorModal([true, 'Erro ao enviar vídeo']);
     }
   };
 

@@ -17,6 +17,14 @@
   height: 350px;
 }
 
+.videooutput-modal.doNotShowModal {
+  z-index: -333 !important;
+}
+
+.videooutput-modal.showModal {
+  z-index: 9999 !important;
+}
+
 .videooutput-modal .ion-page {
   padding: 16px 20px;
 }

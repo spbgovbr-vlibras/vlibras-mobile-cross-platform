@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
@@ -74,6 +74,14 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
 
+  useEffect(() => {
+    if (isVideoScreen) {
+      setValueSelected('PT-BR');
+    } else {
+      setValueSelected('Libras');
+    }
+  }, [isVideoScreen]);
+
   const location = useLocation();
   const history = useHistory();
 
@@ -99,6 +107,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   function setValue(value: string) {
     setValueSelected(value);
     setOpenSelect(false);
+    if (value == 'PT-BR') {
+      history.push(paths.RECORDERAREA);
+    } else {
+      history.push(paths.HOME);
+    }
+    menuController.close();
   }
 
   const domain = useSelector(({ video }: RootState) => video.domain);
