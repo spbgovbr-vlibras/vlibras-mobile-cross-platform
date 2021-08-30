@@ -9,4 +9,7 @@ export enum PlayerKeys {
   INIT_RANDOM_ANIMATION = 'initRandomAnimationsProcess',
   SET_BASE_URL = 'setBaseUrl',
   SET_SLIDER = 'setSlider',
+  AVATAR = 'Avatar',
+  SETEDITOR= 'setEditorCustomization',
+
 }

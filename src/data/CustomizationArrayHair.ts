@@ -1,4 +1,4 @@
- const CustomizationArray = [
+ const CustomizationArrayHair = [
     // hair, shirt and pants
     { color: '#FB8C00'},
     { color: '#FDD835'},
@@ -11,4 +11,4 @@
     { color: '#FFFFFF'}, 
      
   ];
-  export default CustomizationArray; 
+  export default CustomizationArrayHair; 

@@ -6,6 +6,11 @@
     padding: 16px;
 
 }
+.player-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
 
 .customization-menu-principal{
 
