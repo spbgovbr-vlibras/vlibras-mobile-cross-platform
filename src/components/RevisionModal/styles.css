@@ -28,12 +28,10 @@
 
   display: flex;
   flex: 1;
-  margin-left: 155px;
+  margin-left: 127px;
 }
 
 .revision-close-button {
-  display: flex;
-  flex: 1;
   justify-content: flex-end;
 
   background: transparent;
@@ -95,7 +93,7 @@
 
 .revision-modal .chip-area {
   margin-top: 100px;
-  margin-left: 35px;
+  margin-left: 11px;
   margin-bottom: 40px;
 }
 .revision-modal .chip-1 {
@@ -110,6 +108,7 @@
   border: 1px solid #ebebeb;
   box-sizing: border-box;
   border-radius: 24px;
+  margin-right: 8px;
 
   font-family: Roboto;
   font-style: normal;
