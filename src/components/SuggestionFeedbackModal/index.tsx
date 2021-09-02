@@ -13,12 +13,12 @@ const SuggestionFeedbackModal = ({
   showSuggestionFeedbackModal,
   setShowSuggestionFeedbackModal,
 }: SuggestionFeedbackModalProps) => {
-  const handleCloseModal = () => {
+  const handleCloseModal = () => { 
     setShowSuggestionFeedbackModal(false);
   };
 
   const handleOpenWikilibrasSite = () => {
-    <a href="https://wiki.vlibras.gov.br/"></a>
+    window.open('https://wiki.vlibras.gov.br', '_system', 'location=yes');
   };
   return (
     <IonModal
@@ -31,10 +31,7 @@ const SuggestionFeedbackModal = ({
         <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
         <IonText class="subtitle">{Strings.SUBTITLE_MENU_MODAL}</IonText>
       </div>
-      <IonChip
-        class="wikilibras-chip"
-        onClick={handleOpenWikilibrasSite}
-      >
+      <IonChip class="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
         <IonText class="chip-text-space">{Strings.CHIP_TEXT}</IonText>
         <IconArrowUpRight />
       </IonChip>

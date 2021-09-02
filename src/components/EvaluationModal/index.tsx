@@ -18,6 +18,7 @@ interface EvaluationModalProps {
   setShowSuggestionModal: any;
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
+  isPlaying: boolean;
 }
 
 const EvaluationModal = ({
@@ -31,6 +32,7 @@ const EvaluationModal = ({
   setShowSuggestionModal,
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
+  isPlaying,
 }: EvaluationModalProps) => {
   const closeModal = () => {
     setShow(false);
@@ -89,6 +91,7 @@ const EvaluationModal = ({
         setShowSuggestionModal={setShowSuggestionModal}
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setSuggestionFeedbackModal}
+        isPlaying={isPlaying}
       />
     </div>
   );

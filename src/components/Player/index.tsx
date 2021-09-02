@@ -250,6 +250,7 @@ function Player() {
         setShowSuggestionModal={setShowSuggestionModal}
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
+        isPlaying={isPlaying}
       />
     </div>
   );

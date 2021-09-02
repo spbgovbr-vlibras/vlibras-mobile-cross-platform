@@ -27,22 +27,32 @@ import { current } from 'immer';
 import PlayerService from 'services/unity';
 import { PlayerKeys } from 'constants/player';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
+import { sendReview } from 'services/suggestionGloss';
 
 interface RevisionModalProps {
   show: boolean;
   setShow: any;
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
+  isPlaying: boolean;
 }
+
+const playerService = PlayerService.getService();
 
 const RevisionModal = ({
   show,
   setShow,
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
+  isPlaying,
 }: RevisionModalProps) => {
   const handleOpenModal = () => {
     setShow(true);
+  };
+
+  const handleCloseModal = () => {
+    setShow(false);
+    setIsPreview(false);
   };
 
   const handlePlaySuggestionGlosa = () => {
@@ -52,15 +62,19 @@ const RevisionModal = ({
       PlayerKeys.PLAY_NOW,
       auxValueText,
     );
+    setIsPreview(true);
   };
 
   const handleOpenSuggestionFeedbackModal = () => {
     setShow(false);
     setSuggestionFeedbackModal(true);
+    sendReview(currentTranslatorText, auxValueText, 'bad');
+    //playerService.send(PlayerKeys.PLAYER_MANAGER,PlayerKeys.SEND_REVIEW, auxValueText);
   };
-  const playerService = PlayerService.getService();
 
   const TIME_DEBOUNCE_MS = 0;
+  const TIME_DEBOUNCE_SUGGESTION = 0;
+
   const dispatch = useDispatch();
   const currentTranslatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText,
@@ -68,6 +82,7 @@ const RevisionModal = ({
 
   //Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState('');
+  const [isPreview, setIsPreview] = useState(false);
 
   const dictionary = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
@@ -97,6 +112,12 @@ const RevisionModal = ({
     }
   }, [show]);
 
+  useEffect(() => {
+    if (!isPlaying && isPreview) {
+      setShow(true);
+    }
+  }, [isPlaying, isPreview]);
+
   const onSearch = useCallback(
     event => {
       dispatch(
@@ -125,10 +146,7 @@ const RevisionModal = ({
           <button
             className="revision-close-button"
             type="button"
-            onClick={() => {
-              setShow(false);
-              console.log('NO MODAL:' + show);
-            }}
+            onClick={handleCloseModal}
           >
             <IconCloseCircle color="#1447A6" />
           </button>
