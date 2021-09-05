@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { IonModal, IonButton } from '@ionic/react';
+import React from 'react';
+
+import { IonModal } from '@ionic/react';
+
 import { logoWarning } from '../../assets';
 import './styles.css';
 
@@ -13,14 +15,14 @@ const ErrorModal = ({ show, setShow, errorMsg }: ErrorModalProps) => {
   return (
     <IonModal
       isOpen={show}
-      cssClass={'error-modal'}
+      cssClass="error-modal"
       onDidDismiss={() => setShow(false)}
-      swipeToClose={true}
+      backdropDismiss
+      swipeToClose
     >
-      <img className="loading" src={logoWarning} />
-
-      <p className="modal-title"> Ops! </p>
-      <p className="modal-desc"> {errorMsg} </p>
+      <img className="loading" src={logoWarning} alt="Carregando" />
+      <h1>Ops!</h1>
+      <h2>{errorMsg}</h2>
     </IonModal>
   );
 };

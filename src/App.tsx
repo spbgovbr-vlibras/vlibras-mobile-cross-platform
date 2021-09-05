@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { IonApp } from '@ionic/react';
+import { IonApp, setupConfig } from '@ionic/react';
 import { Provider } from 'react-redux';
 
 /* Core CSS required for Ionic components to work properly */
@@ -21,9 +21,15 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { TranslationProvider } from 'hooks/Translation';
+
 import Routes from './routes';
 import PlayerService from './services/unity';
 import store from './store';
+
+setupConfig({
+  animated: true,
+});
 
 const playerService = PlayerService.getService();
 
@@ -35,7 +41,9 @@ function App() {
   return (
     <IonApp>
       <Provider store={store}>
-        <Routes />
+        <TranslationProvider>
+          <Routes />
+        </TranslationProvider>
       </Provider>
     </IonApp>
   );

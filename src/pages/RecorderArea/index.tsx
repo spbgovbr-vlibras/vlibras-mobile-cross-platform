@@ -1,37 +1,39 @@
 import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
-import {
-  logoCapture,
-  logoHistory,
-  logoTranslate,
-  logoMaos,
-} from '../../assets';
-import { useHistory, useLocation } from 'react-router-dom';
-import paths from '../../constants/paths';
-import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/video';
-import { File, DirectoryEntry } from '@ionic-native/file';
+
 import { CameraResultType, Capacitor } from '@capacitor/core';
-
-import { IonContent } from '@ionic/react';
-import { MenuLayout } from '../../layouts';
-import { Strings } from './strings';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
-
+import { File, DirectoryEntry } from '@ionic-native/file';
 import {
   VideoCapturePlus,
   VideoCapturePlusOptions,
   MediaFile,
 } from '@ionic-native/video-capture-plus';
 import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
+import { IonContent } from '@ionic/react';
+import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+
+import {
+  logoCapture,
+  logoHistory,
+  logoTranslate,
+  logoMaos,
+} from '../../assets';
+import {
   VideoOutputModal,
   TranslatingModal,
   ErrorModal,
 } from '../../components';
+import paths from '../../constants/paths';
+import { MenuLayout } from '../../layouts';
+import { Strings } from './strings';
 
 import './styles.css';
 
@@ -56,7 +58,7 @@ const RecorderArea = () => {
     ({ video }: RootState) => video.lastTranslate,
   );
   const takeVideo = async () => {
-    //mock
+    // mock
     if (currentVideoArray.length < 5) {
       dispatch(
         Creators.setCurrentArrayVideo([
@@ -78,23 +80,21 @@ const RecorderArea = () => {
   const takeVideoOficial = async () => {
     try {
       const options = { limit: 1, duration: 30 };
-      let mediafile = await VideoCapturePlus.captureVideo(options);
+      const mediafile = await VideoCapturePlus.captureVideo(options);
 
-      let media = mediafile[0] as MediaFile;
-      let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
-      let resolvedPath: DirectoryEntry;
-
-      resolvedPath = await File.resolveDirectoryUrl(path);
+      const media = mediafile[0] as MediaFile;
+      const path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
+      const resolvedPath: DirectoryEntry = await File.resolveDirectoryUrl(path);
 
       File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
         (buffer: any) => {
-          let imgBlob = new Blob([buffer], {
+          const imgBlob = new Blob([buffer], {
             type: media.type,
           });
 
           const fname = `thumb-${currentVideoArray.length}`;
 
-          let thumbnailoption: CreateThumbnailOptions = {
+          const thumbnailoption: CreateThumbnailOptions = {
             fileUri: resolvedPath.nativeURL + media.name,
             quality: 100,
             atTime: 1,
@@ -103,18 +103,16 @@ const RecorderArea = () => {
 
           VideoEditor.createThumbnail(thumbnailoption)
             .then(async (thumbnailPath: any) => {
-              let pathThumbs = thumbnailPath.substring(
+              const pathThumbs = thumbnailPath.substring(
                 0,
                 thumbnailPath.lastIndexOf('/'),
               );
-              let resolvedPathThumb: DirectoryEntry;
-              resolvedPathThumb = await File.resolveDirectoryUrl(
-                'file://' + pathThumbs,
-              );
+              const resolvedPathThumb: DirectoryEntry =
+                await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
               File.readAsDataURL(
                 resolvedPathThumb.nativeURL,
-                fname + '.jpg',
+                `${fname}.jpg`,
               ).then(
                 (thumbPath: any) => {
                   VideoEditor.getVideoInfo({
@@ -200,7 +198,7 @@ const RecorderArea = () => {
 
     setLoading(false);
 
-    if (arrayOfResults.length != 0) {
+    if (arrayOfResults.length !== 0) {
       const today = new Date();
       dispatch(
         Creators.setLastTranslator({
@@ -225,61 +223,76 @@ const RecorderArea = () => {
 
   const renderOutputs = () => {
     return lastTranslation.map((item: string, key: string) => {
-      return <span key={key}>{item}</span>;
+      return <span key={uuidv4()}>{item}</span>;
     });
   };
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
-        <div
+        <button
           className="main-area-recorder"
           onClick={() => setToogleResult(!toogleResult)}
+          type="button"
         >
-          {results.length != 0 && (
+          {results.length !== 0 && (
             <>
               <div className="title-area">
-                <img className="logo-icon" src={logoMaos} />
+                <img className="logo-icon" src={logoMaos} alt="Logo Mãos" />
                 <p className="title"> Ultima tradução </p>
               </div>
-              <div
+              <button
                 className="list-outputs"
                 onClick={() => history.push(paths.HISTORY)}
+                type="button"
               >
                 <div className="container-outputs">{renderOutputs()}</div>
-              </div>
+              </button>
             </>
           )}
           <img
             src={logoTranslate}
-            className={results.length != 0 ? 'bg-img bg-opacity' : 'bg-img'}
-          ></img>
-        </div>
+            className={results.length !== 0 ? 'bg-img bg-opacity' : 'bg-img'}
+            alt="Logo translate"
+          />
+        </button>
         <div className="fixed-area-recorder">
           <p className="title-recorder">
             Use a câmera para gravar novos sinais
           </p>
           <div className="recorder-area">
             <div className="area-button-recorder">
-              <img
-                className="button-recorder"
-                src={logoCapture}
+              <button
                 onClick={takeVideo}
-                // onClick={() => history.push(paths.SIGNALCAPTURE)}
-              ></img>
+                type="button"
+                className="main-area-recorder-button-none"
+              >
+                <img
+                  className="button-recorder"
+                  src={logoCapture}
+                  alt="Logo Captura"
+                  // onClick={() => history.push(paths.SIGNALCAPTURE)}
+                />
+              </button>
               <p> Câmera </p>
             </div>
-            <img
-              className="history-recorder"
-              src={logoHistory}
+            <button
               onClick={() => history.push(paths.HISTORY)}
-            ></img>
+              className="main-area-recorder-button-none"
+              type="button"
+            >
+              <img
+                className="history-recorder"
+                src={logoHistory}
+                alt="Logo Histórico"
+              />
+            </button>
           </div>
         </div>
         <TranslatingModal loading={loading} setLoading={setLoading} />
         <VideoOutputModal
           outputs={results}
-          showButtons={true}
+          showButtons
           showModal={showModal}
           setShowModal={setShowModal}
           playerIntermedium={false}

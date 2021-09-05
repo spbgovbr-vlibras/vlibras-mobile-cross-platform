@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
+import { NativeStorage } from '@ionic-native/native-storage';
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
-import dateFormat from 'utils/dateFormat';
-import { NativeStorage } from '@ionic-native/native-storage';
 
+import dateFormat from 'utils/dateFormat';
 
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
@@ -27,7 +27,7 @@ const INITIAL_STATE: VideoState = {
   lastTranslate: [],
   domain: 'Saúde',
   isVideoScreen: false,
-  translationsHistoric: {}
+  translationsHistoric: {},
 };
 
 export const Creators = {
@@ -48,21 +48,19 @@ const loadHistory = async (payloadDate: any, payloadData: any) => {
   );
 
   const resultPromise = await promiseHistory;
-  const dateFormatted = dateFormat(payloadDate)
+  const dateFormatted = dateFormat(payloadDate);
 
   if (resultPromise[dateFormatted]) {
-    resultPromise[dateFormatted].unshift(payloadData)
+    resultPromise[dateFormatted].unshift(payloadData);
   } else {
-    resultPromise[dateFormatted] = [payloadData]
+    resultPromise[dateFormatted] = [payloadData];
   }
 
-  NativeStorage.setItem('history', resultPromise)
-  .then(
-  () => console.log(NativeStorage.getItem('myitem')),
-  error => console.error('Error storing item', error)
+  NativeStorage.setItem('history', resultPromise).then(
+    () => console.log(NativeStorage.getItem('myitem')),
+    error => console.error('Error storing item', error),
   );
-
-}
+};
 
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
@@ -77,7 +75,7 @@ const reducer: Reducer<VideoState, ActionTypes> = (
       case Types.SET_LAST_TRANSLATOR:
         draft.lastTranslate = payload.data;
         loadHistory(payload.date, payload.data);
- 
+
         break;
       case Types.SET_DOMAIN:
         draft.domain = payload;
@@ -90,7 +88,5 @@ const reducer: Reducer<VideoState, ActionTypes> = (
     }
   });
 };
-
-
 
 export default reducer;

@@ -12,14 +12,15 @@ import IconHistory from './icons/IconHistory';
 import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
+import IconArrowLeft from './icons/IconArrowLeft';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
 import gifStepOne from './gifs/passo1.gif';
 import gifStepTwo from './gifs/passo2.gif';
-import gifStepThree from './gifs/passo3.gif'; 
+import gifStepThree from './gifs/passo3.gif';
 import gifStepFour from './gifs/passo4.gif';
-import gifTranslating from './gifs/translating.gif'
+import gifTranslating from './gifs/translating.gif';
 import IconEdit from './icons/IconEdit';
 import IconClose from './icons/IconClose';
 import IconPause from './icons/IconPause';
@@ -27,6 +28,7 @@ import IconRefresh from './icons/IconRefresh';
 import IconRunning from './icons/IconRunning';
 import IconSubtitle from './icons/IconSubtitle';
 import IconPauseOutlined from './icons/IconPauseOutlined';
+import IconThumbs from './icons/IconThumbs';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -172,5 +174,7 @@ export {
   IconRunning,
   IconSubtitle,
   IconPauseOutlined,
-  logoWarning
+  logoWarning,
+  IconThumbs,
+  IconArrowLeft,
 };

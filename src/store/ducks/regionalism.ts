@@ -2,6 +2,7 @@
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
+
 import regionalismData from 'data/regionalism';
 
 export const Types = {

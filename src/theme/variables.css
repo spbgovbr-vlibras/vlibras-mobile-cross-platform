@@ -261,3 +261,8 @@ http://ionicframework.com/docs/theming/ */
   display: flex;
   flex-direction: column;
 }
+
+
+body {
+  --ion-safe-area-bottom: env(safe-area-inset-bottom);
+}

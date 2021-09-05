@@ -116,3 +116,8 @@
   margin: auto !important;
   border-radius: 1px !important;
 }
+
+.videooutput-modal-button-none {
+  border: 0;
+  background: none;
+}

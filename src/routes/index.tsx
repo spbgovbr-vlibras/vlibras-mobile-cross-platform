@@ -38,6 +38,7 @@ function Routes() {
           <Route component={Domain} path={paths.DOMAIN} />
           <Route component={OnBoarding} path={paths.ONBOARDING} />
           <Route component={SignalCapture} path={paths.SIGNALCAPTURE} />
+          <Route component={Dictionary} path={paths.DICTIONARY_PLAYER} />
         </IonRouterOutlet>
       </IonReactRouter>
     </BrowserRouter>

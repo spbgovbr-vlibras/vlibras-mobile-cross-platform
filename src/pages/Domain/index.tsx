@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 
 import {
   IonButton,
@@ -10,11 +9,13 @@ import {
   IonItem,
   IonRadio,
 } from '@ionic/react';
-import { MenuLayout } from '../../layouts';
-import paths from '../../constants/paths';
-import { Creators } from 'store/ducks/video';
-import { RootState } from 'store';
 import { useSelector, useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
+import paths from 'constants/paths';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
 import './styles.css';
@@ -37,17 +38,17 @@ const Domain = () => {
   };
 
   const renderItems = () => {
-    let domains = [
+    const domains = [
       Strings.FIRST_OPT_DOMAIN,
       Strings.SECOND_OPT_DOMAIN,
       Strings.THIRD_OPT_DOMAIN,
     ];
 
     return domains.map(item => (
-      <IonItem key={item} style={domain == item ? styles.activeBg : {}}>
+      <IonItem key={item} style={domain === item ? styles.activeBg : {}}>
         <IonLabel
           className="item-domain"
-          style={domain == item ? styles.activeColor : {}}
+          style={domain === item ? styles.activeColor : {}}
         >
           {item}
         </IonLabel>

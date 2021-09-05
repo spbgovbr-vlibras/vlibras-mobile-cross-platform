@@ -1,14 +1,15 @@
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+
 import { IonContent, IonModal, IonPage } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
-import paths from '../../constants/paths';
 
-import Presentation from './Steps/Presentation';
-import StepOne from './Steps/StepOne';
-import StepTwo from './Steps/StepTwo';
-import StepThree from './Steps/StepThree';
-import StepFour from './Steps/StepFour';
+import paths from '../../constants/paths';
 import { MenuLayout } from '../../layouts';
+import Presentation from './Steps/Presentation';
+import StepFour from './Steps/StepFour';
+import StepOne from './Steps/StepOne';
+import StepThree from './Steps/StepThree';
+import StepTwo from './Steps/StepTwo';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -23,6 +24,12 @@ const OnBoarding = () => {
   useEffect(() => {
     setShowModal(true);
   }, [location]);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setCurrentStep(0);
+    history.push(paths.DOMAIN);
+  };
 
   useEffect(() => {
     switch (currentStep) {
@@ -72,12 +79,6 @@ const OnBoarding = () => {
         break;
     }
   }, [currentStep]);
-
-  const closeModal = () => {
-    setShowModal(false);
-    setCurrentStep(0);
-    history.push(paths.DOMAIN);
-  };
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>

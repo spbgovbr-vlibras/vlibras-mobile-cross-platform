@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { IonModal, IonButton } from '@ionic/react';
-import { logoPlay, logoClose, logoMaos, logoAnswer } from '../../assets';
-import './styles.css';
-import Player from 'components/Player';
-import { Creators } from 'store/ducks/video';
-import { useDispatch } from 'react-redux';
 
-import Unity, { UnityContent } from 'react-unity-webgl';
-import paths from 'constants/paths';
+import { IonModal, IonButton } from '@ionic/react';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import Unity, { UnityContent } from 'react-unity-webgl';
+import { v4 as uuidv4 } from 'uuid';
+
+import { logoPlay, logoClose, logoMaos, logoAnswer } from 'assets';
+import paths from 'constants/paths';
+import { Creators } from 'store/ducks/video';
+import './styles.css';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -53,9 +54,14 @@ const VideoOutputModal = ({
 
   const renderOutputs = () => {
     return outputs.map((item: string, key: string) => (
-      <span onClick={() => playWord(item)} key={key}>
+      <button
+        className="videooutput-modal-button-none"
+        onClick={() => playWord(item)}
+        key={uuidv4()}
+        type="button"
+      >
         {item}
-      </span>
+      </button>
     ));
   };
 
@@ -81,20 +87,30 @@ const VideoOutputModal = ({
     <>
       <IonModal
         isOpen={showModal}
-        cssClass={
-          'videooutput-modal' +
-          (openPlayer ? ' player' : '') +
-          (!showButtons ? ' buttons-off' : '')
-        }
-        swipeToClose={true}
+        cssClass={`videooutput-modal${openPlayer ? ' player' : ''}${
+          !showButtons ? ' buttons-off' : ''
+        }`}
+        swipeToClose
         onDidDismiss={closeModal}
       >
         <div className="modal-title">
           <span> Resultado tradução </span>
           {!openPlayer ? (
-            <img src={logoPlay} onClick={() => setOpenPlayer(true)}></img>
+            <button
+              className="videooutput-modal-button-none"
+              onClick={() => setOpenPlayer(true)}
+              type="button"
+            >
+              <img src={logoPlay} alt="Logo Play" />
+            </button>
           ) : (
-            <img src={logoClose} onClick={closeModal}></img>
+            <button
+              className="videooutput-modal-button-none"
+              onClick={closeModal}
+              type="button"
+            >
+              <img src={logoClose} alt="Logo Fechar" />
+            </button>
           )}
         </div>
         <div className="list-outputs">
@@ -117,11 +133,12 @@ const VideoOutputModal = ({
                 history.push(paths.TRANSLATOR);
               }}
             >
-              <img src={logoAnswer}></img>
+              <img src={logoAnswer} alt="Logo" />
               Responder
             </IonButton>
             <IonButton className="newsign-button" onClick={closeModal}>
-              <img className="logo-union" src={logoMaos}></img> Novo Sinal
+              <img className="logo-union" src={logoMaos} alt="Logo" /> Novo
+              Sinal
             </IonButton>
           </div>
         )}

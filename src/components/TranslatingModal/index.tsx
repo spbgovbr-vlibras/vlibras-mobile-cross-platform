@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { IonModal, IonButton } from '@ionic/react';
+import React from 'react';
+
+import { IonModal } from '@ionic/react';
+
 import { gifTranslating } from '../../assets';
 import './styles.css';
 
@@ -12,12 +14,12 @@ const TranslatingModal = ({ loading, setLoading }: TranslatingModalProps) => {
   return (
     <IonModal
       isOpen={loading}
-      cssClass={'translating-modal'}
+      cssClass="translating-modal"
       onDidDismiss={() => setLoading(false)}
-      swipeToClose={true}
+      swipeToClose
     >
       <p className="modal-title"> Traduzindo... </p>
-      <img className="loading" src={gifTranslating} />
+      <img className="loading" src={gifTranslating} alt="Carregando" />
     </IonModal>
   );
 };

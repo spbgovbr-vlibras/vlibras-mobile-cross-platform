@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { NativeStorage } from '@ionic-native/native-storage';
 import {
   IonChip,
   IonContent,
@@ -9,12 +10,13 @@ import {
   IonTextarea,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
-import { RootState } from 'store';
-import { VideoOutputModal } from '../../components';
-import { NativeStorage } from '@ionic-native/native-storage';
+import { v4 as uuidv4 } from 'uuid';
 
-import { logoTranslator1, logoTranslator2 } from '../../assets';
-import { MenuLayout } from '../../layouts';
+import { logoTranslator1, logoTranslator2 } from 'assets';
+import { VideoOutputModal } from 'components';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+
 import { Strings } from './strings';
 
 import './styles.css';
@@ -47,6 +49,11 @@ function Historic() {
     loadHistory();
   }, []);
 
+  const openModalOutput = (actualItem: any) => {
+    setShowModal(true);
+    setResults(actualItem);
+  };
+
   const renderItems = () => {
     const datesMapped = Object.keys(historyStorage).reverse();
 
@@ -55,23 +62,19 @@ function Historic() {
         return (
           <div>
             {key === 0 && <p className="date-desc"> {column} </p>}
-            <div
+            <button
               className="container-outputs"
               onClick={() => openModalOutput(item)}
+              type="button"
             >
-              {item.map((value: string, key: string) => (
-                <span key={key}>{value}</span>
+              {item.map((value: string) => (
+                <span key={uuidv4()}>{value}</span>
               ))}
-            </div>
+            </button>
           </div>
         );
       });
     });
-  };
-
-  const openModalOutput = (actualItem: any) => {
-    setShowModal(true);
-    setResults(actualItem);
   };
 
   return (
@@ -121,7 +124,7 @@ function Historic() {
             showButtons={false}
             showModal={showModal}
             setShowModal={setShowModal}
-            playerIntermedium={true}
+            playerIntermedium
           />
         </div>
       </IonContent>

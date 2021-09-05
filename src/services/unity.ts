@@ -9,6 +9,8 @@ export default class UnityService {
 
   private static service: UnityService;
 
+  private isReady: boolean;
+
   private constructor() {
     this.unityContent = new UnityContent(
       'Build-Final/Build/Build Final.json',
@@ -17,6 +19,7 @@ export default class UnityService {
         adjustOnWindowResize: true,
       },
     );
+    this.isReady = false;
   }
 
   static getService(): UnityService {
@@ -28,6 +31,10 @@ export default class UnityService {
 
   getUnity(): UnityContent {
     return this.unityContent;
+  }
+
+  getIsReady(): boolean {
+    return this.isReady;
   }
 
   send(fn: PlayerKeys, action: PlayerKeys, params?: number | string): void {
@@ -46,6 +53,7 @@ export default class UnityService {
         PlayerKeys.SET_BASE_URL,
         DICTIONAY_URL,
       );
+      this.isReady = true;
     };
   }
 }

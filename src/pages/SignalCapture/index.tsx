@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { IconCloseCircle } from 'assets';
-import { useHistory } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/video';
 
+import { CameraResultType, Capacitor } from '@capacitor/core';
+import { File, DirectoryEntry } from '@ionic-native/file';
 import {
-  logoCaptureV2,
-  logoTranslateVideo,
-  logoTrashBtn,
-  logoCaptureDisable,
-} from '../../assets';
-
+  VideoCapturePlus,
+  VideoCapturePlusOptions,
+  MediaFile,
+} from '@ionic-native/video-capture-plus';
+import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
 import {
   IonButton,
   IonList,
@@ -29,28 +28,27 @@ import {
   IonContent,
   IonAlert,
 } from '@ionic/react';
-import { MenuLayout } from '../../layouts';
-import paths from '../../constants/paths';
-import { CameraResultType, Capacitor } from '@capacitor/core';
-import { File, DirectoryEntry } from '@ionic-native/file';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
+import { useSelector, useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
-  VideoCapturePlus,
-  VideoCapturePlusOptions,
-  MediaFile,
-} from '@ionic-native/video-capture-plus';
+  IconCloseCircle,
+  logoCaptureV2,
+  logoTranslateVideo,
+  logoTrashBtn,
+  logoCaptureDisable,
+} from 'assets';
+import Regionalism from 'pages/Regionalism';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
 
 import { ErrorModal } from '../../components';
-
+import paths from '../../constants/paths';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
+
 import './styles.css';
-import { key } from 'ionicons/icons';
-import Regionalism from 'pages/Regionalism';
 
 const SignalCapture = () => {
   const dispatch = useDispatch();
@@ -71,7 +69,7 @@ const SignalCapture = () => {
   const history = useHistory();
 
   const takeVideo = async () => {
-    //mock
+    // mock
     if (currentVideoArray.length < 5) {
       dispatch(
         Creators.setCurrentArrayVideo([
@@ -96,21 +94,24 @@ const SignalCapture = () => {
         const options = { limit: 1, duration: 30 };
         const mediafile = await VideoCapturePlus.captureVideo(options);
 
-        let media = mediafile[0] as MediaFile;
-        let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
-        let resolvedPath: DirectoryEntry;
-
-        resolvedPath = await File.resolveDirectoryUrl(path);
+        const media = mediafile[0] as MediaFile;
+        const path = media.fullPath.substring(
+          0,
+          media.fullPath.lastIndexOf('/'),
+        );
+        const resolvedPath: DirectoryEntry = await File.resolveDirectoryUrl(
+          path,
+        );
 
         File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
           (buffer: any) => {
-            let imgBlob = new Blob([buffer], {
+            const imgBlob = new Blob([buffer], {
               type: media.type,
             });
 
             const fname = `thumb-${currentVideoArray.length}`;
 
-            let thumbnailoption: CreateThumbnailOptions = {
+            const thumbnailoption: CreateThumbnailOptions = {
               fileUri: resolvedPath.nativeURL + media.name,
               quality: 100,
               atTime: 1,
@@ -119,18 +120,16 @@ const SignalCapture = () => {
 
             VideoEditor.createThumbnail(thumbnailoption)
               .then(async (thumbnailPath: any) => {
-                let pathThumbs = thumbnailPath.substring(
+                const pathThumbs = thumbnailPath.substring(
                   0,
                   thumbnailPath.lastIndexOf('/'),
                 );
-                let resolvedPathThumb: DirectoryEntry;
-                resolvedPathThumb = await File.resolveDirectoryUrl(
-                  'file://' + pathThumbs,
-                );
+                const resolvedPathThumb: DirectoryEntry =
+                  await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
                 File.readAsDataURL(
                   resolvedPathThumb.nativeURL,
-                  fname + '.jpg',
+                  `${fname}.jpg`,
                 ).then(
                   (thumbPath: any) => {
                     VideoEditor.getVideoInfo({
@@ -190,7 +189,7 @@ const SignalCapture = () => {
 
   const removeRecord = (index: any) => {
     const filteredArray = currentVideoArray.filter(
-      (value: {}, i: any) => i !== index,
+      (value: unknown, i: any) => i !== index,
     );
     console.log('Passei aqui');
 
@@ -203,8 +202,12 @@ const SignalCapture = () => {
     // setLog(JSON.stringify(currentVideoArray));
     return currentVideoArray.map((item: any, key: number) => {
       return (
-        <IonItem className="item-recorder" key={key}>
-          <img className="video-thumb" src={item[2].thumbBlob} />
+        <IonItem className="item-recorder" key={uuidv4()}>
+          <img
+            className="video-thumb"
+            src={item[2].thumbBlob}
+            alt="Video Thumb"
+          />
 
           <div className="video-metadata">
             <p className="name"> Sinal {key + 1}</p>
@@ -212,7 +215,13 @@ const SignalCapture = () => {
           </div>
 
           <div className="video-icon-delete">
-            <img src={logoTrashBtn} onClick={() => popupRemove(key)} />
+            <button
+              onClick={() => popupRemove(key)}
+              type="button"
+              className="signal-capture-button-none"
+            >
+              <img src={logoTrashBtn} alt="Logo lixeira" />
+            </button>
           </div>
         </IonItem>
       );
@@ -247,23 +256,35 @@ const SignalCapture = () => {
             <div>
               <span className="tooltiptext">Grave novos sinais</span>
             </div>
-            <img
-              className="button-recorder"
-              src={
-                currentVideoArray.length < 5
-                  ? logoCaptureV2
-                  : logoCaptureDisable
-              }
+            <button
               onClick={takeVideo}
-            ></img>
+              type="button"
+              className="signal-capture-button-none"
+            >
+              <img
+                className="button-recorder"
+                src={
+                  currentVideoArray.length < 5
+                    ? logoCaptureV2
+                    : logoCaptureDisable
+                }
+                alt="Logo Gravar"
+              />
+            </button>
             <p> Câmera </p>
           </div>
           <div className="area-button-recorder">
-            <img
-              className="button-recorder"
-              src={logoTranslateVideo}
+            <button
               onClick={translateVideo}
-            ></img>
+              type="button"
+              className="signal-capture-button-none"
+            >
+              <img
+                className="button-recorder"
+                src={logoTranslateVideo}
+                alt="Logo gravar"
+              />
+            </button>
             <p> Traduzir </p>
           </div>
         </div>

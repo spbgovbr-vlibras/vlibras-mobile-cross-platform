@@ -1,5 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
+import { isPlatform } from '@ionic/core';
+import { IonPopover } from '@ionic/react';
 import { useHistory } from 'react-router';
 import Unity from 'react-unity-webgl';
 
@@ -11,9 +13,16 @@ import {
   IconSubtitle,
   IconRunning,
   IconPause,
+  IconHandsTranslate,
+  IconShare,
+  IconThumbs,
+  IconClose,
+  IconRefresh,
+  IconIcaro,
 } from 'assets';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
 
 import './styles.css';
@@ -28,10 +37,14 @@ const buttonColors = {
   VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
+// Convert 78px to vh then 100vh-7.938257993384785vh (78px transformed) [MA]
+const HEIGHT_PLAYER = '79.0617420066vh';
+const X1 = 1;
+const X2 = 2;
+const X3 = 3;
 const UNDEFINED_GLOSS = -1;
-const DELAY_PROGRESS = 10;
 const MAX_PROGRESS = 100;
-const GLOSS_TEXT = 'A suite VLibras é um conjunto de ferramentas gratuitas';
+const TIMEOUT = 10000;
 
 function toBoolean(flag: BooleanParamsPlayer): boolean {
   return flag === 'True';
@@ -42,17 +55,33 @@ function toInteger(flag: boolean): number {
 }
 
 function Player() {
+  const [popoverState, setShowPopover] = useState({
+    showPopover: false,
+    event: undefined,
+  });
   const history = useHistory();
 
+  const { generateVideo, setTranslateText, translateText } = useTranslation();
+
   // Dynamic states [MA]
+  const [visiblePlayer, setVisiblePlayer] = useState(false);
+  const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
 
   // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  let glossLen = UNDEFINED_GLOSS;
+  let cache = UNDEFINED_GLOSS;
+
+  useEffect(() => {
+    setTimeout(() => setVisiblePlayer(true), TIMEOUT);
+  }, []);
 
   window.onPlayingStateChange = (
     _isPlaying: BooleanParamsPlayer,
@@ -64,44 +93,28 @@ function Player() {
     setIsPlaying(toBoolean(_isPlaying));
     setIsPaused(toBoolean(_isPaused));
     setLoading(toBoolean(_isLoading));
+
+    if (!toBoolean(_isPlaying)) {
+      setHasFinished(true);
+    }
   };
 
-  //
-  let glossLen = UNDEFINED_GLOSS;
-
   window.CounterGloss = (counter: number, glossLength: number) => {
-    if (glossLen === UNDEFINED_GLOSS && GLOSS_TEXT.length < counter) {
+    if (counter === cache - 1) {
       glossLen = counter;
     }
+    cache = counter;
 
-    console.log(GLOSS_TEXT.split(' ').length);
+    const progress = (1 / glossLen) * 100;
 
-    const progress = ((glossLen - counter - 1) / glossLen) * 100;
-
-    if (progressBarRef.current) {
+    if (progressBarRef.current && progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'visible';
+      progressBarRef.current.style.visibility = 'visible';
       progressBarRef.current.style.width = `${
         progress > MAX_PROGRESS ? MAX_PROGRESS : progress
       }%`;
     }
   };
-
-  window.FinishWelcome = (_flag: boolean) => {
-    // To avoid non-reference errors [MA]
-  };
-
-  // TODO: Improve this function to perform better [MA]
-  // function triggerProgress() {
-  //   let width = 1;
-  //   progressBarRef.current!.style.visibility = 'visible';
-  //   const id = setInterval(() => {
-  //     if (width >= MAX_PROGRESS) {
-  //       clearInterval(id);
-  //     } else {
-  //       width += 1;
-  //       progressBarRef.current!.style.width = `${width}%`;
-  //     }
-  //   }, DELAY_PROGRESS);
-  // }
 
   function handlePlay(gloss: string) {
     if (progressContainerRef.current) {
@@ -118,6 +131,12 @@ function Player() {
     );
   }
 
+  function handleSpeed(speed: number) {
+    setSpeedValue(speed);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_SLIDER, speed);
+    setShowPopover({ showPopover: false, event: undefined });
+  }
+
   function handleChangeAvatar() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
   }
@@ -131,11 +150,32 @@ function Player() {
     setIsShowSubtitle(!isShowSubtitle);
   }
 
+  function handleShare() {
+    generateVideo();
+  }
+
+  function resetTranslation() {
+    setHasFinished(false);
+
+    if (progressBarRef.current && progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.width = '0%';
+    }
+  }
+
   const renderPlayerButtons = () => {
     if (isPlaying) {
       return (
         <>
-          <button className="player-action-button-transparent" type="button">
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={(e: any) => {
+              e.persist();
+              setShowPopover({ showPopover: true, event: e });
+            }}
+          >
             <IconRunning color={buttonColors.VARAINT_WHITE} />
           </button>
           <button
@@ -166,28 +206,53 @@ function Player() {
         </>
       );
     }
-    // if (hasFinished) {
-    //   return (
-    //     <>
-    //       <button className="player-action-button-transparent" type="button">
-    //         <IconDictionary color={buttonColors.VARAINT_WHITE} />
-    //       </button>
-    //       <button
-    //         className="player-action-button player-action-button-insert"
-    //         type="button"
-    //         onClick={() => handlePlay(GLOSS_TEXT)}
-    //       >
-    //         <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
-    //       </button>
-    //       <button className="player-action-button-transparent" type="button">
-    //         <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
-    //       </button>
-    //     </>
-    //   );
-    // }
+    if (hasFinished) {
+      return (
+        <>
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={(e: any) => {
+              e.persist();
+              setShowPopover({ showPopover: true, event: e });
+            }}
+          >
+            <IconRunning color={buttonColors.VARAINT_WHITE} />
+          </button>
+          <button
+            className="player-action-button player-action-button-insert"
+            type="button"
+            onClick={() => handlePlay(translateText)}
+          >
+            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
+          </button>
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={handleSubtitle}
+          >
+            <IconSubtitle
+              color={
+                isShowSubtitle
+                  ? buttonColors.VARIANT_WHITE_ACTIVE
+                  : buttonColors.VARAINT_WHITE
+              }
+              size={32}
+            />
+          </button>
+        </>
+      );
+    }
     return (
       <>
-        <button className="player-action-button-transparent" type="button">
+        <button
+          className="player-action-button-transparent"
+          type="button"
+          onClick={() => {
+            history.push(paths.DICTIONARY_PLAYER);
+            //   setVisiblePlayer(false);
+          }}
+        >
           <IconDictionary color={buttonColors.VARAINT_WHITE} />
         </button>
         <button
@@ -210,7 +275,107 @@ function Player() {
 
   return (
     <div className="player-container">
-      <Unity unityContent={playerService.getUnity()} />
+      <IonPopover
+        cssClass="player-popover"
+        event={popoverState.event}
+        isOpen={popoverState.showPopover}
+        onDidDismiss={() =>
+          setShowPopover({ showPopover: false, event: undefined })
+        }
+      >
+        <div className="player-popover-content">
+          <button
+            className={
+              speedValue === X3
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X3)}
+          >
+            <span>X3</span>
+          </button>
+          <div className="player-popover-content-divider" />
+          <button
+            className={
+              speedValue === X2
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X2)}
+          >
+            <span>X2</span>
+          </button>
+          <div className="player-popover-content-divider" />
+          <button
+            className={
+              speedValue === X1
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X1)}
+          >
+            <span>X1</span>
+          </button>
+        </div>
+      </IonPopover>
+      <div className="player-container-button">
+        {isPlaying || hasFinished ? (
+          <button
+            className="player-button-rounded-top"
+            type="button"
+            onClick={resetTranslation}
+          >
+            <IconClose color="#FFF" size={24} />
+          </button>
+        ) : (
+          <button
+            className="player-button-rounded-top"
+            type="button"
+            onClick={handleChangeAvatar}
+          >
+            <IconIcaro color="#FFF" size={20} />
+          </button>
+        )}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          marginBottom: '72px',
+          height: HEIGHT_PLAYER,
+          width: '100vw',
+          visibility: visiblePlayer ? 'visible' : 'hidden',
+          zIndex: 0,
+        }}
+      >
+        <Unity
+          unityContent={playerService.getUnity()}
+          className={
+            isPlatform('ios') ? 'player-content-ios' : 'player-content-default'
+          }
+        />
+      </div>
+
+      {hasFinished && !isPlaying && (
+        <div className="player-container-buttons">
+          <button className="player-button-rounded" type="button">
+            <IconThumbs color="#FFF" size={18} />
+          </button>
+          <button
+            className="player-button-rounded"
+            type="button"
+            onClick={handleShare}
+          >
+            <IconShare color="#FFF" size={18} />
+          </button>
+          <button className="player-button-rounded" type="button">
+            <IconHandsTranslate color="#FFF" size={18} />
+          </button>
+        </div>
+      )}
       <div className="player-action-container">
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />

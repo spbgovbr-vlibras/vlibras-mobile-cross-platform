@@ -200,3 +200,8 @@
 .popup-box-signal-cap .popup-yes.alert-button.sc-ion-alert-md:focus {
   color: blue;
 }
+
+.signal-capture-button-none {
+  border: 0;
+  background: none;
+}

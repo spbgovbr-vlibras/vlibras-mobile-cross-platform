@@ -10,23 +10,34 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/video';
 import { useDispatch } from 'react-redux';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
+import {
+  IconTranslate,
+  IconCloseCircle,
+  IconShare,
+  IconArrowLeft,
+} from 'assets';
 import paths from 'constants/paths';
+import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
 
 import './styles.css';
 
+type MODE = 'menu' | 'back';
+
 interface MenuLayoutProps {
   title: string;
+  mode?: MODE;
 }
 
-const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
+const MenuLayout: React.FC<MenuLayoutProps> = ({
+  children,
+  title,
+  mode = 'menu',
+}) => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -41,13 +52,13 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         dispatch(Creators.setIsVideoScreen(false));
         return (
           <>
-            <span
+            {/* <IonLabel
               className="menu-item-text"
               onClick={() => history.push(paths.ONBOARDING)}
             >
               {Strings.MENU_PT_BR}
-            </span>
-            <IconTranslate color="#2365DE" />
+            </IonLabel>
+            <IconTranslate color="#315EB1" /> */}
           </>
         );
       case paths.RECORDERAREA:
@@ -55,31 +66,22 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         dispatch(Creators.setIsVideoScreen(true));
         return (
           <>
-            <span
+            <IonLabel
               className="menu-item-text"
               onClick={() => history.push(paths.HOME)}
             >
               LIBRAS
-            </span>
-            <IconTranslate color="#2365DE" />
+            </IonLabel>
+            <IconTranslate color="#315EB1" />
           </>
         );
-      case paths.HISTORY:
-      case paths.TRANSLATOR:
-      case paths.DICTIONARY:
-        return (
-          <button onClick={() => history.goBack()} type="button">
-            <IconCloseCircle color="#2365DE" />
-          </button>
-        );
-
       case paths.ABOUT:
         return <IconShare color="#4B4B4B" />;
 
       default:
         return null;
     }
-  }, [location, history]);
+  }, [location, history, dispatch]);
 
   return (
     <IonPage className="menu-layout-container">
@@ -87,11 +89,17 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">{title}</IonTitle>
           <IonButtons slot="start">
-            <IonMenuButton
-              autoHide
-              onClick={openMenu}
-              className="menu-icon-drawer"
-            />
+            {mode === 'menu' ? (
+              <IonMenuButton
+                autoHide
+                onClick={openMenu}
+                className="menu-icon-drawer"
+              />
+            ) : (
+              <Link to={paths.HOME} className="menu-item-link">
+                <IconArrowLeft color="#315EB1" />
+              </Link>
+            )}
           </IonButtons>
           <IonButtons slot="end">
             <div className="menu-container-end">{ToolbarAction}</div>
