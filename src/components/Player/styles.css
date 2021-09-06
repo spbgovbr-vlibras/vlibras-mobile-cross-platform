@@ -15,8 +15,8 @@
 }
 
 .player-action-container {
-  flex: 1;
-  justify-content: flex-end;
+  position: absolute;
+  bottom: 0;
   height: 78px;
   width: 100%;
   display: flex;

@@ -20,6 +20,7 @@ import {
   IconRefresh,
   IconIcaro,
 } from 'assets';
+import EvaluationModal from 'components/EvaluationModal';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
@@ -61,7 +62,7 @@ function Player() {
   });
   const history = useHistory();
 
-  const { generateVideo, setTranslateText, translateText } = useTranslation();
+  const { generateVideo, translateText } = useTranslation();
 
   // Dynamic states [MA]
   const [visiblePlayer, setVisiblePlayer] = useState(false);
@@ -82,6 +83,14 @@ function Player() {
   useEffect(() => {
     setTimeout(() => setVisiblePlayer(true), TIMEOUT);
   }, []);
+
+  // Evaluation modal
+  const [showModal, setShowModal] = useState(false);
+  const [showYesModal, setShowYesModal] = useState(false);
+  const [showNoModal, setShowNoModal] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
+    useState(false);
 
   window.onPlayingStateChange = (
     _isPlaying: BooleanParamsPlayer,
@@ -361,7 +370,11 @@ function Player() {
 
       {hasFinished && !isPlaying && (
         <div className="player-container-buttons">
-          <button className="player-button-rounded" type="button">
+          <button
+            className="player-button-rounded"
+            type="button"
+            onClick={() => setShowModal(true)}
+          >
             <IconThumbs color="#FFF" size={18} />
           </button>
           <button
@@ -382,6 +395,19 @@ function Player() {
         </div>
         <div className="play-action-content">{renderPlayerButtons()}</div>
       </div>
+      <EvaluationModal
+        show={showModal}
+        setShow={setShowModal}
+        showYes={showYesModal}
+        setShowYes={setShowYesModal}
+        showNo={showNoModal}
+        setShowNo={setShowNoModal}
+        showSuggestionModal={showSuggestionModal}
+        setShowSuggestionModal={setShowSuggestionModal}
+        showSuggestionFeedbackModal={showSuggestionFeedbackModal}
+        setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
+        isPlaying={isPlaying}
+      />
     </div>
   );
 }

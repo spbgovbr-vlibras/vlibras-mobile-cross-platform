@@ -2,11 +2,11 @@ import React from 'react';
 
 import { SVGProps } from './types';
 
-const IconCloseCircle = ({
+const IconArrowUpRight = ({
   style = {},
   color = 'black',
-  size = 24,
-  viewBox = '0 0 24 24',
+  size = 16,
+  viewBox = '0 0 16 16',
 }: SVGProps) => (
   <svg
     width={size}
@@ -14,25 +14,17 @@ const IconCloseCircle = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    color={color}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+      d="M4.66675 11.3333L11.3334 4.66663"
       stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
-      d="M15 9L9 15"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M9 9L15 15"
+      d="M4.66675 4.66663H11.3334V11.3333"
       stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
@@ -41,4 +33,4 @@ const IconCloseCircle = ({
   </svg>
 );
 
-export default IconCloseCircle;
+export default IconArrowUpRight;

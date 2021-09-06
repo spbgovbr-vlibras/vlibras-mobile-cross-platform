@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-import { IonText, IonButton, IonTextarea, IonContent } from '@ionic/react';
+import { IonText, IonTextarea, IonContent } from '@ionic/react';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
@@ -9,6 +10,7 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
+import { Creators } from 'store/ducks/translator';
 
 import { Strings } from './strings';
 
@@ -19,6 +21,7 @@ const playerService = PlayerService.getService();
 const Translator = () => {
   const [text, setText] = useState('');
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const { setTranslateText } = useTranslation();
 
@@ -26,6 +29,7 @@ const Translator = () => {
     setTranslateText(text);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     history.push(paths.HOME);
+    dispatch(Creators.setTranslatorText(text));
   }
 
   return (
