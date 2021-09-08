@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 
-import { IonModal, IonButton, IonText, IonChip } from '@ionic/react';
+import { IonModal, IonText, IonChip } from '@ionic/react';
+import { useSelector } from 'react-redux';
 
 import { IconCloseCircle, IconThumbDown, IconThumbUp } from 'assets';
-import './styles.css';
 import EvaluationNoModal from 'components/EvaluationNoModal';
 import EvaluationYesModal from 'components/EvaluationYesModal';
-import RevisionModal from 'components/RevisionModal';
+import { sendReview } from 'services/suggestionGloss';
+import { RootState } from 'store';
 
+import './styles.css';
 import { Strings } from './strings';
 
 interface EvaluationModalProps {
@@ -37,9 +39,24 @@ const EvaluationModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: EvaluationModalProps) => {
+  const currentTranslatorText = useSelector(
+    ({ translator }: RootState) => translator.translatorText,
+  );
+
   const closeModal = () => {
     setShow(false);
   };
+
+  const handlePositiveRevision = useCallback(() => {
+    setShow(false);
+    setShowYes(true);
+
+    sendReview({
+      text: currentTranslatorText,
+      review: currentTranslatorText,
+      rating: 'good',
+    });
+  }, [currentTranslatorText, setShow, setShowYes]);
 
   return (
     <div>
@@ -60,10 +77,7 @@ const EvaluationModal = ({
         <div className="evaluation-modal-container-rating-chips">
           <IonChip
             class="evaluation-modal-container-rating-chips-yes"
-            onClick={() => {
-              setShow(false);
-              setShowYes(true);
-            }}
+            onClick={handlePositiveRevision}
           >
             <IconThumbUp color="#4E4E4E" />
             <IonText class="evaluation-modal-container-rating-chips-texts">

@@ -53,8 +53,8 @@ function Dictionary() {
 
   function translate(text: string) {
     setTranslateText(text);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     history.push(paths.HOME);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
   const renderWord = (item: Words) => (

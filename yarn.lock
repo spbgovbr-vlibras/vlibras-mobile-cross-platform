@@ -1215,6 +1215,11 @@
   dependencies:
     file-saver "^2.0.2"
 
+"@capacitor-community/react-hooks@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@capacitor-community/react-hooks/-/react-hooks-0.0.11.tgz#6ac0889d888e1ff3659e32d63e2d8bbc08312771"
+  integrity sha512-cDxzGQLTbWV91uw87DipG8Z3wz6JuEZPIQ22OTU2BaNEWd+nk71+fXv8OmUShbzzZTqFEIyRQjd7V9s24mQXJg==
+
 "@capacitor/android@^3.0.2":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-3.1.2.tgz#b9f42fcbfb31639575cd90b63754e9ec526d434d"

@@ -17,8 +17,8 @@ import {
   IconShare,
   IconThumbs,
   IconClose,
-  IconRefresh,
   IconIcaro,
+  logoRefresh,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import paths from 'constants/paths';
@@ -39,7 +39,7 @@ const buttonColors = {
 };
 
 // Convert 78px to vh then 100vh-7.938257993384785vh (78px transformed) [MA]
-const HEIGHT_PLAYER = '79.0617420066vh';
+const HEIGHT_PLAYER = '79.1234840132vh';
 const X1 = 1;
 const X2 = 2;
 const X3 = 3;
@@ -65,7 +65,7 @@ function Player() {
   const { generateVideo, translateText } = useTranslation();
 
   // Dynamic states [MA]
-  const [visiblePlayer, setVisiblePlayer] = useState(false);
+  const [visiblePlayer, setVisiblePlayer] = useState(true);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -80,9 +80,17 @@ function Player() {
   let glossLen = UNDEFINED_GLOSS;
   let cache = UNDEFINED_GLOSS;
 
+  // To avoid the unity splash screen [MA]
   useEffect(() => {
     setTimeout(() => setVisiblePlayer(true), TIMEOUT);
   }, []);
+
+  function handlePlay(gloss: string) {
+    if (progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'visible';
+    }
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+  }
 
   // Evaluation modal
   const [showModal, setShowModal] = useState(false);
@@ -124,13 +132,6 @@ function Player() {
       }%`;
     }
   };
-
-  function handlePlay(gloss: string) {
-    if (progressContainerRef.current) {
-      progressContainerRef.current.style.visibility = 'visible';
-    }
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
-  }
 
   function handlePause() {
     playerService.send(
@@ -233,7 +234,7 @@ function Player() {
             type="button"
             onClick={() => handlePlay(translateText)}
           >
-            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
+            <img src={logoRefresh} alt="refresh" />
           </button>
           <button
             className="player-action-button-transparent"
@@ -351,20 +352,18 @@ function Player() {
       </div>
       <div
         style={{
-          position: 'absolute',
-          bottom: 0,
-          marginBottom: '72px',
-          height: HEIGHT_PLAYER,
           width: '100vw',
           visibility: visiblePlayer ? 'visible' : 'hidden',
           zIndex: 0,
+          flexShrink: 0,
+          marginBottom: 70,
+          flex: 1,
+          display: 'flex',
         }}
       >
         <Unity
           unityContent={playerService.getUnity()}
-          className={
-            isPlatform('ios') ? 'player-content-ios' : 'player-content-default'
-          }
+          className="player-content"
         />
       </div>
 

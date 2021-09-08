@@ -27,8 +27,8 @@ const Translator = () => {
 
   function translate() {
     setTranslateText(text);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     history.push(paths.HOME);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     dispatch(Creators.setTranslatorText(text));
   }
 

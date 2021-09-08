@@ -92,11 +92,13 @@ import logoCaptureV2 from './images/capturev2.svg';
 import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
+import logoRefresh from './images/rotate-ccw.png';
 
 import Vlibraslogo from './images/vlibraslogo.png';
 
 export {
   LogoIcaro,
+  logoRefresh,
   logoAvatares,
   logoCamaraDeputados,
   logoFacebook,

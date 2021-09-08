@@ -20,15 +20,16 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { IconClose, IconCloseCircle, IconThumbDown } from 'assets';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
+import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { PlayerKeys } from 'constants/player';
 import { Words } from 'models/dictionary';
+import handleGetText from 'pages/Translator';
 import { sendReview } from 'services/suggestionGloss';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators as CreatorsDictionary } from 'store/ducks/dictionary';
 import { Creators } from 'store/ducks/translator';
 
-import handleGetText from '../../pages/Translator';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -42,7 +43,7 @@ interface RevisionModalProps {
 }
 
 const playerService = PlayerService.getService();
-const TIME_DEBOUNCE_MS = 0;
+const TIME_DEBOUNCE_MS = 1000;
 const TIME_DEBOUNCE_SUGGESTION = 0;
 
 const RevisionModal = ({
@@ -82,8 +83,11 @@ const RevisionModal = ({
   const handleOpenSuggestionFeedbackModal = () => {
     setShow(false);
     setSuggestionFeedbackModal(true);
-    sendReview(currentTranslatorText, auxValueText, 'bad');
-    // playerService.send(PlayerKeys.PLAYER_MANAGER,PlayerKeys.SEND_REVIEW, auxValueText);
+    sendReview({
+      text: currentTranslatorText,
+      review: auxValueText,
+      rating: 'bad',
+    });
   };
 
   const dictionary = useSelector(
@@ -112,25 +116,27 @@ const RevisionModal = ({
         }),
       );
     }
-  }, [show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, dispatch]);
 
   useEffect(() => {
     if (!isPlaying && isPreview) {
       setShow(true);
     }
-  }, [isPlaying, isPreview]);
+  }, [isPlaying, isPreview, setShow]);
 
   const onSearch = useCallback(
     event => {
+      setAuxValueText(event.target.value);
       dispatch(
         CreatorsDictionary.fetchWords.request({
-          page: 1,
+          page: FIRST_PAGE_INDEX,
           limit: 10,
-          name: currentTranslatorText,
+          name: event.target.value || undefined,
         }),
       );
     },
-    [dispatch, currentTranslatorText],
+    [dispatch],
   );
 
   const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
@@ -144,7 +150,10 @@ const RevisionModal = ({
         swipeToClose
       >
         <div className="revision-modal-header">
-          <h1 className="revision-modal-title">Revisão</h1>
+          <div style={{ width: 10 }} />
+          <div>
+            <h1 className="revision-modal-title">Revisão</h1>
+          </div>
           <button
             className="revision-close-button"
             type="button"
@@ -158,11 +167,11 @@ const RevisionModal = ({
           <IonTextarea
             class="text-area"
             placeholder={auxValueText}
-            autofocus
             rows={5}
             cols={5}
             wrap="soft"
             required
+            onIonChange={debouncedSearch}
             value={auxValueText}
           />
           <div className="suggestion-container">

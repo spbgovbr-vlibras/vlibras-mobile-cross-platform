@@ -1,23 +1,21 @@
 .player-container {
   display: flex;
   flex: 1;
-  background-color: #E4E4E4;
   flex-direction: column;
 }
 
-.player-content-ios {
+.player-content {
+  display: flex;
   flex: 1;
-  background-color: #E4E4E4 !important;
+  flex-shrink: inherit;
 }
 
-.player-content-default {
-  background-color: #E4E4E4 !important;
-}
 
 .player-action-container {
   position: absolute;
   bottom: 0;
   height: 78px;
+  min-height: 78px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -44,6 +42,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .player-action-button-microphone {
@@ -116,6 +115,7 @@
 }
 
 .player-container-button {
+  position: absolute;
   padding: 16px;
   width: 100%;
   display: flex;
