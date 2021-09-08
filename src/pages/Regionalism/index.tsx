@@ -38,6 +38,7 @@ function Regionalism() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current,
   );
+  
   const [regionalism,setregionalism] = useState(currentRegionalism); 
 
   const renderItem = (item: RegionalismItem) => (

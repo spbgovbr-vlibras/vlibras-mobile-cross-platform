@@ -4,15 +4,11 @@
     flex-direction: row;
     justify-content: space-between;
     padding: 16px;
-
 }
-.player-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
 
 .customization-menu-principal{
+
+
 
 }
 
@@ -88,4 +84,16 @@ align-self: center;
     padding-bottom: 3px;
 
 
+}
+.player-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+  
+.player-content {
+    display: flex;
+    flex: 1;
+    flex-shrink: inherit;
+    background-color: black;
 }

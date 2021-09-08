@@ -20,14 +20,13 @@ export interface CustomizationState {
   currentpants: string;
   currentshirt: string;
 }
-
 const INITIAL_STATE: CustomizationState = {
-  currentbody: " ",
-  currenteye: " ",
-  currenthair: " ",
-  currentpants: " ",
-  currentshirt: " ", 
- };
+  currentbody: "#f3a78f",
+  currenteye: "#000000",
+  currenthair: "#000000",
+  currentpants: "#121420",
+  currentshirt: "#202763", 
+};
   
 export const Creators = {
   setCurrentCustomizationBody: createAction(Types.SET_CURRENT_CUSTOMIZATION_BODY)<string>(),

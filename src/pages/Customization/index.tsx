@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { IonCol,IonImg, IonButton, IonRow, IonList, IonRadioGroup, IonListHeader, IonLabel, IonItem, IonRadio, IonContent, IonAlert } from '@ionic/react';
+import { IonCol, IonImg, IonButton, IonRow, IonList, IonRadioGroup, IonListHeader, IonLabel, IonItem, IonRadio, IonContent, IonAlert } from '@ionic/react';
 import { Strings } from './string';
 import './styles.css';
 
@@ -17,20 +17,20 @@ import paths from '../../constants/paths';
 import { reloadHistory } from 'utils/setHistory';
 import { useSelector, useDispatch } from 'react-redux';
 import { Creators, CustomizationState } from 'store/ducks/customization';
-import  CustomizationArrayPants  from 'data/CustomizationArrayPants';
-import  CustomizationBody  from 'data/CustomizationArrayBody';
-import  CustomizationArrayShirt  from 'data/CustomizationArrayShirt';
-import  CustomizationArrayHair  from 'data/CustomizationArrayHair';
-import  CustomizationEye  from 'data/CustomizationArrayEye';
+import CustomizationArrayPants from 'data/CustomizationArrayPants';
+import CustomizationBody from 'data/CustomizationArrayBody';
+import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
+import CustomizationArrayHair from 'data/CustomizationArrayHair';
+import CustomizationEye from 'data/CustomizationArrayEye';
 
 import { VideoOutputModal } from 'components';
 
-  import {
-    IconEye,
-    IconPants,
-    IconBody,
-    IconShirt,
-    IconHair 
+import {
+  IconEye,
+  IconPants,
+  IconBody,
+  IconShirt,
+  IconHair
 } from 'assets';
 
 import CustomizationArrayBody from 'data/CustomizationArrayBody';
@@ -38,12 +38,13 @@ import CustomizationArrayEye from 'data/CustomizationArrayEye';
 
 
 const unityContent = new UnityContent(
-  'Build-Final/Build/Build Final.json',
+  'Build-Final/Build/NOVABUILD.json',
   'Build-Final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
 );
+
 
 const playerService = PlayerService.getService();
 
@@ -65,30 +66,30 @@ export interface CustomizationEye {
 }
 
 const IcaroDefault = {
-  icaroBody:'#ffb79d',
-  icaroEye:'#000000',
-  icaroHair:'#000000',
-  icaroShirt:'#202763',
-  icaroPants:'#121420',
+  icaroBody: '#b87d6c',
+  icaroEye: '#000000',
+  icaroHair: '#000000',
+  icaroShirt: '#202763',
+  icaroPants: '#121420',
 }
 
 function Customization() {
 
   //States show
-  const[colorbody,setcolorbody]= useState(IcaroDefault.icaroBody);
-  const[coloreye,setcoloreye]= useState(IcaroDefault.icaroEye);
-  const[colorhair,setcolorhair]= useState(IcaroDefault.icaroHair);
-  const[colorshirt,setcolorshirt]= useState(IcaroDefault.icaroShirt);
-  const[colorpants,setcolorpants]= useState(IcaroDefault.icaroPants);
+  const [colorbody, setcolorbody] = useState(IcaroDefault.icaroBody);
+  const [coloreye, setcoloreye] = useState(IcaroDefault.icaroEye);
+  const [colorhair, setcolorhair] = useState(IcaroDefault.icaroHair);
+  const [colorshirt, setcolorshirt] = useState(IcaroDefault.icaroShirt);
+  const [colorpants, setcolorpants] = useState(IcaroDefault.icaroPants);
   //const [imageUrl, setImageUrl] = useState(getJsonColor.preview.logo);
 
 
 
-  const[showbody,setshowbody]= useState(true);
-  const[showeye,setshoweye]= useState(false);
-  const[showhair,setshowhair]= useState(false);
-  const[showshirt,setshowshirt]= useState(false);
-  const[showpants,setshowpants]= useState(false);
+  const [showbody, setshowbody] = useState(true);
+  const [showeye, setshoweye] = useState(false);
+  const [showhair, setshowhair] = useState(false);
+  const [showshirt, setshowshirt] = useState(false);
+  const [showpants, setshowpants] = useState(false);
   const [showAlert, setshowAlert] = useState(true);
 
   const dispatch = useDispatch();
@@ -98,360 +99,345 @@ function Customization() {
 
   //  funções para alterar States
 
-const showBody = () => {
+  const showBody = () => {
 
-  setshowbody(true);
-  setshoweye(false);
-  setshowhair(false);
-  setshowshirt(false);
-  setshowpants(false);
+    setshowbody(true);
+    setshoweye(false);
+    setshowhair(false);
+    setshowshirt(false);
+    setshowpants(false);
 
-}
-const showEye = () => {
+  }
+  const showEye = () => {
 
-  setshowbody(false);
-  setshoweye(true);
-  setshowhair(false);
-  setshowshirt(false);
-  setshowpants(false);
+    setshowbody(false);
+    setshoweye(true);
+    setshowhair(false);
+    setshowshirt(false);
+    setshowpants(false);
 
-}
-const showHair = () => {
+  }
+  const showHair = () => {
 
-  setshowbody(false);
-  setshoweye(false);
-  setshowhair(true);
-  setshowshirt(false);
-  setshowpants(false);
+    setshowbody(false);
+    setshoweye(false);
+    setshowhair(true);
+    setshowshirt(false);
+    setshowpants(false);
 
-}
+  }
 
-const showShirt = () => {
+  const showShirt = () => {
 
-  setshowbody(false);
-  setshoweye(false);
-  setshowhair(false);
-  setshowshirt(true);
-  setshowpants(false);
+    setshowbody(false);
+    setshoweye(false);
+    setshowhair(false);
+    setshowshirt(true);
+    setshowpants(false);
 
-}
+  }
 
-const showPants = () => {
-  setshowbody(false);
-  setshoweye(false);
-  setshowhair(false);
-  setshowshirt(false);
-  setshowpants(true);
+  const showPants = () => {
+    setshowbody(false);
+    setshoweye(false);
+    setshowhair(false);
+    setshowshirt(false);
+    setshowpants(true);
 
-}
+  }
 
-function popupCancel() {
-  setshowAlert(true);
-}
+  function popupCancel() {
+    setshowAlert(true);
+  }
 
-const selectcolorbody = (color: string) => {
+  const selectcolorbody = (color: string) => {
 
-  setcolorbody(color);
-  console.log(color);
+    setcolorbody(color);
+    console.log(color);
 
-}
-const selectcoloreye = (color: string) => {
+  }
+  const selectcoloreye = (color: string) => {
 
-  setcoloreye(color);
-  console.log(color);
+    setcoloreye(color);
+    console.log(color);
 
-}
-const selectcolorhair = (color: string) => {
+  }
+  const selectcolorhair = (color: string) => {
 
-  setcolorhair(color);
-  console.log(color);
+    setcolorhair(color);
+    console.log(color);
 
-}
-const selectcolorpants = (color: string) => {
+  }
+  const selectcolorpants = (color: string) => {
 
-  setcolorpants(color);
-  console.log(color);
+    setcolorpants(color);
+    console.log(color);
 
-}
-const selectcolorshirt = (color: string) => {
+  }
+  const selectcolorshirt = (color: string) => {
 
-  setcolorshirt(color);
-  console.log(color);
+    setcolorshirt(color);
+    console.log(color);
 
-}
+  }
 
-function SaveChanges() {
-  dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
-  dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
-  dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
-  dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
-  dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
+  function SaveChanges() {
+    dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
+    dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
+    dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
+    dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
+    dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
 
-  console.log(colorbody);
-  console.log(coloreye);
-  console.log(colorhair);
-  console.log(colorpants);
-  console.log(colorshirt);
+    console.log(colorbody);
+    console.log(coloreye);
+    console.log(colorhair);
+    console.log(colorpants);
+    console.log(colorshirt);
 
-  console.log("Cor salva com sucesso meu chapa");
-}
- 
-//CUSTOMIZER ICARO 
+    console.log("Cor salva com sucesso meu chapa");
+  }
 
-const preProcessingPreview = () => {
-  const object = {
-    corpo: colorbody,
-    olhos: '#fffafa',
-    cabelo: colorhair,
-    camisa: colorshirt,
-    calca: colorpants,
-    iris: coloreye,
-    logo: '',
-    pos: "center",
+  //CUSTOMIZER ICARO 
 
+  const preProcessingPreview = () => {
+    const object = {
+      corpo: colorbody,
+      olhos: '#fffafa',
+      cabelo: colorhair,
+      camisa: colorshirt,
+      calca: colorpants,
+      iris: coloreye,
+      pos: "center",
+
+    };
+    console.log(object)
+    return JSON.stringify(object);
   };
-console.log(object)
-  return JSON.stringify(object);
-};
 
-const previewAvatar = () => {
-  playerService.send(
-    PlayerKeys.AVATAR,
-    PlayerKeys.SETEDITOR,
-    preProcessingPreview()
-  );
-};
+  const previewAvatar = () => {
+    unityContent.send(
+      PlayerKeys.AVATAR,
+      PlayerKeys.SETEDITOR,
+      preProcessingPreview()
+    );
+  };
 
-// Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
-//------------------------------------------------------------------------------------------------
+  // Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
+  //------------------------------------------------------------------------------------------------
 
+  const resetColor = () => {
+    selectcolorbody(IcaroDefault.icaroBody)
+    selectcoloreye(IcaroDefault.icaroEye)
+    selectcolorhair(IcaroDefault.icaroHair)
+    selectcolorpants(IcaroDefault.icaroPants)
+    selectcolorshirt(IcaroDefault.icaroShirt)
+    previewAvatar();
+  }
 
-  const showColorsBody = (item: CustomizationBody ) => {
+  const showColorsBody = (item: CustomizationBody) => {
 
-    if (showbody===true) {
-      return(
-            <div
-              className="customization-item-colors" 
-              style={{borderColor:colorbody===item.colorBody?item.colorBody : 'white'}}
-            >
-              <button 
-                className="customization-button-colors"
-                style={{background:item.colorBody}} 
-                type="button"
-                onClick={()=>{selectcolorbody(item.colorBody);previewAvatar()}}
-                >
-                </button>   
-            </div>
-        )
+    if (showbody === true) {
+      return (
+        <div
+          className="customization-item-colors"
+          style={{ borderColor: colorbody === item.colorBody ? item.colorBody : 'white' }}
+        >
+          <button
+            className="customization-button-colors"
+            style={{ background: item.colorBody }}
+            type="button"
+            onClick={() => { selectcolorbody(item.colorBody); previewAvatar() }}
+          >
+          </button>
+        </div>
+      )
     }
   }
   const showColorsEye = (item: CustomizationEye) => {
-    if (showeye===true) {
-      return(
-            <div className="customization-item-colors"  
-            style={{borderColor:coloreye===item.colorEye?item.colorEye : 'white'}}
-            >
-              <button 
-                className="customization-button-colors"
-                style={{background:item.colorEye }}
-                type="button"
-                onClick={()=>{selectcoloreye(item.colorEye);previewAvatar()}}
-                >
-                </button>   
-            </div>
-        )
+    if (showeye === true) {
+      return (
+        <div className="customization-item-colors"
+          style={{ borderColor: coloreye === item.colorEye ? item.colorEye : 'white' }}
+        >
+          <button
+            className="customization-button-colors"
+            style={{ background: item.colorEye }}
+            type="button"
+            onClick={() => { selectcoloreye(item.colorEye); previewAvatar() }}
+          >
+          </button>
+        </div>
+      )
     }
   }
 
-  const showColorsHair = (item: CustomizationArray ) => {
+  const showColorsHair = (item: CustomizationArray) => {
 
-    if (showhair===true) {
-      return(
-            <div className="customization-item-colors"
-            style={{borderColor:colorhair===item.color?item.color : 'white'}}
-            >
-              <button 
-                className="customization-button-colors"
-                style={{background:item.color }}
-                type="button"
-                onClick={()=>{selectcolorhair(item.color);previewAvatar()}}
-                >
-                </button>   
-            </div>
-        )
+    if (showhair === true) {
+      return (
+        <div className="customization-item-colors"
+          style={{ borderColor: colorhair === item.color ? item.color : 'white' }}
+        >
+          <button
+            className="customization-button-colors"
+            style={{ background: item.color }}
+            type="button"
+            onClick={() => { selectcolorhair(item.color); previewAvatar() }}
+          >
+          </button>
+        </div>
+      )
     }
   }
-  const showColorPants = ( item: CustomizationArray ) => {
-    if (showpants===true) {
-      return(
-            <div className="customization-item-colors"
-            style={{borderColor:colorpants===item.color?item.color : 'white'}}
-            >
-              <button 
-                className="customization-button-colors"
-                style={{background:item.color }}
-                type="button"
-                onClick={()=>{selectcolorpants(item.color);previewAvatar()}}
-                >
-                </button>   
-            </div>
-        )
+  const showColorPants = (item: CustomizationArray) => {
+    if (showpants === true) {
+      return (
+        <div className="customization-item-colors"
+          style={{ borderColor: colorpants === item.color ? item.color : 'white' }}
+        >
+          <button
+            className="customization-button-colors"
+            style={{ background: item.color }}
+            type="button"
+            onClick={() => { selectcolorpants(item.color); previewAvatar() }}
+          >
+          </button>
+        </div>
+      )
     }
   }
 
-  const showColorShirt = ( item: CustomizationArray ) => {
-    if (showshirt===true) {
-      return(
-            <div className="customization-item-colors"
-            style={{borderColor:colorshirt===item.color?item.color : 'white'}}
-            >
-              <button 
-                className="customization-button-colors"
-                style={{background:item.color }}
-                type="button"
-                onClick={()=>{selectcolorshirt(item.color);previewAvatar()}}
-                >
-                </button>   
-            </div>
-        )
+  const showColorShirt = (item: CustomizationArray) => {
+    if (showshirt === true) {
+      return (
+        <div className="customization-item-colors"
+          style={{ borderColor: colorshirt === item.color ? item.color : 'white' }}
+        >
+          <button
+            className="customization-button-colors"
+            style={{ background: item.color }}
+            type="button"
+            onClick={() => { selectcolorshirt(item.color); previewAvatar() }}
+          >
+          </button>
+        </div>
+      )
     }
-  
-}
+
+  }
 
 
-// criação da tela  ---------------------------------------------------------------
-// --------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------
+  // criação da tela  ---------------------------------------------------------------
+  // --------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------------
 
 
 
 
- return(
-     <MenuLayout title="Personalização">
-    <IonContent>
-    <div className="player-container">
+  return (
+    <MenuLayout title="Personalização">
+      <div className="player-container">
 
-      <div className="customization-menu-principal">
-      <Unity unityContent={playerService.getUnity()} />
+        <div className="player-container"
+          style={{
+            width: '100vw',
+            // visibility: visiblePlayer ? 'visible' : 'hidden',
+            zIndex: 0,
+            flexShrink: 0,
+            flex: 1,
+            display: 'flex',
+            // backgroundColor: '#000',
+          }}
+        >
+          <Unity
+            unityContent={unityContent}
+            className="player-content"
+          />
+        </div>
 
-      <div className="customization-menu">
+        <div className="customization-menu">
 
-          {/*button Body*/} 
+          {/*button Body*/}
 
-            <button
+          <button
             type="button"
             className="customization-button-menu"
-            onClick={()=>showBody()}
-            style={{borderBottomColor:showbody?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}}              
-            >
+            onClick={() => showBody()}
+            style={{ borderBottomColor: showbody ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE }}
+          >
 
-            <IconBody color={showbody?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}/>  
-            </button>  
-      
-                {/*button Eye*/} 
+            <IconBody color={showbody ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />
+          </button>
 
-            <button
-              className="customization-button-menu"
-              type="button"
-              onClick={()=>showEye()}
-              style={{borderBottomColor:showeye?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}}
-            >
-              
-            <IconEye color={showeye?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}/>  
-            </button>  
+          {/*button Eye*/}
 
-              {/*button Hair*/} 
+          <button
+            className="customization-button-menu"
+            type="button"
+            onClick={() => showEye()}
+            style={{ borderBottomColor: showeye ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE }}
+          >
 
-            <button
-              className="customization-button-menu"
-              type="button"
-              onClick={()=>showHair()}
-              style={{borderBottomColor:showhair?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}}              
-              >
-                <IconHair color={showhair?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}/>  
-            </button>  
+            <IconEye color={showeye ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />
+          </button>
 
-                  {/*button Shirt*/}         
+          {/*button Hair*/}
 
-           <button
-              className="customization-button-menu"
-              type="button"
-              onClick={()=>showShirt()}
-              style={{borderBottomColor:showshirt?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}}
+          <button
+            className="customization-button-menu"
+            type="button"
+            onClick={() => showHair()}
+            style={{ borderBottomColor: showhair ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE }}
+          >
+            <IconHair color={showhair ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />
+          </button>
 
-            >
-                <IconShirt color={showshirt?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />  
-            </button>  
+          {/*button Shirt*/}
 
-              {/*button Pants*/} 
+          <button
+            className="customization-button-menu"
+            type="button"
+            onClick={() => showShirt()}
+            style={{ borderBottomColor: showshirt ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE }}
 
-           <button
-              className="customization-button-menu"
-              type="button"
-              onClick={()=>showPants()}
-              style={{borderBottomColor:showpants?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}}>
-                 <IconPants color={showpants?buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE}/>  
-            </button>  
-            
+          >
+            <IconShirt color={showshirt ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />
+          </button>
+
+          {/*button Pants*/}
+
+          <button
+            className="customization-button-menu"
+            type="button"
+            onClick={() => showPants()}
+            style={{ borderBottomColor: showpants ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE }}>
+            <IconPants color={showpants ? buttonColors.VARIANT_WHITE_ACTIVE : buttonColors.VARAINT_WHITE} />
+          </button>
+
         </div>
 
-          <IonList className="customization-list-colors">
-              {CustomizationBody.map(item => showColorsBody(item))}
-              {CustomizationEye.map(item => showColorsEye(item))}
-              {CustomizationArrayHair.map(item => showColorsHair(item))}
-              {CustomizationArrayShirt.map(item => showColorShirt(item))}
-              {CustomizationArrayPants.map(item => showColorPants(item))}
+        <IonList className="customization-list-colors">
+          {CustomizationBody.map(item => showColorsBody(item))}
+          {CustomizationEye.map(item => showColorsEye(item))}
+          {CustomizationArrayHair.map(item => showColorsHair(item))}
+          {CustomizationArrayShirt.map(item => showColorShirt(item))}
+          {CustomizationArrayPants.map(item => showColorPants(item))}
 
 
-          </IonList>
-
-            </div>
-            </div>
-
-    
+        </IonList>
+        <button onClick={() => resetColor()}>Reset Color</button>
+        
         <div className="customization-all-save">
-            <IonButton class="customization-save" 
-              onClick={()=>SaveChanges()}
-              disabled
-            >
-              {Strings.BUTTON_SALVAR}
-            </IonButton>
+          <IonButton class="customization-save"
+            onClick={() => SaveChanges()}
+          //disabled
+          >
+            {Strings.BUTTON_SALVAR}
+          </IonButton>
         </div>
-
-       { /*button cancel*/ }
-
-        <IonAlert
-          isOpen={showAlert}
-          cssClass="popup-box-signal-cap"
-          header={Strings.TITLE_POPUPCANCEL}
-          message={Strings.MESSAGE_POPUPCANCEL}
-          buttons={[
-            {
-              text: Strings.BUTTON_NAME_YES,
-              cssClass: 'popup-yes',
-              handler: () => {
-                console.log('Confirm Yes');
-                setshowAlert(false);
-                history.replace(paths.HOME);
-                //Se eu colocar um history.push(paths.home) o Icaro nao aparece
-                //na tela de tradução
-              },
-            },
-            {
-              text: Strings.BUTTON_NAME_NO,
-              cssClass: 'popup-no',
-              role: 'cancel',
-              handler: () => {
-                setshowAlert(false);
-                console.log('Confirm No');
-              },
-            },
-          ]}
-        />
-
-      </IonContent>
-         </MenuLayout>
- )
+      </div>
+    </MenuLayout>
+  )
 
 }
-export default Customization ;
+export default Customization;

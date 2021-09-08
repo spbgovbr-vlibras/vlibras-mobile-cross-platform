@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
-import { useHistory } from 'react-router';
-import Unity from 'react-unity-webgl';
+import { useHistory, useLocation } from 'react-router';
+import Unity, { UnityContent } from 'react-unity-webgl';
 
 import {
   IconDictionary,
@@ -15,12 +15,25 @@ import {
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import PlayerService from 'services/unity';
+import {  Types } from 'store/ducks/customization';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/regionalism';
 
 import './styles.css';
+import { useSelector } from 'react-redux';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
+const unityContent = new UnityContent(
+  'Build-Final/Build/NOVABUILD.json',
+  'Build-Final/Build/UnityLoader.js',
+  {
+    adjustOnWindowResize: true,
+  },
+);
+
 const playerService = PlayerService.getService();
+
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
@@ -41,9 +54,30 @@ function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
 }
 
+
 function Player() {
   const history = useHistory();
+  const location = useLocation();
 
+  const currentBody = useSelector(
+    ({ customization }: RootState) => customization.currentbody,
+  );
+  const currentEye = useSelector(
+    ({ customization }: RootState) => customization.currenteye,
+  );
+
+  const currentHair = useSelector(
+    ({ customization }: RootState) => customization.currenthair,
+  );
+
+  const currentShirt = useSelector(
+    ({ customization }: RootState) => customization.currentshirt,
+  );
+
+  const currentPants = useSelector(
+    ({ customization }: RootState) => customization.currentpants,
+  );
+      
   // Dynamic states [MA]
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -107,11 +141,11 @@ function Player() {
     if (progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
     }
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+    unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
 
   function handlePause() {
-    playerService.send(
+    unityContent.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.SET_PAUSE_STATE,
       toInteger(!isPaused),
@@ -119,11 +153,11 @@ function Player() {
   }
 
   function handleChangeAvatar() {
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
+    unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
   }
 
   function handleSubtitle() {
-    playerService.send(
+    unityContent.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.SET_SUBTITLE_STATE,
       toInteger(!isShowSubtitle),
@@ -185,6 +219,31 @@ function Player() {
     //     </>
     //   );
     // }
+
+  const preProcessingPreview = () => {
+     const object = {
+        corpo: currentBody ,
+        olhos: '#fffafa',
+        cabelo: currentHair,
+        camisa: currentShirt,
+        calca: currentPants,
+        iris: currentEye,
+        pos: "center",
+  };
+console.log(object)
+  return JSON.stringify(object);
+};
+
+useEffect(() => {
+  
+      unityContent.send(
+      PlayerKeys.AVATAR,
+      PlayerKeys.SETEDITOR,
+      preProcessingPreview()
+    );
+    
+} );
+
     return (
       <>
         <button className="player-action-button-transparent" type="button">
@@ -210,7 +269,7 @@ function Player() {
 
   return (
     <div className="player-container">
-      <Unity unityContent={playerService.getUnity()} />
+      <Unity unityContent={unityContent} />
       <div className="player-action-container">
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />

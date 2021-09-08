@@ -5,10 +5,18 @@ import './styles.css';
 import Player from 'components/Player';
 import { Creators } from 'store/ducks/video';
 import { useDispatch } from 'react-redux';
+import {  Types } from 'store/ducks/customization';
 
+
+import PlayerService from 'services/unity';
 import Unity, { UnityContent } from 'react-unity-webgl';
 import paths from 'constants/paths';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { PlayerKeys } from 'constants/player';
+import { current } from 'immer';
+import { Customization } from 'pages';
+import { types } from 'util';
+
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -22,12 +30,21 @@ interface VideoOutputModalProps {
 }
 
 const unityContent = new UnityContent(
-  'Build-Final/Build/Build Final.json',
+  'Build-Final/Build/NOVABUILD.json',
   'Build-Final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
 );
+
+export interface CustomizationState {
+  currentbody: string;
+  currenteye: string;
+  currenthair: string;
+  currentpants: string;
+  currentshirt: string;
+}
+
 
 const VideoOutputModal = ({
   outputs,
@@ -74,6 +91,7 @@ const VideoOutputModal = ({
       unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
       unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
       unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 0);
+      
     }
   }, [outputs, showModal]);
 
