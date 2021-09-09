@@ -18,6 +18,7 @@ import {
   OnBoarding,
   SignalCapture,
   RecorderArea,
+  Tutorial,
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
@@ -38,6 +39,8 @@ function Routes() {
           <Route component={Domain} path={paths.DOMAIN} />
           <Route component={OnBoarding} path={paths.ONBOARDING} />
           <Route component={SignalCapture} path={paths.SIGNALCAPTURE} />
+          <Route component={Tutorial} path={paths.TUTORIAL} />
+
         </IonRouterOutlet>
       </IonReactRouter>
     </BrowserRouter>
