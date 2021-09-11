@@ -76,21 +76,6 @@
   width: 17px;
 }
 
-.historic-container-box-ion-text {
-  display: flex;
-  justify-items: center;
-
-  margin-top: 9px;
-  margin-right: 16px;
-  margin-left: 16px;
-  height: 71px;
-
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-
-  color: #747474;
-}
-
 .historic-container-box-ion-item {
   display: flex;
   justify-items: center;
@@ -108,17 +93,13 @@
 }
 
 .historic-container-box-ion-text-area {
-  --padding-top: 0px;
-  --padding-end: 0;
-  --padding-bottom: 14px;
-  /*default: 11px;*/
-  /*--padding-start: 8px;*/
-
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 8px;
-  margin-bottom: 0;
-  font-size: inherit;
+  padding: 6px 8px;
+  margin: 10px 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: Rawline;
+  color: #747474;
+  font-size: 14px;
 }
 
 .historic-container-ion-chips-box {
@@ -176,4 +157,12 @@
 
 .container-render-historic {
   margin-bottom: 20px;
+}
+
+.empty-historic {
+  font-family: Rawline;
+  color: #565656;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 70px;
 }

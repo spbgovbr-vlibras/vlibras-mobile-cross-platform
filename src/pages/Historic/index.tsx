@@ -164,13 +164,9 @@ function Historic() {
                         </div>
                       )}
                       <div className="historic-container-box-ion-text">
-                        <IonItem class="historic-container-box-ion-item">
-                          <IonTextarea
-                            placeholder={item}
-                            class="historic-container-box-ion-text-area"
-                            // disabled={true}
-                          />
-                        </IonItem>
+                        <p className="historic-container-box-ion-text-area">
+                          {item}
+                        </p>
                       </div>
                     </>
                   )}
@@ -231,13 +227,15 @@ function Historic() {
                 {Strings.CHIP_TEXT_2}
               </IonChip>
             )}
-            <IonChip
-              class="historic-container-ion-chip"
-              onClick={() => setScreenKey(2)}
-              style={activeKey === 2 ? style : {}}
-            >
-              {Strings.CHIP_TEXT_3}
-            </IonChip>
+            {env.videoTranslator && (
+              <IonChip
+                class="historic-container-ion-chip"
+                onClick={() => setScreenKey(2)}
+                style={activeKey === 2 ? style : {}}
+              >
+                {Strings.CHIP_TEXT_3}
+              </IonChip>
+            )}
           </div>
 
           <div className="container-render-historic">{renderAllItems()}</div>

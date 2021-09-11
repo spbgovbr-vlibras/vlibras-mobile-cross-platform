@@ -1,4 +1,4 @@
 export const env = {
     production: false,
-    videoTranslator: false
+    videoTranslator: true
 };
