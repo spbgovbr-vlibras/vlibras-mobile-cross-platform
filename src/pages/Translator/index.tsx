@@ -12,6 +12,7 @@ import {
   IonButtons,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import { PlayerKeys } from 'constants/player';
@@ -19,8 +20,7 @@ import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
 import paths from '../../constants/paths';
 import { reloadHistory } from 'utils/setHistory';
-import { useDispatch } from 'react-redux';
-import { Creators } from 'store/ducks/video';
+import { Creators } from 'store/ducks/translator';
 
 import { Strings } from './strings';
 
@@ -50,6 +50,7 @@ function Translator() {
 
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
+    dispatch(Creators.setTranslatorText(text));
   }
 
   return (

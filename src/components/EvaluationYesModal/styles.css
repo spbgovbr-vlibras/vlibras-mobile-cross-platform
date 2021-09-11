@@ -1,0 +1,55 @@
+.evaluation-yes-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.evaluation-yes-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 147px;
+  width: 273px;
+  margin: 0px 70px;
+}
+
+.evaluation-yes-modal .ion-page {
+  padding: 16px 20px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.evaluation-yes-modal .modal-title {
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 27px;
+  text-align: center;
+
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+
+  margin-top: 49.33px;
+  
+
+  /*margin: 2px 0px -15px 0px;*/
+}
+
+.evaluation-yes-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+.evaluation-yes-modal .ion-page{
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  padding-left: 0px;
+}
+
+.evaluation-yes-modal .text-space{
+  margin-left: 6px;
+}
+.evaluation-yes-modal .subtitle{
+  margin-bottom: 43px;
+}

@@ -1,0 +1,77 @@
+.evaluation-no-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.evaluation-no-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 147px;
+  width: 273px;
+  margin: 0px 70px;
+}
+
+.evaluation-no-modal .ion-page {
+  padding: 16px 20px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.evaluation-no-modal .modal-title {
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 27px;
+  text-align: center;
+
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+
+  margin-top: 0px;
+  /*margin: 2px 0px -15px 0px;*/
+}
+
+.evaluation-no-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+.evaluation-no-modal .ion-page {
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  padding-left: 0px;
+}
+.evaluation-modal-container-chip-suggestion {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 150%;
+  /* identical to box height, or 24px */
+
+  color: #4e4e4e;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+
+  margin-bottom: 38px;
+  margin-top:20px;
+
+}
+.evaluation-modal-container-close-button {
+  display: flex;
+  flex: 1;
+  align-self: flex-end;
+
+  background: transparent;
+  border: none;
+
+  margin-right: 10px;
+  margin-top: 10px;
+  padding: 0px;
+}
+.evaluation-no-modal .text-space {
+  margin-left: 6px;
+}

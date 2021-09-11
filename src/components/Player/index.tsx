@@ -11,12 +11,17 @@ import {
   IconSubtitle,
   IconRunning,
   IconPause,
+  IconCloseCircle,
 } from 'assets';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import PlayerService from 'services/unity';
 
 import './styles.css';
+import IconThumbsUp from 'assets/icons/IconThumbsUp';
+import { Icon } from 'ionicons/dist/types/components/icon/icon';
+import EvaluationModal from 'components/EvaluationModal';
+import EvaluationYesModal from 'components/EvaluationModal';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
@@ -53,6 +58,14 @@ function Player() {
   // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  //Evaluation modal
+  const [showModal, setShowModal] = useState(false);
+  const [showYesModal, setShowYesModal] = useState(false);
+  const [showNoModal, setShowNoModal] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
+    useState(false);
 
   window.onPlayingStateChange = (
     _isPlaying: BooleanParamsPlayer,
@@ -211,12 +224,34 @@ function Player() {
   return (
     <div className="player-container">
       <Unity unityContent={playerService.getUnity()} />
+      <div className="player-thumbsup-button">
+        <button
+          className="player-action-button-transparent"
+          type="button"
+          onClick={() => setShowModal(true)}
+        >
+          <IconThumbsUp />
+        </button>
+      </div>
       <div className="player-action-container">
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
         <div className="play-action-content">{renderPlayerButtons()}</div>
       </div>
+      <EvaluationModal
+        show={showModal}
+        setShow={setShowModal}
+        showYes={showYesModal}
+        setShowYes={setShowYesModal}
+        showNo={showNoModal}
+        setShowNo={setShowNoModal}
+        showSuggestionModal={showSuggestionModal}
+        setShowSuggestionModal={setShowSuggestionModal}
+        showSuggestionFeedbackModal={showSuggestionFeedbackModal}
+        setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
+        isPlaying={isPlaying}
+      />
     </div>
   );
 }

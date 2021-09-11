@@ -4,10 +4,6 @@ import { MetaDataParams } from 'store/ducks/dictionary';
 
 const api = axios.create({
   baseURL: 'https://dicionario2-dth.vlibras.gov.br/api',
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  },
 });
 
 export async function getDictionary(params: MetaDataParams): Promise<any> {
