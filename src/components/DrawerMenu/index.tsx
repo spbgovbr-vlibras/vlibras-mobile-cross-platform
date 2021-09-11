@@ -10,13 +10,11 @@ import {
   IonItem,
   IonListHeader,
   IonLabel,
-  IonIcon,
-  IonSelect,
-  IonSelectOption,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
 import { useHistory, useLocation } from 'react-router-dom';
+import { env } from '../../environment/env';
 
 import {
   IconTranslate,
@@ -140,7 +138,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         {title}
       </span>
 
-      {title === Strings.TITLE_MENU_TRANSLATOR && (
+      {title === Strings.TITLE_MENU_TRANSLATOR && env.videoTranslator && (
         <>
           <p
             className="drawer-menu-sub-item"
@@ -238,7 +236,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         </IonList>
         <IonList lines="none">
           {renderItemTab(
-            paths.ONBOARDING,
+            paths.TUTORIAL,
             Strings.TITLE_MENU_TUTORIAL,
             IconTutorial,
             false,

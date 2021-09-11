@@ -8,12 +8,11 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
-  IonLabel,
 } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 import { useDispatch } from 'react-redux';
+import { env } from '../../environment/env';
 
 import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
 import paths from 'constants/paths';
@@ -39,17 +38,21 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
     switch (location.pathname) {
       case paths.HOME:
         dispatch(Creators.setIsVideoScreen(false));
-        return (
-          <>
-            <span
-              className="menu-item-text"
-              onClick={() => history.push(paths.ONBOARDING)}
-            >
-              {Strings.MENU_PT_BR}
-            </span>
-            <IconTranslate color="#2365DE" />
-          </>
-        );
+        if (env.videoTranslator) {
+          return (
+            <>
+              <span
+                className="menu-item-text"
+                onClick={() => history.push(paths.ONBOARDING)}
+              >
+                {Strings.MENU_PT_BR}
+              </span>
+              <IconTranslate color="#2365DE" />
+            </>
+          );
+        } else {
+          return <></>;
+        }
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
         dispatch(Creators.setIsVideoScreen(true));

@@ -21,11 +21,7 @@ import {
   VideoEditor,
 } from '@ionic-native/video-editor';
 
-import {
-  VideoCapturePlus,
-  VideoCapturePlusOptions,
-  MediaFile,
-} from '@ionic-native/video-capture-plus';
+import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
 import {
   VideoOutputModal,
   TranslatingModal,

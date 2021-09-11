@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import {
   IonChip,
   IonContent,
-  IonImg,
   IonItem,
   IonText,
   IonTextarea,
@@ -13,6 +12,7 @@ import { RootState } from 'store';
 import { VideoOutputModal } from '../../components';
 import { NativeStorage } from '@ionic-native/native-storage';
 import dateFormat from 'utils/dateFormat';
+import { env } from '../../environment/env';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { MenuLayout } from '../../layouts';
@@ -30,8 +30,10 @@ function Historic() {
   const [log, setLog] = useState([]);
 
   const [historyStorage, setHistoryStorage] = useState<any>({});
-  const [keysToShow, setKeysToShow] = useState(['text', 'video']);
-  const [activeKey, setActiveKey] = useState(0);
+  const [keysToShow, setKeysToShow] = useState(
+    env.videoTranslator ? ['text', 'video'] : ['text'],
+  );
+  const [activeKey, setActiveKey] = useState(env.videoTranslator ? 0 : 2);
 
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
@@ -211,20 +213,24 @@ function Historic() {
       <IonContent>
         <div className="historic-container">
           <div className="historic-container-ion-chips">
-            <IonChip
-              class={'historic-container-ion-chip'}
-              onClick={() => setScreenKey(0)}
-              style={activeKey === 0 ? style : {}}
-            >
-              {Strings.CHIP_TEXT_1}
-            </IonChip>
-            <IonChip
-              class="historic-container-ion-chip"
-              onClick={() => setScreenKey(1)}
-              style={activeKey === 1 ? style : {}}
-            >
-              {Strings.CHIP_TEXT_2}
-            </IonChip>
+            {env.videoTranslator && (
+              <IonChip
+                class={'historic-container-ion-chip'}
+                onClick={() => setScreenKey(0)}
+                style={activeKey === 0 ? style : {}}
+              >
+                {Strings.CHIP_TEXT_1}
+              </IonChip>
+            )}
+            {env.videoTranslator && (
+              <IonChip
+                class="historic-container-ion-chip"
+                onClick={() => setScreenKey(1)}
+                style={activeKey === 1 ? style : {}}
+              >
+                {Strings.CHIP_TEXT_2}
+              </IonChip>
+            )}
             <IonChip
               class="historic-container-ion-chip"
               onClick={() => setScreenKey(2)}

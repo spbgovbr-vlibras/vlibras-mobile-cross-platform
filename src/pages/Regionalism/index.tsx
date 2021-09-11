@@ -15,13 +15,13 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { env } from '../../environment/env';
 
 import regionalismData from 'data/regionalism';
 import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 import { Strings } from './strings';
-
 
 import './styles.css';
 
@@ -38,7 +38,7 @@ function Regionalism() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current,
   );
-  const [regionalism,setregionalism] = useState(currentRegionalism); 
+  const [regionalism, setregionalism] = useState(currentRegionalism);
 
   const renderItem = (item: RegionalismItem) => (
     <IonItem class="regionalism-item">
@@ -48,12 +48,12 @@ function Regionalism() {
     </IonItem>
   );
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
-    setregionalism(evt.detail.value)
+    setregionalism(evt.detail.value);
   }
-  
+
   function SaveRegionalism() {
     dispatch(Creators.setCurrentRegionalism(regionalism));
-    history.goBack()
+    history.goBack();
   }
 
   return (
@@ -66,19 +66,21 @@ function Regionalism() {
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
-            <IonRadioGroup
-              value={regionalism}
-              onIonChange={handleOnChange}
-            >
-            
+            <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
               {regionalismData.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
           <div className="regionalism-icon-save">
-            <IonButton class="regionalism-cancel" onClick={()=>history.goBack()}>
+            <IonButton
+              class="regionalism-cancel"
+              onClick={() => history.goBack()}
+            >
               {Strings.BUTTON_CANCEL}
             </IonButton>
-            <IonButton class="regionalism-save" onClick={()=>SaveRegionalism()}>
+            <IonButton
+              class="regionalism-save"
+              onClick={() => SaveRegionalism()}
+            >
               {Strings.BUTTON_SAVE}
             </IonButton>
           </div>
