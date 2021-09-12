@@ -38,6 +38,7 @@ import {
   logoTranslateVideo,
   logoTrashBtn,
   logoCaptureDisable,
+  IconArrowLeft,
 } from 'assets';
 import Regionalism from 'pages/Regionalism';
 import { RootState } from 'store';
@@ -56,9 +57,7 @@ const SignalCapture = () => {
     ({ video }: RootState) => video.current,
   );
   const [log, setLog] = useState<any>('alo');
-  const [thumb, setThumb] = useState(
-    'file://storage/emulated/0/Android/data/lavid.ufpb.vlibras.mobile/files/files/videos/thumbailImage.jpg',
-  );
+
   const [showErrorModal, setShowErrorModal] = useState([false, '']);
 
   const [showAlert, setShowAlert] = useState(false);
@@ -191,10 +190,6 @@ const SignalCapture = () => {
     const filteredArray = currentVideoArray.filter(
       (value: unknown, i: any) => i !== index,
     );
-    console.log('Passei aqui');
-
-    console.log('Aqui tbm');
-
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
 
@@ -239,9 +234,14 @@ const SignalCapture = () => {
           <IonTitle className="menu-toolbar-title-signalcap">
             {Strings.TITLE_MENU}
           </IonTitle>
-          <IonButtons slot="end" onClick={popupCancel}>
+          {/* <IonButtons slot="end" onClick={popupCancel}>
             <div className="menu-container-end">
               <IconCloseCircle color="#969696" />
+            </div>
+          </IonButtons> */}
+          <IonButtons slot="start" onClick={popupCancel}>
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#969696" />
             </div>
           </IonButtons>
         </IonToolbar>
@@ -251,6 +251,7 @@ const SignalCapture = () => {
           <p className="progress-recorder"> {currentVideoArray.length} de 5 </p>
           <div className="list-recorded-itens">{renderRecordedItens()}</div>
         </div>
+
         <div className="new-recorder-area">
           <div className="area-button-recorder">
             <div>
@@ -333,7 +334,7 @@ const SignalCapture = () => {
                 console.log('Confirm Yes');
                 dispatch(Creators.setCurrentArrayVideo([]));
                 setShowAlertPage(false);
-                history.push(paths.RECORDERAREA);
+                history.goBack();
               },
             },
             {

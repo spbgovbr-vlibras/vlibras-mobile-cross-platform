@@ -11,4 +11,5 @@ export default {
   DOMAIN: '/domain',
   ONBOARDING: '/onboarding',
   SIGNALCAPTURE: '/signal-capture',
+  CUSTOMIZATION: '/customization',
 };

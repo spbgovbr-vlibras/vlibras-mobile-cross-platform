@@ -23,12 +23,20 @@ interface VideoOutputModalProps {
 }
 
 const unityContent = new UnityContent(
-  'Build-Final/Build/Build Final.json',
+  'Build-Final/Build/NOVABUILD.json',
   'Build-Final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
 );
+
+export interface CustomizationState {
+  currentbody: string;
+  currenteye: string;
+  currenthair: string;
+  currentpants: string;
+  currentshirt: string;
+}
 
 const VideoOutputModal = ({
   outputs,

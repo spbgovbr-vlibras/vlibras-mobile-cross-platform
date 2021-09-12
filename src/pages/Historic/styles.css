@@ -13,37 +13,20 @@
   margin-left: 16px;
 }
 
-.historic-container-ion-chips-1 {
+.historic-container-ion-chip {
   font-family: Rawline;
   font-style: normal;
-  font-weight: bold;
+  font-weight: normal;
   font-size: 12px;
   line-height: 100%;
+  color: #4b4b4b;
+  background: #ededed;
+}
 
+.historic-container-ion-chip.active {
   color: #1447a6;
-  background: #ededed;
-}
-
-.historic-container-ion-chips-2 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
-
-  color: #4b4b4b;
-  background: #ededed;
-}
-
-.historic-container-ion-chips-3 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
-
-  color: #4b4b4b;
-  background: #ededed;
+  background: #d6e5f9;
+  font-weight: bold;
 }
 
 .historic-container-ion-img-1 {
@@ -100,7 +83,7 @@
   margin-top: 9px;
   margin-right: 16px;
   margin-left: 16px;
-  height: 71px;
+  height: 100%;
 
   border: 1px solid #e0e0e0;
   border-radius: 4px;
@@ -169,6 +152,7 @@
   overflow-x: auto;
   white-space: nowrap;
   margin: 5px 15px;
+  background: transparent;
 }
 
 .historic-container .container-outputs span {
@@ -190,4 +174,8 @@
   color: #1b1b1b;
   font-family: Rawline;
   text-align: center;
+}
+
+.container-render-historic {
+  margin-bottom: 20px;
 }

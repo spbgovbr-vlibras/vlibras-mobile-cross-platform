@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { isPlatform } from '@ionic/core';
 import { IonPopover } from '@ionic/react';
-import { useHistory } from 'react-router';
+import { useSelector } from 'react-redux';
+import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
 
 import {
@@ -25,6 +26,9 @@ import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
+import { RootState } from 'store';
+import { Types } from 'store/ducks/customization';
+import { Creators } from 'store/ducks/regionalism';
 
 import './styles.css';
 
@@ -61,8 +65,28 @@ function Player() {
     event: undefined,
   });
   const history = useHistory();
+  const location = useLocation();
 
   const { generateVideo, translateText } = useTranslation();
+
+  const currentBody = useSelector(
+    ({ customization }: RootState) => customization.currentbody,
+  );
+  const currentEye = useSelector(
+    ({ customization }: RootState) => customization.currenteye,
+  );
+
+  const currentHair = useSelector(
+    ({ customization }: RootState) => customization.currenthair,
+  );
+
+  const currentShirt = useSelector(
+    ({ customization }: RootState) => customization.currentshirt,
+  );
+
+  const currentPants = useSelector(
+    ({ customization }: RootState) => customization.currentpants,
+  );
 
   // Dynamic states [MA]
   const [visiblePlayer, setVisiblePlayer] = useState(true);
@@ -282,6 +306,27 @@ function Player() {
       </>
     );
   };
+
+  const preProcessingPreview = () => {
+    const object = {
+      corpo: currentBody,
+      olhos: '#fffafa',
+      cabelo: currentHair,
+      camisa: currentShirt,
+      calca: currentPants,
+      iris: currentEye,
+      pos: 'center',
+    };
+    return JSON.stringify(object);
+  };
+
+  useEffect(() => {
+    playerService.send(
+      PlayerKeys.AVATAR,
+      PlayerKeys.SETEDITOR,
+      preProcessingPreview(),
+    );
+  });
 
   return (
     <div className="player-container">

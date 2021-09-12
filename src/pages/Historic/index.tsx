@@ -12,11 +12,12 @@ import {
 import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { logoTranslator1, logoTranslator2 } from 'assets';
-import { VideoOutputModal } from 'components';
-import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
+import dateFormat from 'utils/dateFormat';
 
+import { logoTranslator1, logoTranslator2 } from '../../assets';
+import { VideoOutputModal } from '../../components';
+import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -31,6 +32,10 @@ function Historic() {
   const [log, setLog] = useState([]);
 
   const [historyStorage, setHistoryStorage] = useState<any>({});
+  const [keysToShow, setKeysToShow] = useState(['text', 'video']);
+  const [activeKey, setActiveKey] = useState(0);
+
+  const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const promiseHistory = NativeStorage.getItem('history').then(
     data => data,
@@ -39,6 +44,11 @@ function Historic() {
       return {};
     },
   );
+
+  const openModalOutput = (actualItem: any) => {
+    setShowModal(true);
+    setResults(actualItem);
+  };
 
   const loadHistory = async () => {
     const resultPromise = await promiseHistory;
@@ -49,32 +59,150 @@ function Historic() {
     loadHistory();
   }, []);
 
-  const openModalOutput = (actualItem: any) => {
-    setShowModal(true);
-    setResults(actualItem);
-  };
-
   const renderItems = () => {
-    const datesMapped = Object.keys(historyStorage).reverse();
+    // if you are mocking the app to use it on ur browser,
+    // you must use the object translationsHistoric instead historyStorage
+
+    // const datesMapped = Object.keys(historyStorage).reverse();
+    console.log(translationsHistoric);
+    const datesMapped = Object.keys(translationsHistoric).reverse();
 
     return datesMapped.map(column => {
-      return historyStorage[column].map((item: any, key: any) => {
-        return (
-          <div>
-            {key === 0 && <p className="date-desc"> {column} </p>}
-            <button
-              className="container-outputs"
-              onClick={() => openModalOutput(item)}
-              type="button"
-            >
-              {item.map((value: string) => (
-                <span key={uuidv4()}>{value}</span>
-              ))}
-            </button>
-          </div>
-        );
+      if (translationsHistoric[column].video) {
+        return translationsHistoric[column].video.map((item: any, key: any) => {
+          // return historyStorage[column].map((item: any, key: any) => {
+          return (
+            <div>
+              {key === 0 && <p className="date-desc"> {dateFormat(column)} </p>}
+              <button
+                className="container-outputs"
+                onClick={() => openModalOutput(item)}
+                type="button"
+              >
+                {item.map((value: string, _: string) => (
+                  <span key={uuidv4()}>{value}</span>
+                ))}
+              </button>
+            </div>
+          );
+        });
+      }
+      return null;
+    });
+  };
+
+  const formatArrayDate = (arrayHistoric: any) => {
+    const dates = Object.keys(arrayHistoric);
+    const formattedObjDate: any = {};
+
+    dates.forEach(element => {
+      if (formattedObjDate[dateFormat(element)]) {
+        if (formattedObjDate[dateFormat(element)].video) {
+          formattedObjDate[dateFormat(element)].video.push(
+            arrayHistoric[element].video,
+          );
+        }
+        if (formattedObjDate[dateFormat(element)].text) {
+          formattedObjDate[dateFormat(element)].text.push(
+            arrayHistoric[element].text,
+          );
+        }
+      } else {
+        formattedObjDate[dateFormat(element)] = arrayHistoric[element];
+      }
+    });
+
+    return formattedObjDate;
+  };
+
+  const renderAllItems = () => {
+    const formattedHistoric = formatArrayDate(historyStorage);
+    const datesMapped = Object.keys(formattedHistoric).reverse();
+    let doesntHaveKey: number;
+
+    return datesMapped.map(column => {
+      doesntHaveKey = 0;
+      return keysToShow.map((key, keyOfKeys) => {
+        if (formattedHistoric[column][key]) {
+          return formattedHistoric[column][key].map(
+            (item: any, elementKey: any) => {
+              return (
+                <div>
+                  {elementKey === 0 &&
+                    (keyOfKeys === 0 || doesntHaveKey === 1) && (
+                      <p className="date-desc"> {column} </p>
+                    )}
+                  {key === 'video' ? (
+                    <>
+                      {elementKey === 0 && (
+                        <div className="historic-container-ion-img-2">
+                          <img
+                            src={logoTranslator2}
+                            className="historic-container-ion-img-translator-2"
+                            alt=""
+                          />
+                          <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
+                        </div>
+                      )}
+                      <button
+                        className="container-outputs"
+                        onClick={() => openModalOutput(item)}
+                        type="button"
+                      >
+                        {item.map((value: string, keyWord: string) => (
+                          <span key={uuidv4()}>{value}</span>
+                        ))}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {elementKey === 0 && (
+                        <div className="historic-container-ion-img-1">
+                          <img
+                            src={logoTranslator1}
+                            className="historic-container-ion-img-translator-1"
+                            alt=""
+                          />
+                          <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
+                        </div>
+                      )}
+                      <div className="historic-container-box-ion-text">
+                        <IonItem class="historic-container-box-ion-item">
+                          <IonTextarea
+                            placeholder={item}
+                            class="historic-container-box-ion-text-area"
+                            // disabled={true}
+                          />
+                        </IonItem>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            },
+          );
+        }
+        doesntHaveKey = 1;
+        return <></>;
       });
     });
+  };
+
+  const setScreenKey = (param: number) => {
+    setActiveKey(param);
+    switch (param) {
+      case 0:
+        setKeysToShow(['text', 'video']);
+        break;
+      case 1:
+        setKeysToShow(['text']);
+        break;
+      case 2:
+        setKeysToShow(['video']);
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -82,43 +210,30 @@ function Historic() {
       <IonContent>
         <div className="historic-container">
           <div className="historic-container-ion-chips">
-            <IonChip class="historic-container-ion-chips-1">
+            <IonChip
+              class="historic-container-ion-chip"
+              onClick={() => setScreenKey(0)}
+              style={activeKey === 0 ? style : {}}
+            >
               {Strings.CHIP_TEXT_1}
             </IonChip>
-            <IonChip class="historic-container-ion-chips-2">
+            <IonChip
+              class="historic-container-ion-chip"
+              onClick={() => setScreenKey(1)}
+              style={activeKey === 1 ? style : {}}
+            >
               {Strings.CHIP_TEXT_2}
             </IonChip>
-            <IonChip class="historic-container-ion-chips-3">
+            <IonChip
+              class="historic-container-ion-chip"
+              onClick={() => setScreenKey(2)}
+              style={activeKey === 2 ? style : {}}
+            >
               {Strings.CHIP_TEXT_3}
             </IonChip>
           </div>
-          <div className="historic-container-ion-img-1">
-            <IonImg
-              src={logoTranslator1}
-              class="historic-container-ion-img-translator-1"
-            />
-            <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
-          </div>
-          <div className="historic-container-box-ion-text">
-            <IonItem class="historic-container-box-ion-item">
-              <IonTextarea
-                placeholder={Strings.TEXT_AREA}
-                rows={10}
-                class="historic-container-box-ion-text-area"
-              />
-            </IonItem>
-          </div>
-          <div className="historic-container-ion-img-2">
-            <IonImg
-              src={logoTranslator2}
-              class="historic-container-ion-img-translator-2"
-            />
-            <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
-          </div>
-          {renderItems()}
 
-          {log}
-
+          <div className="container-render-historic">{renderAllItems()}</div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}

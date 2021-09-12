@@ -16,6 +16,12 @@ import IconArrowLeft from './icons/IconArrowLeft';
 import IconThumbUp from './icons/IconThumbUp';
 import IconThumbDown from './icons/IconThumbDown';
 import IconArrowUpRight from './icons/IconArrowUpRight';
+import IconEye from './icons/IconEye';
+import IconPants from './icons/IconPants';
+import IconShirt from './icons/IconShirt';
+import IconHair from './icons/IconHair';
+import IconBody from './icons/IconBody';
+import IconCustomization from './icons/IconCustomization';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -88,11 +94,17 @@ import logoAnswer from './images/responder-icon.svg';
 import logoHistory from './images/history.svg';
 import logoTranslate from './images/translate.svg';
 import logoCapture from './images/capture.svg';
-import logoCaptureV2 from './images/capturev2.svg';
+import logoCaptureV2 from './images/captureSinal.svg';
 import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
 import logoRefresh from './images/rotate-ccw.png';
+import cameraBlue from './images/camera-blue.svg';
+import logoOlho from './images/olho.png';
+import logoCabelo from './images/cabelo.png';
+import logoCorpo from './images/corpo.png';
+import logoCamisa from './images/camisa.png';
+import logoCalca from './images/calça.png';
 
 import Vlibraslogo from './images/vlibraslogo.png';
 
@@ -185,4 +197,16 @@ export {
   IconThumbUp,
   IconThumbDown,
   IconArrowUpRight,
+  cameraBlue,
+  logoOlho,
+  logoCabelo,
+  logoCalca,
+  logoCorpo,
+  logoCamisa,
+  IconEye,
+  IconPants,
+  IconHair,
+  IconBody,
+  IconShirt,
+  IconCustomization,
 };
