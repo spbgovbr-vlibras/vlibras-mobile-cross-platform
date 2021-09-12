@@ -76,27 +76,15 @@
   width: 100%;
 }
 
-.dictionary-container-ion-chips-suggestions-1 {
+.dictionary-container-ion-chips-suggestions {
   font-family: Rawline;
   font-style: normal;
-  font-weight: bold;
   font-size: 12px;
   line-height: 100%;
-
-  color: #1447a6;
-  background: #ededed;
 }
 
-.dictionary-container-ion-chips-suggestions-2 {
-  font-family: Rawline;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 12px;
-  line-height: 100%;
 
-  color: #4b4b4b;
-  background: #ededed;
-}
+
 .dictionary-words-style{
   font-family: Rawline;
   font-style: normal;

@@ -51,7 +51,7 @@ const Translator = () => {
     //   }),
     // );
 
-    setTranslateText(text);
+    setTranslateText(text, false);
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
     dispatch(Creators.setTranslatorText(text));

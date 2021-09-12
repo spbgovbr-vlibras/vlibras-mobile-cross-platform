@@ -1,11 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { createContext, useContext, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
 
 import {
   Plugins,
   FilesystemDirectory,
   FilesystemEncoding,
 } from '@capacitor/core';
+import { NativeStorage } from '@ionic-native/native-storage';
 import axios from 'axios';
 
 import { ErrorModal, GenerateModal } from 'components';
@@ -29,7 +36,8 @@ interface PollParams {
 
 interface TranslationContextData {
   translateText: string;
-  setTranslateText: (text: string) => void;
+  recentTranslation: string[];
+  setTranslateText: (text: string, fromDictionary: boolean) => void;
   generateVideo: () => void;
 }
 
@@ -61,16 +69,27 @@ const poll = ({ fn, validate, interval, maxAttempts }: PollParams) => {
 
 const POLL_INTERVAL = 5000;
 const MAX_ATTEMPTS = 50;
+const URL_API = 'https://traducao2.vlibras.gov.br/video/download';
+const MAX_RECENTS_WORD = 30;
+const PROPERTY_KEY = 'recents-dictionary';
 
 const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [translateText, setTranslateText] = useState('');
+  const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
+
+  useEffect(() => {
+    NativeStorage.getItem(PROPERTY_KEY)
+      .then(recents => setRecentTranslation(recents))
+      .catch(_ => false);
+  }, []);
 
   function handleShareVideo(uuid: string) {
     setLoading(true);
+    // Move this function to a service [MA]
     axios({
-      url: `https://traducao2.vlibras.gov.br/video/download/${uuid}`,
+      url: `${URL_API}/${uuid}`,
       method: 'GET',
       responseType: 'blob',
     })
@@ -89,7 +108,7 @@ const TranslationProvider: React.FC = ({ children }) => {
           url: savedFile.uri,
         });
       })
-      .catch(error => console.error(error)) // TODO: Enable error modal if fails [MA]
+      .catch(_ => false) // TODO: Enable error modal if fails [MA]
       .finally(() => setLoading(false));
   }
 
@@ -118,9 +137,33 @@ const TranslationProvider: React.FC = ({ children }) => {
     }
   }
 
+  const handleTranslateText = useCallback(
+    async (text: string, fromDictionary: boolean) => {
+      if (fromDictionary) {
+        const recents =
+          recentTranslation.length <= MAX_RECENTS_WORD
+            ? [text, ...recentTranslation.filter(item => item !== text)]
+            : [
+                text,
+                ...recentTranslation.slice(0, -1).filter(item => item !== text),
+              ];
+        setRecentTranslation(recents);
+        NativeStorage.setItem(PROPERTY_KEY, recents);
+      }
+
+      setTranslateText(text);
+    },
+    [setTranslateText, recentTranslation],
+  );
+
   return (
     <TranslationContext.Provider
-      value={{ translateText, setTranslateText, generateVideo }}
+      value={{
+        translateText,
+        recentTranslation,
+        setTranslateText: handleTranslateText,
+        generateVideo,
+      }}
     >
       {children}
       <GenerateModal visible={loading} setVisible={setLoading} />

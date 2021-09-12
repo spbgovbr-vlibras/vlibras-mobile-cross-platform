@@ -11,6 +11,10 @@
     <param name="android-package" value="io.github.pwlin.cordova.plugins.fileopener2.FileOpener2"/>
   </feature>
 
+  <feature name="NativeStorage">
+    <param name="android-package" value="NativeStorage"/>
+  </feature>
+
   <feature name="VideoCapturePlus">
     <param name="android-package" value="nl.xservices.plugins.videocaptureplus.VideoCapturePlus"/>
   </feature>

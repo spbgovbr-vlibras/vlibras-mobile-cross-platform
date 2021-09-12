@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   IonChip,
@@ -32,11 +32,23 @@ import { Strings } from './strings';
 
 import './styles.css';
 
+type DictionaryFilter = 'alphabetical' | 'recents';
+
 const playerService = PlayerService.getService();
 
 const TIME_DEBOUNCE_MS = 1000;
 
+function getChipClassName(
+  filter: DictionaryFilter,
+  expected: DictionaryFilter,
+) {
+  return filter === expected
+    ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
+    : { color: '#4b4b4b', background: '#ededed' };
+}
+
 function Dictionary() {
+  const [filter, setFilter] = useState<DictionaryFilter>('alphabetical');
   const location = useLocation();
 
   const dispatch = useDispatch();
@@ -49,10 +61,10 @@ function Dictionary() {
 
   const history = useHistory();
 
-  const { setTranslateText } = useTranslation();
+  const { setTranslateText, recentTranslation } = useTranslation();
 
   function translate(text: string) {
-    setTranslateText(text);
+    setTranslateText(text, true);
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
@@ -64,6 +76,16 @@ function Dictionary() {
       onClick={() => translate(item.name)}
     >
       <IonText class="dictionary-words-style">{item.name}</IonText>
+    </IonItem>
+  );
+
+  const renderRecents = (item: string) => (
+    <IonItem
+      key={item}
+      class="dictionary-word-item"
+      onClick={() => translate(item)}
+    >
+      <IonText class="dictionary-words-style">{item}</IonText>
     </IonItem>
   );
 
@@ -101,6 +123,14 @@ function Dictionary() {
     infiniteScrollRef.current?.complete();
   }, [dispatch, infiniteScrollRef, metadata]);
 
+  function handleFilterAlpha() {
+    setFilter('alphabetical');
+  }
+
+  function handleFilterRecents() {
+    setFilter('recents');
+  }
+
   return (
     <MenuLayout
       title={Strings.TOOLBAR_TITLE}
@@ -118,16 +148,26 @@ function Dictionary() {
             />
           </div>
           <div className="dictionary-container-ion-chips">
-            <IonChip class="dictionary-container-ion-chips-suggestions-1">
+            <IonChip
+              class="dictionary-container-ion-chips-suggestions"
+              onClick={handleFilterAlpha}
+              style={getChipClassName(filter, 'alphabetical')}
+            >
               {Strings.CHIP_TEXT_SUGGESTIONS_1}
             </IonChip>
-            <IonChip class="dictionary-container-ion-chips-suggestions-2">
+            <IonChip
+              class="dictionary-container-ion-chips-suggestions"
+              onClick={handleFilterRecents}
+              style={getChipClassName(filter, 'recents')}
+            >
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" class="dictionary-words-list">
-              {dictionary.map(item => renderWord(item))}
+              {filter === 'alphabetical'
+                ? dictionary.map(item => renderWord(item))
+                : recentTranslation.map(item => renderRecents(item))}
             </IonList>
           </div>
         </div>
