@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { IonModal, IonButton } from '@ionic/react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -48,10 +48,15 @@ const VideoOutputModal = ({
   const [openPlayer, setOpenPlayer] = useState(playerIntermedium);
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
 
   const closeModal = () => {
     setShowModal(false);
     dispatch(Creators.setCurrentArrayVideo([]));
+
+    if (location.pathname === paths.RECORDERAREA) {
+      setOpenPlayer(false);
+    }
   };
 
   const playWord = (value: string) => {

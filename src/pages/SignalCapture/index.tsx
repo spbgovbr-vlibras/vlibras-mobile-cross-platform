@@ -87,10 +87,10 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideoOficial = async () => {
+  const takeVideoOf = async () => {
     if (currentVideoArray.length < 5) {
       try {
-        const options = { limit: 1, duration: 30 };
+        const options = { limit: 1, duration: 30, highquality: true };
         const mediafile = await VideoCapturePlus.captureVideo(options);
 
         const media = mediafile[0] as MediaFile;
@@ -194,31 +194,43 @@ const SignalCapture = () => {
   };
 
   const renderRecordedItens = () => {
-    // setLog(JSON.stringify(currentVideoArray));
-    return currentVideoArray.map((item: any, key: number) => {
+    const fillNTimes = 5 - currentVideoArray.length;
+    const copyCurrentVideo = [...currentVideoArray];
+
+    for (let index = 0; index < fillNTimes; index += 1) {
+      copyCurrentVideo.push([]);
+    }
+
+    return copyCurrentVideo.map((item: any, key: number) => {
       return (
-        <IonItem className="item-recorder" key={uuidv4()}>
-          <img
-            className="video-thumb"
-            src={item[2].thumbBlob}
-            alt="Video Thumb"
-          />
+        <>
+          {item.length !== 0 ? (
+            <IonItem className="item-recorder" key={uuidv4()}>
+              <img
+                className="video-thumb"
+                src={item[2].thumbBlob}
+                alt="Video Thumb"
+              />
 
-          <div className="video-metadata">
-            <p className="name"> Sinal {key + 1}</p>
-            <p className="size"> {item[3].duration} seg </p>
-          </div>
+              <div className="video-metadata">
+                <p className="name"> Sinal {key + 1}</p>
+                <p className="size"> {item[3].duration} seg </p>
+              </div>
 
-          <div className="video-icon-delete">
-            <button
-              onClick={() => popupRemove(key)}
-              type="button"
-              className="signal-capture-button-none"
-            >
-              <img src={logoTrashBtn} alt="Logo lixeira" />
-            </button>
-          </div>
-        </IonItem>
+              <div className="video-icon-delete">
+                <button
+                  onClick={() => popupRemove(key)}
+                  type="button"
+                  className="signal-capture-button-none"
+                >
+                  <img src={logoTrashBtn} alt="Logo lixeira" />
+                </button>
+              </div>
+            </IonItem>
+          ) : (
+            <div className="item-recorder shadowing" />
+          )}
+        </>
       );
     });
   };
@@ -234,11 +246,6 @@ const SignalCapture = () => {
           <IonTitle className="menu-toolbar-title-signalcap">
             {Strings.TITLE_MENU}
           </IonTitle>
-          {/* <IonButtons slot="end" onClick={popupCancel}>
-            <div className="menu-container-end">
-              <IconCloseCircle color="#969696" />
-            </div>
-          </IonButtons> */}
           <IonButtons slot="start" onClick={popupCancel}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#969696" />

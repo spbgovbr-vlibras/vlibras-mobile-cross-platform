@@ -16,12 +16,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import regionalismData from 'data/regionalism';
+import { env } from 'environment/env';
 import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
 import { Strings } from './strings';
-
 import './styles.css';
 
 export interface RegionalismItem {

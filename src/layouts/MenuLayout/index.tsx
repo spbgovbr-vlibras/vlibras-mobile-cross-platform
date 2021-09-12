@@ -13,13 +13,9 @@ import {
 import { useDispatch } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import {
-  IconTranslate,
-  IconCloseCircle,
-  IconShare,
-  IconArrowLeft,
-} from 'assets';
+import { IconTranslate, IconShare, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
+import { env } from 'environment/env';
 import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
@@ -50,17 +46,22 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
     switch (location.pathname) {
       case paths.HOME:
         dispatch(Creators.setIsVideoScreen(false));
-        return (
-          <>
-            {/* <IonLabel
-              className="menu-item-text"
-              onClick={() => history.push(paths.ONBOARDING)}
-            >
-              {Strings.MENU_PT_BR}
-            </IonLabel>
-            <IconTranslate color="#315EB1" /> */}
-          </>
-        );
+        if (env.videoTranslator) {
+          return (
+            <>
+              <button
+                className="menu-item-text"
+                onClick={() => history.push(paths.ONBOARDING)}
+                type="button"
+              >
+                {Strings.MENU_PT_BR}
+              </button>
+              <IconTranslate color="#2365DE" />
+            </>
+          );
+        }
+        return <></>;
+
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
         dispatch(Creators.setIsVideoScreen(true));
@@ -75,8 +76,6 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
             <IconTranslate color="#315EB1" />
           </>
         );
-      case paths.ABOUT:
-        return <IconShare color="#4B4B4B" />;
 
       default:
         return null;

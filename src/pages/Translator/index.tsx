@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 
-import { IonText, IonTextarea, IonContent } from '@ionic/react';
+import {
+  IonText,
+  IonButton,
+  IonTextarea,
+  IonContent,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+} from '@ionic/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
+import { IconArrowLeft } from 'assets';
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
@@ -11,6 +22,7 @@ import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
 import { Creators } from 'store/ducks/translator';
+import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 
@@ -26,6 +38,19 @@ const Translator = () => {
   const { setTranslateText } = useTranslation();
 
   function translate() {
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    reloadHistory(today, text, 'text');
+
+    // mock
+    // dispatch(
+    //   Creators.setLastTranslator({
+    //     data: text,
+    //     date: today,
+    //     key: 'text',
+    //   }),
+    // );
+
     setTranslateText(text);
     history.push(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
@@ -67,4 +92,5 @@ const Translator = () => {
     </MenuLayout>
   );
 };
+
 export default Translator;

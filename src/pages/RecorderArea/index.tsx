@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { CameraResultType, Capacitor } from '@capacitor/core';
 import { File, DirectoryEntry } from '@ionic-native/file';
@@ -17,22 +17,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+import { logoCapture, logoHistory, logoTranslate, logoMaos } from 'assets';
+import { ErrorModal, VideoOutputModal, TranslatingModal } from 'components';
+import paths from 'constants/paths';
+import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
-import {
-  logoCapture,
-  logoHistory,
-  logoTranslate,
-  logoMaos,
-} from '../../assets';
-import {
-  VideoOutputModal,
-  TranslatingModal,
-  ErrorModal,
-} from '../../components';
-import paths from '../../constants/paths';
-import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -57,6 +48,19 @@ const RecorderArea = () => {
   const lastTranslation = useSelector(
     ({ video }: RootState) => video.lastTranslate,
   );
+
+  const orderArrayByKey = (arrayOfResults: any, arrayOfKeys: any) => {
+    const newResultArray = new Array(arrayOfResults.length);
+
+    arrayOfKeys.forEach((elem: number, key: number) => {
+      newResultArray[elem] = arrayOfResults[key];
+    });
+
+    console.log(arrayOfResults, arrayOfKeys, newResultArray);
+
+    return newResultArray;
+  };
+
   const takeVideo = async () => {
     // mock
     if (currentVideoArray.length < 5) {
@@ -77,9 +81,9 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoOficial = async () => {
+  const takeVideoOf = async () => {
     try {
-      const options = { limit: 1, duration: 30 };
+      const options = { limit: 1, duration: 30, highquality: true };
       const mediafile = await VideoCapturePlus.captureVideo(options);
 
       const media = mediafile[0] as MediaFile;
@@ -164,6 +168,7 @@ const RecorderArea = () => {
 
   const translateVideo = async () => {
     const arrayOfResults: any = [];
+    const arrayOfKeys: any = [];
 
     setLoading(true);
     setShowModal(false);
@@ -172,8 +177,6 @@ const RecorderArea = () => {
       currentVideoArray.map(async (item: any, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
-        console.log(item[1]);
-
         try {
           const resultRequest = await axios.post(
             'http://127.0.0.1:5000/api/v1/recognition',
@@ -189,31 +192,54 @@ const RecorderArea = () => {
             },
           );
 
-          if (resultRequest.data && resultRequest.data.length > 0)
+          if (resultRequest.data && resultRequest.data.length > 0) {
             arrayOfResults.push(resultRequest.data[0].label);
-          else setShowErrorModal([true, 'Erro ao obter resultados']);
+            arrayOfKeys.push(key);
+          }
+          // else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
-          setLog(JSON.stringify(e));
-          setShowErrorModal([true, 'Erro ao enviar vídeo']);
+          // setTimeout(function () {
+          //   setLoading(false);
+          // }, 200);
+          // setLog(JSON.stringify(e.response.data));
+          // console.log(e.response);
+          // if (e.response && e.response.data.detail.message) {
+          //   setShowErrorModal([true, e.response.data.detail.message]);
+          // } else {
+          //   setShowErrorModal([true, 'Erro ao enviar vídeo']);
+          // }
           console.log(e);
         }
       }),
     );
 
-    setLoading(false);
-
-    if (arrayOfResults.length !== 0) {
-      const today = new Date();
-      dispatch(
-        Creators.setLastTranslator({
-          data: arrayOfResults,
-          date: today.toLocaleDateString('pt-BR'),
-          key: 'video',
-        }),
-      );
-      setResults(arrayOfResults);
-      setShowModal(true);
+    setTimeout(function () {
       setLoading(false);
+    }, 200);
+
+    const translatedLabels = orderArrayByKey(arrayOfResults, arrayOfKeys);
+    console.log(translatedLabels);
+    if (translatedLabels.length !== 0) {
+      if (translatedLabels.length === currentVideoArray.length) {
+        const today = new Date();
+        dispatch(
+          Creators.setLastTranslator({
+            data: translatedLabels,
+            date: today.toLocaleDateString('pt-BR'),
+            key: 'video',
+          }),
+        );
+        setResults(translatedLabels);
+        setShowModal(true);
+        setLoading(false);
+      } else if (translatedLabels.length < currentVideoArray.length) {
+        setShowErrorModal([
+          true,
+          'Não foi possível traduzir todos os vídeos. Tente novamente!',
+        ]);
+      }
+    } else {
+      setShowErrorModal([true, 'Erro ao enviar vídeo']);
     }
   };
 
@@ -265,7 +291,7 @@ const RecorderArea = () => {
           <p className="title-recorder">
             Use a câmera para gravar novos sinais
           </p>
-          {log}
+          <div style={{ fontSize: '9px' }}> {log} </div>
           <div className="recorder-area">
             <div className="area-button-recorder">
               <button

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   IonCol,
@@ -34,6 +34,7 @@ import { Creators, CustomizationState } from 'store/ducks/customization';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './string';
+
 import './styles.css';
 
 const unityContent = new UnityContent(
@@ -161,19 +162,13 @@ function Customization() {
     dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
     dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
 
-    console.log(colorbody);
-    console.log(coloreye);
-    console.log(colorhair);
-    console.log(colorpants);
-    console.log(colorshirt);
-
-    console.log('Cor salva com sucesso meu chapa');
+    history.push(paths.HOME);
   }
 
   // CUSTOMIZER ICARO
 
-  const preProcessingPreview = () => {
-    const object = {
+  useEffect(() => {
+    const preProcessingPreview = JSON.stringify({
       corpo: colorbody,
       olhos: '#fffafa',
       cabelo: colorhair,
@@ -181,18 +176,14 @@ function Customization() {
       calca: colorpants,
       iris: coloreye,
       pos: 'center',
-    };
-    console.log(object);
-    return JSON.stringify(object);
-  };
+    });
 
-  const previewAvatar = () => {
     unityContent.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview(),
+      preProcessingPreview,
     );
-  };
+  }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
 
   // Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
   //------------------------------------------------------------------------------------------------
@@ -203,7 +194,12 @@ function Customization() {
     selectcolorhair(IcaroDefault.icaroHair);
     selectcolorpants(IcaroDefault.icaroPants);
     selectcolorshirt(IcaroDefault.icaroShirt);
-    previewAvatar();
+
+    dispatch(Creators.setCurrentCustomizationBody(IcaroDefault.icaroBody)); // redux create
+    dispatch(Creators.setCurrentCustomizationEye(IcaroDefault.icaroEye)); // redux create
+    dispatch(Creators.setCurrentCustomizationHair(IcaroDefault.icaroHair)); // redux create
+    dispatch(Creators.setCurrentCustomizationPants(IcaroDefault.icaroPants)); // redux create
+    dispatch(Creators.setCurrentCustomizationShirt(IcaroDefault.icaroShirt)); // redux create
   };
 
   const showColorsBody = (item: CustomizationBody) => {
@@ -222,10 +218,9 @@ function Customization() {
             type="button"
             onClick={() => {
               selectcolorbody(item.colorBody);
-              previewAvatar();
             }}
           >
-            &
+            &#8203;
           </button>
         </div>
       );
@@ -247,10 +242,9 @@ function Customization() {
             type="button"
             onClick={() => {
               selectcoloreye(item.colorEye);
-              previewAvatar();
             }}
           >
-            &
+            &#8203;
           </button>
         </div>
       );
@@ -273,10 +267,9 @@ function Customization() {
             type="button"
             onClick={() => {
               selectcolorhair(item.color);
-              previewAvatar();
             }}
           >
-            &
+            &#8203;
           </button>
         </div>
       );
@@ -299,10 +292,9 @@ function Customization() {
             type="button"
             onClick={() => {
               selectcolorpants(item.color);
-              previewAvatar();
             }}
           >
-            &
+            &#8203;
           </button>
         </div>
       );
@@ -325,10 +317,9 @@ function Customization() {
             type="button"
             onClick={() => {
               selectcolorshirt(item.color);
-              previewAvatar();
             }}
           >
-            &
+            &#8203;
           </button>
         </div>
       );
@@ -477,13 +468,20 @@ function Customization() {
         </button> */}
 
         <div className="customization-all-save">
-          <IonButton
-            class="customization-save"
+          <button
+            className="customization-reset"
+            onClick={() => resetColor()}
+            type="button"
+          >
+            {Strings.BUTTON_RESET}
+          </button>
+          <button
+            className="customization-save"
             onClick={() => SaveChanges()}
-            // disabled
+            type="button"
           >
             {Strings.BUTTON_SALVAR}
-          </IonButton>
+          </button>
         </div>
       </div>
     </MenuLayout>

@@ -1,10 +1,9 @@
 /* eslint-disable no-param-reassign */
-import { NativeStorage } from '@ionic-native/native-storage';
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
 
-import dateFormat from 'utils/dateFormat';
+import { reloadHistory } from 'utils/setHistory';
 
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
@@ -39,29 +38,6 @@ export const Creators = {
 
 export type ActionTypes = ActionType<typeof Creators>;
 
-const loadHistory = async (payloadDate: any, payloadData: any) => {
-  const promiseHistory = NativeStorage.getItem('history').then(
-    data => data,
-    error => {
-      return {};
-    },
-  );
-
-  const resultPromise = await promiseHistory;
-  const dateFormatted = dateFormat(payloadDate);
-
-  if (resultPromise[dateFormatted]) {
-    resultPromise[dateFormatted].unshift(payloadData);
-  } else {
-    resultPromise[dateFormatted] = [payloadData];
-  }
-
-  NativeStorage.setItem('history', resultPromise).then(
-    () => console.log(NativeStorage.getItem('myitem')),
-    error => console.error('Error storing item', error),
-  );
-};
-
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
   action: ActionTypes,
@@ -74,7 +50,25 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         break;
       case Types.SET_LAST_TRANSLATOR:
         draft.lastTranslate = payload.data;
-        loadHistory(payload.date, payload.data);
+        // draft.lastTranslate = ['alo']; //mock
+
+        // eslint-disable-next-line no-case-declarations
+        const { date, data, key } = payload;
+
+        reloadHistory(date, data, key);
+
+        // mock
+        // if (draft.translationsHistoric[date]) {
+        //   if (draft.translationsHistoric[date][key]) {
+        //     draft.translationsHistoric[date][key].unshift(data)
+        //   } else {
+        //     draft.translationsHistoric[date][key] = []
+        //     draft.translationsHistoric[date][key].unshift(data)
+        //   }
+        // } else {
+        //   draft.translationsHistoric[date] = {}
+        //   draft.translationsHistoric[date][key] = [data]
+        // }
 
         break;
       case Types.SET_DOMAIN:

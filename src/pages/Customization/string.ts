@@ -1,5 +1,6 @@
 export const Strings = {
-  BUTTON_SALVAR: 'SALVAR',
+  BUTTON_RESET: 'Redefinir',
+  BUTTON_SALVAR: 'Salvar',
   BUTTON_NAME_YES: 'Sim',
   BUTTON_NAME_NO: 'Não',
   TITLE_POPUPCANCEL: 'Cancelar Ajustes',

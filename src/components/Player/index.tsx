@@ -307,8 +307,8 @@ function Player() {
     );
   };
 
-  const preProcessingPreview = () => {
-    const object = {
+  useEffect(() => {
+    const preProcessingPreview = JSON.stringify({
       corpo: currentBody,
       olhos: '#fffafa',
       cabelo: currentHair,
@@ -316,17 +316,14 @@ function Player() {
       calca: currentPants,
       iris: currentEye,
       pos: 'center',
-    };
-    return JSON.stringify(object);
-  };
+    });
 
-  useEffect(() => {
     playerService.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview(),
+      preProcessingPreview,
     );
-  });
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
   return (
     <div className="player-container">
@@ -428,9 +425,9 @@ function Player() {
           >
             <IconShare color="#FFF" size={18} />
           </button>
-          <button className="player-button-rounded" type="button">
+          {/* <button className="player-button-rounded" type="button">
             <IconHandsTranslate color="#FFF" size={18} />
-          </button>
+          </button> */}
         </div>
       )}
       <div className="player-action-container">

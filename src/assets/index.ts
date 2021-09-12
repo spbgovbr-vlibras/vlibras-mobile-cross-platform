@@ -5,6 +5,7 @@ import IconTranslate from './icons/IconTranslate';
 import IconDictionary from './icons/IconDictionary';
 import IconRegionalism from './icons/IconRegionalism';
 import IconIcaro from './icons/IconIcaro';
+import IconInfo from './icons/IconInfo';
 import IconTutorial from './icons/IconTutorial';
 import IconHandsTranslate from './icons/IconHandsTranslate';
 import IconMic from './icons/IconMic';
@@ -159,7 +160,7 @@ export {
   IconTranslate,
   IconRegionalism,
   IconDictionary,
-  IconIcaro,
+  IconInfo,
   IconTutorial,
   IcaroPreview,
   IconMic,
@@ -196,6 +197,7 @@ export {
   IconArrowLeft,
   IconThumbUp,
   IconThumbDown,
+  IconIcaro,
   IconArrowUpRight,
   cameraBlue,
   logoOlho,
