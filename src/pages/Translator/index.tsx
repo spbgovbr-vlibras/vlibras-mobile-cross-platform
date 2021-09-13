@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
 
-import {
-  IonText,
-  IonButton,
-  IonTextarea,
-  IonContent,
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-} from '@ionic/react';
+import { IonText, IonTextarea, IonContent } from '@ionic/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { IconArrowLeft } from 'assets';
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
@@ -38,9 +27,11 @@ const Translator = () => {
   const { setTranslateText } = useTranslation();
 
   function translate() {
+    const formatted = text.trim();
+
     const today = new Date().toLocaleDateString('pt-BR');
 
-    reloadHistory(today, text, 'text');
+    reloadHistory(today, formatted, 'text');
 
     // mock
     // dispatch(
@@ -51,10 +42,14 @@ const Translator = () => {
     //   }),
     // );
 
-    setTranslateText(text, false);
+    setTranslateText(formatted, false);
     history.push(paths.HOME);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
-    dispatch(Creators.setTranslatorText(text));
+    playerService.send(
+      PlayerKeys.PLAYER_MANAGER,
+      PlayerKeys.PLAY_NOW,
+      formatted,
+    );
+    dispatch(Creators.setTranslatorText(formatted));
   }
 
   return (
@@ -73,7 +68,7 @@ const Translator = () => {
                 cols={5}
                 wrap="soft"
                 required
-                onIonChange={e => setText(e.detail.value!)}
+                onIonChange={e => setText(e.detail.value || '')}
               />
             </div>
           </div>

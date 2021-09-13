@@ -204,7 +204,7 @@ function Historic() {
   };
 
   return (
-    <MenuLayout title={Strings.TOOLBAR_TITLE}>
+    <MenuLayout title={Strings.TOOLBAR_TITLE} mode="back">
       <IonContent>
         <div className="historic-container">
           <div className="historic-container-ion-chips">
