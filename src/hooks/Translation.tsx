@@ -7,13 +7,8 @@ import React, {
   useEffect,
 } from 'react';
 
-import {
-  Plugins,
-  FilesystemDirectory,
-  FilesystemEncoding,
-} from '@capacitor/core';
 import { NativeStorage } from '@ionic-native/native-storage';
-import axios from 'axios';
+import { SocialSharing } from '@ionic-native/social-sharing/';
 
 import { ErrorModal, GenerateModal } from 'components';
 import {
@@ -23,9 +18,6 @@ import {
   VideoStatusResponse,
   VideoTranslationStatus,
 } from 'services/translate';
-import { convertBlobToBase64 } from 'utils/file';
-
-const { Filesystem, Share } = Plugins;
 
 interface PollParams {
   fn: () => Promise<VideoStatusResponse>;
@@ -88,26 +80,8 @@ const TranslationProvider: React.FC = ({ children }) => {
   function handleShareVideo(uuid: string) {
     setLoading(true);
     // Move this function to a service [MA]
-    axios({
-      url: `${URL_API}/${uuid}`,
-      method: 'GET',
-      responseType: 'blob',
-    })
-      .then(async response => {
-        const name = `${uuid}.mov`;
-        const base64 = (await convertBlobToBase64(response.data)) as string;
-        const savedFile = await Filesystem.writeFile({
-          path: name,
-          data: base64,
-          directory: FilesystemDirectory.Documents,
-          encoding: FilesystemEncoding.UTF8,
-        });
-        setLoading(false);
-        await Share.share({
-          title: 'Compartilhar vídeo',
-          url: savedFile.uri,
-        });
-      })
+
+    SocialSharing.share('', '', `${URL_API}/${uuid}`)
       .catch(_ => false) // TODO: Enable error modal if fails [MA]
       .finally(() => setLoading(false));
   }
