@@ -23,6 +23,7 @@ import IconShirt from './icons/IconShirt';
 import IconHair from './icons/IconHair';
 import IconBody from './icons/IconBody';
 import IconCustomization from './icons/IconCustomization';
+import IconHozana from './icons/IconHozana';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -111,6 +112,7 @@ import Vlibraslogo from './images/vlibraslogo.png';
 
 export {
   LogoIcaro,
+  IconHozana,
   logoRefresh,
   logoAvatares,
   logoCamaraDeputados,

@@ -20,6 +20,7 @@ import {
   IconClose,
   IconIcaro,
   logoRefresh,
+  IconHozana,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import paths from 'constants/paths';
@@ -33,6 +34,8 @@ import { Creators } from 'store/ducks/regionalism';
 import './styles.css';
 
 type BooleanParamsPlayer = 'True' | 'False';
+
+type Avatar = 'hozana' | 'icaro';
 
 const playerService = PlayerService.getService();
 
@@ -89,6 +92,7 @@ function Player() {
   );
 
   // Dynamic states [MA]
+  const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
   const [visiblePlayer, setVisiblePlayer] = useState(true);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -172,6 +176,7 @@ function Player() {
   }
 
   function handleChangeAvatar() {
+    setCurrentAvatar(currentAvatar === 'icaro' ? 'hozana' : 'icaro');
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
   }
 
@@ -388,7 +393,11 @@ function Player() {
             type="button"
             onClick={handleChangeAvatar}
           >
-            <IconIcaro color="#FFF" size={20} />
+            {currentAvatar === 'icaro' ? (
+              <IconHozana color="#FFF" size={20} />
+            ) : (
+              <IconIcaro color="#FFF" size={20} />
+            )}
           </button>
         )}
       </div>
