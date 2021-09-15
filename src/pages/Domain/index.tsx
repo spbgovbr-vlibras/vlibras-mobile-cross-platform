@@ -79,7 +79,7 @@ const Domain = () => {
 
           <IonButtons slot="start" onClick={() => history.goBack()}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#969696" />
+              <IconArrowLeft color="#1447a6" />
             </div>
           </IonButtons>
         </IonToolbar>
