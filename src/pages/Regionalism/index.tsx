@@ -11,16 +11,20 @@ import {
   IonText,
   IonImg,
   IonButton,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
 } from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import regionalismData from 'data/regionalism';
-import { env } from 'environment/env';
-import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
+import { IconArrowLeft } from '../../assets';
 import { Strings } from './strings';
 import './styles.css';
 
@@ -56,7 +60,20 @@ function Regionalism() {
   }
 
   return (
-    <MenuLayout title={Strings.REGIONALISM_TITLE}>
+    <IonPage>
+      <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <IonTitle className="menu-toolbar-title-signalcap">
+            {Strings.REGIONALISM_TITLE}
+          </IonTitle>
+
+          <IonButtons slot="start" onClick={() => history.goBack()}>
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#1447a6" />
+            </div>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
       <IonContent slot="right">
         <div className="regionalism-list">
           <IonList lines="none">
@@ -85,7 +102,7 @@ function Regionalism() {
           </div>
         </div>
       </IonContent>
-    </MenuLayout>
+    </IonPage>
   );
 }
 export default Regionalism;

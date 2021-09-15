@@ -9,6 +9,7 @@ import {
   IonTextarea,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import { RootState } from 'store';
@@ -30,6 +31,7 @@ function Historic() {
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
   const [log, setLog] = useState([]);
+  const location = useLocation();
 
   const [historyStorage, setHistoryStorage] = useState<any>({});
   const [keysToShow, setKeysToShow] = useState(
@@ -59,7 +61,7 @@ function Historic() {
 
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [location]);
 
   const renderItems = () => {
     // if you are mocking the app to use it on ur browser,

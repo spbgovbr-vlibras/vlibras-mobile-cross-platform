@@ -1,4 +1,5 @@
 .customization-menu {
+  background: white;
   display: flex;
   flex-direction: row;
   padding: 16px;
@@ -54,6 +55,7 @@
 }
 
 .customization-all-save {
+  background: white;
   width: 100%;
   display: flex;
   align-items: center;

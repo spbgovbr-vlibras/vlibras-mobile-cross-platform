@@ -13,12 +13,24 @@ import {
   IonRadio,
   IonContent,
   IonAlert,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
 } from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
 
-import { IconEye, IconPants, IconBody, IconShirt, IconHair } from 'assets';
+import {
+  IconEye,
+  IconPants,
+  IconBody,
+  IconShirt,
+  IconHair,
+  IconArrowLeft,
+} from 'assets';
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import { VideoOutputModal } from 'components';
 import paths from 'constants/paths';
@@ -332,7 +344,21 @@ function Customization() {
   // --------------------------------------------------------------------------------
 
   return (
-    <MenuLayout title="Personalização">
+    <IonPage>
+      <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <IonTitle className="menu-toolbar-title-signalcap">
+            Personalização
+          </IonTitle>
+
+          <IonButtons slot="start" onClick={() => history.goBack()}>
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#1447a6" />
+            </div>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      {/* <IonContent slot="right"> */}
       <div className="player-container">
         <div
           className="player-container"
@@ -484,7 +510,8 @@ function Customization() {
           </button>
         </div>
       </div>
-    </MenuLayout>
+      {/* </IonContent> */}
+    </IonPage>
   );
 }
 export default Customization;
