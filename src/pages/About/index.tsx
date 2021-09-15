@@ -48,18 +48,24 @@ function About() {
             <div className="about-container-redes-sociais">
               <IonText>{Strings.TEXT_REDES_SOCIAIS}</IonText>
               <div className="about-container-redes-sociais-footer">
-                <IonImg
-                  src={logoInstagram}
-                  className="about-image-social-media"
-                />
-                <IonImg
-                  src={logoFacebook}
-                  className="about-image-social-media"
-                />
-                <IonImg
-                  src={logoYoutube}
-                  className="about-image-social-media"
-                />
+                <a href="https://www.instagram.com/vlibrasoficial/">
+                  <IonImg
+                    src={logoInstagram}
+                    className="about-image-social-media"
+                  />
+                </a>
+                <a href="https://www.facebook.com/vlibras/">
+                  <IonImg
+                    src={logoFacebook}
+                    className="about-image-social-media"
+                  />
+                </a>
+                <a href="https://www.youtube.com/channel/UCF94lq7TwAu5OmlwIu44qpA">
+                  <IonImg
+                    src={logoYoutube}
+                    className="about-image-social-media"
+                  />
+                </a>
               </div>
             </div>
           </div>

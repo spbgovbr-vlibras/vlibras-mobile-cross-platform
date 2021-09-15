@@ -43,7 +43,7 @@ const Translator = () => {
     // );
 
     setTranslateText(formatted, false);
-    history.push(paths.HOME);
+    history.replace(paths.HOME);
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
@@ -63,7 +63,7 @@ const Translator = () => {
             <div className="translator-input-box">
               <IonTextarea
                 class="translator-textarea"
-                placeholder={Strings.TRANSLATOR_PLACEHOLDER}
+                //  placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 rows={5}
                 cols={5}
                 wrap="soft"

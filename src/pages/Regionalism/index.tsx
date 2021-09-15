@@ -11,6 +11,7 @@ import {
   IonText,
   IonImg,
   IonButton,
+  IonFooter,
 } from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -69,22 +70,21 @@ function Regionalism() {
               {regionalismData.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
-          <div className="regionalism-icon-save">
-            <IonButton
-              class="regionalism-cancel"
-              onClick={() => history.goBack()}
-            >
-              {Strings.BUTTON_CANCEL}
-            </IonButton>
-            <IonButton
-              class="regionalism-save"
-              onClick={() => SaveRegionalism()}
-            >
-              {Strings.BUTTON_SAVE}
-            </IonButton>
-          </div>
         </div>
       </IonContent>
+      <IonFooter>
+        <div className="regionalism-icon-save">
+          <IonButton
+            class="regionalism-cancel"
+            onClick={() => history.goBack()}
+          >
+            {Strings.BUTTON_CANCEL}
+          </IonButton>
+          <IonButton class="regionalism-save" onClick={() => SaveRegionalism()}>
+            {Strings.BUTTON_SAVE}
+          </IonButton>
+        </div>
+      </IonFooter>
     </MenuLayout>
   );
 }
