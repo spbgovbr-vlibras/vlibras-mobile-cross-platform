@@ -48,6 +48,7 @@ function getChipClassName(
 }
 
 function Dictionary() {
+  const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('alphabetical');
   const location = useLocation();
 
@@ -91,11 +92,12 @@ function Dictionary() {
 
   const onSearch = useCallback(
     event => {
+      setSearchText(event.target.value || '');
       dispatch(
         Creators.fetchWords.request({
           page: FIRST_PAGE_INDEX,
           limit: MAX_PER_PAGE,
-          name: event.target.value || undefined,
+          name: `${event.target.value}%`,
         }),
       );
     },
@@ -118,10 +120,11 @@ function Dictionary() {
       Creators.fetchWords.request({
         page: metadata.current_page + PAGE_STEP_SIZE,
         limit: MAX_PER_PAGE,
+        name: `${searchText}%`,
       }),
     );
     infiniteScrollRef.current?.complete();
-  }, [dispatch, infiniteScrollRef, metadata]);
+  }, [dispatch, infiniteScrollRef, metadata, searchText]);
 
   function handleFilterAlpha() {
     setFilter('alphabetical');

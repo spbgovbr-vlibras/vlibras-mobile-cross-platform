@@ -112,7 +112,7 @@ const RevisionModal = ({
         CreatorsDictionary.fetchWords.request({
           page: 1,
           limit: 10,
-          name: currentTranslatorText,
+          name: `${currentTranslatorText}%`,
         }),
       );
     }
@@ -127,12 +127,12 @@ const RevisionModal = ({
 
   const onSearch = useCallback(
     event => {
-      setAuxValueText(event.target.value);
+      setAuxValueText(event.target.value || '');
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: FIRST_PAGE_INDEX,
           limit: 10,
-          name: event.target.value || undefined,
+          name: `${event.target.value}%`,
         }),
       );
     },

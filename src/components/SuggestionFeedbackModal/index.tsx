@@ -32,10 +32,10 @@ const SuggestionFeedbackModal = ({
     >
       <div className="text-container">
         <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
-        <IonText class="subtitle">{Strings.SUBTITLE_MENU_MODAL}</IonText>
+        <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>
       </div>
       <IonChip class="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
-        <IonText class="chip-text-space">{Strings.CHIP_TEXT}</IonText>
+        <span className="chip-text-space">{Strings.CHIP_TEXT}</span>
         <IconArrowUpRight />
       </IonChip>
     </IonModal>

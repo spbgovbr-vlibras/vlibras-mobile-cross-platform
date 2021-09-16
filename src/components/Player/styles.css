@@ -103,6 +103,11 @@
   align-items: center;
 }
 
+.player-action-button img {
+  width: 24px;
+  height: 24px;
+}
+
 .player-button-rounded-top {
   width: 36px;
   height: 36px;
