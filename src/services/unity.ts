@@ -13,8 +13,8 @@ export default class UnityService {
 
   private constructor() {
     this.unityContent = new UnityContent(
-      'Build-Final/Build2/Build Final.json',
-      'Build-Final/Build2/UnityLoader.js',
+      'BUILD/Build/BUILD.json',
+      'BUILD/Build/UnityLoader.js',
       {
         adjustOnWindowResize: true,
       },
