@@ -11,6 +11,7 @@ import {
   IonText,
   IonImg,
   IonButton,
+  IonFooter,
   IonPage,
   IonHeader,
   IonToolbar,
@@ -86,22 +87,21 @@ function Regionalism() {
               {regionalismData.map(item => renderItem(item))}
             </IonRadioGroup>
           </IonList>
-          <div className="regionalism-icon-save">
-            <IonButton
-              class="regionalism-cancel"
-              onClick={() => history.goBack()}
-            >
-              {Strings.BUTTON_CANCEL}
-            </IonButton>
-            <IonButton
-              class="regionalism-save"
-              onClick={() => SaveRegionalism()}
-            >
-              {Strings.BUTTON_SAVE}
-            </IonButton>
-          </div>
         </div>
       </IonContent>
+      <IonFooter>
+        <div className="regionalism-icon-save">
+          <IonButton
+            class="regionalism-cancel"
+            onClick={() => history.goBack()}
+          >
+            {Strings.BUTTON_CANCEL}
+          </IonButton>
+          <IonButton class="regionalism-save" onClick={() => SaveRegionalism()}>
+            {Strings.BUTTON_SAVE}
+          </IonButton>
+        </div>
+      </IonFooter>
     </IonPage>
   );
 }

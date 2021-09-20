@@ -5,4 +5,5 @@ export const Strings = {
   BUTTON_NAME_NO: 'Não',
   TITLE_POPUPCANCEL: 'Cancelar Ajustes',
   MESSAGE_POPUPCANCEL: 'As definições serão descartadas',
+  TITLE_POPUP_RESET: 'Redefinir Cores',
 };

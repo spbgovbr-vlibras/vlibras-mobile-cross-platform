@@ -66,7 +66,7 @@ function Dictionary() {
 
   function translate(text: string) {
     setTranslateText(text, true);
-    history.push(paths.HOME);
+    history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 

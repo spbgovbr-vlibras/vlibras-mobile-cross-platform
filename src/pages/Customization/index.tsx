@@ -97,7 +97,8 @@ function Customization() {
   const [showhair, setshowhair] = useState(false);
   const [showshirt, setshowshirt] = useState(false);
   const [showpants, setshowpants] = useState(false);
-  const [showAlert, setshowAlert] = useState(true);
+  const [showAlert, setshowAlert] = useState(false);
+  const [showAlertCancel, setshowAlertCancel] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -148,23 +149,18 @@ function Customization() {
 
   const selectcolorbody = (color: string) => {
     setcolorbody(color);
-    console.log(color);
   };
   const selectcoloreye = (color: string) => {
     setcoloreye(color);
-    console.log(color);
   };
   const selectcolorhair = (color: string) => {
     setcolorhair(color);
-    console.log(color);
   };
   const selectcolorpants = (color: string) => {
     setcolorpants(color);
-    console.log(color);
   };
   const selectcolorshirt = (color: string) => {
     setcolorshirt(color);
-    console.log(color);
   };
 
   function SaveChanges() {
@@ -339,6 +335,35 @@ function Customization() {
     return null;
   };
 
+  /*   const showPopUpReset = () => {
+    <IonAlert
+      isOpen={showAlert}
+      cssClass="popup-box-signal-cap"
+      header={Strings.TITLE_POPUP_RESET}
+      message={Strings.MESSAGE_POPUPCANCEL}
+      buttons={[
+        {
+          text: Strings.BUTTON_NAME_YES,
+          cssClass: 'popup-yes',
+          handler: () => {
+            console.log('Confirm Yes');
+            setshowAlert(false);
+            resetColor();
+          },
+        },
+        {
+          text: Strings.BUTTON_NAME_NO,
+          cssClass: 'popup-no',
+          role: 'cancel',
+          handler: () => {
+            console.log('Confirm No');
+            setshowAlert(false);
+          },
+        },
+      ]}
+    />;
+  };
+ */
   // criação da tela  ---------------------------------------------------------------
   // --------------------------------------------------------------------------------
   // --------------------------------------------------------------------------------
@@ -351,14 +376,13 @@ function Customization() {
             Personalização
           </IonTitle>
 
-          <IonButtons slot="start" onClick={() => history.goBack()}>
+          <IonButtons slot="start" onClick={() => setshowAlertCancel(true)}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#1447a6" />
             </div>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
-      {/* <IonContent slot="right"> */}
       <div className="player-container">
         <div
           className="player-container"
@@ -496,10 +520,58 @@ function Customization() {
         <div className="customization-all-save">
           <button
             className="customization-reset"
-            onClick={() => resetColor()}
+            onClick={() => setshowAlert(true)}
             type="button"
           >
             {Strings.BUTTON_RESET}
+            <IonAlert
+              isOpen={showAlert}
+              cssClass="popup-box-signal-cap"
+              header={Strings.TITLE_POPUP_RESET}
+              message={Strings.MESSAGE_POPUPCANCEL}
+              buttons={[
+                {
+                  text: Strings.BUTTON_NAME_YES,
+                  cssClass: 'popup-yes',
+                  handler: () => {
+                    setshowAlert(false);
+                    resetColor();
+                  },
+                },
+                {
+                  text: Strings.BUTTON_NAME_NO,
+                  cssClass: 'popup-no',
+                  role: 'cancel',
+                  handler: () => {
+                    setshowAlert(false);
+                  },
+                },
+              ]}
+            />
+            <IonAlert
+              isOpen={showAlertCancel}
+              cssClass="popup-box-signal-cap"
+              header={Strings.TITLE_POPUPCANCEL}
+              message={Strings.MESSAGE_POPUPCANCEL}
+              buttons={[
+                {
+                  text: Strings.BUTTON_NAME_YES,
+                  cssClass: 'popup-yes',
+                  handler: () => {
+                    setshowAlertCancel(false);
+                    history.push(paths.HOME);
+                  },
+                },
+                {
+                  text: Strings.BUTTON_NAME_NO,
+                  cssClass: 'popup-no',
+                  role: 'cancel',
+                  handler: () => {
+                    setshowAlertCancel(false);
+                  },
+                },
+              ]}
+            />
           </button>
           <button
             className="customization-save"
@@ -510,7 +582,6 @@ function Customization() {
           </button>
         </div>
       </div>
-      {/* </IonContent> */}
     </IonPage>
   );
 }
