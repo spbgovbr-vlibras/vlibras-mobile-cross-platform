@@ -170,7 +170,9 @@ function Dictionary() {
             <IonList lines="none" class="dictionary-words-list">
               {filter === 'alphabetical'
                 ? dictionary.map(item => renderWord(item))
-                : recentTranslation.map(item => renderRecents(item))}
+                : recentTranslation
+                    .filter(item => item.includes(searchText.toUpperCase()))
+                    .map(item => renderRecents(item))}
             </IonList>
           </div>
         </div>
