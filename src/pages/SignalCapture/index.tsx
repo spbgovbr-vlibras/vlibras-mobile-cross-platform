@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { CameraResultType, Capacitor } from '@capacitor/core';
 import { File, DirectoryEntry } from '@ionic-native/file';
 import {
   VideoCapturePlus,

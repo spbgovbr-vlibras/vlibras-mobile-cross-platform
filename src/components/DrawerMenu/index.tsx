@@ -23,7 +23,7 @@ import {
   IconInfo,
   IconTutorial,
   IconDomain,
-  IconCustomization,
+  IconCustomization, 
   Vlibraslogo,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
