@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { isPlatform } from '@ionic/core';
 import { IonPopover } from '@ionic/react';
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
@@ -14,13 +13,14 @@ import {
   IconSubtitle,
   IconRunning,
   IconPause,
-  IconHandsTranslate,
   IconShare,
   IconThumbs,
   IconClose,
   IconIcaro,
   logoRefresh,
   IconHozana,
+  logoSubtitleOn,
+  logoSubtitleOff,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import paths from 'constants/paths';
@@ -28,8 +28,6 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import { Types } from 'store/ducks/customization';
-import { Creators } from 'store/ducks/regionalism';
 
 import './styles.css';
 
@@ -45,8 +43,6 @@ const buttonColors = {
   VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
-// Convert 78px to vh then 100vh-7.938257993384785vh (78px transformed) [MA]
-const HEIGHT_PLAYER = '79.1234840132vh';
 const X1 = 1;
 const X2 = 2;
 const X3 = 3;
@@ -68,7 +64,6 @@ function Player() {
     event: undefined,
   });
   const history = useHistory();
-  const location = useLocation();
 
   const { generateVideo, translateText } = useTranslation();
 
@@ -233,14 +228,11 @@ function Player() {
             type="button"
             onClick={handleSubtitle}
           >
-            <IconSubtitle
-              color={
-                isShowSubtitle
-                  ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-              size={32}
-            />
+            {isShowSubtitle ? (
+              <img src={logoSubtitleOn} alt="refresh" />
+            ) : (
+              <img src={logoSubtitleOff} alt="refresh" />
+            )}
           </button>
         </>
       );
@@ -270,14 +262,11 @@ function Player() {
             type="button"
             onClick={handleSubtitle}
           >
-            <IconSubtitle
-              color={
-                isShowSubtitle
-                  ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-              size={32}
-            />
+            {isShowSubtitle ? (
+              <img src={logoSubtitleOn} alt="refresh" />
+            ) : (
+              <img src={logoSubtitleOff} alt="refresh" />
+            )}
           </button>
         </>
       );

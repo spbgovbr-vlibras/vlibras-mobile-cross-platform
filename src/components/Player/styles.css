@@ -78,6 +78,11 @@
   align-items: center;
 }
 
+.player-action-button-transparent img {
+  width: 32px;
+  height: 32px;
+}
+
 .player-container-buttons {
   position: absolute;
   padding: 16px;
