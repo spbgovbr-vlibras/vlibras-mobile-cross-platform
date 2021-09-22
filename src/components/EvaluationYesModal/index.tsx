@@ -19,6 +19,10 @@ const EvaluationYesModal = ({
   const handleCloseModal = () => {
     setShowYes(false);
   };
+
+  if (showYes) {
+    setTimeout(handleCloseModal, 2000);
+  }
   return (
     <IonModal
       isOpen={showYes}

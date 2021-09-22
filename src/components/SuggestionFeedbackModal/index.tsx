@@ -23,6 +23,10 @@ const SuggestionFeedbackModal = ({
   const handleOpenWikilibrasSite = () => {
     window.open('https://wiki.vlibras.gov.br', '_system', 'location=yes');
   };
+
+  if (showSuggestionFeedbackModal) {
+    setTimeout(handleCloseModal, 2000);
+  }
   return (
     <IonModal
       isOpen={showSuggestionFeedbackModal}
