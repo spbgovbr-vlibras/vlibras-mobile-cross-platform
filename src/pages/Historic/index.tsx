@@ -63,56 +63,25 @@ function Historic() {
     loadHistory();
   }, [location]);
 
-  const renderItems = () => {
-    // if you are mocking the app to use it on ur browser,
-    // you must use the object translationsHistoric instead historyStorage
-
-    // const datesMapped = Object.keys(historyStorage).reverse();
-    console.log(translationsHistoric);
-    const datesMapped = Object.keys(translationsHistoric).reverse();
-
-    return datesMapped.map(column => {
-      if (translationsHistoric[column].video) {
-        return translationsHistoric[column].video.map((item: any, key: any) => {
-          // return historyStorage[column].map((item: any, key: any) => {
-          return (
-            <div>
-              {key === 0 && <p className="date-desc"> {dateFormat(column)} </p>}
-              <button
-                className="container-outputs"
-                onClick={() => openModalOutput(item)}
-                type="button"
-              >
-                {item.map((value: string, _: string) => (
-                  <span key={uuidv4()}>{value}</span>
-                ))}
-              </button>
-            </div>
-          );
-        });
-      }
-      return null;
-    });
-  };
-
   const formatArrayDate = (arrayHistoric: any) => {
     const dates = Object.keys(arrayHistoric);
     const formattedObjDate: any = {};
 
     dates.forEach(element => {
-      if (formattedObjDate[dateFormat(element)]) {
-        if (formattedObjDate[dateFormat(element)].video) {
-          formattedObjDate[dateFormat(element)].video.push(
-            arrayHistoric[element].video,
+      const formattedDate = dateFormat(element);
+      if (formattedObjDate[formattedDate]) {
+        if (formattedObjDate[formattedDate].video) {
+          formattedObjDate[formattedDate].video.push(
+            ...arrayHistoric[element].video,
           );
         }
-        if (formattedObjDate[dateFormat(element)].text) {
-          formattedObjDate[dateFormat(element)].text.push(
-            arrayHistoric[element].text,
+        if (formattedObjDate[formattedDate].text) {
+          formattedObjDate[formattedDate].text.push(
+            ...arrayHistoric[element].text,
           );
         }
       } else {
-        formattedObjDate[dateFormat(element)] = arrayHistoric[element];
+        formattedObjDate[formattedDate] = arrayHistoric[element];
       }
     });
 
@@ -238,7 +207,6 @@ function Historic() {
               </IonChip>
             )}
           </div>
-
           <div className="container-render-historic">{renderAllItems()}</div>
           <VideoOutputModal
             outputs={results}
