@@ -89,17 +89,22 @@ function Regionalism() {
           </IonList>
         </div>
       </IonContent>
-      <IonFooter>
+      <IonFooter style={{ background: 'white' }}>
         <div className="regionalism-icon-save">
-          <IonButton
-            class="regionalism-cancel"
+          <button
+            className="regionalism-cancel"
             onClick={() => history.goBack()}
+            type="button"
           >
             {Strings.BUTTON_CANCEL}
-          </IonButton>
-          <IonButton class="regionalism-save" onClick={() => SaveRegionalism()}>
+          </button>
+          <button
+            type="button"
+            className="regionalism-save"
+            onClick={() => SaveRegionalism()}
+          >
             {Strings.BUTTON_SAVE}
-          </IonButton>
+          </button>
         </div>
       </IonFooter>
     </IonPage>
