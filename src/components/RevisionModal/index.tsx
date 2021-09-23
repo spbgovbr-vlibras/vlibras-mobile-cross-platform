@@ -1,34 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  IonModal,
-  IonButton,
-  IonText,
-  IonChip,
-  IonSearchbar,
-  IonTextarea,
-  IonItem,
-  IonList,
-  IonSlide,
-  IonSlides,
-} from '@ionic/react';
-import { current } from 'immer';
-import { State } from 'ionicons/dist/types/stencil-public-runtime';
-import { text } from 'ionicons/icons';
+import { IonModal, IonText, IonChip, IonTextarea } from '@ionic/react';
 import { debounce } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { IconClose, IconCloseCircle, IconThumbDown } from 'assets';
+import { IconCloseCircle } from 'assets';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
 import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { PlayerKeys } from 'constants/player';
+import { useTranslation } from 'hooks/Translation';
 import { Words } from 'models/dictionary';
-import handleGetText from 'pages/Translator';
 import { sendReview } from 'services/suggestionGloss';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators as CreatorsDictionary } from 'store/ducks/dictionary';
-import { Creators } from 'store/ducks/translator';
 
 import { Strings } from './strings';
 
@@ -44,7 +29,6 @@ interface RevisionModalProps {
 
 const playerService = PlayerService.getService();
 const TIME_DEBOUNCE_MS = 1000;
-const TIME_DEBOUNCE_SUGGESTION = 0;
 
 const RevisionModal = ({
   show,
@@ -53,17 +37,15 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
+  const { translateText } = useTranslation();
   // Aux var for the TextArea value
-  const [auxValueText, setAuxValueText] = useState('');
+  const [auxValueText, setAuxValueText] = useState(translateText);
   const [isPreview, setIsPreview] = useState(false);
   const dispatch = useDispatch();
+
   const currentTranslatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText,
   );
-
-  const handleOpenModal = () => {
-    setShow(true);
-  };
 
   const handleCloseModal = () => {
     setShow(false);
@@ -106,18 +88,18 @@ const RevisionModal = ({
 
   useEffect(() => {
     // Setting TextArea value with the current translator
-    setAuxValueText(currentTranslatorText);
+    setAuxValueText(translateText);
     if (show) {
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: 1,
           limit: 10,
-          name: `${currentTranslatorText}%`,
+          name: `${translateText}%`,
         }),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show, dispatch]);
+  }, [show, dispatch, translateText]);
 
   useEffect(() => {
     if (!isPlaying && isPreview) {

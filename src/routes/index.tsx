@@ -1,10 +1,9 @@
 import React from 'react';
 
+import { App } from '@capacitor/app';
 import { IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { BrowserRouter, Route } from 'react-router-dom';
-import { App } from '@capacitor/app';
-import { useHistory } from 'react-router-dom';
 
 import { DrawerMenu } from 'components';
 
@@ -28,7 +27,7 @@ const CONTENT_ID = '@vlibras/mobile';
 function Routes() {
   document.addEventListener('ionBackButton', (ev: any) => {
     ev.detail.register(-1, () => {
-      if (window.location.pathname == '/') {
+      if (window.location.pathname === '/') {
         App.exitApp();
       }
     });

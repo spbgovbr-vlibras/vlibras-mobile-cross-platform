@@ -1,20 +1,18 @@
 {
-  "appId": "lavid.ufpb.vlibras.mobile",
-  "appName": "VLibrasMobile",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "build",
-  "linuxAndroidStudioPath": "/opt/android-studio-4.2/android-studio/bin/studio.sh",
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 0
-    }
-  },
-  "cordova": {},
-  "server": {
-    "androidScheme": "http",
-    "allowNavigation": [
-      "lavid.nsa.root.sx"
-    ]
-  }
+	"appId": "lavid.ufpb.vlibras.mobile",
+	"appName": "VLibrasMobile",
+	"webDir": "build",
+	"bundledWebRuntime": false,
+	"cordova": {},
+	"server": {
+		"androidScheme": "http",
+		"allowNavigation": [
+			"lavid.nsa.root.sx"
+		]
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0
+		}
+	}
 }

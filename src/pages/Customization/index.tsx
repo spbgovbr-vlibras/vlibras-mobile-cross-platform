@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import {
-  IonCol,
-  IonImg,
-  IonButton,
-  IonRow,
   IonList,
-  IonRadioGroup,
-  IonListHeader,
-  IonLabel,
-  IonItem,
-  IonRadio,
-  IonContent,
   IonAlert,
   IonPage,
   IonHeader,
@@ -19,7 +9,7 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
 
@@ -31,8 +21,6 @@ import {
   IconHair,
   IconArrowLeft,
 } from 'assets';
-import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
-import { VideoOutputModal } from 'components';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import CustomizationBody from 'data/CustomizationArrayBody';
@@ -40,24 +28,19 @@ import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
-import { MenuLayout } from 'layouts';
-import PlayerService from 'services/unity';
-import { Creators, CustomizationState } from 'store/ducks/customization';
-import { reloadHistory } from 'utils/setHistory';
+import { Creators } from 'store/ducks/customization';
 
 import { Strings } from './string';
 
 import './styles.css';
 
 const unityContent = new UnityContent(
-  'Build-Final/Build/NOVABUILD.json',
-  'Build-Final/Build/UnityLoader.js',
+  'BUILD/Build/BUILD.json',
+  'BUILD/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
 );
-
-const playerService = PlayerService.getService();
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
@@ -335,35 +318,6 @@ function Customization() {
     return null;
   };
 
-  /*   const showPopUpReset = () => {
-    <IonAlert
-      isOpen={showAlert}
-      cssClass="popup-box-signal-cap"
-      header={Strings.TITLE_POPUP_RESET}
-      message={Strings.MESSAGE_POPUPCANCEL}
-      buttons={[
-        {
-          text: Strings.BUTTON_NAME_YES,
-          cssClass: 'popup-yes',
-          handler: () => {
-            console.log('Confirm Yes');
-            setshowAlert(false);
-            resetColor();
-          },
-        },
-        {
-          text: Strings.BUTTON_NAME_NO,
-          cssClass: 'popup-no',
-          role: 'cancel',
-          handler: () => {
-            console.log('Confirm No');
-            setshowAlert(false);
-          },
-        },
-      ]}
-    />;
-  };
- */
   // criação da tela  ---------------------------------------------------------------
   // --------------------------------------------------------------------------------
   // --------------------------------------------------------------------------------

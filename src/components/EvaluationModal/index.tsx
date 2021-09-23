@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { IconCloseCircle, IconThumbDown, IconThumbUp } from 'assets';
 import EvaluationNoModal from 'components/EvaluationNoModal';
 import EvaluationYesModal from 'components/EvaluationYesModal';
+import { useTranslation } from 'hooks/Translation';
 import { sendReview } from 'services/suggestionGloss';
 import { RootState } from 'store';
 
@@ -39,9 +40,7 @@ const EvaluationModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: EvaluationModalProps) => {
-  const currentTranslatorText = useSelector(
-    ({ translator }: RootState) => translator.translatorText,
-  );
+  const { translateText } = useTranslation();
 
   const closeModal = () => {
     setShow(false);
@@ -52,11 +51,11 @@ const EvaluationModal = ({
     setShowYes(true);
 
     sendReview({
-      text: currentTranslatorText,
-      review: currentTranslatorText,
+      text: translateText,
+      review: translateText,
       rating: 'good',
     });
-  }, [currentTranslatorText, setShow, setShowYes]);
+  }, [translateText, setShow, setShowYes]);
 
   return (
     <div>
