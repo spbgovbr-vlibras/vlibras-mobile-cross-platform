@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { IonPopover } from '@ionic/react';
-import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router';
+import { IonPopover, isPlatform } from '@ionic/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import Unity from 'react-unity-webgl';
 
 import {
@@ -10,7 +10,6 @@ import {
   IconHistory,
   IconEdit,
   IconPauseOutlined,
-  IconSubtitle,
   IconRunning,
   IconPause,
   IconShare,
@@ -28,6 +27,7 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
+import { Creators } from 'store/ducks/customization';
 
 import './styles.css';
 
@@ -48,7 +48,6 @@ const X2 = 2;
 const X3 = 3;
 const UNDEFINED_GLOSS = -1;
 const MAX_PROGRESS = 100;
-const TIMEOUT = 10000;
 
 function toBoolean(flag: BooleanParamsPlayer): boolean {
   return flag === 'True';
@@ -88,7 +87,7 @@ function Player() {
 
   // Dynamic states [MA]
   const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
-  const [visiblePlayer, setVisiblePlayer] = useState(true);
+  const [visiblePlayer, setVisiblePlayer] = useState(false);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -100,13 +99,20 @@ function Player() {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
+  const dispatch = useDispatch();
+
   let glossLen = UNDEFINED_GLOSS;
   let cache = UNDEFINED_GLOSS;
 
   // To avoid the unity splash screen [MA]
   useEffect(() => {
-    setTimeout(() => setVisiblePlayer(true), TIMEOUT);
-  }, []);
+    playerService.getUnity().on('progress', (progression: number) => {
+      if (progression === 1) {
+        dispatch(Creators.loadCustomization.request({}));
+        setVisiblePlayer(true);
+      }
+    });
+  }, [dispatch]);
 
   function handlePlay(gloss: string) {
     if (progressContainerRef.current) {
@@ -393,12 +399,12 @@ function Player() {
       <div
         style={{
           width: '100vw',
-          visibility: visiblePlayer ? 'visible' : 'hidden',
           zIndex: 0,
           flexShrink: 0,
           marginBottom: 70,
           flex: 1,
           display: 'flex',
+          background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
         }}
       >
         <Unity

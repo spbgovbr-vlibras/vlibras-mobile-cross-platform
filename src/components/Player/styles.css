@@ -2,12 +2,14 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  background-color: #E5E5E5;
 }
 
 .player-content {
   display: flex;
   flex: 1;
   flex-shrink: inherit;
+
 }
 
 

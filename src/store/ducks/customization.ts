@@ -1,9 +1,8 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable no-param-reassign */
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
-import { createAction, ActionType } from 'typesafe-actions';
-
-import regionalismData from 'data/regionalism';
+import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
 export const Types = {
   SET_CURRENT_CUSTOMIZATION_BODY:
@@ -15,6 +14,12 @@ export const Types = {
     '@customization/SET_CURRENT_CUSTOMIZATION_PANTS',
   SET_CURRENT_CUSTOMIZATION_SHIRT:
     '@customization/SET_CURRENT_CUSTOMIZATION_SHIRT',
+  LOAD_CUSTOMIZATION_REQUEST: '@customization/LOAD_CUSTOMIZATION_REQUEST',
+  LOAD_CUSTOMIZATION_SUCCESS: '@customization/LOAD_CUSTOMIZATION_SUCCESS',
+  LOAD_CUSTOMIZATION_FAILURE: '@customization/LOAD_CUSTOMIZATION_FAILURE',
+  STORE_CUSTOMIZATION_REQUEST: '@customization/STORE_CUSTOMIZATION_REQUEST',
+  STORE_CUSTOMIZATION_SUCCESS: '@customization/STORE_CUSTOMIZATION_SUCCESS',
+  STORE_CUSTOMIZATION_FAILURE: '@customization/STORE_CUSTOMIZATION_FAILURE',
 };
 
 export interface CustomizationState {
@@ -30,6 +35,16 @@ const INITIAL_STATE: CustomizationState = {
   currenthair: '#000000',
   currentpants: '#121420',
   currentshirt: '#202763',
+};
+
+export type CustomizationColors = {
+  corpo: string;
+  olhos: string;
+  cabelo: string;
+  camisa: string;
+  calca: string;
+  iris: string;
+  pos: 'center';
 };
 
 export const Creators = {
@@ -48,6 +63,16 @@ export const Creators = {
   setCurrentCustomizationShirt: createAction(
     Types.SET_CURRENT_CUSTOMIZATION_SHIRT,
   )<string>(),
+  storeCustomization: createAsyncAction(
+    Types.STORE_CUSTOMIZATION_REQUEST,
+    Types.STORE_CUSTOMIZATION_SUCCESS,
+    Types.STORE_CUSTOMIZATION_FAILURE,
+  )<CustomizationColors, unknown, unknown>(),
+  loadCustomization: createAsyncAction(
+    Types.LOAD_CUSTOMIZATION_REQUEST,
+    Types.LOAD_CUSTOMIZATION_SUCCESS,
+    Types.LOAD_CUSTOMIZATION_FAILURE,
+  )<unknown, CustomizationColors, unknown>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -74,7 +99,14 @@ const reducer: Reducer<CustomizationState, ActionTypes> = (
       case Types.SET_CURRENT_CUSTOMIZATION_SHIRT:
         draft.currentshirt = payload;
         break;
-
+      case Types.LOAD_CUSTOMIZATION_SUCCESS:
+        const colors = payload as CustomizationColors;
+        draft.currentbody = colors.corpo;
+        draft.currenteye = colors.iris;
+        draft.currenthair = colors.cabelo;
+        draft.currentpants = colors.calca;
+        draft.currentshirt = colors.camisa;
+        break;
       default:
         break;
     }

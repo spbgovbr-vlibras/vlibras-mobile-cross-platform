@@ -8,8 +8,9 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
+  isPlatform,
 } from '@ionic/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
 
@@ -28,6 +29,7 @@ import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 
 import { Strings } from './string';
@@ -67,12 +69,34 @@ const IcaroDefault = {
 };
 
 function Customization() {
+  const currentBody = useSelector(
+    ({ customization }: RootState) => customization.currentbody,
+  );
+  const currentEye = useSelector(
+    ({ customization }: RootState) => customization.currenteye,
+  );
+
+  const currentHair = useSelector(
+    ({ customization }: RootState) => customization.currenthair,
+  );
+
+  const currentShirt = useSelector(
+    ({ customization }: RootState) => customization.currentshirt,
+  );
+
+  const currentPants = useSelector(
+    ({ customization }: RootState) => customization.currentpants,
+  );
+
+  const [visiblePlayer, setVisiblePlayer] = useState(false);
+
   // States show
-  const [colorbody, setcolorbody] = useState(IcaroDefault.icaroBody);
-  const [coloreye, setcoloreye] = useState(IcaroDefault.icaroEye);
-  const [colorhair, setcolorhair] = useState(IcaroDefault.icaroHair);
-  const [colorshirt, setcolorshirt] = useState(IcaroDefault.icaroShirt);
-  const [colorpants, setcolorpants] = useState(IcaroDefault.icaroPants);
+  const [colorbody, setcolorbody] = useState(currentBody);
+  const [coloreye, setcoloreye] = useState(currentEye);
+  const [colorhair, setcolorhair] = useState(currentHair);
+  const [colorshirt, setcolorshirt] = useState(currentShirt);
+  const [colorpants, setcolorpants] = useState(currentPants);
+
   // const [imageUrl, setImageUrl] = useState(getJsonColor.preview.logo);
 
   const [showbody, setshowbody] = useState(true);
@@ -85,6 +109,15 @@ function Customization() {
 
   const dispatch = useDispatch();
   const history = useHistory();
+
+  useEffect(() => {
+    unityContent.on('progress', (progression: any) => {
+      if (progression === 1) {
+        dispatch(Creators.loadCustomization.request({}));
+        setVisiblePlayer(true);
+      }
+    });
+  }, [dispatch]);
 
   //  funções para alterar States
 
@@ -153,10 +186,30 @@ function Customization() {
     dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
     dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
 
+    dispatch(
+      Creators.storeCustomization.request({
+        corpo: colorbody,
+        olhos: '#fffafa',
+        cabelo: colorhair,
+        camisa: colorshirt,
+        calca: colorpants,
+        iris: coloreye,
+        pos: 'center',
+      }),
+    );
+
     history.push(paths.HOME);
   }
 
   // CUSTOMIZER ICARO
+
+  useEffect(() => {
+    selectcolorbody(currentBody);
+    selectcolorhair(currentHair);
+    setcolorshirt(currentShirt);
+    selectcolorpants(currentPants);
+    selectcoloreye(currentEye);
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
@@ -191,6 +244,18 @@ function Customization() {
     dispatch(Creators.setCurrentCustomizationHair(IcaroDefault.icaroHair)); // redux create
     dispatch(Creators.setCurrentCustomizationPants(IcaroDefault.icaroPants)); // redux create
     dispatch(Creators.setCurrentCustomizationShirt(IcaroDefault.icaroShirt)); // redux create
+
+    dispatch(
+      Creators.storeCustomization.request({
+        corpo: IcaroDefault.icaroBody,
+        olhos: '#fffafa',
+        cabelo: IcaroDefault.icaroHair,
+        camisa: IcaroDefault.icaroShirt,
+        calca: IcaroDefault.icaroPants,
+        iris: IcaroDefault.icaroEye,
+        pos: 'center',
+      }),
+    );
   };
 
   const showColorsBody = (item: CustomizationBody) => {
@@ -339,15 +404,14 @@ function Customization() {
       </IonHeader>
       <div className="player-container">
         <div
-          className="player-container"
           style={{
             width: '100vw',
-            // visibility: visiblePlayer ? 'visible' : 'hidden',
             zIndex: 0,
             flexShrink: 0,
             flex: 1,
             display: 'flex',
-            // backgroundColor: '#000',
+            background:
+              isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
           }}
         >
           <Unity unityContent={unityContent} className="player-content" />
