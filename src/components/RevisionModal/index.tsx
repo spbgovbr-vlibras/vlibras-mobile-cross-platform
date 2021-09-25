@@ -37,7 +37,7 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
-  const { translateText } = useTranslation();
+  const { translateText, setTranslateText } = useTranslation();
   // Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState(translateText);
   const [isPreview, setIsPreview] = useState(false);
@@ -79,7 +79,10 @@ const RevisionModal = ({
     <div className="revision-modal-word-item">
       <IonChip
         class="suggestion-chips"
-        onClick={() => setAuxValueText(item.name)}
+        onClick={() => {
+          setTranslateText(item.name, false);
+          setAuxValueText(item.name);
+        }}
       >
         {item.name}
       </IonChip>

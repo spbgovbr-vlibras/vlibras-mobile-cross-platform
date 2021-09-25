@@ -204,12 +204,37 @@ function Customization() {
   // CUSTOMIZER ICARO
 
   useEffect(() => {
-    selectcolorbody(currentBody);
-    selectcolorhair(currentHair);
-    setcolorshirt(currentShirt);
-    selectcolorpants(currentPants);
-    selectcoloreye(currentEye);
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+    if (visiblePlayer) {
+      selectcolorbody(currentBody);
+      selectcolorhair(currentHair);
+      setcolorshirt(currentShirt);
+      selectcolorpants(currentPants);
+      selectcoloreye(currentEye);
+
+      const preProcessingPreview = JSON.stringify({
+        corpo: currentBody,
+        olhos: '#fffafa',
+        cabelo: currentHair,
+        camisa: currentShirt,
+        calca: currentPants,
+        iris: currentEye,
+        pos: 'center',
+      });
+
+      unityContent.send(
+        PlayerKeys.AVATAR,
+        PlayerKeys.SETEDITOR,
+        preProcessingPreview,
+      );
+    }
+  }, [
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+    visiblePlayer,
+  ]);
 
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
