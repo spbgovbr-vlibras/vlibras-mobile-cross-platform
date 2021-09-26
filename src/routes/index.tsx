@@ -20,6 +20,7 @@ import {
   SignalCapture,
   RecorderArea,
   Customization,
+  Tutorial,
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
@@ -50,6 +51,7 @@ function Routes() {
           <Route component={Customization} path={paths.CUSTOMIZATION} />
           <Route component={SignalCapture} path={paths.SIGNALCAPTURE} />
           <Route component={Dictionary} path={paths.DICTIONARY_PLAYER} />
+          <Route component={Tutorial} path={paths.TUTORIAL} />
         </IonRouterOutlet>
       </IonReactRouter>
     </BrowserRouter>

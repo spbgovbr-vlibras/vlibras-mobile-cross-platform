@@ -23,7 +23,8 @@ import {
   logoUfpb,
   logoYoutube,
   IconArrowLeft,
-} from '../../assets';
+} from 'assets';
+
 import { Strings } from './strings';
 
 import './styles.css';

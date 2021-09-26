@@ -88,11 +88,6 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const history = useHistory();
 
   function navLink(path: string) {
-    // TODO: Remover essa condição quando a tela for construída [MA]
-    if (path === paths.TUTORIAL) {
-      return;
-    }
-
     history.push(path);
     menuController.close(Strings.MENU_ID);
   }
