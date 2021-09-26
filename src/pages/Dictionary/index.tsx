@@ -62,10 +62,10 @@ function Dictionary() {
 
   const history = useHistory();
 
-  const { setTranslateText, recentTranslation } = useTranslation();
+  const { setTextGloss, recentTranslation } = useTranslation();
 
   function translate(text: string) {
-    setTranslateText(text, true);
+    setTextGloss(text, true);
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }

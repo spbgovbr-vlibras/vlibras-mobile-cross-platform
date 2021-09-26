@@ -64,7 +64,7 @@ function Player() {
   });
   const history = useHistory();
 
-  const { generateVideo, translateText } = useTranslation();
+  const { generateVideo, textGloss } = useTranslation();
 
   const currentBody = useSelector(
     ({ customization }: RootState) => customization.currentbody,
@@ -259,7 +259,7 @@ function Player() {
           <button
             className="player-action-button player-action-button-insert"
             type="button"
-            onClick={() => handlePlay(translateText)}
+            onClick={() => handlePlay(textGloss)}
           >
             <img src={logoRefresh} alt="refresh" />
           </button>

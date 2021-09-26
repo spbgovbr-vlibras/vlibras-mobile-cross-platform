@@ -11,14 +11,14 @@ const suggestionGloss = axios.create({
 
 export interface SendReviewBody {
   text: string;
+  translation: string;
   review: string;
   rating: 'good' | 'bad';
 }
 
 export async function sendReview(data: SendReviewBody): Promise<any> {
   try {
-    const gloss = await translate({ text: data.review });
-    await suggestionGloss.post('/', { ...data, translation: gloss });
+    await suggestionGloss.post('/', data);
   } catch (error) {
     console.log(error);
   }

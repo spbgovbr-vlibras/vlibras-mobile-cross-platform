@@ -27,9 +27,11 @@ interface PollParams {
 }
 
 interface TranslationContextData {
-  translateText: string;
+  textPtBr: string;
+  setTextPtBr: (text: string, fromDictionary: boolean) => Promise<string>;
+  textGloss: string;
+  setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
-  setTranslateText: (text: string, fromDictionary: boolean) => void;
   generateVideo: () => void;
 }
 
@@ -68,7 +70,8 @@ const PROPERTY_KEY = 'recents-dictionary';
 const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [translateText, setTranslateText] = useState('');
+  const [textPtBr, setTextPtBr] = useState('');
+  const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
 
   useEffect(() => {
@@ -89,7 +92,7 @@ const TranslationProvider: React.FC = ({ children }) => {
   async function generateVideo() {
     setLoading(true);
     try {
-      const gloss = await translate({ text: translateText });
+      const gloss = await translate({ text: textPtBr });
       const response = await generateVideoTranslate({ gloss });
       const uuid = response.requestUID as string;
 
@@ -111,7 +114,7 @@ const TranslationProvider: React.FC = ({ children }) => {
     }
   }
 
-  const handleTranslateText = useCallback(
+  const handleTextPtBr = useCallback(
     async (text: string, fromDictionary: boolean) => {
       if (fromDictionary) {
         const recents =
@@ -124,18 +127,47 @@ const TranslationProvider: React.FC = ({ children }) => {
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
       }
-
-      setTranslateText(text);
+      setTextPtBr(text);
+      try {
+        const gloss = await translate({ text });
+        setTextGloss(gloss);
+        return gloss;
+      } catch {
+        // don't need
+      }
+      return text;
     },
-    [setTranslateText, recentTranslation],
+    [recentTranslation],
+  );
+
+  const handleTextGloss = useCallback(
+    async (gloss: string, fromDictionary: boolean) => {
+      if (fromDictionary) {
+        const recents =
+          recentTranslation.length <= MAX_RECENTS_WORD
+            ? [gloss, ...recentTranslation.filter(item => item !== gloss)]
+            : [
+                gloss,
+                ...recentTranslation
+                  .slice(0, -1)
+                  .filter(item => item !== gloss),
+              ];
+        setRecentTranslation(recents);
+        NativeStorage.setItem(PROPERTY_KEY, recents);
+      }
+      setTextGloss(gloss);
+    },
+    [recentTranslation],
   );
 
   return (
     <TranslationContext.Provider
       value={{
-        translateText,
+        textPtBr,
+        textGloss,
+        setTextPtBr: handleTextPtBr,
+        setTextGloss: handleTextGloss,
         recentTranslation,
-        setTranslateText: handleTranslateText,
         generateVideo,
       }}
     >

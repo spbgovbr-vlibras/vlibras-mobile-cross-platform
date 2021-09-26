@@ -37,15 +37,11 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
-  const { translateText, setTranslateText } = useTranslation();
+  const { textPtBr, textGloss, setTextGloss } = useTranslation();
   // Aux var for the TextArea value
-  const [auxValueText, setAuxValueText] = useState(translateText);
+  const [auxValueText, setAuxValueText] = useState(textGloss);
   const [isPreview, setIsPreview] = useState(false);
   const dispatch = useDispatch();
-
-  const currentTranslatorText = useSelector(
-    ({ translator }: RootState) => translator.translatorText,
-  );
 
   const handleCloseModal = () => {
     setShow(false);
@@ -54,6 +50,7 @@ const RevisionModal = ({
 
   const handlePlaySuggestionGlosa = () => {
     setShow(false);
+    // setTextGloss(auxValueText, false);
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
@@ -66,7 +63,8 @@ const RevisionModal = ({
     setShow(false);
     setSuggestionFeedbackModal(true);
     sendReview({
-      text: currentTranslatorText,
+      text: textPtBr,
+      translation: textGloss,
       review: auxValueText,
       rating: 'bad',
     });
@@ -75,14 +73,25 @@ const RevisionModal = ({
   const dictionary = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
   );
+
+  const handleWordSuggestion = useCallback(
+    (word: string) => {
+      const text = auxValueText.split(' ');
+      text.pop();
+      const gloss = text.join(' ').concat(` ${word}`);
+
+      // setTextGloss(gloss, false);
+      setAuxValueText(gloss);
+    },
+    [auxValueText],
+  );
+
   const renderWord = (item: Words) => (
     <div className="revision-modal-word-item">
       <IonChip
         class="suggestion-chips"
-        onClick={() => {
-          setTranslateText(item.name, false);
-          setAuxValueText(item.name);
-        }}
+        onClick={() => handleWordSuggestion(item.name)}
+        key={item.name}
       >
         {item.name}
       </IonChip>
@@ -90,19 +99,20 @@ const RevisionModal = ({
   );
 
   useEffect(() => {
-    // Setting TextArea value with the current translator
-    setAuxValueText(translateText);
-    if (show) {
+    if (show && !auxValueText) {
+      // Setting TextArea value with the current translator
+      setAuxValueText(textGloss);
+      const searchText = textGloss.split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: 1,
           limit: 10,
-          name: `${translateText}%`,
+          name: `${searchText}%`,
         }),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [show, dispatch, translateText]);
+  }, [show, dispatch, auxValueText]);
 
   useEffect(() => {
     if (!isPlaying && isPreview) {
@@ -113,11 +123,12 @@ const RevisionModal = ({
   const onSearch = useCallback(
     event => {
       setAuxValueText(event.target.value || '');
+      const searchText = (event.target.value || '').split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: FIRST_PAGE_INDEX,
           limit: 10,
-          name: `${event.target.value}%`,
+          name: `${searchText}%`,
         }),
       );
     },

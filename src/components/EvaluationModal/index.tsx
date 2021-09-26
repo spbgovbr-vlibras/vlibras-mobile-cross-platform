@@ -40,7 +40,7 @@ const EvaluationModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: EvaluationModalProps) => {
-  const { translateText } = useTranslation();
+  const { textPtBr, textGloss } = useTranslation();
 
   const closeModal = () => {
     setShow(false);
@@ -51,11 +51,12 @@ const EvaluationModal = ({
     setShowYes(true);
 
     sendReview({
-      text: translateText,
-      review: translateText,
+      text: textPtBr,
+      translation: textGloss,
+      review: textGloss,
       rating: 'good',
     });
-  }, [translateText, setShow, setShowYes]);
+  }, [textPtBr, textGloss, setShow, setShowYes]);
 
   return (
     <div>

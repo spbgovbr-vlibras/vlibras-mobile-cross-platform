@@ -24,31 +24,19 @@ const Translator = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const { setTranslateText } = useTranslation();
+  const { setTextPtBr } = useTranslation();
 
-  function translate() {
+  async function translate() {
     const formatted = text.trim();
 
     const today = new Date().toLocaleDateString('pt-BR');
 
     reloadHistory(today, formatted, 'text');
 
-    // mock
-    // dispatch(
-    //   Creators.setLastTranslator({
-    //     data: text,
-    //     date: today,
-    //     key: 'text',
-    //   }),
-    // );
+    const gloss = await setTextPtBr(formatted, false);
 
-    setTranslateText(formatted, false);
     history.replace(paths.HOME);
-    playerService.send(
-      PlayerKeys.PLAYER_MANAGER,
-      PlayerKeys.PLAY_NOW,
-      formatted,
-    );
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
     dispatch(Creators.setTranslatorText(formatted));
   }
 
