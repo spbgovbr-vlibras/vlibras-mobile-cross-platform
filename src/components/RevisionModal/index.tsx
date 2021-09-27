@@ -46,6 +46,7 @@ const RevisionModal = ({
   const handleCloseModal = () => {
     setShow(false);
     setIsPreview(false);
+    setAuxValueText('');
   };
 
   const handlePlaySuggestionGlosa = () => {
@@ -68,6 +69,7 @@ const RevisionModal = ({
       review: auxValueText,
       rating: 'bad',
     });
+    setAuxValueText('');
   };
 
   const dictionary = useSelector(
