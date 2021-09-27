@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   IonList,
@@ -201,40 +201,38 @@ function Customization() {
     history.push(paths.HOME);
   }
 
+  const rollbackCustomization = useCallback(() => {
+    selectcolorbody(currentBody);
+    selectcolorhair(currentHair);
+    setcolorshirt(currentShirt);
+    selectcolorpants(currentPants);
+    selectcoloreye(currentEye);
+
+    const preProcessingPreview = JSON.stringify({
+      corpo: currentBody,
+      olhos: '#fffafa',
+      cabelo: currentHair,
+      camisa: currentShirt,
+      calca: currentPants,
+      iris: currentEye,
+      pos: 'center',
+    });
+    console.log(preProcessingPreview);
+
+    unityContent.send(
+      PlayerKeys.AVATAR,
+      PlayerKeys.SETEDITOR,
+      preProcessingPreview,
+    );
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+
   // CUSTOMIZER ICARO
 
   useEffect(() => {
     if (visiblePlayer) {
-      selectcolorbody(currentBody);
-      selectcolorhair(currentHair);
-      setcolorshirt(currentShirt);
-      selectcolorpants(currentPants);
-      selectcoloreye(currentEye);
-
-      const preProcessingPreview = JSON.stringify({
-        corpo: currentBody,
-        olhos: '#fffafa',
-        cabelo: currentHair,
-        camisa: currentShirt,
-        calca: currentPants,
-        iris: currentEye,
-        pos: 'center',
-      });
-
-      unityContent.send(
-        PlayerKeys.AVATAR,
-        PlayerKeys.SETEDITOR,
-        preProcessingPreview,
-      );
+      rollbackCustomization();
     }
-  }, [
-    currentBody,
-    currentHair,
-    currentShirt,
-    currentPants,
-    currentEye,
-    visiblePlayer,
-  ]);
+  }, [visiblePlayer, rollbackCustomization]);
 
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
@@ -602,6 +600,7 @@ function Customization() {
                   cssClass: 'popup-yes',
                   handler: () => {
                     setshowAlertCancel(false);
+                    rollbackCustomization();
                     history.push(paths.HOME);
                   },
                 },
