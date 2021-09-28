@@ -1,5 +1,5 @@
 {
-	"appId": "lavid.ufpb.vlibras.mobile",
+	"appId": "br.ufpb.lavid.vlibras",
 	"appName": "VLibrasMobile",
 	"webDir": "build",
 	"bundledWebRuntime": false,
