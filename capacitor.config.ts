@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'br.ufpb.lavid.vlibras',
-  appName: 'VLibrasMobile',
+  appId: 'com.lavid.vlibrasdroid',
+  appName: 'VLibras',
   webDir: 'build',
   bundledWebRuntime: false,
   cordova: {},

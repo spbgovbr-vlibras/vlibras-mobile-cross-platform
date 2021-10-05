@@ -1,6 +1,6 @@
 {
-	"appId": "lavid.ufpb.vlibras.mobile",
-	"appName": "VLibrasMobile",
+	"appId": "com.lavid.vlibrasdroid",
+	"appName": "VLibras",
 	"webDir": "build",
 	"bundledWebRuntime": false,
 	"cordova": {},
