@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
-import React, { useEffect, useState } from 'react';
+import React, { ButtonHTMLAttributes, useEffect, useState } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
@@ -87,20 +87,22 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const location = useLocation();
   const history = useHistory();
 
-  function navLink(path: string) {
-    history.push(path);
-    menuController.close(Strings.MENU_ID);
-  }
-
-  function personalizedNavLink(path: string) {
-    if (path === paths.HOME) {
-      if (valueSelected === 'PT-BR') {
-        history.push(paths.RECORDERAREA);
+  function navLink(e: any, path: string) {
+    if (e.target.className === 'drawer-menu-sub-item translator') {
+      setOpenSelect(!openSelect);
+    } else {
+      if (path === paths.HOME) {
+        if (valueSelected === 'PT-BR') {
+          history.push(paths.RECORDERAREA);
+        } else {
+          history.push(path);
+        }
+        menuController.close(Strings.MENU_ID);
+        setOpenSelect(false);
       } else {
         history.push(path);
+        menuController.close(Strings.MENU_ID);
       }
-      menuController.close();
-      setOpenSelect(false);
     }
   }
 
@@ -112,7 +114,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     } else {
       history.push(paths.HOME);
     }
-    menuController.close();
+    menuController.close(Strings.MENU_ID);
   }
 
   const domain = useSelector(({ video }: RootState) => video.domain);
@@ -129,23 +131,17 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      onClick={() => navLink(tab)}
+      onClick={e => navLink(e, tab)}
     >
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
-      <span
-        className="drawer-menu-item-label"
-        // onClick={() => personalizedNavLink(tab)}
-        // type="button"
-      >
-        {title}
-      </span>
+      <span className="drawer-menu-item-label">{title}</span>
 
       {title === Strings.TITLE_MENU_TRANSLATOR && env.videoTranslator && (
         <>
           <button
-            className="drawer-menu-sub-item"
+            className="drawer-menu-sub-item translator"
             onClick={() => setOpenSelect(true)}
             type="button"
           >
@@ -172,107 +168,107 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   );
 
   return (
-    <IonMenuToggle>
-      <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
-        <IonHeader className="drawer-menu-container" mode="ios">
-          <div className="drawer-menu-header-logo">
-            <IonImg className="drawer-menu-image-header" src={Vlibraslogo} />
-            <IonLabel className="drawer-menu-header-label">
-              {Strings.HEADER_VLIBRAS_LABEL}
-            </IonLabel>
-          </div>
-          {openSelect && (
-            <div className="dropdown-trans-picker">
-              <button
-                className={
-                  valueSelected === 'Libras' || valueSelected === ''
-                    ? 'option-trans selected'
-                    : 'option-trans'
-                }
-                onClick={() => setValue('Libras')}
-                type="button"
-              >
-                Libras
-              </button>
-              <button
-                className={
-                  valueSelected === 'PT-BR'
-                    ? 'option-trans selected'
-                    : 'option-trans'
-                }
-                onClick={() => setValue('PT-BR')}
-                type="button"
-              >
-                PT-BR
-              </button>
-            </div>
-          )}
-          <IonList lines="none">
-            <IonListHeader>
-              <IonLabel className="drawer-menu-title-header">
-                {Strings.HEADER_TITLE_SERVICES}
-              </IonLabel>
-            </IonListHeader>
-
-            {renderItemTab(
-              paths.HOME,
-              Strings.TITLE_MENU_TRANSLATOR,
-              IconTranslate,
-              true,
-            )}
-            {renderItemTab(
-              paths.DICTIONARY,
-              Strings.TITLE_MENU_DICTIONARY,
-              IconDictionary,
-              true,
-            )}
-          </IonList>
-        </IonHeader>
-        <div className="drawer-menu-divider" />
-        <div className="drawer-menu-content">
-          <IonList lines="none">
-            <IonListHeader>
-              <IonLabel className="drawer-menu-title-header">
-                {Strings.HEADER_TITLE_DEFINITIONS}
-              </IonLabel>
-            </IonListHeader>
-            {isVideoScreen
-              ? renderItemTab(
-                  paths.DOMAIN,
-                  Strings.TITLE_MENU_DOMAIN,
-                  IconDomain,
-                  true,
-                )
-              : renderItemTab(
-                  paths.REGIONALISM,
-                  Strings.TITLE_MENU_REGIONALISM,
-                  IconRegionalism,
-                  true,
-                )}
-            {renderItemTab(
-              paths.CUSTOMIZATION,
-              Strings.TITLE_MENU_CUSTOMIZATION,
-              IconCustomization,
-              true,
-            )}
-          </IonList>
-          <IonList lines="none">
-            {renderItemTab(
-              paths.TUTORIAL,
-              Strings.TITLE_MENU_TUTORIAL,
-              IconTutorial,
-              false,
-            )}
-            {renderItemTab(
-              paths.ABOUT,
-              Strings.TITLE_MENU_ABOUT,
-              IconInfo,
-              false,
-            )}
-          </IonList>
+    // <IonMenuToggle>
+    <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
+      <IonHeader className="drawer-menu-container" mode="ios">
+        <div className="drawer-menu-header-logo">
+          <IonImg className="drawer-menu-image-header" src={Vlibraslogo} />
+          <IonLabel className="drawer-menu-header-label">
+            {Strings.HEADER_VLIBRAS_LABEL}
+          </IonLabel>
         </div>
-      </IonMenu>
-    </IonMenuToggle>
+        {openSelect && (
+          <div className="dropdown-trans-picker">
+            <button
+              className={
+                valueSelected === 'Libras' || valueSelected === ''
+                  ? 'option-trans selected'
+                  : 'option-trans'
+              }
+              onClick={() => setValue('Libras')}
+              type="button"
+            >
+              Libras
+            </button>
+            <button
+              className={
+                valueSelected === 'PT-BR'
+                  ? 'option-trans selected'
+                  : 'option-trans'
+              }
+              onClick={() => setValue('PT-BR')}
+              type="button"
+            >
+              PT-BR
+            </button>
+          </div>
+        )}
+        <IonList lines="none">
+          <IonListHeader>
+            <IonLabel className="drawer-menu-title-header">
+              {Strings.HEADER_TITLE_SERVICES}
+            </IonLabel>
+          </IonListHeader>
+
+          {renderItemTab(
+            paths.HOME,
+            Strings.TITLE_MENU_TRANSLATOR,
+            IconTranslate,
+            true,
+          )}
+          {renderItemTab(
+            paths.DICTIONARY,
+            Strings.TITLE_MENU_DICTIONARY,
+            IconDictionary,
+            true,
+          )}
+        </IonList>
+      </IonHeader>
+      <div className="drawer-menu-divider" />
+      <div className="drawer-menu-content">
+        <IonList lines="none">
+          <IonListHeader>
+            <IonLabel className="drawer-menu-title-header">
+              {Strings.HEADER_TITLE_DEFINITIONS}
+            </IonLabel>
+          </IonListHeader>
+          {isVideoScreen
+            ? renderItemTab(
+                paths.DOMAIN,
+                Strings.TITLE_MENU_DOMAIN,
+                IconDomain,
+                true,
+              )
+            : renderItemTab(
+                paths.REGIONALISM,
+                Strings.TITLE_MENU_REGIONALISM,
+                IconRegionalism,
+                true,
+              )}
+          {renderItemTab(
+            paths.CUSTOMIZATION,
+            Strings.TITLE_MENU_CUSTOMIZATION,
+            IconCustomization,
+            true,
+          )}
+        </IonList>
+        <IonList lines="none">
+          {renderItemTab(
+            paths.TUTORIAL,
+            Strings.TITLE_MENU_TUTORIAL,
+            IconTutorial,
+            false,
+          )}
+          {renderItemTab(
+            paths.ABOUT,
+            Strings.TITLE_MENU_ABOUT,
+            IconInfo,
+            false,
+          )}
+        </IonList>
+      </div>
+    </IonMenu>
+    // </IonMenuToggle>
   );
 }
 

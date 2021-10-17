@@ -10,7 +10,7 @@
 }
 
 .videooutput-modal.player .modal-wrapper {
-  height: 420px;
+  height: 440px;
 }
 
 .videooutput-modal.buttons-off .modal-wrapper {
@@ -36,13 +36,18 @@
   line-height: 20px;
   font-family: Roboto;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.videooutput-modal .modal-title img {
-  width: 24px;
-  height: 24px;
-  float: right;
+.videooutput-modal .modal-title button {
+  width: 34px;
+  height: 34px;
   cursor: pointer;
+  position: absolute;
+  right: 5px;
+  top: 5px;
 }
 
 .videooutput-modal .container-outputs {
@@ -50,12 +55,15 @@
   box-sizing: border-box;
   border-radius: 4px;
   padding: 10px 8px;
-  overflow: hidden;
+  /* overflow: hidden;
   overflow-x: auto;
-  white-space: nowrap;
+  white-space: nowrap; */
+  margin: 10px 0px;
+  display: flex;
+  flex-flow: wrap;
 }
 
-.videooutput-modal .container-outputs span {
+.videooutput-modal .container-outputs button {
   font-family: Rawline;
   border: 0.5px solid #1447a6;
   background: #fff5cc;
@@ -64,7 +72,7 @@
   line-height: 17.5px;
   border-radius: 48px;
   padding: 6px 12px;
-  margin-left: 3px;
+  margin: 4px 5px;
   cursor: pointer;
   display: inline-block;
 }
@@ -72,6 +80,7 @@
 .videooutput-modal .list-buttons {
   display: flex;
   justify-content: center;
+  margin-top: 18px;
 }
 
 .videooutput-modal .list-buttons button img {
@@ -94,10 +103,7 @@
   margin-top: 20px;
   text-transform: none;
   letter-spacing: 0px;
-}
-
-.videooutput-modal .list-buttons ion-button img {
-  margin-right: 8px;
+  --box-shadow: 0px;
 }
 
 .videooutput-modal .list-buttons .answer-button {
@@ -116,18 +122,48 @@
   color: white;
 }
 
+.videooutput-modal .list-buttons .newsign-button svg,
+.videooutput-modal .list-buttons .answer-button svg {
+  margin-right: 8px;
+}
+
 .videooutput-modal .player {
-  height: 200px;
+  height: 229px;
+  /* border: 1px solid #1447a6 !important; */
+  width: 71%;
+  margin: auto;
 }
 
 .videooutput-modal .player-video-output {
-  border: 1px solid #1447a6 !important;
-  width: 70% !important;
-  margin: auto !important;
-  border-radius: 1px !important;
+  width: 100% !important;
+}
+
+.videooutput-modal .player-video-output canvas {
+  background: #e6e6e6;
+}
+
+.player-progress-container-video {
+  margin-top: -2px;
+  width: calc(100%);
+  height: 6px;
+  background: #d6e5f9;
+  visibility: hidden;
+  /* position: absolute; */
+}
+
+.player-progress-bar-video {
+  width: 0;
+  height: 6px;
+  background: #003f86;
 }
 
 .videooutput-modal-button-none {
   border: 0;
   background: none;
+}
+
+.videooutput-modal-button-none {
+  width: 100%;
+  margin: 10px;
+  display: inline-flex;
 }

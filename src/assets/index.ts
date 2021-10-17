@@ -26,6 +26,9 @@ import IconCustomization from './icons/IconCustomization';
 import IconHozana from './icons/IconHozana';
 import IconLeftArrow from './icons/IconLeftArrow';
 import IconYoutube from './icons/IconYoutube';
+import IconCamera from './icons/IconCamera';
+import IconPlay from './icons/IconPlay';
+
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -221,4 +224,6 @@ export {
   IconCustomization,
   IconLeftArrow,
   IconYoutube,
+  IconCamera,
+  IconPlay
 };
