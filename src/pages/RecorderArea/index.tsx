@@ -22,6 +22,8 @@ import { Creators } from 'store/ducks/video';
 import { Strings } from './strings';
 
 import './styles.css';
+import { NativeStorage } from '@ionic-native/native-storage';
+import { Capacitor } from '@capacitor/core';
 
 const RecorderArea = () => {
   const history = useHistory();
@@ -30,15 +32,26 @@ const RecorderArea = () => {
   const [results, setResults] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState([false, '']);
+  const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
+    false,
+    '',
+  ]);
+  const [lastTranslation, setLastTranslation] = useState<string[]>([]);
 
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
 
-  const lastTranslation = useSelector(
-    ({ video }: RootState) => video.lastTranslate,
+  const domain = useSelector(({ video }: RootState) => video.domain);
+
+  const promiseLastTranslation: Promise<string[]> = NativeStorage.getItem(
+    'lastTranslation',
+  ).then(
+    (data: string[]) => data,
+    (error: Error) => {
+      return [];
+    },
   );
 
   const orderArrayByKey = (
@@ -54,7 +67,7 @@ const RecorderArea = () => {
     return newResultArray;
   };
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -74,17 +87,23 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     try {
-      const options = { limit: 1, duration: 30, highquality: true };
+      const options = { limit: 1, duration: 30, highquality: false };
       const mediafile = await VideoCapturePlus.captureVideo(options);
 
+      let resolvedPath: DirectoryEntry;
       const media = mediafile[0] as MediaFile;
       const path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
-      const resolvedPath: DirectoryEntry = await File.resolveDirectoryUrl(path);
+
+      if (Capacitor.getPlatform() === 'ios') {
+        resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+      } else {
+        resolvedPath = await File.resolveDirectoryUrl(path);
+      }
 
       File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
-        (buffer: ArrayBuffer) => {
+        (buffer: any) => {
           const imgBlob = new Blob([buffer], {
             type: media.type,
           });
@@ -144,17 +163,14 @@ const RecorderArea = () => {
               );
             })
             .catch((err: Error) => {
-              setShowErrorModal([
-                true,
-                'Não foi possível criar a prévia do vídeo',
-              ]);
+              setShowErrorModal([true, JSON.stringify(err)]);
             });
         },
         (error: Error) =>
           setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
       );
     } catch (error) {
-      setShowErrorModal([true, 'Erro ao abrir câmera']);
+      setShowErrorModal([true, JSON.stringify(error)]);
       console.log(error);
     }
   };
@@ -172,6 +188,7 @@ const RecorderArea = () => {
       currentVideoArray.map(async (item: ObjectType, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
+        form.append('domain', domain);
         try {
           const resultRequest = await axios.post(
             'http://127.0.0.1:5000/api/v1/recognition',
@@ -245,10 +262,15 @@ const RecorderArea = () => {
     ) {
       translateVideo();
     }
+    getLastTranslationOnStorage();
   }, [location]);
 
+  const getLastTranslationOnStorage = async () => {
+    setLastTranslation(await promiseLastTranslation);
+  };
+
   const renderOutputs = () => {
-    return lastTranslation.map((item: string, key: string) => {
+    return lastTranslation.map((item: string) => {
       return <span key={uuidv4()}>{item}</span>;
     });
   };
@@ -257,7 +279,7 @@ const RecorderArea = () => {
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
         <div className="main-area-recorder">
-          {results.length !== 0 && (
+          {lastTranslation.length !== 0 && (
             <>
               <div className="title-area">
                 <img className="logo-icon" src={logoMaos} alt="Logo Mãos" />
@@ -301,14 +323,10 @@ const RecorderArea = () => {
             </div>
             <button
               onClick={() => history.push(paths.HISTORY)}
-              className="main-area-recorder-button-none"
+              className="main-area-recorder-button-none history-recorder"
               type="button"
             >
-              <img
-                className="history-recorder"
-                src={logoHistory}
-                alt="Logo Histórico"
-              />
+              <img src={logoHistory} alt="Logo Histórico" />
             </button>
           </div>
         </div>
