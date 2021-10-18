@@ -72,7 +72,7 @@
   border: 1px solid #e0e0e0;
   box-sizing: border-box;
   border-radius: 4px;
-  padding: 10px 8px;
+  padding: 5px 8px;
   display: flex;
   flex-flow: wrap;
   /* overflow: hidden;
@@ -105,10 +105,6 @@
   background: none;
 }
 
-.main-area-recorder-button-none .container-output {
-  margin: 10px;
+.main-area-recorder-button-none.container-output {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }

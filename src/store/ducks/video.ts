@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
 
-import { reloadHistory } from 'utils/setHistory';
+import { reloadHistory, lastTranslation } from 'utils/setHistory';
 
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
@@ -43,6 +43,12 @@ export const Creators = {
 
 export type ActionTypes = ActionType<typeof Creators>;
 
+type payloadVideoTranslator = {
+  date: string,
+  data: string[],
+  key: string
+};
+
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
   action: ActionTypes,
@@ -58,9 +64,10 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         // draft.lastTranslate = ['alo']; //mock
 
         // eslint-disable-next-line no-case-declarations
-        const { date, data, key } = payload;
+        const { date, data, key } : payloadVideoTranslator = payload;
 
         reloadHistory(date, data, key);
+        lastTranslation(data, key);
 
         // mock
         // if (draft.translationsHistoric[date]) {

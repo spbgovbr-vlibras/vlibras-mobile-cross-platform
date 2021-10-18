@@ -55,8 +55,10 @@ const SignalCapture = () => {
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
-
-  const [showErrorModal, setShowErrorModal] = useState([false, '']);
+  const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
+    false,
+    '',
+  ]);
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertpage, setShowAlertPage] = useState(false);
@@ -65,7 +67,7 @@ const SignalCapture = () => {
 
   const history = useHistory();
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -85,7 +87,7 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30, highquality: true };

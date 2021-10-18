@@ -48,8 +48,8 @@ const VideoOutputModal = ({
   const history = useHistory();
   const location = useLocation();
 
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const progressContainerRef = useRef<HTMLDivElement>(null);
+  const progressBarOutputRef = useRef<HTMLDivElement>(null);
+  const progressContainerOutputRef = useRef<HTMLDivElement>(null);
 
   const MAX_PROGRESS = 100;
   const UNDEFINED_GLOSS = -1;
@@ -67,16 +67,16 @@ const VideoOutputModal = ({
   };
 
   const progressHandle = (): void => {
-    if (progressContainerRef.current) {
-      progressContainerRef.current.style.visibility = 'visible';
+    if (progressContainerOutputRef.current) {
+      progressContainerOutputRef.current.style.visibility = 'visible';
     }
   };
 
   const cleanProgress = (): void => {
-    if (progressBarRef.current && progressContainerRef.current) {
-      progressContainerRef.current.style.visibility = 'hidden';
-      progressBarRef.current.style.visibility = 'hidden';
-      progressBarRef.current.style.width = '0%';
+    if (progressBarOutputRef.current && progressContainerOutputRef.current) {
+      progressContainerOutputRef.current.style.visibility = 'hidden';
+      progressBarOutputRef.current.style.visibility = 'hidden';
+      progressBarOutputRef.current.style.width = '0%';
     }
   };
 
@@ -126,10 +126,10 @@ const VideoOutputModal = ({
 
     const progress = (1 / glossLen) * 100;
 
-    if (progressBarRef.current && progressContainerRef.current) {
-      progressContainerRef.current.style.visibility = 'visible';
-      progressBarRef.current.style.visibility = 'visible';
-      progressBarRef.current.style.width = `${
+    if (progressBarOutputRef.current && progressContainerOutputRef.current) {
+      progressContainerOutputRef.current.style.visibility = 'visible';
+      progressBarOutputRef.current.style.visibility = 'visible';
+      progressBarOutputRef.current.style.width = `${
         progress > MAX_PROGRESS ? MAX_PROGRESS : progress
       }%`;
     }
@@ -175,10 +175,13 @@ const VideoOutputModal = ({
               className="player-video-output"
             />
             <div
-              ref={progressContainerRef}
+              ref={progressContainerOutputRef}
               className="player-progress-container-video"
             >
-              <div ref={progressBarRef} className="player-progress-bar-video" />
+              <div
+                ref={progressBarOutputRef}
+                className="player-progress-bar-video"
+              />
             </div>
           </div>
         )}
