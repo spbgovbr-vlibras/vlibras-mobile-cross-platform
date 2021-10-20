@@ -13,7 +13,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logoCapture, logoHistory, logoTranslate, logoMaos } from 'assets';
-import { ErrorModal, VideoOutputModal, TranslatingModal } from 'components';
+import { ErrorModal, VideoOutputModal, LoadingModal } from 'components';
 import paths from 'constants/paths';
 import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
@@ -31,6 +31,7 @@ const RecorderArea = () => {
 
   const [results, setResults] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingDescription, setLoadingDescription] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
     false,
@@ -67,7 +68,7 @@ const RecorderArea = () => {
     return newResultArray;
   };
 
-  const takeVideoMock = async () => {
+  const takeVideo = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -87,10 +88,12 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideo = async () => {
+  const takeVideoOf = async () => {
     try {
-      const options = { limit: 1, duration: 30, highquality: false };
+      const options = { limit: 1, duration: 30, highquality: true };
       const mediafile = await VideoCapturePlus.captureVideo(options);
+      setLoadingDescription('Processando...');
+      setLoading(true);
 
       let resolvedPath: DirectoryEntry;
       const media = mediafile[0] as MediaFile;
@@ -145,9 +148,11 @@ const RecorderArea = () => {
                           ],
                         ]),
                       );
+                      setLoading(false);
                       history.push(paths.SIGNALCAPTURE);
                     },
                     err => {
+                      setLoading(false);
                       setShowErrorModal([
                         true,
                         'Não foi possível obter informações do vídeo',
@@ -155,22 +160,31 @@ const RecorderArea = () => {
                     },
                   );
                 },
-                error =>
+                error => {
+                  setLoading(false);
                   setShowErrorModal([
                     true,
                     'Não foi possível carregar a prévia do vídeo',
-                  ]),
+                  ]);
+                },
               );
             })
             .catch((err: Error) => {
-              setShowErrorModal([true, JSON.stringify(err)]);
+              setLoading(false);
+              setShowErrorModal([
+                true,
+                'Não foi possível criar a prévia do vídeo',
+              ]);
             });
         },
-        (error: Error) =>
-          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
+        (error: Error) => {
+          setLoading(false);
+          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+        },
       );
     } catch (error) {
-      setShowErrorModal([true, JSON.stringify(error)]);
+      setLoading(false);
+      setShowErrorModal([true, 'Erro ao abrir câmera']);
       console.log(error);
     }
   };
@@ -179,6 +193,7 @@ const RecorderArea = () => {
     const arrayOfResults: string[] = [];
     const arrayOfKeys: number[] = [];
 
+    setLoadingDescription('Traduzindo...');
     setLoading(true);
     setShowModal(false);
 
@@ -188,11 +203,15 @@ const RecorderArea = () => {
       currentVideoArray.map(async (item: ObjectType, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
-        form.append('domain', domain);
+        const domainParam = domain
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
         try {
           const resultRequest = await axios.post(
             'http://127.0.0.1:5000/api/v1/recognition',
-            // 'http://lavid.nsa.root.sx:3000/api/v1/recognition',
+            //`http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
             form,
             {
               headers: {
@@ -208,6 +227,7 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
             arrayOfKeys.push(key);
           }
+
           // else setShowErrorModal([true, 'Erro ao obter resultados']);
         } catch (e) {
           // setTimeout(function () {
@@ -262,8 +282,11 @@ const RecorderArea = () => {
     ) {
       translateVideo();
     }
-    getLastTranslationOnStorage();
   }, [location]);
+
+  useEffect(() => {
+    getLastTranslationOnStorage();
+  }, [location, results]);
 
   const getLastTranslationOnStorage = async () => {
     setLastTranslation(await promiseLastTranslation);
@@ -330,7 +353,11 @@ const RecorderArea = () => {
             </button>
           </div>
         </div>
-        <TranslatingModal loading={loading} setLoading={setLoading} />
+        <LoadingModal
+          loading={loading}
+          setLoading={setLoading}
+          text={loadingDescription}
+        />
         <VideoOutputModal
           outputs={results}
           showButtons

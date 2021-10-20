@@ -117,15 +117,17 @@ function Historic() {
                           <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
                         </div>
                       )}
-                      <button
-                        className="container-outputs"
-                        onClick={() => openModalOutput(item)}
-                        type="button"
-                      >
-                        {item.map((value: string, keyWord: string) => (
-                          <span key={uuidv4()}>{value}</span>
-                        ))}
-                      </button>
+                      <div className="list-outputs">
+                        <button
+                          className="container-outputs"
+                          onClick={() => openModalOutput(item)}
+                          type="button"
+                        >
+                          {item.map((value: string, keyWord: string) => (
+                            <span key={uuidv4()}>{value}</span>
+                          ))}
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>

@@ -43,6 +43,10 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
     ({ video }: RootState) => video.onboardingFirstAccess,
   );
 
+  const isVideoScreen = useSelector(
+    ({ video }: RootState) => video.isVideoScreen,
+  );
+
   function openMenu() {
     menuController.open();
   }
@@ -107,7 +111,10 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
                 className="menu-icon-drawer"
               />
             ) : (
-              <Link to={paths.HOME} className="menu-item-link">
+              <Link
+                to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
+                className="menu-item-link"
+              >
                 <IconArrowLeft color="#315EB1" />
               </Link>
             )}

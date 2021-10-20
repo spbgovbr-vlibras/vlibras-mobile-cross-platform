@@ -108,13 +108,13 @@
   z-index: 999888;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 2px;
-  width: 80px;
+  width: 90px;
 }
 
 .dropdown-trans-picker .option-trans {
   font-family: Rawline !important;
   color: #4e4e4e;
-  padding: 6px 20px 6px 20px;
+  padding: 12px 20px;
   background: initial;
   font-weight: 600;
   width: 100%;
