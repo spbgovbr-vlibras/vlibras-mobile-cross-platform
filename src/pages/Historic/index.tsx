@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { NativeStorage } from '@ionic-native/native-storage';
 import {
@@ -22,6 +22,9 @@ import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
+import paths from 'constants/paths';
+
+type GenericObject = { [key: string]: any };
 
 function Historic() {
   const translationsHistoric = useSelector(
@@ -33,7 +36,8 @@ function Historic() {
   const [log, setLog] = useState([]);
   const location = useLocation();
 
-  const [historyStorage, setHistoryStorage] = useState<any>({});
+  const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
+
   const [keysToShow, setKeysToShow] = useState(
     env.videoTranslator ? ['text', 'video'] : ['text'],
   );
@@ -42,7 +46,9 @@ function Historic() {
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const promiseHistory = NativeStorage.getItem('history').then(
-    data => data,
+    data => {
+      return data;
+    },
     error => {
       setLog(error);
       return {};
@@ -55,16 +61,28 @@ function Historic() {
   };
 
   const loadHistory = async () => {
-    const resultPromise = await promiseHistory;
-    setHistoryStorage(resultPromise);
+    setHistoryStorage(await promiseHistory);
   };
 
+  // const arrayTest: GenericObject = {
+  //   '17/10/2021': { text: ['oi'] },
+  //   '19/10/2021': {
+  //     video: [
+  //       ['Pneumonia', 'Pneumonia'],
+  //       ['exame_medico', 'nausea', 'exame_medico'],
+  //       ['saude'],
+  //     ],
+  //     text: ['alo meu nome é maria', 'testando', 'ok', 'teste'],
+  //   },
+  // };
+
   useEffect(() => {
-    loadHistory();
+    if (location.pathname === paths.HISTORY) loadHistory();
   }, [location]);
 
-  const formatArrayDate = (arrayHistoric: any) => {
-    const dates = Object.keys(arrayHistoric);
+  const formatArrayDate = () => {
+    const arrayState = JSON.parse(JSON.stringify(historyStorage));
+    const dates = Object.keys(arrayState);
     const formattedObjDate: any = {};
 
     dates.forEach(element => {
@@ -72,16 +90,19 @@ function Historic() {
       if (formattedObjDate[formattedDate]) {
         if (formattedObjDate[formattedDate].video) {
           formattedObjDate[formattedDate].video.push(
-            ...arrayHistoric[element].video,
+            ...arrayState[element].video,
           );
         }
         if (formattedObjDate[formattedDate].text) {
           formattedObjDate[formattedDate].text.push(
-            ...arrayHistoric[element].text,
+            ...arrayState[element].text,
           );
         }
       } else {
-        formattedObjDate[formattedDate] = arrayHistoric[element];
+        formattedObjDate[formattedDate] = {
+          text: arrayState[element].text || [],
+          video: arrayState[element].video || [],
+        };
       }
     });
 
@@ -89,7 +110,7 @@ function Historic() {
   };
 
   const renderAllItems = () => {
-    const formattedHistoric = formatArrayDate(historyStorage);
+    const formattedHistoric = formatArrayDate();
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 
