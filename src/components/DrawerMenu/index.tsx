@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
-import React, { ButtonHTMLAttributes, useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
@@ -11,7 +11,7 @@ import {
   IonItem,
   IonListHeader,
   IonLabel,
-  IonMenuToggle,
+  IonMenuButton,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
@@ -76,6 +76,8 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
 
+  const buttonMenu = useRef<any>(null);
+
   useEffect(() => {
     if (isVideoScreen) {
       setValueSelected('PT-BR');
@@ -97,10 +99,16 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         } else {
           history.push(path);
         }
+        if (buttonMenu.current) {
+          buttonMenu.current.click();
+        }
         menuController.close(Strings.MENU_ID);
         setOpenSelect(false);
       } else {
         history.push(path);
+        if (buttonMenu.current) {
+          buttonMenu.current.click();
+        }
         menuController.close(Strings.MENU_ID);
       }
     }
@@ -113,6 +121,9 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
       history.push(paths.RECORDERAREA);
     } else {
       history.push(paths.HOME);
+    }
+    if (buttonMenu.current) {
+      buttonMenu.current.click();
     }
     menuController.close(Strings.MENU_ID);
   }
@@ -177,6 +188,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             {Strings.HEADER_VLIBRAS_LABEL}
           </IonLabel>
         </div>
+        <IonMenuButton autoHide ref={buttonMenu} style={{ display: 'none' }} />
         {openSelect && (
           <div className="dropdown-trans-picker">
             <button
