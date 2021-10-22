@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { IonPopover, isPlatform } from '@ionic/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
 
 import {
@@ -28,6 +28,7 @@ import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
+import { Creators as CreatorsVideo } from 'store/ducks/video';
 
 import './styles.css';
 
@@ -99,6 +100,7 @@ function Player() {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
+  const location = useLocation();
   const dispatch = useDispatch();
 
   let glossLen = UNDEFINED_GLOSS;
@@ -145,6 +147,10 @@ function Player() {
     }
   };
 
+  useEffect(() => {
+    if (location.pathname === paths.HOME) resetTranslation();
+  }, [location]);
+
   window.CounterGloss = (counter: number, glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
@@ -160,6 +166,7 @@ function Player() {
         progress > MAX_PROGRESS ? MAX_PROGRESS : progress
       }%`;
     }
+    dispatch(CreatorsVideo.setProgress(progress));
   };
 
   function handlePause() {
