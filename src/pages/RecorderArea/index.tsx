@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BackgroundMode } from '@ionic-native/background-mode';
 
 import { File, DirectoryEntry } from '@ionic-native/file';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
@@ -68,7 +69,7 @@ const RecorderArea = () => {
     return newResultArray;
   };
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -88,10 +89,14 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     try {
       const options = { limit: 1, duration: 30, highquality: true };
+
+      // BackgroundMode.enable();
       const mediafile = await VideoCapturePlus.captureVideo(options);
+      // BackgroundMode.disable();
+
       setLoadingDescription('Processando...');
       setLoading(true);
 
@@ -210,8 +215,8 @@ const RecorderArea = () => {
 
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognition',
-            //`http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
+            //'http://127.0.0.1:5000/api/v1/recognition',
+            `http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
             form,
             {
               headers: {
@@ -265,10 +270,7 @@ const RecorderArea = () => {
         setShowModal(true);
         setLoading(false);
       } else if (translatedLabels.length < currentVideoArray.length) {
-        setShowErrorModal([
-          true,
-          'Não foi possível traduzir todos os vídeos. Tente novamente!',
-        ]);
+        setShowErrorModal([true, 'Não foi possível traduzir todos os vídeos!']);
       }
     } else {
       setShowErrorModal([true, 'Erro ao enviar vídeo']);

@@ -115,6 +115,8 @@ const VideoOutputModal = ({
   useEffect(() => {
     if (showModal) {
       cleanProgress();
+    } else {
+      unityContent.send(PLAYER_MANAGER, 'stopAll');
     }
   }, [outputs, showModal]);
 

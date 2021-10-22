@@ -73,6 +73,9 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     ({ video }: RootState) => video.isVideoScreen,
   );
 
+  const onboardingFirstAccess = useSelector(
+    ({ video }: RootState) => video.onboardingFirstAccess,
+  );
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
 
@@ -118,7 +121,8 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     setValueSelected(value);
     setOpenSelect(false);
     if (value === 'PT-BR') {
-      history.push(paths.RECORDERAREA);
+      if (onboardingFirstAccess) history.push(paths.ONBOARDING);
+      else history.push(paths.RECORDERAREA);
     } else {
       history.push(paths.HOME);
     }

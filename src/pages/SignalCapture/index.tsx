@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BackgroundMode } from '@ionic-native/background-mode';
 
 import { File, DirectoryEntry } from '@ionic-native/file';
 
@@ -61,7 +62,7 @@ const SignalCapture = () => {
 
   const history = useHistory();
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -81,11 +82,13 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30, highquality: true };
+        // BackgroundMode.enable();
         const mediafile = await VideoCapturePlus.captureVideo(options);
+        // BackgroundMode.disable();
 
         setLoadingDescription('Processando...');
         setLoading(true);
