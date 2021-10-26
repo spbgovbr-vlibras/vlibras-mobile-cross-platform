@@ -187,16 +187,40 @@ const RecorderArea = () => {
           setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
         },
       );
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      setShowErrorModal([true, 'Erro ao abrir câmera']);
-      console.log(error);
+      if (error.message != 'Canceled')
+        setShowErrorModal([true, 'Erro ao abrir câmera']);
+    }
+  };
+
+  type ErrorType = {
+    key: number;
+    msg: string;
+  };
+
+  const returnError = (
+    networkError: boolean,
+    arrayOfErrors: ErrorType[],
+    defaultMsg: string,
+  ) => {
+    if (networkError)
+      setShowErrorModal([true, 'Erro ao se conectar com tradutor']);
+    else if (arrayOfErrors.length != 0)
+      setShowErrorModal([
+        true,
+        `Video ${arrayOfErrors[0].key + 1}: ${arrayOfErrors[0].msg}`,
+      ]);
+    else {
+      setShowErrorModal([true, defaultMsg]);
     }
   };
 
   const translateVideo = async () => {
     const arrayOfResults: string[] = [];
     const arrayOfKeys: number[] = [];
+    let arrayOfErrors: ErrorType[] = [];
+    let networkError = false;
 
     setLoadingDescription('Traduzindo...');
     setLoading(true);
@@ -232,20 +256,16 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
             arrayOfKeys.push(key);
           }
+        } catch (e: any) {
+          if (!e.status) {
+            networkError = true;
+          }
 
-          // else setShowErrorModal([true, 'Erro ao obter resultados']);
-        } catch (e) {
-          // setTimeout(function () {
-          //   setLoading(false);
-          // }, 200);
-          // setLog(JSON.stringify(e.response.data));
-          // console.log(e.response);
-          // if (e.response && e.response.data.detail.message) {
-          //   setShowErrorModal([true, e.response.data.detail.message]);
-          // } else {
-          //   setShowErrorModal([true, 'Erro ao enviar vídeo']);
-          // }
-          console.log(e);
+          if (e.response) {
+            arrayOfErrors.push({ key, msg: e.response.e.detail.message });
+          } else {
+            arrayOfErrors.push({ key, msg: 'Erro ao enviar vídeo' });
+          }
         }
       }),
     );
@@ -270,10 +290,20 @@ const RecorderArea = () => {
         setShowModal(true);
         setLoading(false);
       } else if (translatedLabels.length < currentVideoArray.length) {
-        setShowErrorModal([true, 'Não foi possível traduzir todos os vídeos!']);
+        setLoading(false);
+        returnError(
+          networkError,
+          arrayOfErrors,
+          'Não foi possível traduzir todos os vídeos!',
+        );
       }
     } else {
-      setShowErrorModal([true, 'Erro ao enviar vídeo']);
+      setLoading(false);
+      returnError(
+        networkError,
+        arrayOfErrors,
+        'Erro ao enviar vídeo, tente novamente!',
+      );
     }
   };
 
