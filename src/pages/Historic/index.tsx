@@ -65,7 +65,9 @@ function Historic() {
   };
 
   // const arrayTest: GenericObject = {
-  //   '17/10/2021': { text: ['oi'] },
+  //   '26/10/2021': { video: [['testandoLabel']] },
+  //   '25/10/2021': { video: [['testandoLabel Ontem']] },
+  //   // '17/10/2021': { text: ['oi'] },
   //   '19/10/2021': {
   //     video: [
   //       ['Pneumonia', 'Pneumonia'],
@@ -117,7 +119,7 @@ function Historic() {
     return datesMapped.map(column => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
-        if (formattedHistoric[column][key]) {
+        if (formattedHistoric[column][key].length != 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
