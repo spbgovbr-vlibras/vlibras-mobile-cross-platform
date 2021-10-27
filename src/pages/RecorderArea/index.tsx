@@ -189,8 +189,7 @@ const RecorderArea = () => {
       );
     } catch (error: any) {
       setLoading(false);
-      if (error.message != 'Canceled')
-        setShowErrorModal([true, 'Erro ao abrir câmera']);
+      if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
     }
   };
 
@@ -204,6 +203,8 @@ const RecorderArea = () => {
     arrayOfErrors: ErrorType[],
     defaultMsg: string,
   ) => {
+    dispatch(Creators.setCurrentArrayVideo([]));
+
     if (networkError)
       setShowErrorModal([true, 'Erro ao se conectar com tradutor']);
     else if (arrayOfErrors.length != 0)
@@ -257,13 +258,10 @@ const RecorderArea = () => {
             arrayOfKeys.push(key);
           }
         } catch (e: any) {
-          if (!e.status) {
-            networkError = true;
-          }
-
-          if (e.response) {
-            arrayOfErrors.push({ key, msg: e.response.e.detail.message });
+          if (e.response && e.response.data) {
+            arrayOfErrors.push({ key, msg: e.response.data.detail.message });
           } else {
+            networkError = true;
             arrayOfErrors.push({ key, msg: 'Erro ao enviar vídeo' });
           }
         }

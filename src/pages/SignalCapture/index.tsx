@@ -184,9 +184,9 @@ const SignalCapture = () => {
             setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
           },
         );
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
-        setShowErrorModal([true, 'Erro ao abrir câmera']);
+        if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
       }
     }
   };
