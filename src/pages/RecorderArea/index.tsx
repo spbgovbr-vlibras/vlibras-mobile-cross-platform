@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+import { Capacitor } from '@capacitor/core';
 import { File, DirectoryEntry } from '@ionic-native/file';
+import { NativeStorage } from '@ionic-native/native-storage';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
 import {
   CreateThumbnailOptions,
@@ -22,8 +24,6 @@ import { Creators } from 'store/ducks/video';
 import { Strings } from './strings';
 
 import './styles.css';
-import { NativeStorage } from '@ionic-native/native-storage';
-import { Capacitor } from '@capacitor/core';
 
 const RecorderArea = () => {
   const history = useHistory();
@@ -97,7 +97,7 @@ const RecorderArea = () => {
       const path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
 
       if (Capacitor.getPlatform() === 'ios') {
-        resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+        resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
       } else {
         resolvedPath = await File.resolveDirectoryUrl(path);
       }
@@ -254,6 +254,9 @@ const RecorderArea = () => {
       setShowErrorModal([true, 'Erro ao enviar vídeo']);
     }
   };
+  const getLastTranslationOnStorage = async () => {
+    setLastTranslation(await promiseLastTranslation);
+  };
 
   useEffect(() => {
     if (
@@ -264,10 +267,6 @@ const RecorderArea = () => {
     }
     getLastTranslationOnStorage();
   }, [location]);
-
-  const getLastTranslationOnStorage = async () => {
-    setLastTranslation(await promiseLastTranslation);
-  };
 
   const renderOutputs = () => {
     return lastTranslation.map((item: string) => {

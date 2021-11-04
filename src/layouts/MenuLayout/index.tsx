@@ -16,12 +16,12 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import { IconTranslate, IconShare, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
 import { env } from 'environment/env';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
 
 import './styles.css';
-import { RootState } from 'store';
 
 type MODE = 'menu' | 'back';
 

@@ -15,7 +15,7 @@ dependencies {
     implementation project(':capacitor-status-bar')
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
 }
-
+apply from: "../../node_modules/cordova-plugin-video-editor/src/android/build.gradle"
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

@@ -11,7 +11,7 @@ export const Types = {
   SET_DOMAIN: '@video/SET_DOMAIN',
   SET_IS_VIDEO_SCREEN: '@video/SET_IS_VIDEO_SCREEN',
   SET_TRANSLATION_HISTORIC: '@video/SET_TRANSLATION_HISTORIC',
-  SET_FIRST_ACCESS: '@video/SET_FIRST_ACCESS'
+  SET_FIRST_ACCESS: '@video/SET_FIRST_ACCESS',
 };
 
 export interface VideoState {
@@ -29,7 +29,7 @@ const INITIAL_STATE: VideoState = {
   domain: 'Saúde',
   isVideoScreen: false,
   translationsHistoric: {},
-  onboardingFirstAccess: true
+  onboardingFirstAccess: true,
 };
 
 export const Creators = {
@@ -38,15 +38,14 @@ export const Creators = {
   setDomain: createAction(Types.SET_DOMAIN)<any>(),
   setIsVideoScreen: createAction(Types.SET_IS_VIDEO_SCREEN)<any>(),
   setFirstAccess: createAction(Types.SET_FIRST_ACCESS)<any>(),
-
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
 
 type payloadVideoTranslator = {
-  date: string,
-  data: string[],
-  key: string
+  date: string;
+  data: string[];
+  key: string;
 };
 
 const reducer: Reducer<VideoState, ActionTypes> = (
@@ -64,7 +63,7 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         // draft.lastTranslate = ['alo']; //mock
 
         // eslint-disable-next-line no-case-declarations
-        const { date, data, key } : payloadVideoTranslator = payload;
+        const { date, data, key }: payloadVideoTranslator = payload;
 
         reloadHistory(date, data, key);
         lastTranslation(data, key);
@@ -90,8 +89,7 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.isVideoScreen = payload;
         break;
       case Types.SET_FIRST_ACCESS:
-
-        draft.onboardingFirstAccess = payload; 
+        draft.onboardingFirstAccess = payload;
         break;
       default:
         break;

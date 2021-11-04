@@ -29,7 +29,6 @@ import IconYoutube from './icons/IconYoutube';
 import IconCamera from './icons/IconCamera';
 import IconPlay from './icons/IconPlay';
 
-
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
 import gifStepOne from './gifs/passo1.gif';
@@ -225,5 +224,5 @@ export {
   IconLeftArrow,
   IconYoutube,
   IconCamera,
-  IconPlay
+  IconPlay,
 };

@@ -32,11 +32,11 @@ export const reloadHistory = async (
   );
 };
 
-export const lastTranslation = (data: string[], key: string) : void => {
-  if (key === "video") {
+export const lastTranslation = (data: string[], key: string): void => {
+  if (key === 'video') {
     NativeStorage.setItem('lastTranslation', data).then(
       () => console.log(NativeStorage.getItem('lastTranslation')),
       error => console.error('Error storing lastTranslationitem', error),
     );
   }
-}
+};

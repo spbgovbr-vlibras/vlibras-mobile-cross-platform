@@ -91,6 +91,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     if (e.target.className === 'drawer-menu-sub-item translator') {
       setOpenSelect(!openSelect);
     } else {
+      // eslint-disable-next-line no-lonely-if
       if (path === paths.HOME) {
         if (valueSelected === 'PT-BR') {
           history.push(paths.RECORDERAREA);
