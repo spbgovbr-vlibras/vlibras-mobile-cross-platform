@@ -22,6 +22,7 @@ import {
   logoSubtitleOff,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
+import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
@@ -33,7 +34,7 @@ import './styles.css';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
-type Avatar = 'hozana' | 'icaro';
+type Avatar = 'hozana' | 'icaro' | 'guga';
 
 const playerService = PlayerService.getService();
 
@@ -177,8 +178,23 @@ function Player() {
   }
 
   function handleChangeAvatar() {
-    setCurrentAvatar(currentAvatar === 'icaro' ? 'hozana' : 'icaro');
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.CHANGE_AVATAR);
+    let nextAvatar: Avatar;
+
+    if (currentAvatar === 'icaro') {
+      nextAvatar = 'hozana';
+    } else if (currentAvatar === 'hozana') {
+      nextAvatar = 'guga';
+    } else {
+      nextAvatar = 'icaro';
+    }
+
+    setCurrentAvatar(nextAvatar);
+
+    playerService.send(
+      PlayerKeys.PLAYER_MANAGER,
+      PlayerKeys.CHANGE_AVATAR,
+      nextAvatar,
+    );
   }
 
   function handleSubtitle() {
@@ -279,23 +295,69 @@ function Player() {
     }
     return (
       <>
-        <button
-          className="player-action-button-transparent"
-          type="button"
-          onClick={() => {
-            history.push(paths.DICTIONARY_PLAYER);
-            //   setVisiblePlayer(false);
+        <div
+          style={{
+            position: 'relative',
           }}
         >
-          <IconDictionary color={buttonColors.VARAINT_WHITE} />
-        </button>
-        <button
-          className="player-action-button player-action-button-insert"
-          type="button"
-          onClick={() => history.push(paths.TRANSLATOR)}
+          <div
+            style={{
+              marginRight: 6,
+              position: 'absolute',
+              width: '100vw',
+              bottom: 50,
+              left: -16,
+            }}
+          >
+            <TutorialPopover
+              title="Dicionário"
+              description="Consulte os sinais disponíveis no vlibras"
+              position="bl"
+              isEnabled={false}
+            />
+          </div>
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={() => {
+              history.push(paths.DICTIONARY_PLAYER);
+              //   setVisiblePlayer(false);
+            }}
+          >
+            <IconDictionary color={buttonColors.VARAINT_WHITE} />
+          </button>
+        </div>
+
+        <div
+          style={{
+            position: 'relative',
+          }}
         >
-          <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
-        </button>
+          <div
+            style={{
+              marginRight: 6,
+              position: 'absolute',
+              width: '100vw',
+              bottom: 54,
+              left: -40,
+            }}
+          >
+            <TutorialPopover
+              title="Dicionário"
+              description="Consulte os sinais disponíveis no vlibras"
+              position="bc"
+              isEnabled={false}
+            />
+          </div>
+          <button
+            className="player-action-button player-action-button-insert"
+            type="button"
+            onClick={() => history.push(paths.TRANSLATOR)}
+          >
+            <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
+          </button>
+        </div>
+
         <button
           className="player-action-button-transparent"
           type="button"
@@ -317,7 +379,7 @@ function Player() {
       iris: currentEye,
       pos: 'center',
     });
-
+    console.log(preProcessingPreview);
     playerService.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
@@ -383,17 +445,27 @@ function Player() {
             <IconClose color="#FFF" size={24} />
           </button>
         ) : (
-          <button
-            className="player-button-rounded-top"
-            type="button"
-            onClick={handleChangeAvatar}
-          >
-            {currentAvatar === 'icaro' ? (
-              <IconHozana color="#FFF" size={20} />
-            ) : (
-              <IconIcaro color="#FFF" size={20} />
-            )}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ marginRight: 6 }}>
+              <TutorialPopover
+                title="Trocar avatar"
+                description="Alterne entre os avatares disponíveis"
+                position="rb"
+                isEnabled={false}
+              />
+            </div>
+            <button
+              className="player-button-rounded-top"
+              type="button"
+              onClick={handleChangeAvatar}
+            >
+              {currentAvatar === 'icaro' ? (
+                <IconHozana color="#FFF" size={20} />
+              ) : (
+                <IconIcaro color="#FFF" size={20} />
+              )}
+            </button>
+          </div>
         )}
       </div>
       <div
@@ -429,9 +501,6 @@ function Player() {
           >
             <IconShare color="#FFF" size={18} />
           </button>
-          {/* <button className="player-button-rounded" type="button">
-            <IconHandsTranslate color="#FFF" size={18} />
-          </button> */}
         </div>
       )}
       <div className="player-action-container">
@@ -440,6 +509,7 @@ function Player() {
         </div>
         <div className="play-action-content">{renderPlayerButtons()}</div>
       </div>
+
       <EvaluationModal
         show={showModal}
         setShow={setShowModal}

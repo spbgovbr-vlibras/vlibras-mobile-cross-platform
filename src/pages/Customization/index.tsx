@@ -37,8 +37,8 @@ import { Strings } from './string';
 import './styles.css';
 
 const unityContent = new UnityContent(
-  'BUILD/Build/BUILD.json',
-  'BUILD/Build/UnityLoader.js',
+  'BUILD-8/Build/BUILD.json',
+  'BUILD-8/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },
@@ -189,7 +189,7 @@ function Customization() {
     dispatch(
       Creators.storeCustomization.request({
         corpo: colorbody,
-        olhos: '#fffafa',
+        olhos: '#000',
         cabelo: colorhair,
         camisa: colorshirt,
         calca: colorpants,
@@ -210,14 +210,13 @@ function Customization() {
 
     const preProcessingPreview = JSON.stringify({
       corpo: currentBody,
-      olhos: '#fffafa',
+      olhos: '#000',
       cabelo: currentHair,
       camisa: currentShirt,
       calca: currentPants,
       iris: currentEye,
       pos: 'center',
     });
-    console.log(preProcessingPreview);
 
     unityContent.send(
       PlayerKeys.AVATAR,
@@ -237,7 +236,7 @@ function Customization() {
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
       corpo: colorbody,
-      olhos: '#fffafa',
+      olhos: '#000',
       cabelo: colorhair,
       camisa: colorshirt,
       calca: colorpants,
@@ -271,7 +270,7 @@ function Customization() {
     dispatch(
       Creators.storeCustomization.request({
         corpo: IcaroDefault.icaroBody,
-        olhos: '#fffafa',
+        olhos: '#000',
         cabelo: IcaroDefault.icaroHair,
         camisa: IcaroDefault.icaroShirt,
         calca: IcaroDefault.icaroPants,

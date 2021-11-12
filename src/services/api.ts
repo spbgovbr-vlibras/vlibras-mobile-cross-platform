@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MetadataParams, ListResponseDictionary } from 'store/ducks/dictionary';
 
 const api = axios.create({
-  baseURL: 'https://dicionario2-dth.vlibras.gov.br/api',
+  baseURL: 'https://repositorio.vlibras.gov.br/api',
 });
 
 export async function getDictionary(
