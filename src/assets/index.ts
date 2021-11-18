@@ -111,8 +111,11 @@ import logoCamisa from './images/camisa.png';
 import logoCalca from './images/calça.png';
 import logoSubtitleOn from './images/subtitle-on.png';
 import logoSubtitleOff from './images/subtitle-off.png';
-
 import Vlibraslogo from './images/vlibraslogo.png';
+
+export { ReactComponent as IcaroAvatar } from './images/icaro.svg';
+export { ReactComponent as GugaAvatar } from './images/guga.svg';
+export { ReactComponent as HozanaAvatar } from './images/hozana.svg';
 
 export {
   logoSubtitleOff,

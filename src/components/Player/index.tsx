@@ -20,6 +20,9 @@ import {
   IconHozana,
   logoSubtitleOn,
   logoSubtitleOff,
+  IcaroAvatar,
+  HozanaAvatar,
+  GugaAvatar,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
@@ -455,15 +458,13 @@ function Player() {
               />
             </div>
             <button
-              className="player-button-rounded-top"
+              className="player-button-avatar-rounded-top"
               type="button"
               onClick={handleChangeAvatar}
             >
-              {currentAvatar === 'icaro' ? (
-                <IconHozana color="#FFF" size={20} />
-              ) : (
-                <IconIcaro color="#FFF" size={20} />
-              )}
+              {currentAvatar === 'icaro' && <IcaroAvatar />}
+              {currentAvatar === 'hozana' && <HozanaAvatar />}
+              {currentAvatar === 'guga' && <GugaAvatar />}
             </button>
           </div>
         )}

@@ -37,8 +37,8 @@ import { Strings } from './string';
 import './styles.css';
 
 const unityContent = new UnityContent(
-  'BUILD-8/Build/BUILD.json',
-  'BUILD-8/Build/UnityLoader.js',
+  'final/Build/final.json',
+  'final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
   },

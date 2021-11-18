@@ -126,6 +126,17 @@
   align-items: center;
 }
 
+.player-button-avatar-rounded-top {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1B1B1B;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .player-container-button {
   position: absolute;
   padding: 16px;
