@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 
 import { IonModal } from '@ionic/react';
 
 import { logoWarning } from '../../assets';
 import './styles.css';
 
+type errorModalType = boolean | string;
 interface ErrorModalProps {
-  show: any;
-  setShow: any;
-  errorMsg: any;
+  show: boolean;
+  setShow: Dispatch<SetStateAction<any>>;
+  errorMsg: string;
 }
 
 const ErrorModal = ({ show, setShow, errorMsg }: ErrorModalProps) => {
@@ -16,7 +17,7 @@ const ErrorModal = ({ show, setShow, errorMsg }: ErrorModalProps) => {
     <IonModal
       isOpen={show}
       cssClass="error-modal"
-      onDidDismiss={() => setShow(false)}
+      onDidDismiss={() => setShow([false, ''])}
       backdropDismiss
       swipeToClose
     >

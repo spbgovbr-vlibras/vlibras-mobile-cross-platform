@@ -55,18 +55,19 @@ const SignalCapture = () => {
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
-  const [log, setLog] = useState<any>('alo');
-
-  const [showErrorModal, setShowErrorModal] = useState([false, '']);
+  const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
+    false,
+    '',
+  ]);
 
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertpage, setShowAlertPage] = useState(false);
 
-  const [toDelete, setToDelete] = useState([]);
+  const [toDelete, setToDelete] = useState<number>(-1);
 
   const history = useHistory();
 
-  const takeVideo = async () => {
+  const takeVideoMock = async () => {
     // mock
     if (currentVideoArray.length < 5) {
       dispatch(
@@ -86,7 +87,7 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30, highquality: true };
@@ -102,7 +103,7 @@ const SignalCapture = () => {
         );
 
         File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
-          (buffer: any) => {
+          (buffer: ArrayBuffer) => {
             const imgBlob = new Blob([buffer], {
               type: media.type,
             });
@@ -117,7 +118,7 @@ const SignalCapture = () => {
             };
 
             VideoEditor.createThumbnail(thumbnailoption)
-              .then(async (thumbnailPath: any) => {
+              .then(async (thumbnailPath: string) => {
                 const pathThumbs = thumbnailPath.substring(
                   0,
                   thumbnailPath.lastIndexOf('/'),
@@ -129,7 +130,7 @@ const SignalCapture = () => {
                   resolvedPathThumb.nativeURL,
                   `${fname}.jpg`,
                 ).then(
-                  (thumbPath: any) => {
+                  (thumbPath: string) => {
                     VideoEditor.getVideoInfo({
                       fileUri: resolvedPath.nativeURL + media.name,
                     }).then(
@@ -162,14 +163,14 @@ const SignalCapture = () => {
                     ]),
                 );
               })
-              .catch((err: any) => {
+              .catch((err: Error) => {
                 setShowErrorModal([
                   true,
                   'Não foi possível criar a prévia do vídeo',
                 ]);
               });
           },
-          (error: any) =>
+          (error: Error) =>
             setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
         );
       } catch (error) {
@@ -180,14 +181,14 @@ const SignalCapture = () => {
   function popupCancel() {
     setShowAlertPage(true);
   }
-  const popupRemove = (index: any) => {
+  const popupRemove = (index: number) => {
     setShowAlert(true);
     setToDelete(index);
   };
 
-  const removeRecord = (index: any) => {
+  const removeRecord = (index: number) => {
     const filteredArray = currentVideoArray.filter(
-      (value: unknown, i: any) => i !== index,
+      (value: unknown, i: number) => i !== index,
     );
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
@@ -200,7 +201,12 @@ const SignalCapture = () => {
       copyCurrentVideo.push([]);
     }
 
-    return copyCurrentVideo.map((item: any, key: number) => {
+    type ArrayVideo = {
+      thumbBlob: string;
+      duration: number;
+    };
+
+    return copyCurrentVideo.map((item: ArrayVideo[], key: number) => {
       return (
         <>
           {item.length !== 0 ? (

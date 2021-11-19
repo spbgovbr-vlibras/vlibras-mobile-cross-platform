@@ -9,9 +9,12 @@ import {
   IonTextarea,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+import paths from 'constants/paths';
+import { PlayerKeys } from 'constants/player';
+import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import dateFormat from 'utils/dateFormat';
 
@@ -31,6 +34,7 @@ function Historic() {
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
   const [log, setLog] = useState([]);
+  const history = useHistory();
   const location = useLocation();
 
   const [historyStorage, setHistoryStorage] = useState<any>({});
@@ -40,6 +44,8 @@ function Historic() {
   const [activeKey, setActiveKey] = useState(env.videoTranslator ? 0 : 2);
 
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
+
+  const playerService = PlayerService.getService();
 
   const promiseHistory = NativeStorage.getItem('history').then(
     data => data,
@@ -139,7 +145,20 @@ function Historic() {
                           <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
                         </div>
                       )}
-                      <div className="historic-container-box-ion-text">
+                      <div
+                        className="historic-container-box-ion-text"
+                        onClick={() => {
+                          history.push(paths.HOME);
+                          playerService.send(
+                            PlayerKeys.PLAYER_MANAGER,
+                            PlayerKeys.PLAY_NOW,
+                            item,
+                          );
+                        }}
+                        tabIndex={0}
+                        role="menu"
+                        aria-hidden="true"
+                      >
                         <p className="historic-container-box-ion-text-area">
                           {item}
                         </p>

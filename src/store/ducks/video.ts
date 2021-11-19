@@ -3,7 +3,7 @@ import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
 
-import { reloadHistory } from 'utils/setHistory';
+import { reloadHistory, lastTranslation } from 'utils/setHistory';
 
 export const Types = {
   SET_ARRAY_VIDEOS: '@video/SET_ARRAY_VIDEOS',
@@ -11,6 +11,7 @@ export const Types = {
   SET_DOMAIN: '@video/SET_DOMAIN',
   SET_IS_VIDEO_SCREEN: '@video/SET_IS_VIDEO_SCREEN',
   SET_TRANSLATION_HISTORIC: '@video/SET_TRANSLATION_HISTORIC',
+  SET_FIRST_ACCESS: '@video/SET_FIRST_ACCESS',
 };
 
 export interface VideoState {
@@ -19,6 +20,7 @@ export interface VideoState {
   translationsHistoric: any;
   domain: string;
   isVideoScreen: boolean;
+  onboardingFirstAccess: boolean;
 }
 
 const INITIAL_STATE: VideoState = {
@@ -27,6 +29,7 @@ const INITIAL_STATE: VideoState = {
   domain: 'Saúde',
   isVideoScreen: false,
   translationsHistoric: {},
+  onboardingFirstAccess: true,
 };
 
 export const Creators = {
@@ -34,9 +37,16 @@ export const Creators = {
   setLastTranslator: createAction(Types.SET_LAST_TRANSLATOR)<any>(),
   setDomain: createAction(Types.SET_DOMAIN)<any>(),
   setIsVideoScreen: createAction(Types.SET_IS_VIDEO_SCREEN)<any>(),
+  setFirstAccess: createAction(Types.SET_FIRST_ACCESS)<any>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
+
+type payloadVideoTranslator = {
+  date: string;
+  data: string[];
+  key: string;
+};
 
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
@@ -53,9 +63,10 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         // draft.lastTranslate = ['alo']; //mock
 
         // eslint-disable-next-line no-case-declarations
-        const { date, data, key } = payload;
+        const { date, data, key }: payloadVideoTranslator = payload;
 
         reloadHistory(date, data, key);
+        lastTranslation(data, key);
 
         // mock
         // if (draft.translationsHistoric[date]) {
@@ -76,6 +87,9 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         break;
       case Types.SET_IS_VIDEO_SCREEN:
         draft.isVideoScreen = payload;
+        break;
+      case Types.SET_FIRST_ACCESS:
+        draft.onboardingFirstAccess = payload;
         break;
       default:
         break;

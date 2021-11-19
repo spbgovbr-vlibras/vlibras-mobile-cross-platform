@@ -10,12 +10,13 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconShare, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
 import { env } from 'environment/env';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
@@ -38,6 +39,10 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
   const history = useHistory();
   const dispatch = useDispatch();
 
+  const onboardingFirstAccess = useSelector(
+    ({ video }: RootState) => video.onboardingFirstAccess,
+  );
+
   function openMenu() {
     menuController.open();
   }
@@ -51,7 +56,13 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
             <>
               <button
                 className="menu-item-text"
-                onClick={() => history.push(paths.ONBOARDING)}
+                onClick={() =>
+                  history.push(
+                    onboardingFirstAccess
+                      ? paths.ONBOARDING
+                      : paths.RECORDERAREA,
+                  )
+                }
                 type="button"
               >
                 {Strings.MENU_PT_BR}
@@ -65,6 +76,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
         dispatch(Creators.setIsVideoScreen(true));
+        dispatch(Creators.setFirstAccess(false));
         return (
           <>
             <IonLabel
