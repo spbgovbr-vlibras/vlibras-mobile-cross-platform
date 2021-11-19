@@ -5,12 +5,13 @@ import { IonModal } from '@ionic/react';
 import { gifTranslating } from '../../assets';
 import './styles.css';
 
-interface TranslatingModalProps {
+interface LoadingModalProps {
   loading: boolean;
   setLoading: any;
+  text: string;
 }
 
-const TranslatingModal = ({ loading, setLoading }: TranslatingModalProps) => {
+const LoadingModal = ({ loading, setLoading, text }: LoadingModalProps) => {
   return (
     <IonModal
       isOpen={loading}
@@ -18,10 +19,10 @@ const TranslatingModal = ({ loading, setLoading }: TranslatingModalProps) => {
       onDidDismiss={() => setLoading(false)}
       swipeToClose
     >
-      <p className="modal-title"> Traduzindo... </p>
+      <p className="modal-title"> {text} </p>
       <img className="loading" src={gifTranslating} alt="Carregando" />
     </IonModal>
   );
 };
 
-export default TranslatingModal;
+export default LoadingModal;

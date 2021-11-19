@@ -138,13 +138,14 @@
 
 .videooutput-modal .player {
   height: 229px;
-  /* border: 1px solid #1447a6 !important; */
+  border: 1px solid #1447a6 !important;
   width: 71%;
   margin: auto;
 }
 
 .videooutput-modal .player-video-output {
   width: 100% !important;
+  box-sizing: none !important;
 }
 
 .videooutput-modal .player-video-output canvas {
@@ -152,11 +153,17 @@
 }
 
 .player-progress-container-video {
-  width: calc(100%);
+  width: calc(100% + 2px);
+  margin-left: -1px;
   height: 6px;
   background: #d6e5f9;
   visibility: hidden;
+  margin-top: 0px;
   /* position: absolute; */
+  /* height: calc(100% + 9px); */
+  border-left: 1px solid #1447a6 !important;
+  border-right: 1px solid #1447a6 !important;
+  border-bottom: 1px solid #1447a6 !important;
 }
 
 .player-progress-bar-video {

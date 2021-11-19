@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 import { IonModal, IonButton } from '@ionic/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +16,7 @@ import { IconCloseCircle, IconCamera, IconEdit, IconPlay } from 'assets';
 import paths from 'constants/paths';
 import { Creators } from 'store/ducks/video';
 import './styles.css';
+import { RootState } from 'store';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -57,6 +58,10 @@ const VideoOutputModal = ({
   let cache = UNDEFINED_GLOSS;
   let glossLen = UNDEFINED_GLOSS;
 
+  const progressOutput = useSelector(
+    ({ video }: RootState) => video.progressOutput,
+  );
+
   const closeModal = () => {
     setShowModal(false);
     dispatch(Creators.setCurrentArrayVideo([]));
@@ -97,8 +102,9 @@ const VideoOutputModal = ({
   };
 
   (window as any).onLoadPlayer = () => {
-    // cleanProgress();
-    progressHandle();
+    // alert('ONLOAD');
+
+    cleanProgress();
     unityContent.send(PLAYER_MANAGER, 'initRandomAnimationsProcess');
     unityContent.send(PLAYER_MANAGER, 'setURL', '');
     unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
@@ -108,32 +114,40 @@ const VideoOutputModal = ({
 
   useEffect(() => {
     if (showModal) {
-      // cleanProgress();
-      progressHandle();
-      unityContent.send(PLAYER_MANAGER, 'initRandomAnimationsProcess');
-      unityContent.send(PLAYER_MANAGER, 'setURL', '');
-      unityContent.send(PLAYER_MANAGER, 'setBaseUrl', DICTIONAY_URL);
-      unityContent.send(PLAYER_MANAGER, 'playNow', outputs.join(' '));
-      unityContent.send(PLAYER_MANAGER, 'setSubtitlesState', 0);
+      cleanProgress();
+    } else {
+      unityContent.send(PLAYER_MANAGER, 'stopAll');
     }
   }, [outputs, showModal]);
 
-  window.CounterGloss = (counter: number, glossLength: number) => {
-    if (counter === cache - 1) {
-      glossLen = counter;
-    }
-    cache = counter;
+  // window.CounterGloss = (counter: number, glossLength: number) => {
+  //   if (counter === cache - 1) {
+  //     glossLen = counter;
+  //   }
+  //   cache = counter;
 
-    const progress = (1 / glossLen) * 100;
+  //   console.log(window);
 
+  //   const progress = (1 / glossLen) * 100;
+  //   console.log(progress);
+  //   if (progressBarOutputRef.current && progressContainerOutputRef.current) {
+  //     progressContainerOutputRef.current.style.visibility = 'visible';
+  //     progressBarOutputRef.current.style.visibility = 'visible';
+  //     progressBarOutputRef.current.style.width = `${
+  //       progress > MAX_PROGRESS ? MAX_PROGRESS : progress
+  //     }%`;
+  //   }
+  // };
+
+  useEffect(() => {
     if (progressBarOutputRef.current && progressContainerOutputRef.current) {
       progressContainerOutputRef.current.style.visibility = 'visible';
       progressBarOutputRef.current.style.visibility = 'visible';
       progressBarOutputRef.current.style.width = `${
-        progress > MAX_PROGRESS ? MAX_PROGRESS : progress
+        progressOutput > MAX_PROGRESS ? MAX_PROGRESS : progressOutput
       }%`;
     }
-  };
+  }, [progressOutput]);
 
   return (
     <>

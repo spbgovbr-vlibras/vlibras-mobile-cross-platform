@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BackgroundMode } from '@ionic-native/background-mode';
 
 import { Capacitor } from '@capacitor/core';
 import { File, DirectoryEntry } from '@ionic-native/file';
@@ -15,7 +16,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logoCapture, logoHistory, logoTranslate, logoMaos } from 'assets';
-import { ErrorModal, VideoOutputModal, TranslatingModal } from 'components';
+import { ErrorModal, VideoOutputModal, LoadingModal } from 'components';
 import paths from 'constants/paths';
 import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
@@ -31,6 +32,7 @@ const RecorderArea = () => {
 
   const [results, setResults] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingDescription, setLoadingDescription] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
     false,
@@ -89,8 +91,14 @@ const RecorderArea = () => {
 
   const takeVideo = async () => {
     try {
-      const options = { limit: 1, duration: 30, highquality: false };
+      const options = { limit: 1, duration: 30, highquality: true };
+
+      // BackgroundMode.enable();
       const mediafile = await VideoCapturePlus.captureVideo(options);
+      // BackgroundMode.disable();
+
+      setLoadingDescription('Processando...');
+      setLoading(true);
 
       let resolvedPath: DirectoryEntry;
       const media = mediafile[0] as MediaFile;
@@ -145,9 +153,11 @@ const RecorderArea = () => {
                           ],
                         ]),
                       );
+                      setLoading(false);
                       history.push(paths.SIGNALCAPTURE);
                     },
                     err => {
+                      setLoading(false);
                       setShowErrorModal([
                         true,
                         'Não foi possível obter informações do vídeo',
@@ -155,30 +165,65 @@ const RecorderArea = () => {
                     },
                   );
                 },
-                error =>
+                error => {
+                  setLoading(false);
                   setShowErrorModal([
                     true,
                     'Não foi possível carregar a prévia do vídeo',
-                  ]),
+                  ]);
+                },
               );
             })
             .catch((err: Error) => {
-              setShowErrorModal([true, JSON.stringify(err)]);
+              setLoading(false);
+              setShowErrorModal([
+                true,
+                'Não foi possível criar a prévia do vídeo',
+              ]);
             });
         },
-        (error: Error) =>
-          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
+        (error: Error) => {
+          setLoading(false);
+          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+        },
       );
-    } catch (error) {
-      setShowErrorModal([true, JSON.stringify(error)]);
-      console.log(error);
+    } catch (error: any) {
+      setLoading(false);
+      if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+    }
+  };
+
+  type ErrorType = {
+    key: number;
+    msg: string;
+  };
+
+  const returnError = (
+    networkError: boolean,
+    arrayOfErrors: ErrorType[],
+    defaultMsg: string,
+  ) => {
+    dispatch(Creators.setCurrentArrayVideo([]));
+
+    if (networkError)
+      setShowErrorModal([true, 'Erro ao se conectar com tradutor']);
+    else if (arrayOfErrors.length != 0)
+      setShowErrorModal([
+        true,
+        `Video ${arrayOfErrors[0].key + 1}: ${arrayOfErrors[0].msg}`,
+      ]);
+    else {
+      setShowErrorModal([true, defaultMsg]);
     }
   };
 
   const translateVideo = async () => {
     const arrayOfResults: string[] = [];
     const arrayOfKeys: number[] = [];
+    let arrayOfErrors: ErrorType[] = [];
+    let networkError = false;
 
+    setLoadingDescription('Traduzindo...');
     setLoading(true);
     setShowModal(false);
 
@@ -188,11 +233,15 @@ const RecorderArea = () => {
       currentVideoArray.map(async (item: ObjectType, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
-        form.append('domain', domain);
+        const domainParam = domain
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognition',
-            // 'http://lavid.nsa.root.sx:3000/api/v1/recognition',
+            //'http://127.0.0.1:5000/api/v1/recognition',
+            `http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
             form,
             {
               headers: {
@@ -208,19 +257,13 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
             arrayOfKeys.push(key);
           }
-          // else setShowErrorModal([true, 'Erro ao obter resultados']);
-        } catch (e) {
-          // setTimeout(function () {
-          //   setLoading(false);
-          // }, 200);
-          // setLog(JSON.stringify(e.response.data));
-          // console.log(e.response);
-          // if (e.response && e.response.data.detail.message) {
-          //   setShowErrorModal([true, e.response.data.detail.message]);
-          // } else {
-          //   setShowErrorModal([true, 'Erro ao enviar vídeo']);
-          // }
-          console.log(e);
+        } catch (e: any) {
+          if (e.response && e.response.data) {
+            arrayOfErrors.push({ key, msg: e.response.data.detail.message });
+          } else {
+            networkError = true;
+            arrayOfErrors.push({ key, msg: 'Erro ao enviar vídeo' });
+          }
         }
       }),
     );
@@ -245,13 +288,20 @@ const RecorderArea = () => {
         setShowModal(true);
         setLoading(false);
       } else if (translatedLabels.length < currentVideoArray.length) {
-        setShowErrorModal([
-          true,
-          'Não foi possível traduzir todos os vídeos. Tente novamente!',
-        ]);
+        setLoading(false);
+        returnError(
+          networkError,
+          arrayOfErrors,
+          'Não foi possível traduzir todos os vídeos!',
+        );
       }
     } else {
-      setShowErrorModal([true, 'Erro ao enviar vídeo']);
+      setLoading(false);
+      returnError(
+        networkError,
+        arrayOfErrors,
+        'Erro ao enviar vídeo, tente novamente!',
+      );
     }
   };
   const getLastTranslationOnStorage = async () => {
@@ -265,8 +315,11 @@ const RecorderArea = () => {
     ) {
       translateVideo();
     }
-    getLastTranslationOnStorage();
   }, [location]);
+
+  useEffect(() => {
+    getLastTranslationOnStorage();
+  }, [location, results]);
 
   const renderOutputs = () => {
     return lastTranslation.map((item: string) => {
@@ -329,7 +382,11 @@ const RecorderArea = () => {
             </button>
           </div>
         </div>
-        <TranslatingModal loading={loading} setLoading={setLoading} />
+        <LoadingModal
+          loading={loading}
+          setLoading={setLoading}
+          text={loadingDescription}
+        />
         <VideoOutputModal
           outputs={results}
           showButtons

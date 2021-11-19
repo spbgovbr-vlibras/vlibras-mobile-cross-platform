@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { NativeStorage } from '@ionic-native/native-storage';
 import {
@@ -26,6 +26,8 @@ import { Strings } from './strings';
 
 import './styles.css';
 
+type GenericObject = { [key: string]: any };
+
 function Historic() {
   const translationsHistoric = useSelector(
     ({ video }: RootState) => video.translationsHistoric,
@@ -37,7 +39,8 @@ function Historic() {
   const history = useHistory();
   const location = useLocation();
 
-  const [historyStorage, setHistoryStorage] = useState<any>({});
+  const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
+
   const [keysToShow, setKeysToShow] = useState(
     env.videoTranslator ? ['text', 'video'] : ['text'],
   );
@@ -48,7 +51,9 @@ function Historic() {
   const playerService = PlayerService.getService();
 
   const promiseHistory = NativeStorage.getItem('history').then(
-    data => data,
+    data => {
+      return data;
+    },
     error => {
       setLog(error);
       return {};
@@ -61,16 +66,30 @@ function Historic() {
   };
 
   const loadHistory = async () => {
-    const resultPromise = await promiseHistory;
-    setHistoryStorage(resultPromise);
+    setHistoryStorage(await promiseHistory);
   };
 
+  // const arrayTest: GenericObject = {
+  //   '26/10/2021': { video: [['testandoLabel']] },
+  //   '25/10/2021': { video: [['testandoLabel Ontem']] },
+  //   // '17/10/2021': { text: ['oi'] },
+  //   '19/10/2021': {
+  //     video: [
+  //       ['Pneumonia', 'Pneumonia'],
+  //       ['exame_medico', 'nausea', 'exame_medico'],
+  //       ['saude'],
+  //     ],
+  //     text: ['alo meu nome é maria', 'testando', 'ok', 'teste'],
+  //   },
+  // };
+
   useEffect(() => {
-    loadHistory();
+    if (location.pathname === paths.HISTORY) loadHistory();
   }, [location]);
 
-  const formatArrayDate = (arrayHistoric: any) => {
-    const dates = Object.keys(arrayHistoric);
+  const formatArrayDate = () => {
+    const arrayState = JSON.parse(JSON.stringify(historyStorage));
+    const dates = Object.keys(arrayState);
     const formattedObjDate: any = {};
 
     dates.forEach(element => {
@@ -78,16 +97,19 @@ function Historic() {
       if (formattedObjDate[formattedDate]) {
         if (formattedObjDate[formattedDate].video) {
           formattedObjDate[formattedDate].video.push(
-            ...arrayHistoric[element].video,
+            ...arrayState[element].video,
           );
         }
         if (formattedObjDate[formattedDate].text) {
           formattedObjDate[formattedDate].text.push(
-            ...arrayHistoric[element].text,
+            ...arrayState[element].text,
           );
         }
       } else {
-        formattedObjDate[formattedDate] = arrayHistoric[element];
+        formattedObjDate[formattedDate] = {
+          text: arrayState[element].text || [],
+          video: arrayState[element].video || [],
+        };
       }
     });
 
@@ -95,14 +117,14 @@ function Historic() {
   };
 
   const renderAllItems = () => {
-    const formattedHistoric = formatArrayDate(historyStorage);
+    const formattedHistoric = formatArrayDate();
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 
     return datesMapped.map(column => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
-        if (formattedHistoric[column][key]) {
+        if (formattedHistoric[column][key].length != 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
@@ -123,15 +145,17 @@ function Historic() {
                           <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
                         </div>
                       )}
-                      <button
-                        className="container-outputs"
-                        onClick={() => openModalOutput(item)}
-                        type="button"
-                      >
-                        {item.map((value: string, keyWord: string) => (
-                          <span key={uuidv4()}>{value}</span>
-                        ))}
-                      </button>
+                      <div className="list-outputs">
+                        <button
+                          className="container-outputs"
+                          onClick={() => openModalOutput(item)}
+                          type="button"
+                        >
+                          {item.map((value: string, keyWord: string) => (
+                            <span key={uuidv4()}>{value}</span>
+                          ))}
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>

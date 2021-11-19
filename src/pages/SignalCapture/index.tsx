@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { BackgroundMode } from '@ionic-native/background-mode';
 
 import { File, DirectoryEntry } from '@ionic-native/file';
+
 import {
   VideoCapturePlus,
   VideoCapturePlusOptions,
@@ -11,18 +13,11 @@ import {
   VideoEditor,
 } from '@ionic-native/video-editor';
 import {
-  IonButton,
-  IonList,
-  IonRadioGroup,
-  IonListHeader,
-  IonLabel,
   IonItem,
-  IonRadio,
   IonHeader,
   IonToolbar,
   IonButtons,
   IonTitle,
-  IonMenuButton,
   IonPage,
   IonContent,
   IonAlert,
@@ -32,20 +27,18 @@ import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  IconCloseCircle,
   logoCaptureV2,
   logoTranslateVideo,
   logoTrashBtn,
   logoCaptureDisable,
   IconArrowLeft,
 } from 'assets';
-import Regionalism from 'pages/Regionalism';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
+import { Capacitor } from '@capacitor/core';
 
-import { ErrorModal } from '../../components';
+import { ErrorModal, LoadingModal } from '../../components';
 import paths from '../../constants/paths';
-import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -60,6 +53,8 @@ const SignalCapture = () => {
     '',
   ]);
 
+  const [loading, setLoading] = useState(false);
+  const [loadingDescription, setLoadingDescription] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertpage, setShowAlertPage] = useState(false);
 
@@ -91,16 +86,25 @@ const SignalCapture = () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30, highquality: true };
+        // BackgroundMode.enable();
         const mediafile = await VideoCapturePlus.captureVideo(options);
+        // BackgroundMode.disable();
+
+        setLoadingDescription('Processando...');
+        setLoading(true);
 
         const media = mediafile[0] as MediaFile;
         const path = media.fullPath.substring(
           0,
           media.fullPath.lastIndexOf('/'),
         );
-        const resolvedPath: DirectoryEntry = await File.resolveDirectoryUrl(
-          path,
-        );
+        let resolvedPath: DirectoryEntry;
+
+        if (Capacitor.getPlatform() === 'ios') {
+          resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+        } else {
+          resolvedPath = await File.resolveDirectoryUrl(path);
+        }
 
         File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
           (buffer: ArrayBuffer) => {
@@ -135,6 +139,7 @@ const SignalCapture = () => {
                       fileUri: resolvedPath.nativeURL + media.name,
                     }).then(
                       info => {
+                        setLoading(false);
                         dispatch(
                           Creators.setCurrentArrayVideo([
                             ...currentVideoArray,
@@ -149,6 +154,7 @@ const SignalCapture = () => {
                         history.push(paths.SIGNALCAPTURE);
                       },
                       err => {
+                        setLoading(false);
                         setShowErrorModal([
                           true,
                           'Não foi possível obter informações do vídeo',
@@ -156,25 +162,31 @@ const SignalCapture = () => {
                       },
                     );
                   },
-                  error =>
+                  error => {
+                    setLoading(false);
                     setShowErrorModal([
                       true,
                       'Não foi possível carregar a prévia do vídeo',
-                    ]),
+                    ]);
+                  },
                 );
               })
               .catch((err: Error) => {
+                setLoading(false);
                 setShowErrorModal([
                   true,
                   'Não foi possível criar a prévia do vídeo',
                 ]);
               });
           },
-          (error: Error) =>
-            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
+          (error: Error) => {
+            setLoading(false);
+            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+          },
         );
-      } catch (error) {
-        setShowErrorModal([true, 'Erro ao abrir câmera']);
+      } catch (error: any) {
+        setLoading(false);
+        if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
       }
     }
   };
@@ -306,6 +318,11 @@ const SignalCapture = () => {
           show={showErrorModal[0]}
           setShow={setShowErrorModal}
           errorMsg={showErrorModal[1]}
+        />
+        <LoadingModal
+          loading={loading}
+          setLoading={setLoading}
+          text={loadingDescription}
         />
         <IonAlert
           isOpen={showAlert}
