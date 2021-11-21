@@ -469,9 +469,9 @@ function Player() {
               type="button"
               onClick={handleChangeAvatar}
             >
-              {currentAvatar === 'icaro' && <IcaroAvatar />}
-              {currentAvatar === 'hozana' && <HozanaAvatar />}
-              {currentAvatar === 'guga' && <GugaAvatar />}
+              {currentAvatar === 'icaro' && <HozanaAvatar />}
+              {currentAvatar === 'hozana' && <GugaAvatar />}
+              {currentAvatar === 'guga' && <IcaroAvatar />}
             </button>
           </div>
         )}

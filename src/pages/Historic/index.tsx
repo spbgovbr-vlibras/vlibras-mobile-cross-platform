@@ -23,6 +23,7 @@ import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
+import { useTranslation } from 'hooks/Translation';
 
 import './styles.css';
 
@@ -48,6 +49,7 @@ function Historic() {
 
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
+  const { setTextPtBr } = useTranslation();
   const playerService = PlayerService.getService();
 
   const promiseHistory = NativeStorage.getItem('history').then(
@@ -68,20 +70,6 @@ function Historic() {
   const loadHistory = async () => {
     setHistoryStorage(await promiseHistory);
   };
-
-  // const arrayTest: GenericObject = {
-  //   '26/10/2021': { video: [['testandoLabel']] },
-  //   '25/10/2021': { video: [['testandoLabel Ontem']] },
-  //   // '17/10/2021': { text: ['oi'] },
-  //   '19/10/2021': {
-  //     video: [
-  //       ['Pneumonia', 'Pneumonia'],
-  //       ['exame_medico', 'nausea', 'exame_medico'],
-  //       ['saude'],
-  //     ],
-  //     text: ['alo meu nome é maria', 'testando', 'ok', 'teste'],
-  //   },
-  // };
 
   useEffect(() => {
     if (location.pathname === paths.HISTORY) loadHistory();
@@ -115,6 +103,16 @@ function Historic() {
 
     return formattedObjDate;
   };
+
+
+
+  async function onTranslationHistory(text: string) {
+    const formatted = text.trim();
+    const gloss = await setTextPtBr(formatted, false);
+
+    history.replace(paths.HOME);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+  }
 
   const renderAllItems = () => {
     const formattedHistoric = formatArrayDate();
@@ -171,14 +169,7 @@ function Historic() {
                       )}
                       <div
                         className="historic-container-box-ion-text"
-                        onClick={() => {
-                          history.push(paths.HOME);
-                          playerService.send(
-                            PlayerKeys.PLAYER_MANAGER,
-                            PlayerKeys.PLAY_NOW,
-                            item,
-                          );
-                        }}
+                        onClick={() => onTranslationHistory(item)}
                         tabIndex={0}
                         role="menu"
                         aria-hidden="true"
