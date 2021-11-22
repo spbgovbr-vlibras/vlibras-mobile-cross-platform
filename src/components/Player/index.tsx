@@ -338,13 +338,83 @@ function Player() {
               marginRight: 6,
               position: 'absolute',
               width: '100vw',
-              bottom: 54,
-              left: -40,
+              bottom: 578,
+              left: 0,
             }}
           >
             <TutorialPopover
-              title="Dicionário"
-              description="Consulte os sinais disponíveis no vlibras"
+              title="Alterne o tipo de tradução"
+              description="Tradução de PT-BR para Libras e vice versa"
+              position="tr"
+              isEnabled
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              marginRight: 6,
+              position: 'absolute',
+              width: '100vw',
+              bottom: 578,
+              left: -108,
+            }}
+          >
+            <TutorialPopover
+              title={'\xa0\xa0\xa0Menu'}
+              description={
+                '\xa0\xa0\xa0Informações e ajustes adicionais do tradutor'
+              }
+              position="tl"
+              isEnabled={false}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              marginRight: 6,
+              position: 'absolute',
+              width: '100vw',
+              bottom: 28,
+              left: -18,
+            }}
+          >
+            <TutorialPopover
+              title="Historico"
+              description="Acesse as traduções dos últimos 30 dias"
+              position="br"
+              isEnabled
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              marginRight: 6,
+              position: 'absolute',
+              width: '100vw',
+              bottom: 54,
+              left: -45,
+            }}
+          >
+            <TutorialPopover
+              title="Tradução PT-BR"
+              description="Escreva ou cole o texto para ser traduzido"
               position="bc"
               isEnabled={false}
             />
