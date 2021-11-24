@@ -35,6 +35,7 @@ import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 
 import './styles.css';
+import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
@@ -68,6 +69,7 @@ function Player() {
     event: undefined,
   });
   const history = useHistory();
+  const { currentStep, goNextStep, onCancel } = useTutorial();
 
   const { generateVideo, textGloss } = useTranslation();
 
@@ -316,14 +318,14 @@ function Player() {
               position: 'absolute',
               width: '100vw',
               bottom: 50,
-              left: -16,
+              left: 0,
             }}
           >
             <TutorialPopover
               title="Dicionário"
               description="Consulte os sinais disponíveis no vlibras"
               position="bl"
-              isEnabled={false}
+              isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
           <button
@@ -338,36 +340,57 @@ function Player() {
           </button>
         </div>
 
-        <div
-          style={{
-            position: 'relative',
-          }}
-        >
+        <div>
           <div
             style={{
-              marginRight: 6,
+              margin: 'auto',
               position: 'absolute',
+              bottom: 70,
+              left: 0,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
               width: '100vw',
-              bottom: 54,
-              left: -40,
             }}
           >
             <TutorialPopover
-              title="Dicionário"
-              description="Consulte os sinais disponíveis no vlibras"
+              title="Tradução PT-BR"
+              description="Escreva ou cole o texto para ser traduzido"
               position="bc"
-              isEnabled={false}
+              isEnabled={currentStep === TutorialSteps.TRANSLATION}
             />
           </div>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={() => history.push(paths.TRANSLATOR)}
-          >
-            <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
         </div>
+        <button
+          className="player-action-button player-action-button-insert"
+          type="button"
+          onClick={() => history.push(paths.TRANSLATOR)}
+        >
+          <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
+        </button>
 
+        <div
+          style={{
+            margin: 'auto',
+            position: 'absolute',
+            bottom: 60,
+            left: 0,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+            paddingRight: '28px',
+          }}
+        >
+          <TutorialPopover
+            title="Histórico"
+            description="Acesse as traduções dos últimos 30 dias"
+            position="br"
+            isEnabled={currentStep === TutorialSteps.HISTORY}
+          />
+        </div>
         <button
           className="player-action-button-transparent"
           type="button"
@@ -399,6 +422,24 @@ function Player() {
 
   return (
     <div className="player-container">
+      <div
+        style={{
+          position: 'absolute',
+          padding: '8px',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          zIndex: 2,
+        }}
+      >
+        <TutorialPopover
+          title="Menu"
+          description="Informações e ajustes adicionais do tradudor"
+          position="tl"
+          isEnabled={currentStep === TutorialSteps.MENU}
+        />
+      </div>
       <IonPopover
         cssClass="player-popover"
         event={popoverState.event}
@@ -461,7 +502,7 @@ function Player() {
                 title="Trocar avatar"
                 description="Alterne entre os avatares disponíveis"
                 position="rb"
-                isEnabled={false}
+                isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
               />
             </div>
             <button
@@ -493,8 +534,24 @@ function Player() {
         />
       </div>
 
-      {hasFinished && !isPlaying && (
+      {(currentStep === TutorialSteps.LIKED_TRANSLATION ||
+        currentStep === TutorialSteps.SHARE ||
+        (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
+          <div
+            style={{
+              top: -54,
+              position: 'absolute',
+              right: 10,
+            }}
+          >
+            <TutorialPopover
+              title="Gostou da tradução?"
+              description="Avalie e sugira melhorias."
+              position="br"
+              isEnabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
+            />
+          </div>
           <button
             className="player-button-rounded"
             type="button"
@@ -502,6 +559,21 @@ function Player() {
           >
             <IconThumbs color="#FFF" size={18} />
           </button>
+
+          <div
+            style={{
+              top: -2,
+              position: 'absolute',
+              right: 10,
+            }}
+          >
+            <TutorialPopover
+              title="Compartilhar"
+              description="Vídeo com a tradução"
+              position="br"
+              isEnabled={currentStep === TutorialSteps.SHARE}
+            />
+          </div>
           <button
             className="player-button-rounded"
             type="button"
@@ -531,6 +603,22 @@ function Player() {
         setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
         isPlaying={isPlaying}
       />
+      {TutorialSteps.INITIAL === currentStep && (
+        <div className="tutorial-box-shadow">
+          <h1>Veja como usar</h1>
+          <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+            <button className="button-outlined" onClick={onCancel}>
+              Ver depois
+            </button>
+            <button
+              className="button-solid"
+              onClick={goNextStep}
+            >
+              Inicar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

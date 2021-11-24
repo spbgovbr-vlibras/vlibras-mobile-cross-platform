@@ -1,6 +1,8 @@
 import React from 'react';
 
+import { ArrowLeft } from 'assets';
 import './styles.css';
+import { TUTORIAL_QUEUE, useTutorial } from 'hooks/Tutorial';
 
 type ArrowPosition =
   | 'tl'
@@ -28,13 +30,25 @@ const TutorialPopover = ({
   description,
   position,
   isEnabled = false,
-}: TutorialPopoverProps) =>
-  isEnabled ? (
+}: TutorialPopoverProps) => {
+  const { currentStepIndex, goNextStep } = useTutorial();
+
+  return isEnabled ? (
     <div className="tutorial-popover-container">
-      <h1>{title}</h1>
-      <h2>{description}</h2>
+      <div className="tutorial-row">
+        <div>
+          <h1>{title}</h1>
+          <h2>{description}</h2>
+        </div>
+        <div className="tutorial-column">
+          <button onClick={goNextStep}>
+            <ArrowLeft />
+          </button>
+          <span>{`${currentStepIndex + 1}/${TUTORIAL_QUEUE.length}`}</span>
+        </div>
+      </div>
       <div className={`container__arrow container__arrow--${position}`} />
     </div>
   ) : null;
-
+};
 export default TutorialPopover;

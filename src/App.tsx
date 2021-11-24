@@ -22,6 +22,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import { TranslationProvider } from 'hooks/Translation';
+import { TutorialProvider } from 'hooks/Tutorial';
 
 import Routes from './routes';
 import PlayerService from './services/unity';
@@ -42,7 +43,9 @@ function App() {
     <IonApp>
       <Provider store={store}>
         <TranslationProvider>
-          <Routes />
+          <TutorialProvider>
+            <Routes />
+          </TutorialProvider>
         </TranslationProvider>
       </Provider>
     </IonApp>

@@ -118,6 +118,7 @@ import Vlibraslogo from './images/vlibraslogo.png';
 export { ReactComponent as IcaroAvatar } from './images/icaro.svg';
 export { ReactComponent as GugaAvatar } from './images/guga.svg';
 export { ReactComponent as HozanaAvatar } from './images/hozana.svg';
+export { ReactComponent as ArrowLeft } from './images/arrow-left.svg';
 
 export {
   logoSubtitleOff,
