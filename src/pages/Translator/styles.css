@@ -1,0 +1,91 @@
+.translator-textarea {
+  border: 1px solid #bababa;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 4px;
+  font-family: Rawline;
+  z-index: 0;
+  font-style: italic;
+}
+
+.translator-textarea.translator-textarea {
+  padding: 0px 15px;
+}
+
+.translator-input-box {
+  position: relative;
+}
+
+.translator-textarea:hover {
+  --background: #fff5cc;
+  border: 1px solid #1447a6;
+}
+
+.translator-box {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+}
+
+.translator-background-mic {
+  color: white;
+}
+
+.translator-header {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 145%;
+  text-align: center;
+  color: #4b4b4b;
+  margin: 20px;
+}
+
+.translator-item-button-save {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 37px;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.translator-button-save {
+  border-radius: 24px;
+  background-color: #1447a6;
+  border-radius: 24px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: row;
+}
+
+.translator-button-save span {
+  margin-left: 8px;
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 145%;
+  /* or 26px */
+  text-align: center;
+  color: white;
+}
+
+.translator-button-save svg {
+  margin-right: 8px;
+}
+
+.translator-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex: 1;
+  height: 100%;
+}
+
+.translator-button-hands {
+  padding-right: 5px;
+}

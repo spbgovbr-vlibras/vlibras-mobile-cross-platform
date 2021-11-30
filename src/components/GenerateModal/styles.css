@@ -1,0 +1,61 @@
+.generate-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.generate-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 160px;
+  width: 250px;
+}
+
+.generate-modal .ion-page {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.generate-modal h1 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 150%;
+  /* identical to box height, or 24px */
+  color: #1B1B1B;
+  margin: 0 !important;
+}
+
+.generate-modal h2 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 150%;
+  margin: 0 !important;
+  text-align: center;
+  padding: 4px 0 16px 0;
+  /* identical to box height, or 21px */
+
+  color: #1B1B1B;
+}
+
+
+.generate-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+
+.generate-modal .loading {
+  width: 50px;
+  height: 50px;
+}
+
+.generate-modal-spinner  {
+  width: 58px;
+  height: 58px;
+  --color: #1447A6;
+}

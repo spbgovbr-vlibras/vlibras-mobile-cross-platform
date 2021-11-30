@@ -1,0 +1,17 @@
+.bullet-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0px;
+}
+
+.bullet {
+  width: 5%;
+  height: 14px;
+  border-radius: 10px;
+  background-color: var(--ion-color-bullet-deactived);
+  margin: 2px;
+}
+
+.bullet.active {
+  background-color: var(--ion-color-bullet-actived);
+}

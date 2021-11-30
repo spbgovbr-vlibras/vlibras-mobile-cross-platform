@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">VLibras</string>
+    <string name="title_activity_main">VLibras</string>
+    <string name="package_name">com.lavid.vlibrasdroid</string>
+    <string name="custom_url_scheme">com.lavid.vlibrasdroid</string>
+</resources>

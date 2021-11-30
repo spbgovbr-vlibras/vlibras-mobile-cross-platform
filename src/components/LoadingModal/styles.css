@@ -1,0 +1,32 @@
+.translating-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.translating-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 200px;
+  margin: 0px 70px;
+}
+
+.translating-modal .ion-page {
+  padding: 16px 20px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.translating-modal .modal-title {
+  font-weight: 700;
+  color: var(--ion-color-modal-title);
+  font-size: 18px;
+  line-height: 20px;
+  text-align: center;
+  margin-top: -20px;
+}
+
+.translating-modal .loading {
+  width: 72px;
+  height: 72px;
+  margin-top: 20px;
+}

@@ -1,0 +1,110 @@
+.title-recorder {
+  font-family: Rawline;
+  text-align: center;
+  height: 100%;
+}
+
+.recorder-area {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.recorder-area .history-recorder {
+  position: absolute;
+  margin-left: 180px;
+  margin-top: 24px;
+}
+
+.fixed-area-recorder {
+  position: fixed;
+  bottom: 35px;
+  width: 100%;
+}
+
+.area-button-recorder p {
+  font-family: Rawline;
+  font-size: 12px;
+  margin: 0px;
+  text-align: center;
+}
+
+.main-area-recorder {
+  margin: auto;
+  height: 75%;
+  padding: 20px;
+  border: none;
+  background: none;
+}
+
+.main-area-recorder .bg-img {
+  position: absolute;
+  margin: auto;
+  top: -70px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+}
+
+.main-area-recorder .bg-img.bg-opacity {
+  opacity: 0.6;
+}
+
+.main-area-recorder .title-area {
+  font-family: Rawline;
+  display: inline-flex;
+  width: 100%;
+  color: #1b1b1b;
+  font-size: 14px;
+}
+
+.main-area-recorder .logo-icon {
+  margin-right: 7px;
+}
+
+.main-area-recorder .title {
+  display: inline-flex;
+  width: 100%;
+}
+
+.main-area-recorder .container-outputs {
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  flex-flow: wrap;
+  /* overflow: hidden;
+  overflow-x: auto; */
+  /* white-space: nowrap; */
+}
+
+.main-area-recorder .container-outputs span {
+  font-family: Rawline;
+  background: #ededed;
+  color: #565656;
+  font-size: 14px;
+  line-height: 17.5px;
+  border-radius: 48px;
+  padding: 6px 12px;
+  margin: 4px 5px;
+  cursor: pointer;
+  /* display: flex;
+  justify-content: flex-start; */
+  /* margin: 20px; */
+  /* display: inline-block; */
+}
+.area-button-recorder {
+  position: relative;
+  display: inline-block;
+}
+
+.main-area-recorder-button-none {
+  border: 0;
+  background: none;
+}
+
+.main-area-recorder-button-none.container-output {
+  width: 100%;
+}

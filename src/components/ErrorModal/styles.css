@@ -1,0 +1,64 @@
+.error-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.error-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 180px;
+  width: 200px;
+}
+
+.error-modal .ion-page {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.error-modal .modal-title {
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  color: var(--ion-color-modal-body);
+  /* margin: 5px 0px -15px 0px; */
+}
+
+.error-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+
+.error-modal h1 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 150%;
+  /* identical to box height, or 24px */
+  color: #1b1b1b;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.error-modal h2 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 150%;
+  margin: 5px 10px !important;
+  padding: 0 !important;
+  text-align: center;
+  color: #1b1b1b;
+}
+
+.error-modal .loading {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 8px;
+}

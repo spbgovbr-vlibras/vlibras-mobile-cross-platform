@@ -1,0 +1,95 @@
+.suggestion-feedback-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.suggestion-feedback-modal .modal-wrapper {
+  border-radius: 8px;
+  height: 124px;
+  margin: 0px 50px;
+}
+
+.suggestion-feedback-modal .ion-page {
+  padding: 16px 20px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.suggestion-feedback-modal .text-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-self: center;
+}
+
+.suggestion-feedback-modal .modal-title {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 150%;
+  text-align: center;
+  color: #000;
+  margin: 0 !important;
+  /*margin: 2px 0px -15px 0px;*/
+}
+
+.suggestion-feedback-modal .modal-desc {
+  color: var(--ion-color-modal-body);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  margin: 20px 0px 0px 0px;
+}
+.suggestion-feedback-modal .ion-page {
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  padding-left: 0px;
+}
+.suggestion-feedback-modal .subtitle{
+  margin: 0 !important;
+  margin-top: 6px;
+  color: black;
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 150%;
+}
+
+.suggestion-feedback-modal .wikilibras-chip {
+  height: 34px;
+
+  margin-top: 13px;
+  padding: 8px 16px;
+
+  border: 1px solid #8e8e8e;
+  box-sizing: border-box;
+  border-radius: 25px;
+  background-color: #fff;
+
+  font-family: Helvetica Neue;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+}
+
+.suggestion-feedback-modal .chip-text-space{
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+  /* identical to box height, or 12px */
+  
+  display: flex;
+  align-items: center;
+  text-align: center;
+  
+  color: #3E4049;
+  margin-right: 4px;
+}

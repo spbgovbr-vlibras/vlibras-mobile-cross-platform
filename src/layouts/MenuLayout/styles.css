@@ -1,0 +1,53 @@
+.menu-toolbar-title {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 125%;
+  color: #1447a6;
+}
+
+.menu-layout-container {
+  background-color: white;
+}
+
+.menu-icon-drawer {
+  color: #1447a6;
+}
+
+.menu-icon-share {
+  width: 18px;
+  height: 18px;
+  color: #4b4b4b;
+}
+
+.menu-container-end {
+  display: flex;
+  flex-direction: row;
+  justify-items: center;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.menu-container-end button {
+  background: none;
+}
+
+.menu-item-text {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 125%;
+  color: #969696;
+  margin-right: 8px;
+}
+
+.menu-item-link {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  margin-left: 8px;
+}

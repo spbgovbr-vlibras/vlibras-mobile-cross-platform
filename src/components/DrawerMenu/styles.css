@@ -1,0 +1,130 @@
+.drawer-menu-container {
+  padding: 40px 0 24px 0;
+}
+
+.drawer-menu-image-header {
+  /*width: 111px;
+  height: 38px;*/
+  margin-left: 32px;
+}
+
+.drawer-menu-header-logo {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+.drawer-menu-header-label {
+  font-family: Mulish;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 24px;
+  letter-spacing: 0.3px;
+  color: #373f41;
+
+  margin-left: 4px;
+
+  align-self: center;
+}
+
+.drawer-menu-divider {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.drawer-menu-title-header {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  color: #939293;
+  margin: 16px 8px 8px 8px;
+}
+
+.drawer-menu-item {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 125%;
+  margin: 0px 10px;
+
+  --color: #4b4b4b;
+
+  border-radius: 4px;
+  /* margin: 0 8px; */
+}
+
+.drawer-menu-item-activated {
+  --background: #d6e5f9;
+  --color: #1447a6;
+  border-radius: 4px;
+  margin: 0px 10px;
+}
+
+.drawer-menu-item svg {
+  min-width: 24px;
+}
+
+.drawer-menu-item-label {
+  margin-left: 18px;
+  width: 100%;
+}
+
+.drawer-menu-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 32px;
+}
+
+.drawer-menu-sub-item {
+  text-align: right;
+  flex: auto;
+  color: #1447a6;
+  margin-right: 7px;
+  width: 40%;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.drawer-menu-sub-item.translator {
+  outline: none;
+}
+
+.arrow-down {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #4b4b4b;
+  margin-top: 2px;
+}
+
+.dropdown-trans-picker {
+  background: white;
+  position: absolute;
+  top: 155px;
+  right: 10px;
+  z-index: 999888;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  width: 90px;
+}
+
+.dropdown-trans-picker .option-trans {
+  font-family: Rawline !important;
+  color: #4e4e4e;
+  padding: 12px 20px;
+  background: initial;
+  font-weight: 600;
+  width: 100%;
+}
+
+.dropdown-trans-picker .option-trans.selected {
+  color: var(--ion-color-modal-title);
+  background: rgba(0, 0, 0, 0.08);
+}

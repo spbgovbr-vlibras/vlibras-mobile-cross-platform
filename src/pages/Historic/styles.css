@@ -1,0 +1,177 @@
+.historic-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.historic-container-ion-chips {
+  display: flex;
+  flex-direction: row;
+  margin-left: 16px;
+}
+
+.historic-container-ion-chip {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+  color: #4b4b4b;
+  background: #ededed;
+}
+
+.historic-container-ion-chip.active {
+  color: #1447a6;
+  background: #d6e5f9;
+  font-weight: bold;
+}
+
+.historic-container-ion-img-1 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 4px;
+  margin-left: 18px;
+  margin-top: 19px;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  /* identical to box height, or 15px */
+
+  color: #1447a6;
+}
+
+.historic-container-ion-img-translator-1 {
+  width: 17px;
+}
+
+.historic-container-ion-img-2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 4px;
+  margin-top: 8px;
+  margin-right: 16px;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 125%;
+  /* identical to box height, or 15px */
+
+  color: #1447a6;
+}
+
+.historic-container-ion-img-translator-2 {
+  width: 17px;
+}
+
+.historic-container-box-ion-item {
+  display: flex;
+  justify-items: center;
+
+  width: 100%;
+
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 125%;
+  /* or 17px */
+
+  color: #747474;
+}
+
+.historic-container-box-ion-text-area {
+  padding: 6px 8px;
+  margin: 10px 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: Rawline;
+  color: #747474;
+  font-size: 14px;
+}
+
+.historic-container-ion-chips-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  margin-top: 8px;
+  margin-right: 16px;
+  margin-left: 16px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  color: #747474;
+}
+
+.historic-container-ion-chips-box-text {
+  font-family: Rawline;
+  background: #ededed;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.historic-container .container-outputs {
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  border-radius: 4px;
+  padding: 5px 8px;
+  /* overflow: hidden;
+  overflow-x: auto;
+  white-space: nowrap; */
+  margin: 5px 15px;
+  background: transparent;
+  display: flex;
+  flex-flow: wrap;
+  width: 100%;
+}
+
+.historic-container .container-outputs span {
+  font-family: Rawline;
+  background: #ededed;
+  color: #565656;
+  font-size: 14px;
+  line-height: 17.5px;
+  border-radius: 48px;
+  padding: 6px 12px;
+  margin: 4px 5px;
+  cursor: pointer;
+  display: inline-block;
+  border: none;
+}
+
+.historic-container .list-outputs {
+  display: flex;
+}
+
+.date-desc {
+  font-size: 12px;
+  color: #1b1b1b;
+  font-family: Rawline;
+  text-align: center;
+}
+
+.container-render-historic {
+  margin-bottom: 20px;
+}
+
+.empty-historic {
+  font-family: Rawline;
+  color: #565656;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 70px;
+}
