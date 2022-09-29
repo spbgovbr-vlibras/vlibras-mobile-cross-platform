@@ -10,6 +10,7 @@ interface GenerateModalProps {
   visible: boolean;
   setVisible: (show: boolean) => void;
   translationRequestType?: TranslationRequestType;
+  onModalPresented?: () => void;
 }
 
 const getModalTexts = (translationRequestType: TranslationRequestType): {
@@ -34,10 +35,12 @@ const GenerateModal = (
   { 
     visible, 
     setVisible, 
-    translationRequestType = TranslationRequestType.VIDEO_SHARE 
+    translationRequestType = TranslationRequestType.VIDEO_SHARE,
+    onModalPresented,
   }: GenerateModalProps
 ) => {
   const modalTexts = getModalTexts(translationRequestType);
+
   return (
     <IonModal
       isOpen={visible}
@@ -45,6 +48,11 @@ const GenerateModal = (
       onDidDismiss={() => setVisible(false)}
       swipeToClose={false}
       backdropDismiss={false}
+      onDidPresent={() => {
+        if(onModalPresented) {
+          onModalPresented()
+        }
+      }}
     >
       <h1>{modalTexts.title}</h1>
       <h2>{modalTexts.description}</h2>

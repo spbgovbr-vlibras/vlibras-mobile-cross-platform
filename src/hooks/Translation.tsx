@@ -73,6 +73,7 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [loadingVideoGeneration, setVideoGenerationLoading] = useState(false);
   const [loadingTextTranslation, setTextTranslationLoading] = useState(false);
   const [translateRequestType, setTranslateRequestType] = useState(TranslationRequestType.VIDEO_SHARE);
+  const [translationError, setTranslationError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
@@ -96,6 +97,7 @@ const TranslationProvider: React.FC = ({ children }) => {
   async function generateVideo() {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
     setVideoGenerationLoading(true);
+    setTranslationError(false);
     try {
       const gloss = await translate({ text: textPtBr });
       const response = await generateVideoTranslate({ gloss });
@@ -110,11 +112,11 @@ const TranslationProvider: React.FC = ({ children }) => {
       })
         .then(() => handleShareVideo(uuid))
         .catch(() => {
-          setVideoGenerationLoading(false);
+          setTranslationError(true);
           setErrorModalVisible(true);
         });
     } catch {
-      setVideoGenerationLoading(false);
+      setTranslationError(true);
       setErrorModalVisible(true);
     }
   }
@@ -122,7 +124,8 @@ const TranslationProvider: React.FC = ({ children }) => {
   const handleTextPtBr = useCallback(
     async (text: string, fromDictionary: boolean) => {
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
-      setTextTranslationLoading(true)
+      setTextTranslationLoading(true);
+      setTranslationError(false);
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
@@ -138,10 +141,10 @@ const TranslationProvider: React.FC = ({ children }) => {
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
-        setTextTranslationLoading(false)
+        setTranslationError(true);
         return gloss;
       } catch {
-        setTextTranslationLoading(false)
+        setTranslationError(true);
         // don't need
       }
       return text;
@@ -182,6 +185,12 @@ const TranslationProvider: React.FC = ({ children }) => {
     }
   }
 
+  const onModalPresented = () => {
+    if(translationError) {
+      setModalVisible(false);
+    }
+  }
+
   return (
     <TranslationContext.Provider
       value={{
@@ -197,7 +206,8 @@ const TranslationProvider: React.FC = ({ children }) => {
       <GenerateModal 
         visible={isLoading} 
         setVisible={setModalVisible} 
-        translationRequestType={translateRequestType} 
+        translationRequestType={translateRequestType}
+        onModalPresented={onModalPresented}
       />
       
       <ErrorModal
