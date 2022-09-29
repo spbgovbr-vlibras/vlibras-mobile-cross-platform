@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+
 import { IonModal, IonText, IonChip } from '@ionic/react';
-import './styles.css';
-import { Strings } from './strings';
+
 import { IconArrowUpRight } from 'assets';
+import './styles.css';
+
+import { Strings } from './strings';
 
 interface SuggestionFeedbackModalProps {
   showSuggestionFeedbackModal: any;
@@ -13,26 +16,30 @@ const SuggestionFeedbackModal = ({
   showSuggestionFeedbackModal,
   setShowSuggestionFeedbackModal,
 }: SuggestionFeedbackModalProps) => {
-  const handleCloseModal = () => { 
+  const handleCloseModal = () => {
     setShowSuggestionFeedbackModal(false);
   };
 
   const handleOpenWikilibrasSite = () => {
     window.open('https://wiki.vlibras.gov.br', '_system', 'location=yes');
   };
+
+  if (showSuggestionFeedbackModal) {
+    setTimeout(handleCloseModal, 2000);
+  }
   return (
     <IonModal
       isOpen={showSuggestionFeedbackModal}
-      cssClass={'suggestion-feedback-modal'}
+      cssClass="suggestion-feedback-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose={true}
+      swipeToClose
     >
       <div className="text-container">
         <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
-        <IonText class="subtitle">{Strings.SUBTITLE_MENU_MODAL}</IonText>
+        <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>
       </div>
       <IonChip class="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
-        <IonText class="chip-text-space">{Strings.CHIP_TEXT}</IonText>
+        <span className="chip-text-space">{Strings.CHIP_TEXT}</span>
         <IconArrowUpRight />
       </IonChip>
     </IonModal>

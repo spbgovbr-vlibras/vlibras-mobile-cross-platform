@@ -1,6 +1,7 @@
 .evaluation-no-modal {
   background: var(--ion-color-grey-65);
   font-family: Rawline;
+  display: flex;;
 }
 
 .evaluation-no-modal .modal-wrapper {
@@ -12,9 +13,9 @@
 
 .evaluation-no-modal .ion-page {
   padding: 16px 20px;
-  justify-content: center;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .evaluation-no-modal .modal-title {
@@ -24,11 +25,9 @@
   text-align: center;
 
   display: flex;
-  flex: 1;
   align-items: baseline;
-
-  margin-top: 0px;
   /*margin: 2px 0px -15px 0px;*/
+  margin: 0 !important;
 }
 
 .evaluation-no-modal .modal-desc {
@@ -51,15 +50,12 @@
   font-size: 16px;
   line-height: 150%;
   /* identical to box height, or 24px */
-
+  margin-top: 14px;
   color: #4e4e4e;
   background: #ffffff;
   border: 1px solid #e0e0e0;
-
-  margin-bottom: 38px;
-  margin-top:20px;
-
 }
+
 .evaluation-modal-container-close-button {
   display: flex;
   flex: 1;
@@ -72,6 +68,9 @@
   margin-top: 10px;
   padding: 0px;
 }
+
 .evaluation-no-modal .text-space {
   margin-left: 6px;
+  color: black;
+  margin: 0 !important;
 }

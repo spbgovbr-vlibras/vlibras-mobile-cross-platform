@@ -181,7 +181,7 @@
   position: absolute;
   font-size: 18px;
   width: 224px;
-  height: 138px;
+  height: 160px;
   /* Altera a box */
 }
 .popup-box-signal-cap .alert-button-group {
@@ -255,4 +255,9 @@
 .arrow-left-container-start {
   margin-left: 14px;
   margin-top: 5px;
+}
+
+.signal-capture-button-none {
+  border: 0;
+  background: none;
 }

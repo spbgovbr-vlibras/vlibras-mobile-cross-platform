@@ -1,0 +1,130 @@
+.tutorial-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  justify-content: flex-start;
+
+  margin: 0;
+  margin-left: 16px;
+}
+
+.tutorial-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin-top: 16px;
+  margin-left: 16px;
+}
+.tutorial-header-text {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 125%;
+  /* identical to box height, or 22px */
+
+
+  /* Primary - dark */
+
+  color: #1447a6;
+}
+.tutorial-tip-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin-top: 27px;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.tutorial-tip-text {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16.8px;
+  line-height: 120%;
+  /* or 20px */
+
+  margin-right: 139px;
+
+
+  /* Gray */
+
+  color: #4e4e4e;
+}
+
+.tutorial-toggle {
+  width: 48px;
+  height: 24px;
+
+  /* Primaria */
+  border-radius: 12px;
+}
+
+.tutorial-text-container {
+  display: flex;
+  flex-direction: column;
+}
+.tutorial-texts-1 {
+  font-family: Roboto;
+  font-style: solid;
+  font-weight: 600;
+  font-size: 16.8px;
+  line-height: 150%;
+  /* or 25px */
+
+  /* Gray */
+
+  color: #4e4e4e;
+
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+.tutorial-texts-2 {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13.8px;
+  line-height: 180%;
+  /* or 25px */
+
+  /* Gray */
+
+  color: #4e4e4e;
+
+  margin-top: 8px;
+}
+
+.tutorial-texts-3 {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13.8px;
+  line-height: 180%;
+  /* or 25px */
+
+  /* Gray */
+
+  color: #4e4e4e;
+}
+
+.tutorial-texts-4 {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16.8px;
+  line-height: 150%;
+  /* or 25px */
+
+  color: #4e4e4e;
+
+  margin-top: 32px;
+  margin-bottom: 8px;
+
+}
+
+.tutorial-youtube-logo {
+  width: 24px;
+}

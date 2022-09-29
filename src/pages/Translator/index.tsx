@@ -1,73 +1,47 @@
 import React, { useState } from 'react';
 
-import {
-  IonText,
-  IonButton,
-  IonTextarea,
-  IonContent,
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-} from '@ionic/react';
-import { useHistory } from 'react-router-dom';
+import { IonText, IonTextarea, IonContent } from '@ionic/react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
+import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
-import paths from '../../constants/paths';
-import { reloadHistory } from 'utils/setHistory';
 import { Creators } from 'store/ducks/translator';
+import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 
 import './styles.css';
-import { IconArrowLeft } from 'assets';
 
 const playerService = PlayerService.getService();
 
-function Translator() {
+const Translator = () => {
   const [text, setText] = useState('');
   const history = useHistory();
   const dispatch = useDispatch();
 
-  function translate() {
+  const { setTextPtBr } = useTranslation();
+
+  async function translate() {
+    const formatted = text.trim();
+
     const today = new Date().toLocaleDateString('pt-BR');
 
-    reloadHistory(today, text, 'text');
+    reloadHistory(today, formatted, 'text');
 
-    //mock
-    // dispatch(
-    //   Creators.setLastTranslator({
-    //     data: text,
-    //     date: today,
-    //     key: 'text',
-    //   }),
-    // );
+    const gloss = await setTextPtBr(formatted, false);
 
-    history.push(paths.HOME);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
-    dispatch(Creators.setTranslatorText(text));
+    history.replace(paths.HOME);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+    dispatch(Creators.setTranslatorText(formatted));
   }
 
   return (
-    <IonPage>
-      <IonHeader className="ion-no-border">
-        <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
-            {Strings.TRANSLATOR_TITLE}
-          </IonTitle>
-
-          <IonButtons slot="start" onClick={() => history.goBack()}>
-            <div className="arrow-left-container-start">
-              <IconArrowLeft color="#969696" />
-            </div>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+    <MenuLayout title={Strings.TRANSLATOR_TITLE} mode="back">
       <IonContent>
         <div className="scroll-content">
           <div className="translator-box">
@@ -77,25 +51,29 @@ function Translator() {
             <div className="translator-input-box">
               <IonTextarea
                 class="translator-textarea"
-                placeholder={Strings.TRANSLATOR_PLACEHOLDER}
-                autofocus
+                //  placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 rows={5}
                 cols={5}
                 wrap="soft"
                 required
-                onIonChange={e => setText(e.detail.value!)}
+                onIonChange={e => setText(e.detail.value || '')}
               />
             </div>
           </div>
           <div className="translator-item-button-save">
-            <IonButton class="translator-button-save" onClick={translate}>
+            <button
+              className="translator-button-save"
+              onClick={translate}
+              type="button"
+            >
               <IconHandsTranslate color="white" />
-              {Strings.TRANSLATOR_TEXT_BUTTON}
-            </IonButton>
+              <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
+            </button>
           </div>
         </div>
       </IonContent>
-    </IonPage>
+    </MenuLayout>
   );
-}
+};
+
 export default Translator;

@@ -8,27 +8,44 @@ import {
   IonToolbar,
   IonPage,
   IonMenuButton,
+  IonLabel,
 } from '@ionic/react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { Creators } from 'store/ducks/video';
-import { useDispatch } from 'react-redux';
-import { env } from '../../environment/env';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { IconTranslate, IconCloseCircle, IconShare } from 'assets';
+import { IconTranslate, IconShare, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
+import { env } from 'environment/env';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
 
 import './styles.css';
 
+type MODE = 'menu' | 'back';
+
 interface MenuLayoutProps {
   title: string;
+  mode?: MODE;
 }
 
-const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
+const MenuLayout: React.FC<MenuLayoutProps> = ({
+  children,
+  title,
+  mode = 'menu',
+}) => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
+
+  const onboardingFirstAccess = useSelector(
+    ({ video }: RootState) => video.onboardingFirstAccess,
+  );
+
+  const isVideoScreen = useSelector(
+    ({ video }: RootState) => video.isVideoScreen,
+  );
 
   function openMenu() {
     menuController.open();
@@ -41,47 +58,45 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         if (env.videoTranslator) {
           return (
             <>
-              <span
+              <button
                 className="menu-item-text"
-                onClick={() => history.push(paths.ONBOARDING)}
+                onClick={() =>
+                  history.push(
+                    onboardingFirstAccess
+                      ? paths.ONBOARDING
+                      : paths.RECORDERAREA,
+                  )
+                }
+                type="button"
               >
                 {Strings.MENU_PT_BR}
-              </span>
+              </button>
               <IconTranslate color="#2365DE" />
             </>
           );
-        } else {
-          return <></>;
         }
+        return <></>;
+
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
         dispatch(Creators.setIsVideoScreen(true));
+        dispatch(Creators.setFirstAccess(false));
         return (
           <>
-            <span
+            <IonLabel
               className="menu-item-text"
               onClick={() => history.push(paths.HOME)}
             >
               LIBRAS
-            </span>
-            <IconTranslate color="#2365DE" />
+            </IonLabel>
+            <IconTranslate color="#315EB1" />
           </>
         );
-      case paths.HISTORY:
-      case paths.DICTIONARY:
-        return (
-          <button onClick={() => history.goBack()} type="button">
-            <IconCloseCircle color="#2365DE" />
-          </button>
-        );
-
-      case paths.ABOUT:
-        return <IconShare color="#4B4B4B" />;
 
       default:
         return null;
     }
-  }, [location, history]);
+  }, [location, history, dispatch]);
 
   return (
     <IonPage className="menu-layout-container">
@@ -89,11 +104,20 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({ children, title }) => {
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">{title}</IonTitle>
           <IonButtons slot="start">
-            <IonMenuButton
-              autoHide
-              onClick={openMenu}
-              className="menu-icon-drawer"
-            />
+            {mode === 'menu' ? (
+              <IonMenuButton
+                autoHide
+                onClick={openMenu}
+                className="menu-icon-drawer"
+              />
+            ) : (
+              <Link
+                to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
+                className="menu-item-link"
+              >
+                <IconArrowLeft color="#315EB1" />
+              </Link>
+            )}
           </IonButtons>
           <IonButtons slot="end">
             <div className="menu-container-end">{ToolbarAction}</div>

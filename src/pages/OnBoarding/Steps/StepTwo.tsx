@@ -1,9 +1,11 @@
-import Bullets from 'components/Bullets';
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
+
 import { IonButton, IonImg } from '@ionic/react';
-import { IcaroPreview } from '../../../assets';
+
+import Bullets from 'components/Bullets';
+
+import { IcaroPreview, gifStepTwo } from '../../../assets';
 import { Strings } from '../strings';
-import { gifStepTwo } from '../../../assets';
 
 interface StepTwoProps {
   setCurrentStep: Dispatch<SetStateAction<number>>;

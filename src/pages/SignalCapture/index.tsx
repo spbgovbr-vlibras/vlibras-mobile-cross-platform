@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
-import { IconCloseCircle } from 'assets';
-import { useHistory } from 'react-router-dom';
+import { BackgroundMode } from '@ionic-native/background-mode';
+
+import { File, DirectoryEntry } from '@ionic-native/file';
+
+import {
+  VideoCapturePlus,
+  VideoCapturePlusOptions,
+  MediaFile,
+} from '@ionic-native/video-capture-plus';
+import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
+import {
+  IonItem,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonTitle,
+  IonPage,
+  IonContent,
+  IonAlert,
+} from '@ionic/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/video';
+import { useHistory } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   logoCaptureV2,
@@ -11,66 +32,38 @@ import {
   logoTrashBtn,
   logoCaptureDisable,
   IconArrowLeft,
-} from '../../assets';
+} from 'assets';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+import { Capacitor } from '@capacitor/core';
 
-import {
-  IonButton,
-  IonList,
-  IonRadioGroup,
-  IonListHeader,
-  IonLabel,
-  IonItem,
-  IonRadio,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonTitle,
-  IonMenuButton,
-  IonPage,
-  IonContent,
-  IonAlert,
-} from '@ionic/react';
-import { MenuLayout } from '../../layouts';
+import { ErrorModal, LoadingModal } from '../../components';
 import paths from '../../constants/paths';
-import { CameraResultType, Capacitor } from '@capacitor/core';
-import { File, DirectoryEntry } from '@ionic-native/file';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
-
-import {
-  VideoCapturePlus,
-  VideoCapturePlusOptions,
-  MediaFile,
-} from '@ionic-native/video-capture-plus';
-
-import { ErrorModal } from '../../components';
-
 import { Strings } from './strings';
+
 import './styles.css';
-import { key } from 'ionicons/icons';
-import Regionalism from 'pages/Regionalism';
 
 const SignalCapture = () => {
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
-  const [log, setLog] = useState<any>('alo');
+  const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
+    false,
+    '',
+  ]);
 
-  const [showErrorModal, setShowErrorModal] = useState([false, '']);
-
+  const [loading, setLoading] = useState(false);
+  const [loadingDescription, setLoadingDescription] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertpage, setShowAlertPage] = useState(false);
 
-  const [toDelete, setToDelete] = useState([]);
+  const [toDelete, setToDelete] = useState<number>(-1);
 
   const history = useHistory();
 
-  const takeVideo = async () => {
-    //mock
+  const takeVideoMock = async () => {
+    // mock
     if (currentVideoArray.length < 5) {
       dispatch(
         Creators.setCurrentArrayVideo([
@@ -89,27 +82,39 @@ const SignalCapture = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     if (currentVideoArray.length < 5) {
       try {
         const options = { limit: 1, duration: 30, highquality: true };
+        // BackgroundMode.enable();
         const mediafile = await VideoCapturePlus.captureVideo(options);
+        // BackgroundMode.disable();
 
-        let media = mediafile[0] as MediaFile;
-        let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
+        setLoadingDescription('Processando...');
+        setLoading(true);
+
+        const media = mediafile[0] as MediaFile;
+        const path = media.fullPath.substring(
+          0,
+          media.fullPath.lastIndexOf('/'),
+        );
         let resolvedPath: DirectoryEntry;
 
-        resolvedPath = await File.resolveDirectoryUrl(path);
+        if (Capacitor.getPlatform() === 'ios') {
+          resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+        } else {
+          resolvedPath = await File.resolveDirectoryUrl(path);
+        }
 
         File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
-          (buffer: any) => {
-            let imgBlob = new Blob([buffer], {
+          (buffer: ArrayBuffer) => {
+            const imgBlob = new Blob([buffer], {
               type: media.type,
             });
 
             const fname = `thumb-${currentVideoArray.length}`;
 
-            let thumbnailoption: CreateThumbnailOptions = {
+            const thumbnailoption: CreateThumbnailOptions = {
               fileUri: resolvedPath.nativeURL + media.name,
               quality: 100,
               atTime: 1,
@@ -117,25 +122,24 @@ const SignalCapture = () => {
             };
 
             VideoEditor.createThumbnail(thumbnailoption)
-              .then(async (thumbnailPath: any) => {
-                let pathThumbs = thumbnailPath.substring(
+              .then(async (thumbnailPath: string) => {
+                const pathThumbs = thumbnailPath.substring(
                   0,
                   thumbnailPath.lastIndexOf('/'),
                 );
-                let resolvedPathThumb: DirectoryEntry;
-                resolvedPathThumb = await File.resolveDirectoryUrl(
-                  'file://' + pathThumbs,
-                );
+                const resolvedPathThumb: DirectoryEntry =
+                  await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
                 File.readAsDataURL(
                   resolvedPathThumb.nativeURL,
-                  fname + '.jpg',
+                  `${fname}.jpg`,
                 ).then(
-                  (thumbPath: any) => {
+                  (thumbPath: string) => {
                     VideoEditor.getVideoInfo({
                       fileUri: resolvedPath.nativeURL + media.name,
                     }).then(
                       info => {
+                        setLoading(false);
                         dispatch(
                           Creators.setCurrentArrayVideo([
                             ...currentVideoArray,
@@ -150,6 +154,7 @@ const SignalCapture = () => {
                         history.push(paths.SIGNALCAPTURE);
                       },
                       err => {
+                        setLoading(false);
                         setShowErrorModal([
                           true,
                           'Não foi possível obter informações do vídeo',
@@ -157,57 +162,72 @@ const SignalCapture = () => {
                       },
                     );
                   },
-                  error =>
+                  error => {
+                    setLoading(false);
                     setShowErrorModal([
                       true,
                       'Não foi possível carregar a prévia do vídeo',
-                    ]),
+                    ]);
+                  },
                 );
               })
-              .catch((err: any) => {
+              .catch((err: Error) => {
+                setLoading(false);
                 setShowErrorModal([
                   true,
                   'Não foi possível criar a prévia do vídeo',
                 ]);
               });
           },
-          (error: any) =>
-            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
+          (error: Error) => {
+            setLoading(false);
+            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+          },
         );
-      } catch (error) {
-        setShowErrorModal([true, 'Erro ao abrir câmera']);
+      } catch (error: any) {
+        setLoading(false);
+        if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
       }
     }
   };
   function popupCancel() {
     setShowAlertPage(true);
   }
-  const popupRemove = (index: any) => {
+  const popupRemove = (index: number) => {
     setShowAlert(true);
     setToDelete(index);
   };
 
-  const removeRecord = (index: any) => {
+  const removeRecord = (index: number) => {
     const filteredArray = currentVideoArray.filter(
-      (value: {}, i: any) => i !== index,
+      (value: unknown, i: number) => i !== index,
     );
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
 
   const renderRecordedItens = () => {
     const fillNTimes = 5 - currentVideoArray.length;
-    let copyCurrentVideo = [...currentVideoArray];
+    const copyCurrentVideo = [...currentVideoArray];
 
-    for (let index = 0; index < fillNTimes; index++) {
+    for (let index = 0; index < fillNTimes; index += 1) {
       copyCurrentVideo.push([]);
     }
 
-    return copyCurrentVideo.map((item: any, key: number) => {
+    type ArrayVideo = {
+      thumbBlob: string;
+      duration: number;
+    };
+
+    return copyCurrentVideo.map((item: ArrayVideo[], key: number) => {
       return (
         <>
-          {item.length != 0 ? (
-            <IonItem className="item-recorder" key={key}>
-              <img className="video-thumb" src={item[2].thumbBlob} />
+          {item.length !== 0 ? (
+            <IonItem className="item-recorder" key={uuidv4()}>
+              <img
+                className="video-thumb"
+                src={item[2].thumbBlob}
+                alt="Video Thumb"
+              />
 
               <div className="video-metadata">
                 <p className="name"> Sinal {key + 1}</p>
@@ -215,11 +235,17 @@ const SignalCapture = () => {
               </div>
 
               <div className="video-icon-delete">
-                <img src={logoTrashBtn} onClick={() => popupRemove(key)} />
+                <button
+                  onClick={() => popupRemove(key)}
+                  type="button"
+                  className="signal-capture-button-none"
+                >
+                  <img src={logoTrashBtn} alt="Logo lixeira" />
+                </button>
               </div>
             </IonItem>
           ) : (
-            <div className="item-recorder shadowing"></div>
+            <div className="item-recorder shadowing" />
           )}
         </>
       );
@@ -255,23 +281,35 @@ const SignalCapture = () => {
             <div>
               <span className="tooltiptext">Grave novos sinais</span>
             </div>
-            <img
-              className="button-recorder"
-              src={
-                currentVideoArray.length < 5
-                  ? logoCaptureV2
-                  : logoCaptureDisable
-              }
+            <button
               onClick={takeVideo}
-            ></img>
+              type="button"
+              className="signal-capture-button-none"
+            >
+              <img
+                className="button-recorder"
+                src={
+                  currentVideoArray.length < 5
+                    ? logoCaptureV2
+                    : logoCaptureDisable
+                }
+                alt="Logo Gravar"
+              />
+            </button>
             <p> Câmera </p>
           </div>
           <div className="area-button-recorder">
-            <img
-              className="button-recorder"
-              src={logoTranslateVideo}
+            <button
               onClick={translateVideo}
-            ></img>
+              type="button"
+              className="signal-capture-button-none"
+            >
+              <img
+                className="button-recorder"
+                src={logoTranslateVideo}
+                alt="Logo gravar"
+              />
+            </button>
             <p> Traduzir </p>
           </div>
         </div>
@@ -280,6 +318,11 @@ const SignalCapture = () => {
           show={showErrorModal[0]}
           setShow={setShowErrorModal}
           errorMsg={showErrorModal[1]}
+        />
+        <LoadingModal
+          loading={loading}
+          setLoading={setLoading}
+          text={loadingDescription}
         />
         <IonAlert
           isOpen={showAlert}

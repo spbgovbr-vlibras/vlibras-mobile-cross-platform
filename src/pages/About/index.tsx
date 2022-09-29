@@ -1,6 +1,16 @@
 import React from 'react';
 
-import { IonContent, IonImg, IonText } from '@ionic/react';
+import {
+  IonContent,
+  IonImg,
+  IonText,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+} from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 
 import {
   logoAvatares,
@@ -12,15 +22,31 @@ import {
   logoRnp,
   logoUfpb,
   logoYoutube,
-} from '../../assets';
-import { MenuLayout } from '../../layouts';
+  IconArrowLeft,
+} from 'assets';
+
 import { Strings } from './strings';
 
 import './styles.css';
 
 function About() {
+  const history = useHistory();
+
   return (
-    <MenuLayout title={Strings.TOOLBAR_TITLE}>
+    <IonPage>
+      <IonHeader className="ion-no-border">
+        <IonToolbar>
+          <IonTitle className="menu-toolbar-title-signalcap">
+            {Strings.TOOLBAR_TITLE}
+          </IonTitle>
+
+          <IonButtons slot="start" onClick={() => history.goBack()}>
+            <div className="arrow-left-container-start">
+              <IconArrowLeft color="#1447a6" />
+            </div>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
         <div className="about-box-content">
           <h1 className="about-box-text-suite">
@@ -48,24 +74,30 @@ function About() {
             <div className="about-container-redes-sociais">
               <IonText>{Strings.TEXT_REDES_SOCIAIS}</IonText>
               <div className="about-container-redes-sociais-footer">
-                <IonImg
-                  src={logoInstagram}
-                  className="about-image-social-media"
-                />
-                <IonImg
-                  src={logoFacebook}
-                  className="about-image-social-media"
-                />
-                <IonImg
-                  src={logoYoutube}
-                  className="about-image-social-media"
-                />
+                <a href="https://www.instagram.com/vlibrasoficial/">
+                  <IonImg
+                    src={logoInstagram}
+                    className="about-image-social-media"
+                  />
+                </a>
+                <a href="https://www.facebook.com/vlibras/">
+                  <IonImg
+                    src={logoFacebook}
+                    className="about-image-social-media"
+                  />
+                </a>
+                <a href="https://www.youtube.com/channel/UCF94lq7TwAu5OmlwIu44qpA">
+                  <IonImg
+                    src={logoYoutube}
+                    className="about-image-social-media"
+                  />
+                </a>
               </div>
             </div>
           </div>
         </div>
       </IonContent>
-    </MenuLayout>
+    </IonPage>
   );
 }
 

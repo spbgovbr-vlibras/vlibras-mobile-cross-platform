@@ -17,6 +17,7 @@
   display: flex;
   flex: 1;
   flex-direction: row;
+  justify-content: space-between;
 }
 
 .revision-modal-title {
@@ -25,15 +26,14 @@
   font-weight: bold;
   font-size: 18px;
   line-height: 125%;
-
+  color: #000;
   display: flex;
   flex: 1;
-  margin-left: 155px;
+  width: 100%;
+  margin: 0 !important;
 }
 
 .revision-close-button {
-  display: flex;
-  flex: 1;
   justify-content: flex-end;
 
   background: transparent;
@@ -48,7 +48,7 @@
   line-height: 125%;
   /* identical to box height, or 20px */
 
-  color: #000000;
+  --color: #000000;
 
   margin-bottom: 16px; /*n funfa*/
 }
@@ -89,14 +89,16 @@
   border-radius: 4px;
   font-family: Rawline;
   z-index: 0;
-
+  --color: #000;
   margin-top: 16px;
 }
 
 .revision-modal .chip-area {
   margin-top: 100px;
-  margin-left: 35px;
-  margin-bottom: 40px;
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
 }
 .revision-modal .chip-1 {
   justify-content: center;
@@ -110,6 +112,7 @@
   border: 1px solid #ebebeb;
   box-sizing: border-box;
   border-radius: 24px;
+  margin-right: 8px;
 
   font-family: Roboto;
   font-style: normal;
@@ -190,11 +193,8 @@
 
   color: #1447a6;
 }
-.revision-modal-word-item {
-  --padding-start: 0px;
-  --min-height: 0px;
 
-  max-width: 150px;
+.revision-modal-word-item {
   margin-right: 10px;
 }
 
@@ -217,4 +217,5 @@
 .revision-modal .suggestion-chips {
   background: #ededed;
   border-radius: 47px;
+
 }

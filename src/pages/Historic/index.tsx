@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { NativeStorage } from '@ionic-native/native-storage';
 import {
   IonChip,
   IonContent,
@@ -8,17 +9,25 @@ import {
   IonTextarea,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+
+import paths from 'constants/paths';
+import { PlayerKeys } from 'constants/player';
+import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import { VideoOutputModal } from '../../components';
-import { NativeStorage } from '@ionic-native/native-storage';
 import dateFormat from 'utils/dateFormat';
-import { env } from '../../environment/env';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
+import { VideoOutputModal } from '../../components';
+import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
+import { useTranslation } from 'hooks/Translation';
 
 import './styles.css';
+
+type GenericObject = { [key: string]: any };
 
 function Historic() {
   const translationsHistoric = useSelector(
@@ -28,8 +37,11 @@ function Historic() {
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
   const [log, setLog] = useState([]);
+  const history = useHistory();
+  const location = useLocation();
 
-  const [historyStorage, setHistoryStorage] = useState<any>({});
+  const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
+
   const [keysToShow, setKeysToShow] = useState(
     env.videoTranslator ? ['text', 'video'] : ['text'],
   );
@@ -37,119 +49,110 @@ function Historic() {
 
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
+  const { setTextPtBr } = useTranslation();
+  const playerService = PlayerService.getService();
+
   const promiseHistory = NativeStorage.getItem('history').then(
-    data => data,
+    data => {
+      return data;
+    },
     error => {
       setLog(error);
       return {};
     },
   );
 
+  const openModalOutput = (actualItem: any) => {
+    setShowModal(true);
+    setResults(actualItem);
+  };
+
   const loadHistory = async () => {
-    const resultPromise = await promiseHistory;
-    setHistoryStorage(resultPromise);
+    setHistoryStorage(await promiseHistory);
   };
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    if (location.pathname === paths.HISTORY) loadHistory();
+  }, [location]);
 
-  const renderItems = () => {
-    //if you are mocking the app to use it on ur browser,
-    //you must use the object translationsHistoric instead historyStorage
-
-    // const datesMapped = Object.keys(historyStorage).reverse();
-    console.log(translationsHistoric);
-    const datesMapped = Object.keys(translationsHistoric).reverse();
-
-    return datesMapped.map(column => {
-      if (translationsHistoric[column]['video']) {
-        return translationsHistoric[column]['video'].map(
-          (item: any, key: any) => {
-            // return historyStorage[column].map((item: any, key: any) => {
-            return (
-              <div>
-                {key === 0 && (
-                  <p className="date-desc"> {dateFormat(column)} </p>
-                )}
-                <div
-                  className="container-outputs"
-                  onClick={() => openModalOutput(item)}
-                >
-                  {item.map((value: string, key: string) => (
-                    <span key={key}>{value}</span>
-                  ))}
-                </div>
-              </div>
-            );
-          },
-        );
-      }
-    });
-  };
-
-  const formatArrayDate = (arrayHistoric: any) => {
-    const dates = Object.keys(arrayHistoric);
+  const formatArrayDate = () => {
+    const arrayState = JSON.parse(JSON.stringify(historyStorage));
+    const dates = Object.keys(arrayState);
     const formattedObjDate: any = {};
 
-    dates.map(element => {
-      if (formattedObjDate[dateFormat(element)]) {
-        if (formattedObjDate[dateFormat(element)]['video']) {
-          formattedObjDate[dateFormat(element)]['video'].push(
-            arrayHistoric[element]['video'],
+    dates.forEach(element => {
+      const formattedDate = dateFormat(element);
+      if (formattedObjDate[formattedDate]) {
+        if (formattedObjDate[formattedDate].video) {
+          formattedObjDate[formattedDate].video.push(
+            ...arrayState[element].video,
           );
         }
-        if (formattedObjDate[dateFormat(element)]['text']) {
-          formattedObjDate[dateFormat(element)]['text'].push(
-            arrayHistoric[element]['text'],
+        if (formattedObjDate[formattedDate].text) {
+          formattedObjDate[formattedDate].text.push(
+            ...arrayState[element].text,
           );
         }
       } else {
-        formattedObjDate[dateFormat(element)] = arrayHistoric[element];
+        formattedObjDate[formattedDate] = {
+          text: arrayState[element].text || [],
+          video: arrayState[element].video || [],
+        };
       }
     });
 
     return formattedObjDate;
   };
 
+
+
+  async function onTranslationHistory(text: string) {
+    const formatted = text.trim();
+    const gloss = await setTextPtBr(formatted, false);
+
+    history.replace(paths.HOME);
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+  }
+
   const renderAllItems = () => {
-    const formattedHistoric = formatArrayDate(historyStorage);
+    const formattedHistoric = formatArrayDate();
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
-
-    console.log(formattedHistoric);
-    console.log(datesMapped);
 
     return datesMapped.map(column => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
-        if (formattedHistoric[column][key]) {
+        if (formattedHistoric[column][key].length != 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
                 <div>
                   {elementKey === 0 &&
-                    (keyOfKeys == 0 || doesntHaveKey == 1) && (
+                    (keyOfKeys === 0 || doesntHaveKey === 1) && (
                       <p className="date-desc"> {column} </p>
                     )}
-                  {key == 'video' ? (
+                  {key === 'video' ? (
                     <>
                       {elementKey === 0 && (
                         <div className="historic-container-ion-img-2">
                           <img
                             src={logoTranslator2}
                             className="historic-container-ion-img-translator-2"
+                            alt=""
                           />
                           <IonText>{Strings.TRANSLATOR_TEXT_2}</IonText>
                         </div>
                       )}
-                      <div
-                        className="container-outputs"
-                        onClick={() => openModalOutput(item)}
-                      >
-                        {item.map((value: string, keyWord: string) => (
-                          <span key={keyWord}>{value}</span>
-                        ))}
+                      <div className="list-outputs">
+                        <button
+                          className="container-outputs"
+                          onClick={() => openModalOutput(item)}
+                          type="button"
+                        >
+                          {item.map((value: string, keyWord: string) => (
+                            <span key={uuidv4()}>{value}</span>
+                          ))}
+                        </button>
                       </div>
                     </>
                   ) : (
@@ -159,11 +162,18 @@ function Historic() {
                           <img
                             src={logoTranslator1}
                             className="historic-container-ion-img-translator-1"
+                            alt=""
                           />
                           <IonText>{Strings.TRANSLATOR_TEXT_1}</IonText>
                         </div>
                       )}
-                      <div className="historic-container-box-ion-text">
+                      <div
+                        className="historic-container-box-ion-text"
+                        onClick={() => onTranslationHistory(item)}
+                        tabIndex={0}
+                        role="menu"
+                        aria-hidden="true"
+                      >
                         <p className="historic-container-box-ion-text-area">
                           {item}
                         </p>
@@ -174,17 +184,11 @@ function Historic() {
               );
             },
           );
-        } else {
-          doesntHaveKey = 1;
-          return <></>;
         }
+        doesntHaveKey = 1;
+        return <></>;
       });
     });
-  };
-
-  const openModalOutput = (actualItem: any) => {
-    setShowModal(true);
-    setResults(actualItem);
   };
 
   const setScreenKey = (param: number) => {
@@ -205,13 +209,13 @@ function Historic() {
   };
 
   return (
-    <MenuLayout title={Strings.TOOLBAR_TITLE}>
+    <MenuLayout title={Strings.TOOLBAR_TITLE} mode="back">
       <IonContent>
         <div className="historic-container">
           <div className="historic-container-ion-chips">
             {env.videoTranslator && (
               <IonChip
-                class={'historic-container-ion-chip'}
+                class="historic-container-ion-chip"
                 onClick={() => setScreenKey(0)}
                 style={activeKey === 0 ? style : {}}
               >
@@ -237,14 +241,13 @@ function Historic() {
               </IonChip>
             )}
           </div>
-
           <div className="container-render-historic">{renderAllItems()}</div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}
             showModal={showModal}
             setShowModal={setShowModal}
-            playerIntermedium={true}
+            playerIntermedium
           />
         </div>
       </IonContent>

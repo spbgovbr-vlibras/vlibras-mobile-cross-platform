@@ -1,24 +1,30 @@
-/* eslint-disable no-param-reassign */
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
+import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { Words } from 'models/dictionary';
 
-export interface MetaDataParams {
+export interface MetadataParams {
   limit: number;
   page: number;
   name?: string;
 }
 
-export interface MetaData {
+export interface Metadata {
+  current_page: number;
+  first_page: number;
+  first_page_url: string;
+  last_page: number;
+  last_page_url: string;
+  next_page_url: string;
+  per_page: number;
+  previous_page_url: string;
   total: number;
-  limit: number;
-  pageIndex: number;
 }
 
 export interface ListResponseDictionary {
-  meta: MetaData;
+  meta: Metadata;
   data: Words[];
 }
 
@@ -32,15 +38,14 @@ export const Types = {
 export interface DictionaryState {
   words: Words[];
   recents: Words[];
-  metaData: MetaData;
+  metadata: Metadata;
   loading: boolean;
-  // estado da aplicação
 }
 
 const INITIAL_STATE: DictionaryState = {
   words: [],
   recents: [],
-  metaData: {} as MetaData,
+  metadata: {} as Metadata,
   loading: false,
 };
 
@@ -50,7 +55,7 @@ export const Creators = {
     Types.GET_REQUEST,
     Types.GET_SUCCESS,
     Types.GET_FAILURE,
-  )<MetaDataParams, ListResponseDictionary, unknown>(),
+  )<MetadataParams, ListResponseDictionary, unknown>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -62,27 +67,29 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<DictionaryState>) => {
     switch (type) {
-      case Types.SET_CURRENT_DICTIONARY:
+      case Types.SET_CURRENT_DICTIONARY: {
         draft.words = payload;
-
         break;
-      case Types.GET_REQUEST:
+      }
+      case Types.GET_REQUEST: {
         draft.loading = true;
-
         break;
-      case Types.GET_SUCCESS:
+      }
+      case Types.GET_SUCCESS: {
         draft.loading = false;
-        // eslint-disable-next-line no-case-declarations
         const { meta, data } = payload as ListResponseDictionary;
-        draft.words = data;
-        draft.metaData = meta;
-
+        if (meta.current_page === FIRST_PAGE_INDEX) {
+          draft.words = data;
+        } else {
+          draft.words = [...draft.words, ...data];
+        }
+        draft.metadata = meta;
         break;
-      case Types.GET_FAILURE:
+      }
+      case Types.GET_FAILURE: {
         draft.loading = false;
-
         break;
-
+      }
       default:
         break;
     }

@@ -19,16 +19,16 @@ const IconArrowUpRight = ({
     <path
       d="M4.66675 11.3333L11.3334 4.66663"
       stroke={color}
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M4.66675 4.66663H11.3334V11.3333"
       stroke={color}
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

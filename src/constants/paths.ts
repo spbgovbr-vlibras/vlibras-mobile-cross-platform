@@ -6,8 +6,10 @@ export default {
   TRANSLATOR: '/translator',
   TUTORIAL: '/tutorial',
   DICTIONARY: '/dictionary',
+  DICTIONARY_PLAYER: '/dictionary-player',
   RECORDERAREA: '/recorder-area',
   DOMAIN: '/domain',
   ONBOARDING: '/onboarding',
-  SIGNALCAPTURE: '/signal-capture'
+  SIGNALCAPTURE: '/signal-capture',
+  CUSTOMIZATION: '/customization',
 };

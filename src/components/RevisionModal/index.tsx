@@ -1,33 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { IconClose, IconCloseCircle, IconThumbDown } from 'assets';
-import {
-  IonModal,
-  IonButton,
-  IonText,
-  IonChip,
-  IonSearchbar,
-  IonTextarea,
-  IonItem,
-  IonList,
-  IonSlide,
-  IonSlides,
-} from '@ionic/react';
-import './styles.css';
-import { Strings } from './strings';
-import handleGetText from '../../pages/Translator';
-import { text } from 'ionicons/icons';
-import { Creators } from 'store/ducks/translator';
-import { Creators as CreatorsDictionary } from 'store/ducks/dictionary';
-import { useDispatch, useSelector } from 'react-redux';
-import { State } from 'ionicons/dist/types/stencil-public-runtime';
-import { RootState } from 'store';
-import { Words } from 'models/dictionary';
+
+import { IonModal, IonText, IonChip, IonTextarea } from '@ionic/react';
 import { debounce } from 'lodash';
-import { current } from 'immer';
-import PlayerService from 'services/unity';
-import { PlayerKeys } from 'constants/player';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { IconCloseCircle } from 'assets';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
+import { FIRST_PAGE_INDEX } from 'constants/pagination';
+import { PlayerKeys } from 'constants/player';
+import { useTranslation } from 'hooks/Translation';
+import { Words } from 'models/dictionary';
 import { sendReview } from 'services/suggestionGloss';
+import PlayerService from 'services/unity';
+import { RootState } from 'store';
+import { Creators as CreatorsDictionary } from 'store/ducks/dictionary';
+
+import { Strings } from './strings';
+
+import './styles.css';
 
 interface RevisionModalProps {
   show: boolean;
@@ -38,6 +28,7 @@ interface RevisionModalProps {
 }
 
 const playerService = PlayerService.getService();
+const TIME_DEBOUNCE_MS = 1000;
 
 const RevisionModal = ({
   show,
@@ -46,17 +37,21 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
-  const handleOpenModal = () => {
-    setShow(true);
-  };
+  const { textPtBr, textGloss, setTextGloss } = useTranslation();
+  // Aux var for the TextArea value
+  const [auxValueText, setAuxValueText] = useState(textGloss);
+  const [isPreview, setIsPreview] = useState(false);
+  const dispatch = useDispatch();
 
   const handleCloseModal = () => {
     setShow(false);
     setIsPreview(false);
+    setAuxValueText('');
   };
 
   const handlePlaySuggestionGlosa = () => {
     setShow(false);
+    // setTextGloss(auxValueText, false);
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
@@ -68,30 +63,37 @@ const RevisionModal = ({
   const handleOpenSuggestionFeedbackModal = () => {
     setShow(false);
     setSuggestionFeedbackModal(true);
-    sendReview(currentTranslatorText, auxValueText, 'bad');
-    //playerService.send(PlayerKeys.PLAYER_MANAGER,PlayerKeys.SEND_REVIEW, auxValueText);
+    sendReview({
+      text: textPtBr,
+      translation: textGloss,
+      review: auxValueText,
+      rating: 'bad',
+    });
+    setAuxValueText('');
   };
-
-  const TIME_DEBOUNCE_MS = 0;
-  const TIME_DEBOUNCE_SUGGESTION = 0;
-
-  const dispatch = useDispatch();
-  const currentTranslatorText = useSelector(
-    ({ translator }: RootState) => translator.translatorText,
-  );
-
-  //Aux var for the TextArea value
-  const [auxValueText, setAuxValueText] = useState('');
-  const [isPreview, setIsPreview] = useState(false);
 
   const dictionary = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
   );
+
+  const handleWordSuggestion = useCallback(
+    (word: string) => {
+      const text = auxValueText.split(' ');
+      text.pop();
+      const gloss = text.join(' ').concat(` ${word}`);
+
+      // setTextGloss(gloss, false);
+      setAuxValueText(gloss);
+    },
+    [auxValueText],
+  );
+
   const renderWord = (item: Words) => (
     <div className="revision-modal-word-item">
       <IonChip
         class="suggestion-chips"
-        onClick={() => setAuxValueText(item.name)}
+        onClick={() => handleWordSuggestion(item.name)}
+        key={item.name}
       >
         {item.name}
       </IonChip>
@@ -99,36 +101,40 @@ const RevisionModal = ({
   );
 
   useEffect(() => {
-    //Setting TextArea value with the current translator
-    setAuxValueText(currentTranslatorText);
-    if (show) {
+    if (show && !auxValueText) {
+      // Setting TextArea value with the current translator
+      setAuxValueText(textGloss);
+      const searchText = textGloss.split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: 1,
           limit: 10,
-          name: currentTranslatorText,
+          name: `${searchText}%`,
         }),
       );
     }
-  }, [show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, dispatch, auxValueText]);
 
   useEffect(() => {
     if (!isPlaying && isPreview) {
       setShow(true);
     }
-  }, [isPlaying, isPreview]);
+  }, [isPlaying, isPreview, setShow]);
 
   const onSearch = useCallback(
     event => {
+      setAuxValueText(event.target.value || '');
+      const searchText = (event.target.value || '').split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
-          page: 1,
+          page: FIRST_PAGE_INDEX,
           limit: 10,
-          name: currentTranslatorText,
+          name: `${searchText}%`,
         }),
       );
     },
-    [dispatch, currentTranslatorText],
+    [dispatch],
   );
 
   const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
@@ -137,12 +143,15 @@ const RevisionModal = ({
     <div>
       <IonModal
         isOpen={show}
-        cssClass={'revision-modal'}
+        cssClass="revision-modal"
         onDidDismiss={() => setShow(false)}
-        swipeToClose={true}
+        swipeToClose
       >
         <div className="revision-modal-header">
-          <IonText class="revision-modal-title">Revisão</IonText>
+          <div style={{ width: 10 }} />
+          <div>
+            <h1 className="revision-modal-title">Revisão</h1>
+          </div>
           <button
             className="revision-close-button"
             type="button"
@@ -156,13 +165,13 @@ const RevisionModal = ({
           <IonTextarea
             class="text-area"
             placeholder={auxValueText}
-            autofocus
             rows={5}
             cols={5}
             wrap="soft"
             required
+            onIonChange={debouncedSearch}
             value={auxValueText}
-          ></IonTextarea>
+          />
           <div className="suggestion-container">
             <IonText className="suggestion-text-header">
               {Strings.SUGGESTION_BOX_HEADER}
@@ -186,7 +195,7 @@ const RevisionModal = ({
       <SuggestionFeedbackModal
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setShowSuggestionFeedbackModal={setSuggestionFeedbackModal}
-      ></SuggestionFeedbackModal>
+      />
     </div>
   );
 };

@@ -24,13 +24,7 @@
   text-align: center;
 
   display: flex;
-  flex: 1;
   align-items: baseline;
-
-  margin-top: 49.33px;
-  
-
-  /*margin: 2px 0px -15px 0px;*/
 }
 
 .evaluation-yes-modal .modal-desc {
@@ -48,8 +42,12 @@
 }
 
 .evaluation-yes-modal .text-space{
+  margin: 0 !important;
   margin-left: 6px;
+  color: black;
 }
 .evaluation-yes-modal .subtitle{
-  margin-bottom: 43px;
+  margin: 0 !important;
+  margin-top: 6px;
+  color: black;
 }

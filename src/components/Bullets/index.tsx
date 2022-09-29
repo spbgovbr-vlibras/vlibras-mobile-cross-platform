@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './styles.css';
+
 interface BulletsProps {
   active: number;
 }
@@ -7,10 +8,7 @@ interface BulletsProps {
 const Bullets = ({ active }: BulletsProps) => {
   const loadBullets = () => {
     return [1, 2, 3, 4].map(item => (
-      <div
-        className={`bullet` + (item <= active ? ' active' : '')}
-        key={item}
-      ></div>
+      <div className={`bullet${item <= active ? ' active' : ''}`} key={item} />
     ));
   };
 

@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
-import produce, { Draft } from 'immer';
 import { useState } from 'react';
+
+import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
-import { Words } from 'models/dictionary';
 
+import { Words } from 'models/dictionary';
 
 export const Types = {
   SET_TRANSLATOR_TEXT: '@translator/SET_CURRENT_TRANSLATOR_TEXT',
@@ -12,7 +13,7 @@ export const Types = {
 
 export interface TranslatorTextState {
   translatorText: string;
-} 
+}
 
 const INITIAL_STATE: TranslatorTextState = {
   translatorText: '',

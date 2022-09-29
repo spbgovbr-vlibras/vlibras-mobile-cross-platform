@@ -1,5 +1,7 @@
 import React, { Dispatch, MouseEventHandler, SetStateAction } from 'react';
+
 import { IonButton, IonImg } from '@ionic/react';
+
 import { gifStepZero } from '../../../assets';
 import { Strings } from '../strings';
 

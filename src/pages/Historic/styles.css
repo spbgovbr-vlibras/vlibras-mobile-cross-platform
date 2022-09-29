@@ -128,11 +128,15 @@
   border: 1px solid #e0e0e0;
   box-sizing: border-box;
   border-radius: 4px;
-  padding: 10px 8px;
-  overflow: hidden;
+  padding: 5px 8px;
+  /* overflow: hidden;
   overflow-x: auto;
-  white-space: nowrap;
+  white-space: nowrap; */
   margin: 5px 15px;
+  background: transparent;
+  display: flex;
+  flex-flow: wrap;
+  width: 100%;
 }
 
 .historic-container .container-outputs span {
@@ -143,9 +147,14 @@
   line-height: 17.5px;
   border-radius: 48px;
   padding: 6px 12px;
-  margin-left: 3px;
+  margin: 4px 5px;
   cursor: pointer;
   display: inline-block;
+  border: none;
+}
+
+.historic-container .list-outputs {
+  display: flex;
 }
 
 .date-desc {

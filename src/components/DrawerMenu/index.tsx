@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
@@ -10,6 +11,7 @@ import {
   IonItem,
   IonListHeader,
   IonLabel,
+  IonMenuButton,
 } from '@ionic/react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store';
@@ -23,10 +25,12 @@ import {
   IconInfo,
   IconTutorial,
   IconDomain,
+  IconCustomization,
   Vlibraslogo,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
+import RegionalismArray from 'data/regionalism';
 
 import { Strings } from './strings';
 
@@ -40,6 +44,15 @@ const CLASS_NAME_MENU = 'drawer-menu-item';
 const CLASS_NAME_ACTIVED_MENU = `drawer-menu-item-activated ${CLASS_NAME_MENU}`;
 const ACTIVED_COLOR = '#2365DE';
 const DEFAULT_COLOR = '#4B4B4B';
+
+function videoArea(value: string, expected: string) {
+  return (
+    (expected === paths.RECORDERAREA ||
+      expected === paths.SIGNALCAPTURE ||
+      expected === paths.ONBOARDING) &&
+    value === '/'
+  );
+}
 
 function getClassName(value: string, expected: string): string {
   if (videoArea(value, expected)) {
@@ -55,22 +68,18 @@ function getColor(value: string, expected: string): string {
   return value === expected ? ACTIVED_COLOR : DEFAULT_COLOR;
 }
 
-function videoArea(value: string, expected: string) {
-  return (
-    (expected == paths.RECORDERAREA ||
-      expected == paths.SIGNALCAPTURE ||
-      expected == paths.ONBOARDING) &&
-    value == '/'
-  );
-}
-
 function DrawerMenu({ contentId }: DrawerMenuProps) {
   const isVideoScreen = useSelector(
     ({ video }: RootState) => video.isVideoScreen,
   );
 
+  const onboardingFirstAccess = useSelector(
+    ({ video }: RootState) => video.onboardingFirstAccess,
+  );
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
+
+  const buttonMenu = useRef<any>(null);
 
   useEffect(() => {
     if (isVideoScreen) {
@@ -83,37 +92,49 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const location = useLocation();
   const history = useHistory();
 
-  function navLink(path: string) {
-    if (path != paths.HOME) {
-      history.push(path);
-      menuController.close();
-    }
-  }
-
-  function personalizedNavLink(path: string) {
-    if (path == paths.HOME) {
-      if (valueSelected == 'PT-BR') {
-        history.push(paths.RECORDERAREA);
+  function navLink(e: any, path: string) {
+    if (e.target.className === 'drawer-menu-sub-item translator') {
+      setOpenSelect(!openSelect);
+    } else {
+      // eslint-disable-next-line no-lonely-if
+      if (path === paths.HOME) {
+        if (valueSelected === 'PT-BR') {
+          history.push(paths.RECORDERAREA);
+        } else {
+          history.push(path);
+        }
+        if (buttonMenu.current) {
+          buttonMenu.current.click();
+        }
+        menuController.close(Strings.MENU_ID);
+        setOpenSelect(false);
       } else {
         history.push(path);
+        if (buttonMenu.current) {
+          buttonMenu.current.click();
+        }
+        menuController.close(Strings.MENU_ID);
       }
-      menuController.close();
-      setOpenSelect(false);
     }
   }
 
   function setValue(value: string) {
     setValueSelected(value);
     setOpenSelect(false);
-    if (value == 'PT-BR') {
-      history.push(paths.RECORDERAREA);
+    if (value === 'PT-BR') {
+      if (onboardingFirstAccess) history.push(paths.ONBOARDING);
+      else history.push(paths.RECORDERAREA);
     } else {
       history.push(paths.HOME);
     }
-    menuController.close();
+    if (buttonMenu.current) {
+      buttonMenu.current.click();
+    }
+    menuController.close(Strings.MENU_ID);
   }
 
   const domain = useSelector(({ video }: RootState) => video.domain);
+  const current = useSelector((state: RootState) => state.regionalism.current);
 
   const renderItemTab = (
     tab: string,
@@ -126,26 +147,22 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      onClick={() => navLink(tab)}
+      onClick={e => navLink(e, tab)}
     >
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
-      <span
-        className="drawer-menu-item-label"
-        onClick={() => personalizedNavLink(tab)}
-      >
-        {title}
-      </span>
+      <span className="drawer-menu-item-label">{title}</span>
 
       {title === Strings.TITLE_MENU_TRANSLATOR && env.videoTranslator && (
         <>
-          <p
-            className="drawer-menu-sub-item"
+          <button
+            className="drawer-menu-sub-item translator"
             onClick={() => setOpenSelect(true)}
+            type="button"
           >
-            {valueSelected ? valueSelected : 'Libras'}
-          </p>
+            {valueSelected || 'Libras'}
+          </button>
           <div className="arrow-down"> </div>
         </>
       )}
@@ -155,10 +172,19 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           <div className="arrow-down"> </div>
         </>
       )}
+      {title === Strings.TITLE_MENU_REGIONALISM && (
+        <>
+          <p className="drawer-menu-sub-item">
+            {RegionalismArray.find(item => item.name === current)?.abbreviation}
+          </p>
+          <div className="arrow-down"> </div>
+        </>
+      )}
     </IonItem>
   );
 
   return (
+    // <IonMenuToggle>
     <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
       <IonHeader className="drawer-menu-container" mode="ios">
         <div className="drawer-menu-header-logo">
@@ -167,28 +193,31 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             {Strings.HEADER_VLIBRAS_LABEL}
           </IonLabel>
         </div>
+        <IonMenuButton autoHide ref={buttonMenu} style={{ display: 'none' }} />
         {openSelect && (
           <div className="dropdown-trans-picker">
-            <div
+            <button
               className={
-                valueSelected == 'Libras' || valueSelected == ''
+                valueSelected === 'Libras' || valueSelected === ''
                   ? 'option-trans selected'
                   : 'option-trans'
               }
               onClick={() => setValue('Libras')}
+              type="button"
             >
               Libras
-            </div>
-            <div
+            </button>
+            <button
               className={
-                valueSelected == 'PT-BR'
+                valueSelected === 'PT-BR'
                   ? 'option-trans selected'
                   : 'option-trans'
               }
               onClick={() => setValue('PT-BR')}
+              type="button"
             >
               PT-BR
-            </div>
+            </button>
           </div>
         )}
         <IonList lines="none">
@@ -233,6 +262,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 IconRegionalism,
                 true,
               )}
+          {renderItemTab(
+            paths.CUSTOMIZATION,
+            Strings.TITLE_MENU_CUSTOMIZATION,
+            IconCustomization,
+            true,
+          )}
         </IonList>
         <IonList lines="none">
           {renderItemTab(
@@ -250,6 +285,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         </IonList>
       </div>
     </IonMenu>
+    // </IonMenuToggle>
   );
 }
 

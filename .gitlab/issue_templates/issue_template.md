@@ -1,0 +1,18 @@
+*PLATAFORMA:*
+- [ ] MOBILE
+
+*MÓDULO:*
+- [ ] PT-Libras    
+- [ ] Libras-PT
+
+*DESCRIÇÃO:*
+
+*PROCEDIMENTO DE TESTE:*
+1. 
+2.
+
+*RESULTADOS ENCONTRADOS EM:*
+
+*VERSÃO TESTADA:*
+
+*SUGESTÕES PARA RESOLVER:*

@@ -4,6 +4,7 @@
 import IconTranslate from './icons/IconTranslate';
 import IconDictionary from './icons/IconDictionary';
 import IconRegionalism from './icons/IconRegionalism';
+import IconIcaro from './icons/IconIcaro';
 import IconInfo from './icons/IconInfo';
 import IconTutorial from './icons/IconTutorial';
 import IconHandsTranslate from './icons/IconHandsTranslate';
@@ -13,18 +14,28 @@ import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
 import IconArrowLeft from './icons/IconArrowLeft';
-
 import IconThumbUp from './icons/IconThumbUp';
 import IconThumbDown from './icons/IconThumbDown';
 import IconArrowUpRight from './icons/IconArrowUpRight';
+import IconEye from './icons/IconEye';
+import IconPants from './icons/IconPants';
+import IconShirt from './icons/IconShirt';
+import IconHair from './icons/IconHair';
+import IconBody from './icons/IconBody';
+import IconCustomization from './icons/IconCustomization';
+import IconHozana from './icons/IconHozana';
+import IconLeftArrow from './icons/IconLeftArrow';
+import IconYoutube from './icons/IconYoutube';
+import IconCamera from './icons/IconCamera';
+import IconPlay from './icons/IconPlay';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
 import gifStepOne from './gifs/passo1.gif';
 import gifStepTwo from './gifs/passo2.gif';
-import gifStepThree from './gifs/passo3.gif'; 
+import gifStepThree from './gifs/passo3.gif';
 import gifStepFour from './gifs/passo4.gif';
-import gifTranslating from './gifs/translating.gif'
+import gifTranslating from './gifs/translating.gif';
 import IconEdit from './icons/IconEdit';
 import IconClose from './icons/IconClose';
 import IconPause from './icons/IconPause';
@@ -32,6 +43,7 @@ import IconRefresh from './icons/IconRefresh';
 import IconRunning from './icons/IconRunning';
 import IconSubtitle from './icons/IconSubtitle';
 import IconPauseOutlined from './icons/IconPauseOutlined';
+import IconThumbs from './icons/IconThumbs';
 
 /* ----------------- Exports images -----------------------  [MA] */
 
@@ -92,12 +104,28 @@ import logoCaptureV2 from './images/captureSinal.svg';
 import logoTranslateVideo from './images/translate-video.svg';
 import logoTrashBtn from './images/botao-lixo.svg';
 import logoCaptureDisable from './images/capture-disable.svg';
+import logoRefresh from './images/rotate-ccw.png';
 import cameraBlue from './images/camera-blue.svg';
-
+import logoOlho from './images/olho.png';
+import logoCabelo from './images/cabelo.png';
+import logoCorpo from './images/corpo.png';
+import logoCamisa from './images/camisa.png';
+import logoCalca from './images/calça.png';
+import logoSubtitleOn from './images/subtitle-on.png';
+import logoSubtitleOff from './images/subtitle-off.png';
 import Vlibraslogo from './images/vlibraslogo.png';
 
+export { ReactComponent as IcaroAvatar } from './images/icaro.svg';
+export { ReactComponent as GugaAvatar } from './images/guga.svg';
+export { ReactComponent as HozanaAvatar } from './images/hozana.svg';
+export { ReactComponent as ArrowLeft } from './images/arrow-left.svg';
+
 export {
+  logoSubtitleOff,
+  logoSubtitleOn,
   LogoIcaro,
+  IconHozana,
+  logoRefresh,
   logoAvatares,
   logoCamaraDeputados,
   logoFacebook,
@@ -178,10 +206,27 @@ export {
   IconRunning,
   IconSubtitle,
   IconPauseOutlined,
+  logoWarning,
+  IconThumbs,
   IconArrowLeft,
-  cameraBlue,
   IconThumbUp,
   IconThumbDown,
+  IconIcaro,
   IconArrowUpRight,
-  logoWarning
+  cameraBlue,
+  logoOlho,
+  logoCabelo,
+  logoCalca,
+  logoCorpo,
+  logoCamisa,
+  IconEye,
+  IconPants,
+  IconHair,
+  IconBody,
+  IconShirt,
+  IconCustomization,
+  IconLeftArrow,
+  IconYoutube,
+  IconCamera,
+  IconPlay,
 };

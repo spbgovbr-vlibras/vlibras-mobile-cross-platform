@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { IconThumbUp } from 'assets';
+
 import { IonModal, IonButton, IonText, IonChip } from '@ionic/react';
+
+import { IconThumbUp } from 'assets';
+
 import './styles.css';
 import { Strings } from './strings';
 
@@ -9,22 +12,29 @@ interface EvaluationYesModalProps {
   setShowYes: any;
 }
 
-const EvaluationYesModal = ({ showYes, setShowYes}: EvaluationYesModalProps) => {
+const EvaluationYesModal = ({
+  showYes,
+  setShowYes,
+}: EvaluationYesModalProps) => {
   const handleCloseModal = () => {
     setShowYes(false);
+  };
+
+  if (showYes) {
+    setTimeout(handleCloseModal, 2000);
   }
   return (
     <IonModal
       isOpen={showYes}
-      cssClass={'evaluation-yes-modal'}
+      cssClass="evaluation-yes-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose={true}
+      swipeToClose
     >
       <div className="modal-title">
         <IconThumbUp color="black" />
-        <IonText class="text-space">{Strings.TITLE_MENU_MODAL}</IonText>
+        <p className="text-space">{Strings.TITLE_MENU_MODAL}</p>
       </div>
-      <IonText class="subtitle">{Strings.SUBTITLE_MENU_MODAL}</IonText>
+      <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>
     </IonModal>
   );
 };

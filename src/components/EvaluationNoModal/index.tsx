@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { IconCloseCircle, IconThumbDown } from 'assets';
+
 import { IonModal, IonButton, IonText, IonChip } from '@ionic/react';
+
+import { IconCloseCircle, IconThumbDown } from 'assets';
 import './styles.css';
-import { Strings } from './strings';
 import RevisionModal from 'components/RevisionModal';
+
+import { Strings } from './strings';
 
 interface EvaluationNoModalProps {
   showNo: any;
@@ -28,33 +31,37 @@ const EvaluationNoModal = ({
     <div>
       <IonModal
         isOpen={showNo}
-        cssClass={'evaluation-no-modal'}
+        cssClass="evaluation-no-modal"
         onDidDismiss={() => setShowNo(false)}
-        swipeToClose={true}
+        swipeToClose
       >
-        <button
-          className="evaluation-modal-container-close-button"
-          type="button"
-          onClick={() => {
-            setShowNo(false);
-            console.log('NO MODAL:' + showNo);
-          }}
-        >
-          <IconCloseCircle color="#4e4e4e" />
-        </button>
+        <div className="evaluation-modal-container-close-button-container">
+          <button
+            type="button"
+            onClick={() => {
+              setShowNo(false);
+              console.log(`NO MODAL:${showNo}`);
+            }}
+          >
+            <IconCloseCircle color="#4e4e4e" />
+          </button>
+        </div>
+
         <div className="modal-title">
           <IconThumbDown color="black" />
-          <IonText class="text-space">{Strings.TITLE_MENU_MODAL}</IonText>
+          <p className="text-space">{Strings.TITLE_MENU_MODAL}</p>
         </div>
-        <IonChip
-          class="evaluation-modal-container-chip-suggestion"
-          onClick={() => {
-            setShowSuggestionModal(true);
-            setShowNo(false);
-          }}
-        >
-          {Strings.EDIT_SUGGESTION}
-        </IonChip>
+        <div>
+          <IonChip
+            class="evaluation-modal-container-chip-suggestion"
+            onClick={() => {
+              setShowSuggestionModal(true);
+              setShowNo(false);
+            }}
+          >
+            {Strings.EDIT_SUGGESTION}
+          </IonChip>
+        </div>
       </IonModal>
       <RevisionModal
         show={showSuggestionModal}
@@ -62,7 +69,7 @@ const EvaluationNoModal = ({
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setSuggestionFeedbackModal}
         isPlaying={isPlaying}
-      ></RevisionModal>
+      />
     </div>
   );
 };

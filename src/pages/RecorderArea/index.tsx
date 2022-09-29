@@ -1,32 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import {
-  logoCapture,
-  logoHistory,
-  logoTranslate,
-  logoMaos,
-} from '../../assets';
-import { useHistory, useLocation } from 'react-router-dom';
-import paths from '../../constants/paths';
-import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from 'store';
-import { Creators } from 'store/ducks/video';
-import { File, DirectoryEntry } from '@ionic-native/file';
+import { BackgroundMode } from '@ionic-native/background-mode';
 
-import { IonContent } from '@ionic/react';
-import { MenuLayout } from '../../layouts';
-import { Strings } from './strings';
+import { Capacitor } from '@capacitor/core';
+import { File, DirectoryEntry } from '@ionic-native/file';
+import { NativeStorage } from '@ionic-native/native-storage';
+import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
 import {
   CreateThumbnailOptions,
   VideoEditor,
 } from '@ionic-native/video-editor';
+import { IonContent } from '@ionic/react';
+import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
-import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
-import {
-  VideoOutputModal,
-  TranslatingModal,
-  ErrorModal,
-} from '../../components';
+import { logoCapture, logoHistory, logoTranslate, logoMaos } from 'assets';
+import { ErrorModal, VideoOutputModal, LoadingModal } from 'components';
+import paths from 'constants/paths';
+import { MenuLayout } from 'layouts';
+import { RootState } from 'store';
+import { Creators } from 'store/ducks/video';
+
+import { Strings } from './strings';
 
 import './styles.css';
 
@@ -34,37 +30,47 @@ const RecorderArea = () => {
   const history = useHistory();
   const location = useLocation();
 
-  const [results, setResults] = React.useState<any>([]);
-  const [loading, setLoading] = React.useState<any>(false);
-  const [toogleResult, setToogleResult] = React.useState(false);
+  const [results, setResults] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingDescription, setLoadingDescription] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState([false, '']);
-
-  const [log, setLog] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
+    false,
+    '',
+  ]);
+  const [lastTranslation, setLastTranslation] = useState<string[]>([]);
 
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
     ({ video }: RootState) => video.current,
   );
 
-  const lastTranslation = useSelector(
-    ({ video }: RootState) => video.lastTranslate,
+  const domain = useSelector(({ video }: RootState) => video.domain);
+
+  const promiseLastTranslation: Promise<string[]> = NativeStorage.getItem(
+    'lastTranslation',
+  ).then(
+    (data: string[]) => data,
+    (error: Error) => {
+      return [];
+    },
   );
 
-  const orderArrayByKey = (arrayOfResults: any, arrayOfKeys: any) => {
-    let newResultArray = new Array(arrayOfResults.length);
+  const orderArrayByKey = (
+    arrayOfResults: string[],
+    arrayOfKeys: number[],
+  ): string[] => {
+    const newResultArray = new Array(arrayOfResults.length);
 
-    arrayOfKeys.map((elem: number, key: number) => {
+    arrayOfKeys.forEach((elem: number, key: number) => {
       newResultArray[elem] = arrayOfResults[key];
     });
-
-    console.log(arrayOfResults, arrayOfKeys, newResultArray);
 
     return newResultArray;
   };
 
-  const takeVideo = async () => {
-    //mock
+  const takeVideoMock = async () => {
+    // mock
     if (currentVideoArray.length < 5) {
       dispatch(
         Creators.setCurrentArrayVideo([
@@ -83,26 +89,36 @@ const RecorderArea = () => {
     }
   };
 
-  const takeVideoOf = async () => {
+  const takeVideo = async () => {
     try {
       const options = { limit: 1, duration: 30, highquality: true };
-      let mediafile = await VideoCapturePlus.captureVideo(options);
 
-      let media = mediafile[0] as MediaFile;
-      let path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
+      // BackgroundMode.enable();
+      const mediafile = await VideoCapturePlus.captureVideo(options);
+      // BackgroundMode.disable();
+
+      setLoadingDescription('Processando...');
+      setLoading(true);
+
       let resolvedPath: DirectoryEntry;
+      const media = mediafile[0] as MediaFile;
+      const path = media.fullPath.substring(0, media.fullPath.lastIndexOf('/'));
 
-      resolvedPath = await File.resolveDirectoryUrl(path);
+      if (Capacitor.getPlatform() === 'ios') {
+        resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
+      } else {
+        resolvedPath = await File.resolveDirectoryUrl(path);
+      }
 
       File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
         (buffer: any) => {
-          let imgBlob = new Blob([buffer], {
+          const imgBlob = new Blob([buffer], {
             type: media.type,
           });
 
           const fname = `thumb-${currentVideoArray.length}`;
 
-          let thumbnailoption: CreateThumbnailOptions = {
+          const thumbnailoption: CreateThumbnailOptions = {
             fileUri: resolvedPath.nativeURL + media.name,
             quality: 100,
             atTime: 1,
@@ -110,21 +126,19 @@ const RecorderArea = () => {
           };
 
           VideoEditor.createThumbnail(thumbnailoption)
-            .then(async (thumbnailPath: any) => {
-              let pathThumbs = thumbnailPath.substring(
+            .then(async (thumbnailPath: string) => {
+              const pathThumbs = thumbnailPath.substring(
                 0,
                 thumbnailPath.lastIndexOf('/'),
               );
-              let resolvedPathThumb: DirectoryEntry;
-              resolvedPathThumb = await File.resolveDirectoryUrl(
-                'file://' + pathThumbs,
-              );
+              const resolvedPathThumb: DirectoryEntry =
+                await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
               File.readAsDataURL(
                 resolvedPathThumb.nativeURL,
-                fname + '.jpg',
+                `${fname}.jpg`,
               ).then(
-                (thumbPath: any) => {
+                (thumbPath: string) => {
                   VideoEditor.getVideoInfo({
                     fileUri: resolvedPath.nativeURL + media.name,
                   }).then(
@@ -139,9 +153,11 @@ const RecorderArea = () => {
                           ],
                         ]),
                       );
+                      setLoading(false);
                       history.push(paths.SIGNALCAPTURE);
                     },
                     err => {
+                      setLoading(false);
                       setShowErrorModal([
                         true,
                         'Não foi possível obter informações do vídeo',
@@ -149,44 +165,83 @@ const RecorderArea = () => {
                     },
                   );
                 },
-                error =>
+                error => {
+                  setLoading(false);
                   setShowErrorModal([
                     true,
                     'Não foi possível carregar a prévia do vídeo',
-                  ]),
+                  ]);
+                },
               );
             })
-            .catch((err: any) => {
+            .catch((err: Error) => {
+              setLoading(false);
               setShowErrorModal([
                 true,
                 'Não foi possível criar a prévia do vídeo',
               ]);
             });
         },
-        (error: any) =>
-          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']),
+        (error: Error) => {
+          setLoading(false);
+          setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+        },
       );
-    } catch (error) {
-      setShowErrorModal([true, 'Erro ao abrir câmera']);
-      console.log(error);
+    } catch (error: any) {
+      setLoading(false);
+      if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+    }
+  };
+
+  type ErrorType = {
+    key: number;
+    msg: string;
+  };
+
+  const returnError = (
+    networkError: boolean,
+    arrayOfErrors: ErrorType[],
+    defaultMsg: string,
+  ) => {
+    dispatch(Creators.setCurrentArrayVideo([]));
+
+    if (networkError)
+      setShowErrorModal([true, 'Erro ao se conectar com tradutor']);
+    else if (arrayOfErrors.length != 0)
+      setShowErrorModal([
+        true,
+        `Video ${arrayOfErrors[0].key + 1}: ${arrayOfErrors[0].msg}`,
+      ]);
+    else {
+      setShowErrorModal([true, defaultMsg]);
     }
   };
 
   const translateVideo = async () => {
-    const arrayOfResults: any = [];
-    const arrayOfKeys: any = [];
+    const arrayOfResults: string[] = [];
+    const arrayOfKeys: number[] = [];
+    let arrayOfErrors: ErrorType[] = [];
+    let networkError = false;
 
+    setLoadingDescription('Traduzindo...');
     setLoading(true);
     setShowModal(false);
 
+    type ObjectType = 'string' | 'Blob';
+
     await Promise.all(
-      currentVideoArray.map(async (item: any, key: number) => {
+      currentVideoArray.map(async (item: ObjectType, key: number) => {
         const form = new FormData();
         form.append('file', item[1]);
+        const domainParam = domain
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
         try {
           const resultRequest = await axios.post(
-            'http://127.0.0.1:5000/api/v1/recognition',
-            //'http://lavid.nsa.root.sx:3000/api/v1/recognition',
+            //'http://127.0.0.1:5000/api/v1/recognition',
+            `http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
             form,
             {
               headers: {
@@ -202,19 +257,13 @@ const RecorderArea = () => {
             arrayOfResults.push(resultRequest.data[0].label);
             arrayOfKeys.push(key);
           }
-          // else setShowErrorModal([true, 'Erro ao obter resultados']);
-        } catch (e) {
-          // setTimeout(function () {
-          //   setLoading(false);
-          // }, 200);
-          // setLog(JSON.stringify(e.response.data));
-          // console.log(e.response);
-          // if (e.response && e.response.data.detail.message) {
-          //   setShowErrorModal([true, e.response.data.detail.message]);
-          // } else {
-          //   setShowErrorModal([true, 'Erro ao enviar vídeo']);
-          // }
-          console.log(e);
+        } catch (e: any) {
+          if (e.response && e.response.data) {
+            arrayOfErrors.push({ key, msg: e.response.data.detail.message });
+          } else {
+            networkError = true;
+            arrayOfErrors.push({ key, msg: 'Erro ao enviar vídeo' });
+          }
         }
       }),
     );
@@ -224,8 +273,8 @@ const RecorderArea = () => {
     }, 200);
 
     const translatedLabels = orderArrayByKey(arrayOfResults, arrayOfKeys);
-    console.log(translatedLabels);
-    if (translatedLabels.length != 0) {
+
+    if (translatedLabels.length !== 0) {
       if (translatedLabels.length === currentVideoArray.length) {
         const today = new Date();
         dispatch(
@@ -239,14 +288,24 @@ const RecorderArea = () => {
         setShowModal(true);
         setLoading(false);
       } else if (translatedLabels.length < currentVideoArray.length) {
-        setShowErrorModal([
-          true,
-          'Não foi possível traduzir todos os vídeos. Tente novamente!',
-        ]);
+        setLoading(false);
+        returnError(
+          networkError,
+          arrayOfErrors,
+          'Não foi possível traduzir todos os vídeos!',
+        );
       }
     } else {
-      setShowErrorModal([true, 'Erro ao enviar vídeo']);
+      setLoading(false);
+      returnError(
+        networkError,
+        arrayOfErrors,
+        'Erro ao enviar vídeo, tente novamente!',
+      );
     }
+  };
+  const getLastTranslationOnStorage = async () => {
+    setLastTranslation(await promiseLastTranslation);
   };
 
   useEffect(() => {
@@ -258,64 +317,79 @@ const RecorderArea = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    getLastTranslationOnStorage();
+  }, [location, results]);
+
   const renderOutputs = () => {
-    return lastTranslation.map((item: string, key: string) => {
-      return <span key={key}>{item}</span>;
+    return lastTranslation.map((item: string) => {
+      return <span key={uuidv4()}>{item}</span>;
     });
   };
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>
       <IonContent>
-        <div
-          className="main-area-recorder"
-          onClick={() => setToogleResult(!toogleResult)}
-        >
-          {results.length != 0 && (
+        <div className="main-area-recorder">
+          {lastTranslation.length !== 0 && (
             <>
               <div className="title-area">
-                <img className="logo-icon" src={logoMaos} />
+                <img className="logo-icon" src={logoMaos} alt="Logo Mãos" />
                 <p className="title"> Ultima tradução </p>
               </div>
-              <div
-                className="list-outputs"
+              <button
+                className="main-area-recorder-button-none container-output"
+                type="button"
                 onClick={() => history.push(paths.HISTORY)}
               >
-                <div className="container-outputs">{renderOutputs()}</div>
-              </div>
+                <div className="list-outputs">
+                  <div className="container-outputs">{renderOutputs()}</div>
+                </div>
+              </button>
             </>
           )}
           <img
             src={logoTranslate}
-            className={results.length != 0 ? 'bg-img bg-opacity' : 'bg-img'}
-          ></img>
+            className={results.length !== 0 ? 'bg-img bg-opacity' : 'bg-img'}
+            alt="Logo translate"
+          />
         </div>
         <div className="fixed-area-recorder">
           <p className="title-recorder">
             Use a câmera para gravar novos sinais
           </p>
-          <div style={{ fontSize: '9px' }}> {log} </div>
           <div className="recorder-area">
             <div className="area-button-recorder">
-              <img
-                className="button-recorder"
-                src={logoCapture}
+              <button
                 onClick={takeVideo}
-                // onClick={() => history.push(paths.SIGNALCAPTURE)}
-              ></img>
+                type="button"
+                className="main-area-recorder-button-none"
+              >
+                <img
+                  className="button-recorder"
+                  src={logoCapture}
+                  alt="Logo Captura"
+                />
+              </button>
               <p> Câmera </p>
             </div>
-            <img
-              className="history-recorder"
-              src={logoHistory}
+            <button
               onClick={() => history.push(paths.HISTORY)}
-            ></img>
+              className="main-area-recorder-button-none history-recorder"
+              type="button"
+            >
+              <img src={logoHistory} alt="Logo Histórico" />
+            </button>
           </div>
         </div>
-        <TranslatingModal loading={loading} setLoading={setLoading} />
+        <LoadingModal
+          loading={loading}
+          setLoading={setLoading}
+          text={loadingDescription}
+        />
         <VideoOutputModal
           outputs={results}
-          showButtons={true}
+          showButtons
           showModal={showModal}
           setShowModal={setShowModal}
           playerIntermedium={false}
