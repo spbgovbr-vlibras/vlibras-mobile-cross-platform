@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import { translate } from './translate';
-
 const suggestionGloss = axios.create({
   baseURL: 'https://traducao2.vlibras.gov.br/review',
   headers: {
