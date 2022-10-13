@@ -186,7 +186,7 @@ const RevisionModal = ({
             <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
-            <IonChip class="chip-2" onClick={handleOpenSuggestionFeedbackModal}>
+            <IonChip class="chip-2" disabled={auxValueText.trim().length ===0} onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}
             </IonChip>
           </div>
