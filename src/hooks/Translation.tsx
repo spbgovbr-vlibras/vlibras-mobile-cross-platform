@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TranslationRequestType } from 'constants/types';
+
 import React, {
   createContext,
   useContext,
@@ -9,7 +11,6 @@ import React, {
 
 import { NativeStorage } from '@ionic-native/native-storage';
 import { SocialSharing } from '@ionic-native/social-sharing/';
-
 import { ErrorModal, GenerateModal } from 'components';
 import {
   fetchVideoStatus,
@@ -18,7 +19,6 @@ import {
   VideoStatusResponse,
   VideoTranslationStatus,
 } from 'services/translate';
-import { TranslationRequestType } from 'constants/types';
 
 interface PollParams {
   fn: () => Promise<VideoStatusResponse>;
@@ -72,7 +72,9 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loadingVideoGeneration, setVideoGenerationLoading] = useState(false);
   const [loadingTextTranslation, setTextTranslationLoading] = useState(false);
-  const [translateRequestType, setTranslateRequestType] = useState(TranslationRequestType.VIDEO_SHARE);
+  const [translateRequestType, setTranslateRequestType] = useState(
+    TranslationRequestType.VIDEO_SHARE,
+  );
   const [translationError, setTranslationError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
@@ -172,24 +174,24 @@ const TranslationProvider: React.FC = ({ children }) => {
     [recentTranslation],
   );
 
-  const isLoading = loadingVideoGeneration || loadingTextTranslation
+  const isLoading = loadingVideoGeneration || loadingTextTranslation;
   const setModalVisible = (isVisible: boolean) => {
-    switch(translateRequestType) {
+    switch (translateRequestType) {
       case TranslationRequestType.GLOSS_ONLY: {
-        setTextTranslationLoading(isVisible)
+        setTextTranslationLoading(isVisible);
         break;
       }
       default: {
-        setVideoGenerationLoading(isVisible)
+        setVideoGenerationLoading(isVisible);
       }
     }
-  }
+  };
 
   const onModalPresented = () => {
-    if(translationError) {
+    if (translationError) {
       setModalVisible(false);
     }
-  }
+  };
 
   return (
     <TranslationContext.Provider
@@ -203,13 +205,13 @@ const TranslationProvider: React.FC = ({ children }) => {
       }}
     >
       {children}
-      <GenerateModal 
-        visible={isLoading} 
-        setVisible={setModalVisible} 
+      <GenerateModal
+        visible={isLoading}
+        setVisible={setModalVisible}
         translationRequestType={translateRequestType}
         onModalPresented={onModalPresented}
       />
-      
+
       <ErrorModal
         errorMsg="Erro ao gerar vídeo"
         show={errorModalVisible}
