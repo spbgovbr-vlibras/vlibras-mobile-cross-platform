@@ -8,7 +8,7 @@ import {
   IonText,
   IonTextarea,
 } from '@ionic/react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,9 +25,10 @@ import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 import { useTranslation } from 'hooks/Translation';
 import { reloadHistory } from 'utils/setHistory';
-
+import { Creators } from 'store/ducks/translator';
 
 import './styles.css';
+//import { Creators } from 'store/ducks/customization';
 
 type GenericObject = { [key: string]: any };
 
@@ -41,6 +42,7 @@ function Historic() {
   const [log, setLog] = useState([]);
   const history = useHistory();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
 
@@ -120,7 +122,7 @@ function Historic() {
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
- 
+    dispatch(Creators.setTranslatorText(formatted));
   }
 
   const renderAllItems = () => {
