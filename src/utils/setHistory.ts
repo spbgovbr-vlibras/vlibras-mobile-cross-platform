@@ -38,5 +38,5 @@ export const lastTranslation = (data: string[], key: string): void => {
       () => console.log(NativeStorage.getItem('lastTranslation')),
       error => console.error('Error storing lastTranslationitem', error),
     );
-  }
+  };
 };

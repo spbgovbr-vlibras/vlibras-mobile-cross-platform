@@ -24,6 +24,8 @@ import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
 import { useTranslation } from 'hooks/Translation';
+import { reloadHistory } from 'utils/setHistory';
+
 
 import './styles.css';
 
@@ -108,10 +110,17 @@ function Historic() {
 
   async function onTranslationHistory(text: string) {
     const formatted = text.trim();
+
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    reloadHistory(today, formatted, 'text');
+
     const gloss = await setTextPtBr(formatted, false);
+    
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+ 
   }
 
   const renderAllItems = () => {

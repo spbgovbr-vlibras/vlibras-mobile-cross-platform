@@ -32,7 +32,7 @@ const Translator = () => {
     const today = new Date().toLocaleDateString('pt-BR');
 
     reloadHistory(today, formatted, 'text');
-
+    console.log("TESTE");
     const gloss = await setTextPtBr(formatted, false);
 
     history.replace(paths.HOME);
