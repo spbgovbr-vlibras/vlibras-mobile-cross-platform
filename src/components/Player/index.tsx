@@ -614,7 +614,7 @@ function Player() {
               className="button-solid"
               onClick={goNextStep}
             >
-              Inicar
+              Iniciar
             </button>
           </div>
         </div>
