@@ -13,8 +13,7 @@ const IconArrowLeft = ({
     height={size}
     viewBox={viewBox}
     fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M19 12H5"
       stroke={color}

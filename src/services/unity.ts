@@ -17,7 +17,7 @@ export default class UnityService {
       'final/Build/UnityLoader.js',
       {
         adjustOnWindowResize: true,
-      },
+      }
     );
     this.isReady = false;
   }
@@ -45,13 +45,13 @@ export default class UnityService {
     window.onLoadPlayer = () => {
       this.unityContent.send(
         PlayerKeys.PLAYER_MANAGER,
-        PlayerKeys.INIT_RANDOM_ANIMATION,
+        PlayerKeys.INIT_RANDOM_ANIMATION
       );
       this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
       this.unityContent.send(
         PlayerKeys.PLAYER_MANAGER,
         PlayerKeys.SET_BASE_URL,
-        DICTIONAY_URL,
+        DICTIONAY_URL
       );
       this.isReady = true;
     };

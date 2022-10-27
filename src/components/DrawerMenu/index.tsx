@@ -70,11 +70,11 @@ function getColor(value: string, expected: string): string {
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
   const isVideoScreen = useSelector(
-    ({ video }: RootState) => video.isVideoScreen,
+    ({ video }: RootState) => video.isVideoScreen
   );
 
   const onboardingFirstAccess = useSelector(
-    ({ video }: RootState) => video.onboardingFirstAccess,
+    ({ video }: RootState) => video.onboardingFirstAccess
   );
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
@@ -140,15 +140,14 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     tab: string,
     title: string,
     IconComponent: React.ComponentType<SVGProps>,
-    selectable: boolean,
+    selectable: boolean
   ) => (
     <IonItem
       className={
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      onClick={e => navLink(e, tab)}
-    >
+      onClick={e => navLink(e, tab)}>
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
@@ -159,8 +158,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           <button
             className="drawer-menu-sub-item translator"
             onClick={() => setOpenSelect(true)}
-            type="button"
-          >
+            type="button">
             {valueSelected || 'Libras'}
           </button>
           <div className="arrow-down"> </div>
@@ -203,8 +201,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                   : 'option-trans'
               }
               onClick={() => setValue('Libras')}
-              type="button"
-            >
+              type="button">
               Libras
             </button>
             <button
@@ -214,8 +211,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                   : 'option-trans'
               }
               onClick={() => setValue('PT-BR')}
-              type="button"
-            >
+              type="button">
               PT-BR
             </button>
           </div>
@@ -231,13 +227,13 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             paths.HOME,
             Strings.TITLE_MENU_TRANSLATOR,
             IconTranslate,
-            true,
+            true
           )}
           {renderItemTab(
             paths.DICTIONARY,
             Strings.TITLE_MENU_DICTIONARY,
             IconDictionary,
-            true,
+            true
           )}
         </IonList>
       </IonHeader>
@@ -254,19 +250,19 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 paths.DOMAIN,
                 Strings.TITLE_MENU_DOMAIN,
                 IconDomain,
-                true,
+                true
               )
             : renderItemTab(
                 paths.REGIONALISM,
                 Strings.TITLE_MENU_REGIONALISM,
                 IconRegionalism,
-                true,
+                true
               )}
           {renderItemTab(
             paths.CUSTOMIZATION,
             Strings.TITLE_MENU_CUSTOMIZATION,
             IconCustomization,
-            true,
+            true
           )}
         </IonList>
         <IonList lines="none">
@@ -274,13 +270,13 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             paths.TUTORIAL,
             Strings.TITLE_MENU_TUTORIAL,
             IconTutorial,
-            false,
+            false
           )}
           {renderItemTab(
             paths.ABOUT,
             Strings.TITLE_MENU_ABOUT,
             IconInfo,
-            false,
+            false
           )}
         </IonList>
       </div>

@@ -4,7 +4,7 @@ import { IonButton, IonImg } from '@ionic/react';
 
 import Bullets from 'components/Bullets';
 
-import { IcaroPreview, gifStepFour } from '../../../assets';
+import { gifStepFour } from '../../../assets';
 import { Strings } from '../strings';
 
 interface StepFourProps {
@@ -35,8 +35,7 @@ const StepFour: React.FunctionComponent<StepFourProps> = ({
       <div className="buttons-area">
         <IonButton
           className="goback-modal-button"
-          onClick={() => setCurrentStep(3)}
-        >
+          onClick={() => setCurrentStep(3)}>
           {Strings.BUTTON_BACK}
         </IonButton>
         <IonButton className="primary-modal-button" onClick={jump}>

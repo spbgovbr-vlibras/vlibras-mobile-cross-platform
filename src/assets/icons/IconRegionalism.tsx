@@ -14,8 +14,7 @@ const IconRegionalism = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <g clipPath="url(#clip0)">
       <g clipPath="url(#clip1)">
         <path

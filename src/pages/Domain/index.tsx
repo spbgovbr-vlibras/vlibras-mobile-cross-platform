@@ -20,7 +20,6 @@ import { useHistory } from 'react-router-dom';
 
 import { IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
-import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
@@ -55,8 +54,7 @@ const Domain = () => {
       <IonItem key={item} style={domain === item ? styles.activeBg : {}}>
         <IonLabel
           className="item-domain"
-          style={domain === item ? styles.activeColor : {}}
-        >
+          style={domain === item ? styles.activeColor : {}}>
           {item}
         </IonLabel>
         <IonRadio mode="md" value={item} className="radio" />
@@ -89,8 +87,7 @@ const Domain = () => {
           <IonRadioGroup
             className="ion-radio"
             value={domain}
-            onIonChange={e => setDomain(e.detail.value)}
-          >
+            onIonChange={e => setDomain(e.detail.value)}>
             <IonListHeader>
               <IonLabel className="title-domain">
                 Escolha o domínio para as traduções

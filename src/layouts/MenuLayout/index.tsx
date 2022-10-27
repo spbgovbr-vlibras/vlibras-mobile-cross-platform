@@ -13,7 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { IconTranslate, IconShare, IconArrowLeft } from 'assets';
+import { IconTranslate, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
 import { env } from 'environment/env';
 import { RootState } from 'store';
@@ -40,11 +40,11 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
   const dispatch = useDispatch();
 
   const onboardingFirstAccess = useSelector(
-    ({ video }: RootState) => video.onboardingFirstAccess,
+    ({ video }: RootState) => video.onboardingFirstAccess
   );
 
   const isVideoScreen = useSelector(
-    ({ video }: RootState) => video.isVideoScreen,
+    ({ video }: RootState) => video.isVideoScreen
   );
 
   function openMenu() {
@@ -64,11 +64,10 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
                   history.push(
                     onboardingFirstAccess
                       ? paths.ONBOARDING
-                      : paths.RECORDERAREA,
+                      : paths.RECORDERAREA
                   )
                 }
-                type="button"
-              >
+                type="button">
                 {Strings.MENU_PT_BR}
               </button>
               <IconTranslate color="#2365DE" />
@@ -85,8 +84,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
           <>
             <IonLabel
               className="menu-item-text"
-              onClick={() => history.push(paths.HOME)}
-            >
+              onClick={() => history.push(paths.HOME)}>
               LIBRAS
             </IonLabel>
             <IconTranslate color="#315EB1" />
@@ -113,8 +111,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
             ) : (
               <Link
                 to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
-                className="menu-item-link"
-              >
+                className="menu-item-link">
                 <IconArrowLeft color="#315EB1" />
               </Link>
             )}

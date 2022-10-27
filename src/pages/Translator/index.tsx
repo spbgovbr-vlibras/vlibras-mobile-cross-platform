@@ -64,8 +64,7 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-              disabled={text.trim().length === 0}
-            >
+              disabled={text.trim().length === 0}>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

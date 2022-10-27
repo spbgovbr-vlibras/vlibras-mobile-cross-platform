@@ -1,6 +1,6 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect } from 'react';
 
-import { IonContent, IonModal, IonPage } from '@ionic/react';
+import { IonContent } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import paths from '../../constants/paths';
@@ -35,7 +35,7 @@ const OnBoarding = () => {
     switch (currentStep) {
       case 0:
         setChooseRender(
-          <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />,
+          <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />
         );
         break;
       case 1:
@@ -44,7 +44,7 @@ const OnBoarding = () => {
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
-          />,
+          />
         );
         break;
       case 2:
@@ -53,7 +53,7 @@ const OnBoarding = () => {
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
-          />,
+          />
         );
         break;
       case 3:
@@ -62,7 +62,7 @@ const OnBoarding = () => {
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
-          />,
+          />
         );
         break;
       case 4:
@@ -71,7 +71,7 @@ const OnBoarding = () => {
             setCurrentStep={setCurrentStep}
             active={currentStep}
             jump={closeModal}
-          />,
+          />
         );
         break;
       default:

@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { BackgroundMode } from '@ionic-native/background-mode';
 
+import { Capacitor } from '@capacitor/core';
 import { File, DirectoryEntry } from '@ionic-native/file';
-
-import {
-  VideoCapturePlus,
-  VideoCapturePlusOptions,
-  MediaFile,
-} from '@ionic-native/video-capture-plus';
+import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
 import {
   CreateThumbnailOptions,
   VideoEditor,
@@ -35,7 +30,6 @@ import {
 } from 'assets';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
-import { Capacitor } from '@capacitor/core';
 
 import { ErrorModal, LoadingModal } from '../../components';
 import paths from '../../constants/paths';
@@ -46,7 +40,7 @@ import './styles.css';
 const SignalCapture = () => {
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
-    ({ video }: RootState) => video.current,
+    ({ video }: RootState) => video.current
   );
   const [showErrorModal, setShowErrorModal] = useState<[boolean, string]>([
     false,
@@ -77,7 +71,7 @@ const SignalCapture = () => {
             },
             { duration: Math.trunc(5.4) },
           ],
-        ]),
+        ])
       );
     }
   };
@@ -96,12 +90,12 @@ const SignalCapture = () => {
         const media = mediafile[0] as MediaFile;
         const path = media.fullPath.substring(
           0,
-          media.fullPath.lastIndexOf('/'),
+          media.fullPath.lastIndexOf('/')
         );
         let resolvedPath: DirectoryEntry;
 
         if (Capacitor.getPlatform() === 'ios') {
-          resolvedPath = await File.resolveDirectoryUrl('file://' + path);
+          resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
         } else {
           resolvedPath = await File.resolveDirectoryUrl(path);
         }
@@ -125,14 +119,14 @@ const SignalCapture = () => {
               .then(async (thumbnailPath: string) => {
                 const pathThumbs = thumbnailPath.substring(
                   0,
-                  thumbnailPath.lastIndexOf('/'),
+                  thumbnailPath.lastIndexOf('/')
                 );
                 const resolvedPathThumb: DirectoryEntry =
                   await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
                 File.readAsDataURL(
                   resolvedPathThumb.nativeURL,
-                  `${fname}.jpg`,
+                  `${fname}.jpg`
                 ).then(
                   (thumbPath: string) => {
                     VideoEditor.getVideoInfo({
@@ -149,7 +143,7 @@ const SignalCapture = () => {
                               { thumbBlob: thumbPath },
                               { duration: Math.trunc(info.duration) },
                             ],
-                          ]),
+                          ])
                         );
                         history.push(paths.SIGNALCAPTURE);
                       },
@@ -159,7 +153,7 @@ const SignalCapture = () => {
                           true,
                           'Não foi possível obter informações do vídeo',
                         ]);
-                      },
+                      }
                     );
                   },
                   error => {
@@ -168,7 +162,7 @@ const SignalCapture = () => {
                       true,
                       'Não foi possível carregar a prévia do vídeo',
                     ]);
-                  },
+                  }
                 );
               })
               .catch((err: Error) => {
@@ -182,11 +176,11 @@ const SignalCapture = () => {
           (error: Error) => {
             setLoading(false);
             setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
-          },
+          }
         );
       } catch (error: any) {
         setLoading(false);
-        if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+        if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
       }
     }
   };
@@ -200,7 +194,7 @@ const SignalCapture = () => {
 
   const removeRecord = (index: number) => {
     const filteredArray = currentVideoArray.filter(
-      (value: unknown, i: number) => i !== index,
+      (value: unknown, i: number) => i !== index
     );
     dispatch(Creators.setCurrentArrayVideo(filteredArray));
   };
@@ -238,8 +232,7 @@ const SignalCapture = () => {
                 <button
                   onClick={() => popupRemove(key)}
                   type="button"
-                  className="signal-capture-button-none"
-                >
+                  className="signal-capture-button-none">
                   <img src={logoTrashBtn} alt="Logo lixeira" />
                 </button>
               </div>
@@ -284,8 +277,7 @@ const SignalCapture = () => {
             <button
               onClick={takeVideo}
               type="button"
-              className="signal-capture-button-none"
-            >
+              className="signal-capture-button-none">
               <img
                 className="button-recorder"
                 src={
@@ -302,8 +294,7 @@ const SignalCapture = () => {
             <button
               onClick={translateVideo}
               type="button"
-              className="signal-capture-button-none"
-            >
+              className="signal-capture-button-none">
               <img
                 className="button-recorder"
                 src={logoTranslateVideo}

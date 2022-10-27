@@ -30,7 +30,7 @@ interface TutorialContextData {
 }
 
 const TutorialContext = createContext<TutorialContextData>(
-  {} as TutorialContextData,
+  {} as TutorialContextData
 );
 
 export const TUTORIAL_QUEUE = [
@@ -48,21 +48,30 @@ const PROPERTY_KEY_PRESENT_TUTORIAL = 'present-tutorial';
 
 const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
-    TutorialSteps.INITIAL,
+    TutorialSteps.INITIAL
   );
   const [presentTutorial, setPresentTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+
+  const onSetPresentTutorial = useCallback((value: boolean) => {
+    if (value) {
+      setCurrentStep(TutorialSteps.INITIAL);
+      setCurrentStepIndex(-1);
+    }
+    setPresentTutorial(value);
+    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, value);
+  }, []);
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY_TUTORIAL)
       .then(value =>
         value
           ? setCurrentStep(TutorialSteps.IDLE)
-          : setCurrentStep(TutorialSteps.INITIAL),
+          : setCurrentStep(TutorialSteps.INITIAL)
       )
       .catch(_ => false);
 
-      NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
+    NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
       .then(value => onSetPresentTutorial(value))
       .catch(_ => false);
   }, []);
@@ -85,15 +94,6 @@ const TutorialProvider: React.FC = ({ children }) => {
     }
   }, [currentStepIndex, onCancel]);
 
-  const onSetPresentTutorial = useCallback((value: boolean) => {
-    if (value) {
-      setCurrentStep(TutorialSteps.INITIAL)
-      setCurrentStepIndex(-1);
-    }
-    setPresentTutorial(value);
-    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, value);
-  }, []);
-
   return (
     <TutorialContext.Provider
       value={{
@@ -103,8 +103,7 @@ const TutorialProvider: React.FC = ({ children }) => {
         onCancel,
         presentTutorial,
         setPresentTutorial: onSetPresentTutorial,
-      }}
-    >
+      }}>
       {children}
     </TutorialContext.Provider>
   );

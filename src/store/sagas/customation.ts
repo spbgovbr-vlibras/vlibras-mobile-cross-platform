@@ -5,7 +5,7 @@ import { PLAYER_CUSTOMIZATION_KEY_STORE } from 'constants/keys';
 import { Creators, CustomizationColors } from 'store/ducks/customization';
 
 function* storeCustomization(
-  action: ReturnType<typeof Creators.storeCustomization.request>,
+  action: ReturnType<typeof Creators.storeCustomization.request>
 ): Generator<unknown, void, unknown> {
   try {
     yield NativeStorage.setItem(PLAYER_CUSTOMIZATION_KEY_STORE, action.payload);
@@ -18,7 +18,7 @@ function* storeCustomization(
 function* loadCustomization(): Generator<unknown, void, CustomizationColors> {
   try {
     const response = yield NativeStorage.getItem(
-      PLAYER_CUSTOMIZATION_KEY_STORE,
+      PLAYER_CUSTOMIZATION_KEY_STORE
     );
     yield put(Creators.loadCustomization.success(response));
   } catch (error) {
