@@ -33,6 +33,7 @@ interface TranslationVideoResponse {
 const defaultTranslateData = {
   avatar: 'icaro',
   caption: 'on',
+  pos: 'center',
 };
 
 const api = axios.create({
@@ -40,7 +41,7 @@ const api = axios.create({
 });
 
 export async function fetchVideoStatus(
-  id: string,
+  id: string
 ): Promise<VideoStatusResponse> {
   const response = await api.get(`/video/status/${id}`);
   return response.data;
@@ -52,11 +53,11 @@ export async function translate(data: TranslateData): Promise<string> {
 }
 
 export async function generateVideoTranslate(
-  data: TranslateVideoData,
+  data: TranslateVideoData
 ): Promise<TranslationVideoResponse> {
   const response = await api.post('/video', {
-    ...data,
     ...defaultTranslateData,
+    ...data,
   });
   return response.data;
 }

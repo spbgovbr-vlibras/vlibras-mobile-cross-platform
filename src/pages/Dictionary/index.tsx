@@ -40,7 +40,7 @@ const TIME_DEBOUNCE_MS = 1000;
 
 function getChipClassName(
   filter: DictionaryFilter,
-  expected: DictionaryFilter,
+  expected: DictionaryFilter
 ) {
   return filter === expected
     ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
@@ -57,7 +57,7 @@ function Dictionary() {
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
 
   const { metadata, words: dictionary } = useSelector(
-    ({ dictionaryReducer }: RootState) => dictionaryReducer,
+    ({ dictionaryReducer }: RootState) => dictionaryReducer
   );
 
   const history = useHistory();
@@ -74,8 +74,7 @@ function Dictionary() {
     <IonItem
       key={item.id}
       class="dictionary-word-item"
-      onClick={() => translate(item.name)}
-    >
+      onClick={() => translate(item.name)}>
       <IonText class="dictionary-words-style">{item.name}</IonText>
     </IonItem>
   );
@@ -84,8 +83,7 @@ function Dictionary() {
     <IonItem
       key={item}
       class="dictionary-word-item"
-      onClick={() => translate(item)}
-    >
+      onClick={() => translate(item)}>
       <IonText class="dictionary-words-style">{item}</IonText>
     </IonItem>
   );
@@ -98,10 +96,10 @@ function Dictionary() {
           page: FIRST_PAGE_INDEX,
           limit: MAX_PER_PAGE,
           name: `${event.target.value}%`,
-        }),
+        })
       );
     },
-    [dispatch],
+    [dispatch]
   );
 
   const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
@@ -111,7 +109,7 @@ function Dictionary() {
       Creators.fetchWords.request({
         page: FIRST_PAGE_INDEX,
         limit: MAX_PER_PAGE,
-      }),
+      })
     );
   }, [dispatch]);
 
@@ -121,7 +119,7 @@ function Dictionary() {
         page: metadata.current_page + PAGE_STEP_SIZE,
         limit: MAX_PER_PAGE,
         name: `${searchText}%`,
-      }),
+      })
     );
     infiniteScrollRef.current?.complete();
   }, [dispatch, infiniteScrollRef, metadata, searchText]);
@@ -137,8 +135,7 @@ function Dictionary() {
   return (
     <MenuLayout
       title={Strings.TOOLBAR_TITLE}
-      mode={location.pathname === paths.DICTIONARY ? 'menu' : 'back'}
-    >
+      mode={location.pathname === paths.DICTIONARY ? 'menu' : 'back'}>
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
@@ -154,15 +151,13 @@ function Dictionary() {
             <IonChip
               class="dictionary-container-ion-chips-suggestions"
               onClick={handleFilterAlpha}
-              style={getChipClassName(filter, 'alphabetical')}
-            >
+              style={getChipClassName(filter, 'alphabetical')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_1}
             </IonChip>
             <IonChip
               class="dictionary-container-ion-chips-suggestions"
               onClick={handleFilterRecents}
-              style={getChipClassName(filter, 'recents')}
-            >
+              style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
           </div>
@@ -179,8 +174,7 @@ function Dictionary() {
         <IonInfiniteScroll
           ref={infiniteScrollRef}
           threshold="100px"
-          onIonInfinite={fetchWords}
-        >
+          onIonInfinite={fetchWords}>
           <IonInfiniteScrollContent
             loadingSpinner="bubbles"
             loadingText="Carregando sinais..."

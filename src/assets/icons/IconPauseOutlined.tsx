@@ -14,8 +14,7 @@ const IconPauseOutlined = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M10 4H6V20H10V4Z"
       stroke={color}

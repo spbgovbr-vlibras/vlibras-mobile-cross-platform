@@ -41,7 +41,7 @@ const unityContent = new UnityContent(
   'final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
-  },
+  }
 );
 
 const buttonColors = {
@@ -70,22 +70,22 @@ const IcaroDefault = {
 
 function Customization() {
   const currentBody = useSelector(
-    ({ customization }: RootState) => customization.currentbody,
+    ({ customization }: RootState) => customization.currentbody
   );
   const currentEye = useSelector(
-    ({ customization }: RootState) => customization.currenteye,
+    ({ customization }: RootState) => customization.currenteye
   );
 
   const currentHair = useSelector(
-    ({ customization }: RootState) => customization.currenthair,
+    ({ customization }: RootState) => customization.currenthair
   );
 
   const currentShirt = useSelector(
-    ({ customization }: RootState) => customization.currentshirt,
+    ({ customization }: RootState) => customization.currentshirt
   );
 
   const currentPants = useSelector(
-    ({ customization }: RootState) => customization.currentpants,
+    ({ customization }: RootState) => customization.currentpants
   );
 
   const [visiblePlayer, setVisiblePlayer] = useState(false);
@@ -195,7 +195,7 @@ function Customization() {
         calca: colorpants,
         iris: coloreye,
         pos: 'center',
-      }),
+      })
     );
 
     history.push(paths.HOME);
@@ -221,7 +221,7 @@ function Customization() {
     unityContent.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview,
+      preProcessingPreview
     );
   }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
@@ -247,7 +247,7 @@ function Customization() {
     unityContent.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview,
+      preProcessingPreview
     );
   }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
 
@@ -276,7 +276,7 @@ function Customization() {
         calca: IcaroDefault.icaroPants,
         iris: IcaroDefault.icaroEye,
         pos: 'center',
-      }),
+      })
     );
   };
 
@@ -288,16 +288,14 @@ function Customization() {
           style={{
             borderColor:
               colorbody === item.colorBody ? item.colorBody : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.colorBody }}
             type="button"
             onClick={() => {
               selectcolorbody(item.colorBody);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -312,16 +310,14 @@ function Customization() {
           className="customization-item-colors"
           style={{
             borderColor: coloreye === item.colorEye ? item.colorEye : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.colorEye }}
             type="button"
             onClick={() => {
               selectcoloreye(item.colorEye);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -337,16 +333,14 @@ function Customization() {
           className="customization-item-colors"
           style={{
             borderColor: colorhair === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorhair(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -362,16 +356,14 @@ function Customization() {
           className="customization-item-colors"
           style={{
             borderColor: colorpants === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorpants(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -387,16 +379,14 @@ function Customization() {
           className="customization-item-colors"
           style={{
             borderColor: colorshirt === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorshirt(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -434,8 +424,7 @@ function Customization() {
             display: 'flex',
             background:
               isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
-          }}
-        >
+          }}>
           <Unity unityContent={unityContent} className="player-content" />
         </div>
 
@@ -450,8 +439,7 @@ function Customization() {
               borderBottomColor: showbody
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconBody
               color={
                 showbody
@@ -471,8 +459,7 @@ function Customization() {
               borderBottomColor: showeye
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconEye
               color={
                 showeye
@@ -492,8 +479,7 @@ function Customization() {
               borderBottomColor: showhair
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconHair
               color={
                 showhair
@@ -513,8 +499,7 @@ function Customization() {
               borderBottomColor: showshirt
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconShirt
               color={
                 showshirt
@@ -534,8 +519,7 @@ function Customization() {
               borderBottomColor: showpants
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconPants
               color={
                 showpants
@@ -561,8 +545,7 @@ function Customization() {
           <button
             className="customization-reset"
             onClick={() => setshowAlert(true)}
-            type="button"
-          >
+            type="button">
             {Strings.BUTTON_RESET}
             <IonAlert
               isOpen={showAlert}
@@ -617,8 +600,7 @@ function Customization() {
           <button
             className="customization-save"
             onClick={() => SaveChanges()}
-            type="button"
-          >
+            type="button">
             {Strings.BUTTON_SALVAR}
           </button>
         </div>

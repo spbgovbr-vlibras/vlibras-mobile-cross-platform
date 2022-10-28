@@ -14,8 +14,7 @@ const IconLeftArrow = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M19 12H5"
       stroke={color}

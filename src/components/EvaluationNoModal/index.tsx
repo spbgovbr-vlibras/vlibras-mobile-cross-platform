@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { IonModal, IonButton, IonText, IonChip } from '@ionic/react';
+import { IonModal, IonChip } from '@ionic/react';
 
 import { IconCloseCircle, IconThumbDown } from 'assets';
 import './styles.css';
@@ -33,16 +33,14 @@ const EvaluationNoModal = ({
         isOpen={showNo}
         cssClass="evaluation-no-modal"
         onDidDismiss={() => setShowNo(false)}
-        swipeToClose
-      >
+        swipeToClose>
         <div className="evaluation-modal-container-close-button-container">
           <button
             type="button"
             onClick={() => {
               setShowNo(false);
               console.log(`NO MODAL:${showNo}`);
-            }}
-          >
+            }}>
             <IconCloseCircle color="#4e4e4e" />
           </button>
         </div>
@@ -57,8 +55,7 @@ const EvaluationNoModal = ({
             onClick={() => {
               setShowSuggestionModal(true);
               setShowNo(false);
-            }}
-          >
+            }}>
             {Strings.EDIT_SUGGESTION}
           </IonChip>
         </div>

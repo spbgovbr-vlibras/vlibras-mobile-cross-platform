@@ -14,9 +14,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { IconCloseCircle, IconCamera, IconEdit, IconPlay } from 'assets';
 import paths from 'constants/paths';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 import './styles.css';
-import { RootState } from 'store';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 const PLAYER_MANAGER = 'PlayerManager';
@@ -34,7 +34,7 @@ const unityContent = new UnityContent(
   'BUILD/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
-  },
+  }
 );
 
 const VideoOutputModal = ({
@@ -55,11 +55,11 @@ const VideoOutputModal = ({
   const MAX_PROGRESS = 100;
   const UNDEFINED_GLOSS = -1;
 
-  let cache = UNDEFINED_GLOSS;
-  let glossLen = UNDEFINED_GLOSS;
+  const cache = UNDEFINED_GLOSS;
+  const glossLen = UNDEFINED_GLOSS;
 
   const progressOutput = useSelector(
-    ({ video }: RootState) => video.progressOutput,
+    ({ video }: RootState) => video.progressOutput
   );
 
   const closeModal = () => {
@@ -157,24 +157,21 @@ const VideoOutputModal = ({
           !showButtons ? ' buttons-off' : ''
         }`}
         swipeToClose
-        onDidDismiss={closeModal}
-      >
+        onDidDismiss={closeModal}>
         <div className="modal-title">
           <span> Resultado tradução </span>
           {!openPlayer ? (
             <button
               className="videooutput-modal-button-none"
               onClick={() => setOpenPlayer(true)}
-              type="button"
-            >
+              type="button">
               <IconPlay />
             </button>
           ) : (
             <button
               className="videooutput-modal-button-none"
               onClick={closeModal}
-              type="button"
-            >
+              type="button">
               <IconCloseCircle color="#1447A6" />
             </button>
           )}
@@ -190,8 +187,7 @@ const VideoOutputModal = ({
             />
             <div
               ref={progressContainerOutputRef}
-              className="player-progress-container-video"
-            >
+              className="player-progress-container-video">
               <div
                 ref={progressBarOutputRef}
                 className="player-progress-bar-video"
@@ -206,8 +202,7 @@ const VideoOutputModal = ({
               onClick={() => {
                 setShowModal(false);
                 history.push(paths.TRANSLATOR);
-              }}
-            >
+              }}>
               <IconEdit />
               Responder
             </IonButton>

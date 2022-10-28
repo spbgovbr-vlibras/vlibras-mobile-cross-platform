@@ -14,8 +14,7 @@ const IconArrowUpRight = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M4.66675 11.3333L11.3334 4.66663"
       stroke={color}

@@ -27,7 +27,7 @@ export type ActionTypes = ActionType<typeof Creators>;
 
 const reducer: Reducer<TranslatorTextState, ActionTypes> = (
   state = INITIAL_STATE,
-  action: ActionTypes,
+  action: ActionTypes
 ) => {
   const { payload, type } = action;
   return produce(state, (draft: Draft<TranslatorTextState>) => {

@@ -19,8 +19,7 @@ const ErrorModal = ({ show, setShow, errorMsg }: ErrorModalProps) => {
       cssClass="error-modal"
       onDidDismiss={() => setShow([false, ''])}
       backdropDismiss
-      swipeToClose
-    >
+      swipeToClose>
       <img className="loading" src={logoWarning} alt="Carregando" />
       <h1>Ops!</h1>
       <h2>{errorMsg}</h2>

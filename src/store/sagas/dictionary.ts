@@ -4,7 +4,7 @@ import { getDictionary } from 'services/api';
 import { Creators, ListResponseDictionary } from 'store/ducks/dictionary';
 
 function* fetchWords(
-  action: ReturnType<typeof Creators.fetchWords.request>,
+  action: ReturnType<typeof Creators.fetchWords.request>
 ): Generator<unknown, void, ListResponseDictionary> {
   try {
     const response = yield getDictionary(action.payload);

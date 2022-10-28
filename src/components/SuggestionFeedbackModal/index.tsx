@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { IonModal, IonText, IonChip } from '@ionic/react';
 
@@ -32,8 +32,7 @@ const SuggestionFeedbackModal = ({
       isOpen={showSuggestionFeedbackModal}
       cssClass="suggestion-feedback-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose
-    >
+      swipeToClose>
       <div className="text-container">
         <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
         <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>

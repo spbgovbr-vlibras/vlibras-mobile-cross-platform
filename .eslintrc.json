@@ -17,7 +17,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react", "react-hooks", "@typescript-eslint",  "prettier"],
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
   "rules": {
     "react/prop-types": "off",
     "prettier/prettier": "error",
@@ -64,7 +64,7 @@
     "@typescript-eslint/no-use-before-define": ["error"],
     "react/react-in-jsx-scope": "off",
     "no-param-reassign": "off",
-    "camelcase":"off",
+    "camelcase": "off",
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": ["error"]
   },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BackgroundMode } from '@ionic-native/background-mode';
 
 import { Capacitor } from '@capacitor/core';
+import { BackgroundMode } from '@ionic-native/background-mode';
 import { File, DirectoryEntry } from '@ionic-native/file';
 import { NativeStorage } from '@ionic-native/native-storage';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
@@ -42,23 +42,23 @@ const RecorderArea = () => {
 
   const dispatch = useDispatch();
   const currentVideoArray = useSelector(
-    ({ video }: RootState) => video.current,
+    ({ video }: RootState) => video.current
   );
 
   const domain = useSelector(({ video }: RootState) => video.domain);
 
   const promiseLastTranslation: Promise<string[]> = NativeStorage.getItem(
-    'lastTranslation',
+    'lastTranslation'
   ).then(
     (data: string[]) => data,
     (error: Error) => {
       return [];
-    },
+    }
   );
 
   const orderArrayByKey = (
     arrayOfResults: string[],
-    arrayOfKeys: number[],
+    arrayOfKeys: number[]
   ): string[] => {
     const newResultArray = new Array(arrayOfResults.length);
 
@@ -83,7 +83,7 @@ const RecorderArea = () => {
             },
             { duration: Math.trunc(5.4) },
           ],
-        ]),
+        ])
       );
       history.push(paths.SIGNALCAPTURE);
     }
@@ -129,14 +129,14 @@ const RecorderArea = () => {
             .then(async (thumbnailPath: string) => {
               const pathThumbs = thumbnailPath.substring(
                 0,
-                thumbnailPath.lastIndexOf('/'),
+                thumbnailPath.lastIndexOf('/')
               );
               const resolvedPathThumb: DirectoryEntry =
                 await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
               File.readAsDataURL(
                 resolvedPathThumb.nativeURL,
-                `${fname}.jpg`,
+                `${fname}.jpg`
               ).then(
                 (thumbPath: string) => {
                   VideoEditor.getVideoInfo({
@@ -151,7 +151,7 @@ const RecorderArea = () => {
                             { thumbBlob: thumbPath },
                             { duration: Math.trunc(info.duration) },
                           ],
-                        ]),
+                        ])
                       );
                       setLoading(false);
                       history.push(paths.SIGNALCAPTURE);
@@ -162,7 +162,7 @@ const RecorderArea = () => {
                         true,
                         'Não foi possível obter informações do vídeo',
                       ]);
-                    },
+                    }
                   );
                 },
                 error => {
@@ -171,7 +171,7 @@ const RecorderArea = () => {
                     true,
                     'Não foi possível carregar a prévia do vídeo',
                   ]);
-                },
+                }
               );
             })
             .catch((err: Error) => {
@@ -185,11 +185,11 @@ const RecorderArea = () => {
         (error: Error) => {
           setLoading(false);
           setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
-        },
+        }
       );
     } catch (error: any) {
       setLoading(false);
-      if (error.code != 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+      if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
     }
   };
 
@@ -201,13 +201,13 @@ const RecorderArea = () => {
   const returnError = (
     networkError: boolean,
     arrayOfErrors: ErrorType[],
-    defaultMsg: string,
+    defaultMsg: string
   ) => {
     dispatch(Creators.setCurrentArrayVideo([]));
 
     if (networkError)
       setShowErrorModal([true, 'Erro ao se conectar com tradutor']);
-    else if (arrayOfErrors.length != 0)
+    else if (arrayOfErrors.length !== 0)
       setShowErrorModal([
         true,
         `Video ${arrayOfErrors[0].key + 1}: ${arrayOfErrors[0].msg}`,
@@ -220,7 +220,7 @@ const RecorderArea = () => {
   const translateVideo = async () => {
     const arrayOfResults: string[] = [];
     const arrayOfKeys: number[] = [];
-    let arrayOfErrors: ErrorType[] = [];
+    const arrayOfErrors: ErrorType[] = [];
     let networkError = false;
 
     setLoadingDescription('Traduzindo...');
@@ -240,7 +240,7 @@ const RecorderArea = () => {
 
         try {
           const resultRequest = await axios.post(
-            //'http://127.0.0.1:5000/api/v1/recognition',
+            // 'http://127.0.0.1:5000/api/v1/recognition',
             `http://lavid.nsa.root.sx:3000/api/v1/recognition?domain=${domainParam}`,
             form,
             {
@@ -250,7 +250,7 @@ const RecorderArea = () => {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': 'Content-Type',
               },
-            },
+            }
           );
 
           if (resultRequest.data && resultRequest.data.length > 0) {
@@ -265,7 +265,7 @@ const RecorderArea = () => {
             arrayOfErrors.push({ key, msg: 'Erro ao enviar vídeo' });
           }
         }
-      }),
+      })
     );
 
     setTimeout(function () {
@@ -282,7 +282,7 @@ const RecorderArea = () => {
             data: translatedLabels,
             date: today.toLocaleDateString('pt-BR'),
             key: 'video',
-          }),
+          })
         );
         setResults(translatedLabels);
         setShowModal(true);
@@ -292,7 +292,7 @@ const RecorderArea = () => {
         returnError(
           networkError,
           arrayOfErrors,
-          'Não foi possível traduzir todos os vídeos!',
+          'Não foi possível traduzir todos os vídeos!'
         );
       }
     } else {
@@ -300,7 +300,7 @@ const RecorderArea = () => {
       returnError(
         networkError,
         arrayOfErrors,
-        'Erro ao enviar vídeo, tente novamente!',
+        'Erro ao enviar vídeo, tente novamente!'
       );
     }
   };
@@ -340,8 +340,7 @@ const RecorderArea = () => {
               <button
                 className="main-area-recorder-button-none container-output"
                 type="button"
-                onClick={() => history.push(paths.HISTORY)}
-              >
+                onClick={() => history.push(paths.HISTORY)}>
                 <div className="list-outputs">
                   <div className="container-outputs">{renderOutputs()}</div>
                 </div>
@@ -363,8 +362,7 @@ const RecorderArea = () => {
               <button
                 onClick={takeVideo}
                 type="button"
-                className="main-area-recorder-button-none"
-              >
+                className="main-area-recorder-button-none">
                 <img
                   className="button-recorder"
                   src={logoCapture}
@@ -376,8 +374,7 @@ const RecorderArea = () => {
             <button
               onClick={() => history.push(paths.HISTORY)}
               className="main-area-recorder-button-none history-recorder"
-              type="button"
-            >
+              type="button">
               <img src={logoHistory} alt="Logo Histórico" />
             </button>
           </div>
