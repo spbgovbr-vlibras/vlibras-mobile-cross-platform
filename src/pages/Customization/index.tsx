@@ -283,24 +283,6 @@ function Customization() {
     selectcolorhair(IcaroDefault.icaroHair);
     selectcolorpants(IcaroDefault.icaroPants);
     selectcolorshirt(IcaroDefault.icaroShirt);
-
-    dispatch(Creators.setCurrentCustomizationBody(IcaroDefault.icaroBody)); // redux create
-    dispatch(Creators.setCurrentCustomizationEye(IcaroDefault.icaroEye)); // redux create
-    dispatch(Creators.setCurrentCustomizationHair(IcaroDefault.icaroHair)); // redux create
-    dispatch(Creators.setCurrentCustomizationPants(IcaroDefault.icaroPants)); // redux create
-    dispatch(Creators.setCurrentCustomizationShirt(IcaroDefault.icaroShirt)); // redux create
-
-    dispatch(
-      Creators.storeCustomization.request({
-        corpo: IcaroDefault.icaroBody,
-        olhos: '#000',
-        cabelo: IcaroDefault.icaroHair,
-        camisa: IcaroDefault.icaroShirt,
-        calca: IcaroDefault.icaroPants,
-        iris: IcaroDefault.icaroEye,
-        pos: 'center',
-      })
-    );
   };
 
   const cancelAndReturnToHome = useCallback(() => {
