@@ -30,7 +30,7 @@ import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
 import { RootState } from 'store';
-import { Creators } from 'store/ducks/customization';
+import { Creators, CustomizationState } from 'store/ducks/customization';
 
 import { Strings } from './string';
 
@@ -68,6 +68,25 @@ const IcaroDefault = {
   icaroPants: '#121420',
 };
 
+function hasChanges(
+  current: {
+    colorbody: string;
+    coloreye: string;
+    colorhair: string;
+    colorshirt: string;
+    colorpants: string;
+  },
+  currentSaved: CustomizationState
+): boolean {
+  return (
+    current.colorbody !== currentSaved.currentbody ||
+    current.coloreye !== currentSaved.currenteye ||
+    current.colorhair !== currentSaved.currenthair ||
+    current.colorpants !== currentSaved.currentpants ||
+    current.colorshirt !== currentSaved.currentshirt
+  );
+}
+
 function Customization() {
   const currentBody = useSelector(
     ({ customization }: RootState) => customization.currentbody
@@ -86,6 +105,10 @@ function Customization() {
 
   const currentPants = useSelector(
     ({ customization }: RootState) => customization.currentpants
+  );
+
+  const currentCustomization = useSelector(
+    ({ customization }: RootState) => customization
   );
 
   const [visiblePlayer, setVisiblePlayer] = useState(false);
@@ -280,6 +303,34 @@ function Customization() {
     );
   };
 
+  const cancelAndReturnToHome = useCallback(() => {
+    setshowAlertCancel(false);
+    rollbackCustomization();
+    history.push(paths.HOME);
+  }, [setshowAlertCancel, rollbackCustomization, history]);
+
+  const onCloseClick = useCallback(() => {
+    if (
+      hasChanges(
+        { colorbody, colorpants, coloreye, colorhair, colorshirt },
+        currentCustomization
+      )
+    ) {
+      setshowAlertCancel(true);
+    } else {
+      cancelAndReturnToHome();
+    }
+  }, [
+    colorbody,
+    colorpants,
+    coloreye,
+    colorhair,
+    colorshirt,
+    currentCustomization,
+    setshowAlertCancel,
+    cancelAndReturnToHome,
+  ]);
+
   const showColorsBody = (item: CustomizationBody) => {
     if (showbody) {
       return (
@@ -407,7 +458,7 @@ function Customization() {
             Personalização
           </IonTitle>
 
-          <IonButtons slot="start" onClick={() => setshowAlertCancel(true)}>
+          <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#1447a6" />
             </div>
@@ -580,11 +631,7 @@ function Customization() {
                 {
                   text: Strings.BUTTON_NAME_YES,
                   cssClass: 'popup-yes',
-                  handler: () => {
-                    setshowAlertCancel(false);
-                    rollbackCustomization();
-                    history.push(paths.HOME);
-                  },
+                  handler: cancelAndReturnToHome,
                 },
                 {
                   text: Strings.BUTTON_NAME_NO,
