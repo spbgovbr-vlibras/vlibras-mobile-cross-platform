@@ -23,6 +23,17 @@ interface TranslateData {
 
 interface TranslateVideoData {
   gloss: string;
+  calca?: string,
+  camisa?: string,
+  cabelo?: string,
+  corpo?: string,
+  iris?: string,
+  olhos?: string,
+  sombrancelhas?: string,
+  pos?: string,
+  logo?: string,
+  avatar?: "icaro" | "hozana" | "guga"
+  
 }
 
 interface TranslationVideoResponse {

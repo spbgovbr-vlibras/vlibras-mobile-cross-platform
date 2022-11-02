@@ -33,7 +33,7 @@ interface TranslationContextData {
   textGloss: string;
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
-  generateVideo: () => void;
+  generateVideo: ({}) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
@@ -96,13 +96,26 @@ const TranslationProvider: React.FC = ({ children }) => {
       .finally(() => setVideoGenerationLoading(false));
   }
 
-  async function generateVideo() {
+  interface videoOptions{
+    calca?: string,
+    camisa?: string,
+    cabelo?: string,
+    corpo?: string,
+    iris?: string,
+    olhos?: string,
+    sombrancelhas?: string,
+    pos?: string,
+    logo?: string,
+    avatar?: "icaro" | "hozana" | "guga"
+  }
+
+  async function generateVideo(videoOptions: videoOptions) {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
     setVideoGenerationLoading(true);
     setTranslationError(false);
     try {
       const gloss = await translate({ text: textPtBr });
-      const response = await generateVideoTranslate({ gloss });
+      const response = await generateVideoTranslate({ gloss, ...videoOptions });
       const uuid = response.requestUID as string;
 
       poll({
