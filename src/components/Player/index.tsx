@@ -227,7 +227,14 @@ function Player() {
   }
 
   function handleShare() {
-    generateVideo();
+    generateVideo({
+      calca: currentPants,
+      camisa: currentShirt,
+      cabelo: currentHair,
+      corpo: currentBody,
+      olhos: currentEye,
+      avatar: currentAvatar,
+    });
   }
 
   const renderPlayerButtons = () => {
