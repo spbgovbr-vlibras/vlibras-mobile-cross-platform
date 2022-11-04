@@ -27,6 +27,7 @@ import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { Avatar } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
@@ -36,8 +37,6 @@ import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
 
 type BooleanParamsPlayer = 'True' | 'False';
-
-type Avatar = 'hozana' | 'icaro' | 'guga';
 
 const playerService = PlayerService.getService();
 
@@ -233,7 +232,7 @@ function Player() {
       cabelo: currentHair,
       corpo: currentBody,
       olhos: currentEye,
-      avatar: currentAvatar
+      avatar: currentAvatar,
     });
   }
 

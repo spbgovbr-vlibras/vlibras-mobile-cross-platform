@@ -11,7 +11,7 @@ import { NativeStorage } from '@ionic-native/native-storage';
 import { SocialSharing } from '@ionic-native/social-sharing/';
 
 import { ErrorModal, GenerateModal } from 'components';
-import { TranslationRequestType } from 'constants/types';
+import { Avatar, TranslationRequestType } from 'constants/types';
 import {
   fetchVideoStatus,
   generateVideoTranslate,
@@ -27,13 +27,26 @@ interface PollParams {
   maxAttempts: number;
 }
 
+interface videoOptions {
+  calca?: string;
+  camisa?: string;
+  cabelo?: string;
+  corpo?: string;
+  iris?: string;
+  olhos?: string;
+  sombrancelhas?: string;
+  pos?: string;
+  logo?: string;
+  avatar?: Avatar;
+}
+
 interface TranslationContextData {
   textPtBr: string;
   setTextPtBr: (text: string, fromDictionary: boolean) => Promise<string>;
   textGloss: string;
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
-  generateVideo: ({}) => void;
+  generateVideo: (videoData: videoOptions) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
@@ -94,19 +107,6 @@ const TranslationProvider: React.FC = ({ children }) => {
     SocialSharing.share('', '', `${URL_API}/${uuid}`)
       .catch(_ => false) // TODO: Enable error modal if fails [MA]
       .finally(() => setVideoGenerationLoading(false));
-  }
-
-  interface videoOptions{
-    calca?: string,
-    camisa?: string,
-    cabelo?: string,
-    corpo?: string,
-    iris?: string,
-    olhos?: string,
-    sombrancelhas?: string,
-    pos?: string,
-    logo?: string,
-    avatar?: "icaro" | "hozana" | "guga"
   }
 
   async function generateVideo(videoOptions: videoOptions) {
