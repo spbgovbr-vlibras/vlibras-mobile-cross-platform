@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { Avatar } from 'constants/types';
+
 export enum VideoTranslationStatus {
   QUEUED = 'queued',
   PROCESSING = 'processing',
@@ -23,6 +25,16 @@ interface TranslateData {
 
 interface TranslateVideoData {
   gloss: string;
+  calca?: string;
+  camisa?: string;
+  cabelo?: string;
+  corpo?: string;
+  iris?: string;
+  olhos?: string;
+  sombrancelhas?: string;
+  pos?: string;
+  logo?: string;
+  avatar?: Avatar;
 }
 
 interface TranslationVideoResponse {

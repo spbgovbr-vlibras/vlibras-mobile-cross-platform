@@ -11,7 +11,7 @@ import { NativeStorage } from '@ionic-native/native-storage';
 import { SocialSharing } from '@ionic-native/social-sharing/';
 
 import { ErrorModal, GenerateModal } from 'components';
-import { TranslationRequestType } from 'constants/types';
+import { Avatar, TranslationRequestType } from 'constants/types';
 import {
   fetchVideoStatus,
   generateVideoTranslate,
@@ -27,13 +27,26 @@ interface PollParams {
   maxAttempts: number;
 }
 
+interface videoOptions {
+  calca?: string;
+  camisa?: string;
+  cabelo?: string;
+  corpo?: string;
+  iris?: string;
+  olhos?: string;
+  sombrancelhas?: string;
+  pos?: string;
+  logo?: string;
+  avatar?: Avatar;
+}
+
 interface TranslationContextData {
   textPtBr: string;
   setTextPtBr: (text: string, fromDictionary: boolean) => Promise<string>;
   textGloss: string;
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
-  generateVideo: () => void;
+  generateVideo: (videoData: videoOptions) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
@@ -96,13 +109,13 @@ const TranslationProvider: React.FC = ({ children }) => {
       .finally(() => setVideoGenerationLoading(false));
   }
 
-  async function generateVideo() {
+  async function generateVideo(videoOptions: videoOptions) {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
     setVideoGenerationLoading(true);
     setTranslationError(false);
     try {
       const gloss = await translate({ text: textPtBr });
-      const response = await generateVideoTranslate({ gloss });
+      const response = await generateVideoTranslate({ gloss, ...videoOptions });
       const uuid = response.requestUID as string;
 
       poll({
