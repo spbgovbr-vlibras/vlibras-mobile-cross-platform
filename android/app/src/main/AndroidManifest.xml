@@ -12,6 +12,7 @@
         android:usesCleartextTraffic="true" 
         tools:targetApi="28" 
         android:requestLegacyExternalStorage="true"
+        android:screenOrientation="portrait"
         >
 
         <activity
