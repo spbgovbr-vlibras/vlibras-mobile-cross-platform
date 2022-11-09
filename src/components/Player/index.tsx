@@ -126,6 +126,11 @@ function Player() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
 
+  function handleStop() {
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
+    setHasFinished(false);
+  }
+
   // Evaluation modal
   const [showModal, setShowModal] = useState(false);
   const [showYesModal, setShowYesModal] = useState(false);
@@ -155,6 +160,7 @@ function Player() {
 
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'hidden';
+      progressContainerRef.current.style.width = '0%';
       progressBarRef.current.style.visibility = 'hidden';
       progressBarRef.current.style.width = '0%';
     }
@@ -476,7 +482,7 @@ function Player() {
           <button
             className="player-button-rounded-top"
             type="button"
-            onClick={resetTranslation}>
+            onClick={handleStop}>
             <IconClose color="#FFF" size={24} />
           </button>
         ) : (
