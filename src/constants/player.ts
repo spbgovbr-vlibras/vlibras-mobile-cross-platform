@@ -2,6 +2,7 @@
 export enum PlayerKeys {
   PLAYER_MANAGER = 'PlayerManager',
   PLAY_NOW = 'playNow',
+  STOP_ALL = 'stopAll',
   SET_PAUSE_STATE = 'setPauseState',
   CHANGE_AVATAR = 'Change',
   SET_SUBTITLE_STATE = 'setSubtitlesState',
