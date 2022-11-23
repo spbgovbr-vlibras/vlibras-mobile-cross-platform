@@ -50,7 +50,13 @@ const buttonColors = {
   VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
-export interface CustomizationArray {
+export interface CustomizationArrayHair {
+  color: string;
+}
+export interface CustomizationArrayPants {
+  color: string;
+}
+export interface CustomizationArrayShirt {
   color: string;
 }
 export interface CustomizationBody {
@@ -359,7 +365,7 @@ function Customization() {
     return null;
   };
 
-  const showColorsHair = (item: CustomizationArray) => {
+  const showColorsHair = (item: CustomizationArrayHair) => {
     if (showhair) {
       return (
         <div
@@ -382,7 +388,7 @@ function Customization() {
     return null;
   };
 
-  const showColorPants = (item: CustomizationArray) => {
+  const showColorPants = (item: CustomizationArrayPants) => {
     if (showpants) {
       return (
         <div
@@ -405,7 +411,7 @@ function Customization() {
     return null;
   };
 
-  const showColorShirt = (item: CustomizationArray) => {
+  const showColorShirt = (item: CustomizationArrayShirt) => {
     if (showshirt) {
       return (
         <div
