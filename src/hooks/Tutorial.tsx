@@ -74,10 +74,9 @@ const TutorialProvider: React.FC = ({ children }) => {
     NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
       .then(value => onSetPresentTutorial(value))
       .catch(_ => false);
-  }, []);
+  }, [onSetPresentTutorial]);
 
-  const onCancel = useCallback(() => {
-    NativeStorage.setItem(PROPERTY_KEY_TUTORIAL, true);
+  const onFinishTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.IDLE);
     setCurrentStepIndex(-1);
   }, []);
@@ -90,9 +89,9 @@ const TutorialProvider: React.FC = ({ children }) => {
       setCurrentStep(TUTORIAL_QUEUE[index]);
       setCurrentStepIndex(index);
     } else {
-      onCancel();
+      onFinishTutorial();
     }
-  }, [currentStepIndex, onCancel]);
+  }, [currentStepIndex, onFinishTutorial]);
 
   return (
     <TutorialContext.Provider
@@ -100,7 +99,7 @@ const TutorialProvider: React.FC = ({ children }) => {
         currentStep,
         goNextStep,
         currentStepIndex,
-        onCancel,
+        onCancel: onFinishTutorial,
         presentTutorial,
         setPresentTutorial: onSetPresentTutorial,
       }}>
