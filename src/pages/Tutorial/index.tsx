@@ -11,14 +11,14 @@ import { Strings } from './strings';
 import './styles.css';
 
 function Tutorial() {
-  const { presentTutorial, setPresentTutorial } = useTutorial();
+  const { alwaysShowTutorial, setAlwaysShowTutorial } = useTutorial();
   return (
     <MenuLayout title="Central de ajuda" mode="back">
       <IonItem>
-        <IonLabel>Ver sempre o tutorial</IonLabel>
+        <IonLabel>{Strings.ALWAYS_SEE_TUTORIAL}</IonLabel>
         <IonToggle
-          checked={presentTutorial}
-          onIonChange={e => setPresentTutorial(e.detail.checked)}
+          checked={alwaysShowTutorial}
+          onIonChange={e => setAlwaysShowTutorial(e.detail.checked)}
         />
       </IonItem>
       <div className="tutorial-container">

@@ -25,8 +25,8 @@ interface TutorialContextData {
   goNextStep: () => void;
   onCancel: () => void;
   currentStepIndex: number;
-  presentTutorial: boolean;
-  setPresentTutorial: (presentTutorial: boolean) => void;
+  alwaysShowTutorial: boolean;
+  setAlwaysShowTutorial: (alwaysShow: boolean) => void;
 }
 
 const TutorialContext = createContext<TutorialContextData>(
@@ -50,16 +50,17 @@ const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
     TutorialSteps.INITIAL
   );
-  const [presentTutorial, setPresentTutorial] = useState(false);
+  const [alwaysShowTutorial, setAlwaysShowTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
 
-  const onSetPresentTutorial = useCallback((value: boolean) => {
-    if (value) {
-      setCurrentStep(TutorialSteps.INITIAL);
-      setCurrentStepIndex(-1);
-    }
-    setPresentTutorial(value);
-    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, value);
+  const onSetAlwaysShowTutorialPreference = (alwaysShow: boolean) => {
+    setAlwaysShowTutorial(alwaysShow);
+    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, alwaysShow);
+  };
+
+  const presentTutorial = useCallback(() => {
+    setCurrentStep(TutorialSteps.INITIAL);
+    setCurrentStepIndex(-1);
   }, []);
 
   useEffect(() => {
@@ -72,9 +73,14 @@ const TutorialProvider: React.FC = ({ children }) => {
       .catch(_ => false);
 
     NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
-      .then(value => onSetPresentTutorial(value))
+      .then(value => {
+        setAlwaysShowTutorial(value);
+        if (value) {
+          presentTutorial();
+        }
+      })
       .catch(_ => false);
-  }, [onSetPresentTutorial]);
+  }, [presentTutorial]);
 
   const onFinishTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.IDLE);
@@ -100,8 +106,8 @@ const TutorialProvider: React.FC = ({ children }) => {
         goNextStep,
         currentStepIndex,
         onCancel: onFinishTutorial,
-        presentTutorial,
-        setPresentTutorial: onSetPresentTutorial,
+        alwaysShowTutorial,
+        setAlwaysShowTutorial: onSetAlwaysShowTutorialPreference,
       }}>
       {children}
     </TutorialContext.Provider>
