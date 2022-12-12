@@ -156,12 +156,13 @@ const TranslationProvider: React.FC = ({ children }) => {
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
-        setTranslationError(true);
         return gloss;
       } catch {
         setTranslationError(true);
         // don't need
       }
+
+      setTextTranslationLoading(false);
       return text;
     },
     [recentTranslation]
