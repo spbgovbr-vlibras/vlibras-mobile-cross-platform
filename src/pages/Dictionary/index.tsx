@@ -132,6 +132,15 @@ function Dictionary() {
     setFilter('recents');
   }
 
+  function renderRecentsList() {
+    if (recentTranslation.length > 0) {
+      return recentTranslation
+        .filter(item => item.includes(searchText.toUpperCase()))
+        .map(item => renderRecents(item));
+    }
+    return <div className="recentsNotFound"> Nenhuma pesquisa recente</div>;
+  }
+
   return (
     <MenuLayout
       title={Strings.TOOLBAR_TITLE}
@@ -165,9 +174,7 @@ function Dictionary() {
             <IonList lines="none" class="dictionary-words-list">
               {filter === 'alphabetical'
                 ? dictionary.map(item => renderWord(item))
-                : recentTranslation
-                    .filter(item => item.includes(searchText.toUpperCase()))
-                    .map(item => renderRecents(item))}
+                : renderRecentsList()}
             </IonList>
           </div>
         </div>

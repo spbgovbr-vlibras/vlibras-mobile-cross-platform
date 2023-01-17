@@ -94,6 +94,20 @@
   
   color: #1447A6;
 }
+
+.recentsNotFound{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0 0 0 0;
+  gap: 22px;
+  margin-left: 2rem;
+  font-family: Rawline;
+  color: #1447A6;
+
+  &&{margin-top: 15px}
+}
+
 .dictionary-words-list{
   display: flex;
   flex-direction: column;
