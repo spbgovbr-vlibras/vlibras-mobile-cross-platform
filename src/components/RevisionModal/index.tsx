@@ -161,7 +161,7 @@ const RevisionModal = ({
           <IonText class="text-area-title">{Strings.TEXT_AREA_TITLE}</IonText>
           <IonTextarea
             class="text-area"
-            placeholder={auxValueText}
+            placeholder="Digite aqui..."
             rows={5}
             cols={5}
             wrap="soft"
