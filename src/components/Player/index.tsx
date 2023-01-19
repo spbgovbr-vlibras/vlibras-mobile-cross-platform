@@ -592,7 +592,7 @@ function Player() {
           <h1>Veja como usar</h1>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
             <button className="button-outlined" onClick={onCancel}>
-              Ver depois
+              Pular
             </button>
             <button className="button-solid" onClick={goNextStep}>
               Iniciar
