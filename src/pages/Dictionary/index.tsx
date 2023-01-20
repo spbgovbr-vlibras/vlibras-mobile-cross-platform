@@ -141,6 +141,18 @@ function Dictionary() {
     return <div className="recentsNotFound"> Nenhuma pesquisa recente</div>;
   }
 
+  const renderList = () => (
+    <div className="dictionary-words-container">
+      <IonList lines="none" class="dictionary-words-list">
+        {filter === 'alphabetical'
+          ? dictionary.map(item => renderWord(item))
+          : renderRecentsList()}
+      </IonList>
+    </div>
+  );
+
+  const returnEmpty = () => <div>Não foram encontrados resultados</div>;
+
   return (
     <MenuLayout
       title={Strings.TOOLBAR_TITLE}
@@ -153,7 +165,6 @@ function Dictionary() {
               placeholder={Strings.TEXT_PLACEHOLDER}
               onIonChange={debouncedSearch}
               inputmode="text"
-              searchIcon="none"
             />
           </div>
           <div className="dictionary-container-ion-chips">
@@ -170,13 +181,7 @@ function Dictionary() {
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
           </div>
-          <div className="dictionary-words-container">
-            <IonList lines="none" class="dictionary-words-list">
-              {filter === 'alphabetical'
-                ? dictionary.map(item => renderWord(item))
-                : renderRecentsList()}
-            </IonList>
-          </div>
+          {dictionary.length === 0 ? returnEmpty() : renderList()}
         </div>
         <IonInfiniteScroll
           ref={infiniteScrollRef}

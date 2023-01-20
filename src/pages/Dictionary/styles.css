@@ -38,7 +38,7 @@
   /*height: 100%;*/
 
   /*SearchBar*/
-  height: 44px;
+  height: 50px;
   width: 100%;
   padding-top: 0px;
   padding-bottom: 0px;
@@ -52,7 +52,15 @@
 
   /*SearchBar Icon*/
   background-image: none!important;
+
+
+  
 }
+
+.dictionary-textarea .searchbar-search-icon{
+margin-left: 90%;
+}
+
 .sc-ion-searchbar-md-h{
   border: 1px solid #B9B9B9;
   box-sizing: border-box;
