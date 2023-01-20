@@ -138,6 +138,7 @@ const TranslationProvider: React.FC = ({ children }) => {
 
   const handleTextPtBr = useCallback(
     async (text: string, fromDictionary: boolean) => {
+      let translation: string = text;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
       setTextTranslationLoading(true);
       setTranslationError(false);
@@ -156,14 +157,14 @@ const TranslationProvider: React.FC = ({ children }) => {
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
-        return gloss;
+        translation = gloss;
       } catch {
         setTranslationError(true);
         // don't need
       }
 
       setTextTranslationLoading(false);
-      return text;
+      return translation;
     },
     [recentTranslation]
   );
