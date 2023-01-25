@@ -110,6 +110,10 @@
   align-items: center;
 }
 
+.player-button-rounded:disabled {
+  background: grey;
+}
+
 .player-action-button img {
   width: 24px;
   height: 24px;
