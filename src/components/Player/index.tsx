@@ -98,8 +98,7 @@ function Player() {
   const [loading, setLoading] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
-
-  const isEnabled = true;
+  const [active, setActive] = useState(true);
 
   // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -542,11 +541,7 @@ function Player() {
             />
           </div>
           <button
-            disabled={
-              currentStep === TutorialSteps.LIKED_TRANSLATION
-                ? isEnabled
-                : !isEnabled
-            }
+            disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             className="player-button-rounded"
             type="button"
             onClick={() => setShowModal(true)}>
@@ -568,7 +563,8 @@ function Player() {
           </div>
           <button
             disabled={
-              currentStep === TutorialSteps.SHARE ? isEnabled : !isEnabled
+              currentStep === TutorialSteps.LIKED_TRANSLATION ||
+              currentStep === TutorialSteps.SHARE
             }
             className="player-button-rounded"
             type="button"
