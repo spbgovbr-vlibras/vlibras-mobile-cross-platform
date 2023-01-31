@@ -18,7 +18,6 @@ import {
   logoFacebook,
   logoInstagram,
   logoLavid,
-  logoRealizadores,
   logoRnp,
   logoUfpb,
   logoYoutube,
@@ -64,7 +63,16 @@ function About() {
           </div>
           <div className="about-container-realizadores">
             <IonText>{Strings.TEXT_REALIZADORES}</IonText>
-            <IonImg class="about-image-realizadores" src={logoRealizadores} />
+            <div className="ministries-container">
+              <div className="ministry">
+                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[0]}</span>
+                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[1]}</span>
+              </div>
+              <div className="ministry">
+                <span>{Strings.MINISTRIES_TEXT.DIREITOS_HUMANOS[0]}</span>
+                <span>{Strings.MINISTRIES_TEXT.DIREITOS_HUMANOS[1]}</span>
+              </div>
+            </div>
             <div className="about-container-realizadores-footer">
               <IonImg src={logoCamaraDeputados} />
               <IonImg src={logoLavid} />
