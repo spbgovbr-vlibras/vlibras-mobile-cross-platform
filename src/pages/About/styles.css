@@ -82,9 +82,8 @@
 }
 
 .about-image-realizadores {
-  width: 100%;
-  object-fit: cover;
-  max-width: 512px;
+  width: 120px;
+  margin-top: 16px;
 }
 
 .about-container-realizadores-footer {
