@@ -7,4 +7,8 @@ export const Strings = {
     'O VLibras é um conjunto de ferramentas que traduz conteúdos digitais em Português para Libras, tornando computadores, celulares e plataformas Web mais acessíveis.',
   TEXT_REALIZADORES: 'Realizadores',
   TEXT_REDES_SOCIAIS: 'Redes sociais',
+  MINISTRIES_TEXT: {
+    GESTAO_INOVACAO: ['Ministério da', 'Gestão e Inovação'],
+    DIREITOS_HUMANOS: ['Ministério dos Direitos', 'Humanos e Cidadania'],
+  },
 };

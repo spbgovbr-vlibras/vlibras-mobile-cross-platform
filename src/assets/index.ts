@@ -74,7 +74,6 @@ import logoParaná from './images/Paraná.png';
 import logoPernambuco from './images/Pernambuco.png';
 import logoPiaui from './images/Piaui.png';
 import LogoVlibrasIcaro from './images/logo-vlibras-icaro.png';
-import logoRealizadores from './images/realizadores1.png';
 import logoRioDeJaneiro from './images/Riodejaneiro.png';
 import logoRioGrandeDoNorte from './images/RioGrandeDoNorte.png';
 import logoRioGrandeDoSul from './images/RioGrandeDoSul.png';
@@ -131,7 +130,6 @@ export {
   logoFacebook,
   logoInstagram,
   logoLavid,
-  logoRealizadores,
   logoRnp,
   logoUfpb,
   logoYoutube,
