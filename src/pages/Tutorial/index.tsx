@@ -1,31 +1,24 @@
 import React from 'react';
 
-import {
-  IonText,
-  IonToggle,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonItemDivider,
-} from '@ionic/react';
+import { IonText, IonToggle, IonItem, IonLabel } from '@ionic/react';
 
 import { IconYoutube } from 'assets';
+import { useTutorial } from 'hooks/Tutorial';
 import { MenuLayout } from 'layouts';
 
 import { Strings } from './strings';
 
-import { useTutorial } from 'hooks/Tutorial';
 import './styles.css';
 
 function Tutorial() {
-  const { presentTutorial, setPresentTutorial } = useTutorial();
+  const { alwaysShowTutorial, setAlwaysShowTutorial } = useTutorial();
   return (
     <MenuLayout title="Central de ajuda" mode="back">
       <IonItem>
-        <IonLabel>Ver sempre o tutorial</IonLabel>
+        <IonLabel>{Strings.ALWAYS_SEE_TUTORIAL}</IonLabel>
         <IonToggle
-          checked={presentTutorial}
-          onIonChange={e => setPresentTutorial(e.detail.checked)}
+          checked={alwaysShowTutorial}
+          onIonChange={e => setAlwaysShowTutorial(e.detail.checked)}
         />
       </IonItem>
       <div className="tutorial-container">

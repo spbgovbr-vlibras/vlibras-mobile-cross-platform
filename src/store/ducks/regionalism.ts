@@ -25,7 +25,7 @@ export type ActionTypes = ActionType<typeof Creators>;
 
 const reducer: Reducer<RegionalismState, ActionTypes> = (
   state = INITIAL_STATE,
-  action: ActionTypes,
+  action: ActionTypes
 ) => {
   const { payload, type } = action;
   return produce(state, (draft: Draft<RegionalismState>) => {

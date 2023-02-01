@@ -32,7 +32,6 @@ const Translator = () => {
     const today = new Date().toLocaleDateString('pt-BR');
 
     reloadHistory(today, formatted, 'text');
-
     const gloss = await setTextPtBr(formatted, false);
 
     history.replace(paths.HOME);
@@ -65,7 +64,7 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-            >
+              disabled={text.trim().length === 0}>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

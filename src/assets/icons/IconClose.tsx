@@ -14,8 +14,7 @@ const IconClose = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M21.4998 21.5003L7.35564 7.35608"
       stroke={color}

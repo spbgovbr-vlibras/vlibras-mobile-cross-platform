@@ -55,7 +55,7 @@ const RevisionModal = ({
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
-      auxValueText,
+      auxValueText
     );
     setIsPreview(true);
   };
@@ -73,7 +73,7 @@ const RevisionModal = ({
   };
 
   const dictionary = useSelector(
-    ({ dictionaryReducer }: RootState) => dictionaryReducer.words,
+    ({ dictionaryReducer }: RootState) => dictionaryReducer.words
   );
 
   const handleWordSuggestion = useCallback(
@@ -85,7 +85,7 @@ const RevisionModal = ({
       // setTextGloss(gloss, false);
       setAuxValueText(gloss);
     },
-    [auxValueText],
+    [auxValueText]
   );
 
   const renderWord = (item: Words) => (
@@ -93,8 +93,7 @@ const RevisionModal = ({
       <IonChip
         class="suggestion-chips"
         onClick={() => handleWordSuggestion(item.name)}
-        key={item.name}
-      >
+        key={item.name}>
         {item.name}
       </IonChip>
     </div>
@@ -110,7 +109,7 @@ const RevisionModal = ({
           page: 1,
           limit: 10,
           name: `${searchText}%`,
-        }),
+        })
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -131,10 +130,10 @@ const RevisionModal = ({
           page: FIRST_PAGE_INDEX,
           limit: 10,
           name: `${searchText}%`,
-        }),
+        })
       );
     },
-    [dispatch],
+    [dispatch]
   );
 
   const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
@@ -145,8 +144,7 @@ const RevisionModal = ({
         isOpen={show}
         cssClass="revision-modal"
         onDidDismiss={() => setShow(false)}
-        swipeToClose
-      >
+        swipeToClose>
         <div className="revision-modal-header">
           <div style={{ width: 10 }} />
           <div>
@@ -155,8 +153,7 @@ const RevisionModal = ({
           <button
             className="revision-close-button"
             type="button"
-            onClick={handleCloseModal}
-          >
+            onClick={handleCloseModal}>
             <IconCloseCircle color="#1447A6" />
           </button>
         </div>
@@ -164,7 +161,7 @@ const RevisionModal = ({
           <IonText class="text-area-title">{Strings.TEXT_AREA_TITLE}</IonText>
           <IonTextarea
             class="text-area"
-            placeholder={auxValueText}
+            placeholder="Digite aqui..."
             rows={5}
             cols={5}
             wrap="soft"
@@ -186,7 +183,10 @@ const RevisionModal = ({
             <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
-            <IonChip class="chip-2" onClick={handleOpenSuggestionFeedbackModal}>
+            <IonChip
+              class="chip-2"
+              disabled={auxValueText.trim().length === 0}
+              onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}
             </IonChip>
           </div>

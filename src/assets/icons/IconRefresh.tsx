@@ -13,8 +13,7 @@ const IconRefresh = ({
     height={size}
     viewBox={viewBox}
     fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <g clipPath="url(#clip0)">
       <path
         d="M0.999878 4V10H6.99988"

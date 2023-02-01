@@ -54,7 +54,7 @@ export const Creators = {
   fetchWords: createAsyncAction(
     Types.GET_REQUEST,
     Types.GET_SUCCESS,
-    Types.GET_FAILURE,
+    Types.GET_FAILURE
   )<MetadataParams, ListResponseDictionary, unknown>(),
 };
 
@@ -62,7 +62,7 @@ export type ActionTypes = ActionType<typeof Creators>;
 
 const reducer: Reducer<DictionaryState, ActionTypes> = (
   state = INITIAL_STATE,
-  action: ActionTypes,
+  action: ActionTypes
 ) => {
   const { payload, type } = action;
   return produce(state, (draft: Draft<DictionaryState>) => {

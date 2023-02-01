@@ -10,7 +10,6 @@ import {
   IonRadio,
   IonText,
   IonImg,
-  IonButton,
   IonFooter,
   IonPage,
   IonHeader,
@@ -40,7 +39,7 @@ function Regionalism() {
   const history = useHistory();
 
   const currentRegionalism = useSelector(
-    ({ regionalism }: RootState) => regionalism.current,
+    ({ regionalism }: RootState) => regionalism.current
   );
   const [regionalism, setregionalism] = useState(currentRegionalism);
 
@@ -94,15 +93,13 @@ function Regionalism() {
           <button
             className="regionalism-cancel"
             onClick={() => history.goBack()}
-            type="button"
-          >
+            type="button">
             {Strings.BUTTON_CANCEL}
           </button>
           <button
             type="button"
             className="regionalism-save"
-            onClick={() => SaveRegionalism()}
-          >
+            onClick={() => SaveRegionalism()}>
             {Strings.BUTTON_SAVE}
           </button>
         </div>

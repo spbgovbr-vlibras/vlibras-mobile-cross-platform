@@ -4,7 +4,7 @@ import { IonButton, IonImg } from '@ionic/react';
 
 import Bullets from 'components/Bullets';
 
-import { IcaroPreview, gifStepOne } from '../../../assets';
+import { gifStepOne } from '../../../assets';
 import { Strings } from '../strings';
 
 interface StepOneProps {
@@ -30,14 +30,12 @@ const StepOne = ({ setCurrentStep, active, jump }: StepOneProps) => {
       <div className="buttons-area">
         <IonButton
           className="goback-modal-button"
-          onClick={() => setCurrentStep(0)}
-        >
+          onClick={() => setCurrentStep(0)}>
           {Strings.BUTTON_BACK}
         </IonButton>
         <IonButton
           className="primary-modal-button"
-          onClick={() => setCurrentStep(2)}
-        >
+          onClick={() => setCurrentStep(2)}>
           {Strings.BUTTON_NEXT}
         </IonButton>
       </div>

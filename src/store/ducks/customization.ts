@@ -49,29 +49,29 @@ export type CustomizationColors = {
 
 export const Creators = {
   setCurrentCustomizationBody: createAction(
-    Types.SET_CURRENT_CUSTOMIZATION_BODY,
+    Types.SET_CURRENT_CUSTOMIZATION_BODY
   )<string>(),
   setCurrentCustomizationEye: createAction(
-    Types.SET_CURRENT_CUSTOMIZATION_EYE,
+    Types.SET_CURRENT_CUSTOMIZATION_EYE
   )<string>(),
   setCurrentCustomizationHair: createAction(
-    Types.SET_CURRENT_CUSTOMIZATION_HAIR,
+    Types.SET_CURRENT_CUSTOMIZATION_HAIR
   )<string>(),
   setCurrentCustomizationPants: createAction(
-    Types.SET_CURRENT_CUSTOMIZATION_PANTS,
+    Types.SET_CURRENT_CUSTOMIZATION_PANTS
   )<string>(),
   setCurrentCustomizationShirt: createAction(
-    Types.SET_CURRENT_CUSTOMIZATION_SHIRT,
+    Types.SET_CURRENT_CUSTOMIZATION_SHIRT
   )<string>(),
   storeCustomization: createAsyncAction(
     Types.STORE_CUSTOMIZATION_REQUEST,
     Types.STORE_CUSTOMIZATION_SUCCESS,
-    Types.STORE_CUSTOMIZATION_FAILURE,
+    Types.STORE_CUSTOMIZATION_FAILURE
   )<CustomizationColors, unknown, unknown>(),
   loadCustomization: createAsyncAction(
     Types.LOAD_CUSTOMIZATION_REQUEST,
     Types.LOAD_CUSTOMIZATION_SUCCESS,
-    Types.LOAD_CUSTOMIZATION_FAILURE,
+    Types.LOAD_CUSTOMIZATION_FAILURE
   )<unknown, CustomizationColors, unknown>(),
 };
 
@@ -79,7 +79,7 @@ export type ActionTypes = ActionType<typeof Creators>;
 
 const reducer: Reducer<CustomizationState, ActionTypes> = (
   state = INITIAL_STATE,
-  action: ActionTypes,
+  action: ActionTypes
 ) => {
   const { payload, type } = action;
   return produce(state, (draft: Draft<CustomizationState>) => {

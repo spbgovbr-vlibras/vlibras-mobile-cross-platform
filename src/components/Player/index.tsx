@@ -1,3 +1,4 @@
+/* eslint-disable react/button-has-type */
 import React, { useEffect, useRef, useState } from 'react';
 
 import { IonPopover, isPlatform } from '@ionic/react';
@@ -15,9 +16,7 @@ import {
   IconShare,
   IconThumbs,
   IconClose,
-  IconIcaro,
   logoRefresh,
-  IconHozana,
   logoSubtitleOn,
   logoSubtitleOff,
   IcaroAvatar,
@@ -28,18 +27,16 @@ import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { Avatar } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
+import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
-
 import './styles.css';
-import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 
 type BooleanParamsPlayer = 'True' | 'False';
-
-type Avatar = 'hozana' | 'icaro' | 'guga';
 
 const playerService = PlayerService.getService();
 
@@ -74,22 +71,22 @@ function Player() {
   const { generateVideo, textGloss } = useTranslation();
 
   const currentBody = useSelector(
-    ({ customization }: RootState) => customization.currentbody,
+    ({ customization }: RootState) => customization.currentbody
   );
   const currentEye = useSelector(
-    ({ customization }: RootState) => customization.currenteye,
+    ({ customization }: RootState) => customization.currenteye
   );
 
   const currentHair = useSelector(
-    ({ customization }: RootState) => customization.currenthair,
+    ({ customization }: RootState) => customization.currenthair
   );
 
   const currentShirt = useSelector(
-    ({ customization }: RootState) => customization.currentshirt,
+    ({ customization }: RootState) => customization.currentshirt
   );
 
   const currentPants = useSelector(
-    ({ customization }: RootState) => customization.currentpants,
+    ({ customization }: RootState) => customization.currentpants
   );
 
   // Dynamic states [MA]
@@ -129,6 +126,11 @@ function Player() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
 
+  function handleStop() {
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
+    setHasFinished(false);
+  }
+
   // Evaluation modal
   const [showModal, setShowModal] = useState(false);
   const [showYesModal, setShowYesModal] = useState(false);
@@ -142,7 +144,7 @@ function Player() {
     _isPaused: BooleanParamsPlayer,
     _isPlayingIntervalAnimation: BooleanParamsPlayer,
     _isLoading: BooleanParamsPlayer,
-    _isRepeatable: BooleanParamsPlayer,
+    _isRepeatable: BooleanParamsPlayer
   ) => {
     setIsPlaying(toBoolean(_isPlaying));
     setIsPaused(toBoolean(_isPaused));
@@ -152,6 +154,17 @@ function Player() {
       setHasFinished(true);
     }
   };
+
+  function resetTranslation() {
+    setHasFinished(false);
+
+    if (progressBarRef.current && progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'hidden';
+      progressContainerRef.current.style.width = '0%';
+      progressBarRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.width = '0%';
+    }
+  }
 
   useEffect(() => {
     if (location.pathname === paths.HOME) resetTranslation();
@@ -179,7 +192,7 @@ function Player() {
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.SET_PAUSE_STATE,
-      toInteger(!isPaused),
+      toInteger(!isPaused)
     );
   }
 
@@ -205,7 +218,7 @@ function Player() {
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.CHANGE_AVATAR,
-      nextAvatar,
+      nextAvatar
     );
   }
 
@@ -213,23 +226,20 @@ function Player() {
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.SET_SUBTITLE_STATE,
-      toInteger(!isShowSubtitle),
+      toInteger(!isShowSubtitle)
     );
     setIsShowSubtitle(!isShowSubtitle);
   }
 
   function handleShare() {
-    generateVideo();
-  }
-
-  function resetTranslation() {
-    setHasFinished(false);
-
-    if (progressBarRef.current && progressContainerRef.current) {
-      progressContainerRef.current.style.visibility = 'hidden';
-      progressBarRef.current.style.visibility = 'hidden';
-      progressBarRef.current.style.width = '0%';
-    }
+    generateVideo({
+      calca: currentPants,
+      camisa: currentShirt,
+      cabelo: currentHair,
+      corpo: currentBody,
+      olhos: currentEye,
+      avatar: currentAvatar,
+    });
   }
 
   const renderPlayerButtons = () => {
@@ -242,15 +252,13 @@ function Player() {
             onClick={(e: any) => {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
-            }}
-          >
+            }}>
             <IconRunning color={buttonColors.VARAINT_WHITE} />
           </button>
           <button
             className="player-action-button player-action-button-insert"
             type="button"
-            onClick={handlePause}
-          >
+            onClick={handlePause}>
             {isPaused ? (
               <IconPauseOutlined color={buttonColors.VARIANT_BLUE} size={24} />
             ) : (
@@ -260,8 +268,7 @@ function Player() {
           <button
             className="player-action-button-transparent"
             type="button"
-            onClick={handleSubtitle}
-          >
+            onClick={handleSubtitle}>
             {isShowSubtitle ? (
               <img src={logoSubtitleOn} alt="refresh" />
             ) : (
@@ -280,22 +287,19 @@ function Player() {
             onClick={(e: any) => {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
-            }}
-          >
+            }}>
             <IconRunning color={buttonColors.VARAINT_WHITE} />
           </button>
           <button
             className="player-action-button player-action-button-insert"
             type="button"
-            onClick={() => handlePlay(textGloss)}
-          >
+            onClick={() => handlePlay(textGloss)}>
             <img src={logoRefresh} alt="refresh" />
           </button>
           <button
             className="player-action-button-transparent"
             type="button"
-            onClick={handleSubtitle}
-          >
+            onClick={handleSubtitle}>
             {isShowSubtitle ? (
               <img src={logoSubtitleOn} alt="refresh" />
             ) : (
@@ -310,8 +314,7 @@ function Player() {
         <div
           style={{
             position: 'relative',
-          }}
-        >
+          }}>
           <div
             style={{
               marginRight: 6,
@@ -319,8 +322,7 @@ function Player() {
               width: '100vw',
               bottom: 50,
               left: 0,
-            }}
-          >
+            }}>
             <TutorialPopover
               title="Dicionário"
               description="Consulte os sinais disponíveis no vlibras"
@@ -334,8 +336,7 @@ function Player() {
             onClick={() => {
               history.push(paths.DICTIONARY_PLAYER);
               //   setVisiblePlayer(false);
-            }}
-          >
+            }}>
             <IconDictionary color={buttonColors.VARAINT_WHITE} />
           </button>
         </div>
@@ -352,8 +353,7 @@ function Player() {
               justifyContent: 'center',
               alignItems: 'center',
               width: '100vw',
-            }}
-          >
+            }}>
             <TutorialPopover
               title="Tradução PT-BR"
               description="Escreva ou cole o texto para ser traduzido"
@@ -365,8 +365,7 @@ function Player() {
         <button
           className="player-action-button player-action-button-insert"
           type="button"
-          onClick={() => history.push(paths.TRANSLATOR)}
-        >
+          onClick={() => history.push(paths.TRANSLATOR)}>
           <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
         </button>
 
@@ -382,8 +381,7 @@ function Player() {
             alignItems: 'center',
             width: '100vw',
             paddingRight: '28px',
-          }}
-        >
+          }}>
           <TutorialPopover
             title="Histórico"
             description="Acesse as traduções dos últimos 30 dias"
@@ -394,8 +392,7 @@ function Player() {
         <button
           className="player-action-button-transparent"
           type="button"
-          onClick={() => history.push(paths.HISTORY)}
-        >
+          onClick={() => history.push(paths.HISTORY)}>
           <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
         </button>
       </>
@@ -416,7 +413,7 @@ function Player() {
     playerService.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview,
+      preProcessingPreview
     );
   }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
@@ -426,13 +423,11 @@ function Player() {
         style={{
           position: 'absolute',
           padding: '8px',
-          width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
           zIndex: 2,
-        }}
-      >
+        }}>
         <TutorialPopover
           title="Menu"
           description="Informações e ajustes adicionais do tradudor"
@@ -446,8 +441,7 @@ function Player() {
         isOpen={popoverState.showPopover}
         onDidDismiss={() =>
           setShowPopover({ showPopover: false, event: undefined })
-        }
-      >
+        }>
         <div className="player-popover-content">
           <button
             className={
@@ -456,8 +450,7 @@ function Player() {
                 : 'player-popover-content-item-none'
             }
             type="button"
-            onClick={() => handleSpeed(X3)}
-          >
+            onClick={() => handleSpeed(X3)}>
             <span>X3</span>
           </button>
           <div className="player-popover-content-divider" />
@@ -468,8 +461,7 @@ function Player() {
                 : 'player-popover-content-item-none'
             }
             type="button"
-            onClick={() => handleSpeed(X2)}
-          >
+            onClick={() => handleSpeed(X2)}>
             <span>X2</span>
           </button>
           <div className="player-popover-content-divider" />
@@ -480,8 +472,7 @@ function Player() {
                 : 'player-popover-content-item-none'
             }
             type="button"
-            onClick={() => handleSpeed(X1)}
-          >
+            onClick={() => handleSpeed(X1)}>
             <span>X1</span>
           </button>
         </div>
@@ -491,8 +482,7 @@ function Player() {
           <button
             className="player-button-rounded-top"
             type="button"
-            onClick={resetTranslation}
-          >
+            onClick={handleStop}>
             <IconClose color="#FFF" size={24} />
           </button>
         ) : (
@@ -508,8 +498,7 @@ function Player() {
             <button
               className="player-button-avatar-rounded-top"
               type="button"
-              onClick={handleChangeAvatar}
-            >
+              onClick={handleChangeAvatar}>
               {currentAvatar === 'icaro' && <HozanaAvatar />}
               {currentAvatar === 'hozana' && <GugaAvatar />}
               {currentAvatar === 'guga' && <IcaroAvatar />}
@@ -526,8 +515,7 @@ function Player() {
           flex: 1,
           display: 'flex',
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
-        }}
-      >
+        }}>
         <Unity
           unityContent={playerService.getUnity()}
           className="player-content"
@@ -543,8 +531,7 @@ function Player() {
               top: -54,
               position: 'absolute',
               right: 10,
-            }}
-          >
+            }}>
             <TutorialPopover
               title="Gostou da tradução?"
               description="Avalie e sugira melhorias."
@@ -553,10 +540,10 @@ function Player() {
             />
           </div>
           <button
+            disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             className="player-button-rounded"
             type="button"
-            onClick={() => setShowModal(true)}
-          >
+            onClick={() => setShowModal(true)}>
             <IconThumbs color="#FFF" size={18} />
           </button>
 
@@ -565,8 +552,7 @@ function Player() {
               top: -2,
               position: 'absolute',
               right: 10,
-            }}
-          >
+            }}>
             <TutorialPopover
               title="Compartilhar"
               description="Vídeo com a tradução"
@@ -575,10 +561,13 @@ function Player() {
             />
           </div>
           <button
+            disabled={
+              currentStep === TutorialSteps.SHARE ||
+              currentStep === TutorialSteps.LIKED_TRANSLATION
+            }
             className="player-button-rounded"
             type="button"
-            onClick={handleShare}
-          >
+            onClick={handleShare}>
             <IconShare color="#FFF" size={18} />
           </button>
         </div>
@@ -608,13 +597,10 @@ function Player() {
           <h1>Veja como usar</h1>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
             <button className="button-outlined" onClick={onCancel}>
-              Ver depois
+              Pular
             </button>
-            <button
-              className="button-solid"
-              onClick={goNextStep}
-            >
-              Inicar
+            <button className="button-solid" onClick={goNextStep}>
+              Iniciar
             </button>
           </div>
         </div>

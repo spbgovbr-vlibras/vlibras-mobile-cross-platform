@@ -12,7 +12,7 @@ export const Types = {
   SET_IS_VIDEO_SCREEN: '@video/SET_IS_VIDEO_SCREEN',
   SET_TRANSLATION_HISTORIC: '@video/SET_TRANSLATION_HISTORIC',
   SET_FIRST_ACCESS: '@video/SET_FIRST_ACCESS',
-  SET_PROGRESS: '@video/SET_PROGRESS'
+  SET_PROGRESS: '@video/SET_PROGRESS',
 };
 
 export interface VideoState {
@@ -32,7 +32,7 @@ const INITIAL_STATE: VideoState = {
   isVideoScreen: false,
   translationsHistoric: {},
   onboardingFirstAccess: true,
-  progressOutput: 0
+  progressOutput: 0,
 };
 
 export const Creators = {
@@ -54,7 +54,7 @@ type payloadVideoTranslator = {
 
 const reducer: Reducer<VideoState, ActionTypes> = (
   state = INITIAL_STATE,
-  action: ActionTypes,
+  action: ActionTypes
 ) => {
   const { payload, type } = action;
   return produce(state, (draft: Draft<VideoState>) => {
@@ -93,11 +93,11 @@ const reducer: Reducer<VideoState, ActionTypes> = (
         draft.isVideoScreen = payload;
         break;
       case Types.SET_FIRST_ACCESS:
-        draft.onboardingFirstAccess = payload; 
+        draft.onboardingFirstAccess = payload;
         break;
       case Types.SET_PROGRESS:
-        draft.progressOutput = payload; 
-        break;  
+        draft.progressOutput = payload;
+        break;
       default:
         break;
     }

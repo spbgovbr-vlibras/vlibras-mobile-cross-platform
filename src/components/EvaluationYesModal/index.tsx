@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { IonModal, IonButton, IonText, IonChip } from '@ionic/react';
+import { IonModal } from '@ionic/react';
 
 import { IconThumbUp } from 'assets';
 
@@ -28,8 +28,7 @@ const EvaluationYesModal = ({
       isOpen={showYes}
       cssClass="evaluation-yes-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose
-    >
+      swipeToClose>
       <div className="modal-title">
         <IconThumbUp color="black" />
         <p className="text-space">{Strings.TITLE_MENU_MODAL}</p>

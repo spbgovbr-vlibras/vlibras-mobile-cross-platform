@@ -14,8 +14,7 @@ const IconTutorial = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <path
       d="M12 18.9141C12.6472 18.9141 13.1719 18.3894 13.1719 17.7422C13.1719 17.095 12.6472 16.5703 12 16.5703C11.3528 16.5703 10.8281 17.095 10.8281 17.7422C10.8281 18.3894 11.3528 18.9141 12 18.9141Z"
       fill={color}

@@ -1,14 +1,12 @@
 import React, { useCallback } from 'react';
 
 import { IonModal, IonText, IonChip } from '@ionic/react';
-import { useSelector } from 'react-redux';
 
 import { IconCloseCircle, IconThumbDown, IconThumbUp } from 'assets';
 import EvaluationNoModal from 'components/EvaluationNoModal';
 import EvaluationYesModal from 'components/EvaluationYesModal';
 import { useTranslation } from 'hooks/Translation';
 import { sendReview } from 'services/suggestionGloss';
-import { RootState } from 'store';
 
 import './styles.css';
 import { Strings } from './strings';
@@ -64,8 +62,7 @@ const EvaluationModal = ({
         isOpen={show}
         cssClass="evaluation-modal"
         onDidDismiss={closeModal}
-        swipeToClose
-      >
+        swipeToClose>
         <div className="evaluation-modal-container-close-button-container">
           <button type="button" onClick={closeModal}>
             <IconCloseCircle color="#4E4E4E" />
@@ -77,8 +74,7 @@ const EvaluationModal = ({
         <div className="evaluation-modal-container-rating-chips">
           <IonChip
             class="evaluation-modal-container-rating-chips-yes"
-            onClick={handlePositiveRevision}
-          >
+            onClick={handlePositiveRevision}>
             <IconThumbUp color="#4E4E4E" />
             <IonText class="evaluation-modal-container-rating-chips-texts">
               {Strings.CHIP_YES}
@@ -89,8 +85,7 @@ const EvaluationModal = ({
             onClick={() => {
               setShow(false);
               setShowNo(true);
-            }}
-          >
+            }}>
             <IconThumbDown color="#4E4E4E" />
             <IonText class="evaluation-modal-container-rating-chips-texts">
               {Strings.CHIP_NO}

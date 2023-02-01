@@ -28,8 +28,7 @@ const Presentation = ({ setCurrentStep, jump }: PresentationProps) => {
       <div className="buttons-area">
         <IonButton
           className="primary-modal-button"
-          onClick={() => setCurrentStep(1)}
-        >
+          onClick={() => setCurrentStep(1)}>
           {Strings.BUTTON_PROCEED}
         </IonButton>
       </div>

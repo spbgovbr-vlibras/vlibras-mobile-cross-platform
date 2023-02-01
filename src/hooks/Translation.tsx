@@ -11,6 +11,7 @@ import { NativeStorage } from '@ionic-native/native-storage';
 import { SocialSharing } from '@ionic-native/social-sharing/';
 
 import { ErrorModal, GenerateModal } from 'components';
+import { Avatar, TranslationRequestType } from 'constants/types';
 import {
   fetchVideoStatus,
   generateVideoTranslate,
@@ -26,17 +27,30 @@ interface PollParams {
   maxAttempts: number;
 }
 
+interface videoOptions {
+  calca?: string;
+  camisa?: string;
+  cabelo?: string;
+  corpo?: string;
+  iris?: string;
+  olhos?: string;
+  sombrancelhas?: string;
+  pos?: string;
+  logo?: string;
+  avatar?: Avatar;
+}
+
 interface TranslationContextData {
   textPtBr: string;
   setTextPtBr: (text: string, fromDictionary: boolean) => Promise<string>;
   textGloss: string;
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
-  generateVideo: () => void;
+  generateVideo: (videoData: videoOptions) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
-  {} as TranslationContextData,
+  {} as TranslationContextData
 );
 
 const poll = ({ fn, validate, interval, maxAttempts }: PollParams) => {
@@ -69,7 +83,12 @@ const PROPERTY_KEY = 'recents-dictionary';
 
 const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingVideoGeneration, setVideoGenerationLoading] = useState(false);
+  const [loadingTextTranslation, setTextTranslationLoading] = useState(false);
+  const [translateRequestType, setTranslateRequestType] = useState(
+    TranslationRequestType.VIDEO_SHARE
+  );
+  const [translationError, setTranslationError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
@@ -81,19 +100,22 @@ const TranslationProvider: React.FC = ({ children }) => {
   }, []);
 
   function handleShareVideo(uuid: string) {
-    setLoading(true);
+    setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
+    setVideoGenerationLoading(true);
     // Move this function to a service [MA]
 
     SocialSharing.share('', '', `${URL_API}/${uuid}`)
       .catch(_ => false) // TODO: Enable error modal if fails [MA]
-      .finally(() => setLoading(false));
+      .finally(() => setVideoGenerationLoading(false));
   }
 
-  async function generateVideo() {
-    setLoading(true);
+  async function generateVideo(videoOptions: videoOptions) {
+    setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
+    setVideoGenerationLoading(true);
+    setTranslationError(false);
     try {
       const gloss = await translate({ text: textPtBr });
-      const response = await generateVideoTranslate({ gloss });
+      const response = await generateVideoTranslate({ gloss, ...videoOptions });
       const uuid = response.requestUID as string;
 
       poll({
@@ -105,17 +127,21 @@ const TranslationProvider: React.FC = ({ children }) => {
       })
         .then(() => handleShareVideo(uuid))
         .catch(() => {
-          setLoading(false);
+          setTranslationError(true);
           setErrorModalVisible(true);
         });
     } catch {
-      setLoading(false);
+      setTranslationError(true);
       setErrorModalVisible(true);
     }
   }
 
   const handleTextPtBr = useCallback(
     async (text: string, fromDictionary: boolean) => {
+      let translation: string = text;
+      setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
+      setTextTranslationLoading(true);
+      setTranslationError(false);
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
@@ -131,13 +157,16 @@ const TranslationProvider: React.FC = ({ children }) => {
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
-        return gloss;
+        translation = gloss;
       } catch {
+        setTranslationError(true);
         // don't need
       }
-      return text;
+
+      setTextTranslationLoading(false);
+      return translation;
     },
-    [recentTranslation],
+    [recentTranslation]
   );
 
   const handleTextGloss = useCallback(
@@ -157,8 +186,27 @@ const TranslationProvider: React.FC = ({ children }) => {
       }
       setTextGloss(gloss);
     },
-    [recentTranslation],
+    [recentTranslation]
   );
+
+  const isLoading = loadingVideoGeneration || loadingTextTranslation;
+  const setModalVisible = (isVisible: boolean) => {
+    switch (translateRequestType) {
+      case TranslationRequestType.GLOSS_ONLY: {
+        setTextTranslationLoading(isVisible);
+        break;
+      }
+      default: {
+        setVideoGenerationLoading(isVisible);
+      }
+    }
+  };
+
+  const onModalPresented = () => {
+    if (translationError) {
+      setModalVisible(false);
+    }
+  };
 
   return (
     <TranslationContext.Provider
@@ -169,10 +217,15 @@ const TranslationProvider: React.FC = ({ children }) => {
         setTextGloss: handleTextGloss,
         recentTranslation,
         generateVideo,
-      }}
-    >
+      }}>
       {children}
-      <GenerateModal visible={loading} setVisible={setLoading} />
+      <GenerateModal
+        visible={isLoading}
+        setVisible={setModalVisible}
+        translationRequestType={translateRequestType}
+        onModalPresented={onModalPresented}
+      />
+
       <ErrorModal
         errorMsg="Erro ao gerar vídeo"
         show={errorModalVisible}

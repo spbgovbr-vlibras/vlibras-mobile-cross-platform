@@ -1,49 +1,42 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 
 import { NativeStorage } from '@ionic-native/native-storage';
-import {
-  IonChip,
-  IonContent,
-  IonItem,
-  IonText,
-  IonTextarea,
-} from '@ionic/react';
-import { useSelector } from 'react-redux';
+import { IonChip, IonContent, IonText } from '@ionic/react';
+import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
-import { RootState } from 'store';
+import { Creators } from 'store/ducks/translator';
 import dateFormat from 'utils/dateFormat';
+import { reloadHistory } from 'utils/setHistory';
 
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 import { Strings } from './strings';
-import { useTranslation } from 'hooks/Translation';
 
 import './styles.css';
+// import { Creators } from 'store/ducks/customization';
 
 type GenericObject = { [key: string]: any };
 
 function Historic() {
-  const translationsHistoric = useSelector(
-    ({ video }: RootState) => video.translationsHistoric,
-  );
-
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
   const [log, setLog] = useState([]);
   const history = useHistory();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
 
   const [keysToShow, setKeysToShow] = useState(
-    env.videoTranslator ? ['text', 'video'] : ['text'],
+    env.videoTranslator ? ['text', 'video'] : ['text']
   );
   const [activeKey, setActiveKey] = useState(env.videoTranslator ? 0 : 2);
 
@@ -59,7 +52,7 @@ function Historic() {
     error => {
       setLog(error);
       return {};
-    },
+    }
   );
 
   const openModalOutput = (actualItem: any) => {
@@ -67,13 +60,13 @@ function Historic() {
     setResults(actualItem);
   };
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setHistoryStorage(await promiseHistory);
-  };
+  }, [promiseHistory]);
 
   useEffect(() => {
     if (location.pathname === paths.HISTORY) loadHistory();
-  }, [location]);
+  }, [location, loadHistory]);
 
   const formatArrayDate = () => {
     const arrayState = JSON.parse(JSON.stringify(historyStorage));
@@ -85,12 +78,12 @@ function Historic() {
       if (formattedObjDate[formattedDate]) {
         if (formattedObjDate[formattedDate].video) {
           formattedObjDate[formattedDate].video.push(
-            ...arrayState[element].video,
+            ...arrayState[element].video
           );
         }
         if (formattedObjDate[formattedDate].text) {
           formattedObjDate[formattedDate].text.push(
-            ...arrayState[element].text,
+            ...arrayState[element].text
           );
         }
       } else {
@@ -104,14 +97,18 @@ function Historic() {
     return formattedObjDate;
   };
 
-
-
   async function onTranslationHistory(text: string) {
     const formatted = text.trim();
+
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    reloadHistory(today, formatted, 'text');
+
     const gloss = await setTextPtBr(formatted, false);
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+    dispatch(Creators.setTranslatorText(formatted));
   }
 
   const renderAllItems = () => {
@@ -122,7 +119,7 @@ function Historic() {
     return datesMapped.map(column => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
-        if (formattedHistoric[column][key].length != 0) {
+        if (formattedHistoric[column][key].length !== 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
@@ -147,8 +144,7 @@ function Historic() {
                         <button
                           className="container-outputs"
                           onClick={() => openModalOutput(item)}
-                          type="button"
-                        >
+                          type="button">
                           {item.map((value: string, keyWord: string) => (
                             <span key={uuidv4()}>{value}</span>
                           ))}
@@ -172,8 +168,7 @@ function Historic() {
                         onClick={() => onTranslationHistory(item)}
                         tabIndex={0}
                         role="menu"
-                        aria-hidden="true"
-                      >
+                        aria-hidden="true">
                         <p className="historic-container-box-ion-text-area">
                           {item}
                         </p>
@@ -182,7 +177,7 @@ function Historic() {
                   )}
                 </div>
               );
-            },
+            }
           );
         }
         doesntHaveKey = 1;
@@ -217,8 +212,7 @@ function Historic() {
               <IonChip
                 class="historic-container-ion-chip"
                 onClick={() => setScreenKey(0)}
-                style={activeKey === 0 ? style : {}}
-              >
+                style={activeKey === 0 ? style : {}}>
                 {Strings.CHIP_TEXT_1}
               </IonChip>
             )}
@@ -226,8 +220,7 @@ function Historic() {
               <IonChip
                 class="historic-container-ion-chip"
                 onClick={() => setScreenKey(1)}
-                style={activeKey === 1 ? style : {}}
-              >
+                style={activeKey === 1 ? style : {}}>
                 {Strings.CHIP_TEXT_2}
               </IonChip>
             )}
@@ -235,8 +228,7 @@ function Historic() {
               <IonChip
                 class="historic-container-ion-chip"
                 onClick={() => setScreenKey(2)}
-                style={activeKey === 2 ? style : {}}
-              >
+                style={activeKey === 2 ? style : {}}>
                 {Strings.CHIP_TEXT_3}
               </IonChip>
             )}

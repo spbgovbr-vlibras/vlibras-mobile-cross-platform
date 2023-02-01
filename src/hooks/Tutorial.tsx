@@ -25,12 +25,12 @@ interface TutorialContextData {
   goNextStep: () => void;
   onCancel: () => void;
   currentStepIndex: number;
-  presentTutorial: boolean;
-  setPresentTutorial: (presentTutorial: boolean) => void;
+  alwaysShowTutorial: boolean;
+  setAlwaysShowTutorial: (alwaysShow: boolean) => void;
 }
 
 const TutorialContext = createContext<TutorialContextData>(
-  {} as TutorialContextData,
+  {} as TutorialContextData
 );
 
 export const TUTORIAL_QUEUE = [
@@ -48,27 +48,41 @@ const PROPERTY_KEY_PRESENT_TUTORIAL = 'present-tutorial';
 
 const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
-    TutorialSteps.INITIAL,
+    TutorialSteps.INITIAL
   );
-  const [presentTutorial, setPresentTutorial] = useState(false);
+  const [alwaysShowTutorial, setAlwaysShowTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+
+  const onSetAlwaysShowTutorialPreference = (alwaysShow: boolean) => {
+    setAlwaysShowTutorial(alwaysShow);
+    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, alwaysShow);
+  };
+
+  const presentTutorial = useCallback(() => {
+    setCurrentStep(TutorialSteps.INITIAL);
+    setCurrentStepIndex(-1);
+  }, []);
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY_TUTORIAL)
       .then(value =>
         value
           ? setCurrentStep(TutorialSteps.IDLE)
-          : setCurrentStep(TutorialSteps.INITIAL),
+          : setCurrentStep(TutorialSteps.INITIAL)
       )
       .catch(_ => false);
 
-      NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
-      .then(value => onSetPresentTutorial(value))
+    NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
+      .then(value => {
+        setAlwaysShowTutorial(value);
+        if (value) {
+          presentTutorial();
+        }
+      })
       .catch(_ => false);
-  }, []);
+  }, [presentTutorial]);
 
-  const onCancel = useCallback(() => {
-    NativeStorage.setItem(PROPERTY_KEY_TUTORIAL, true);
+  const onFinishTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.IDLE);
     setCurrentStepIndex(-1);
   }, []);
@@ -81,18 +95,9 @@ const TutorialProvider: React.FC = ({ children }) => {
       setCurrentStep(TUTORIAL_QUEUE[index]);
       setCurrentStepIndex(index);
     } else {
-      onCancel();
+      onFinishTutorial();
     }
-  }, [currentStepIndex, onCancel]);
-
-  const onSetPresentTutorial = useCallback((value: boolean) => {
-    if (value) {
-      setCurrentStep(TutorialSteps.INITIAL)
-      setCurrentStepIndex(-1);
-    }
-    setPresentTutorial(value);
-    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, value);
-  }, []);
+  }, [currentStepIndex, onFinishTutorial]);
 
   return (
     <TutorialContext.Provider
@@ -100,11 +105,10 @@ const TutorialProvider: React.FC = ({ children }) => {
         currentStep,
         goNextStep,
         currentStepIndex,
-        onCancel,
-        presentTutorial,
-        setPresentTutorial: onSetPresentTutorial,
-      }}
-    >
+        onCancel: onFinishTutorial,
+        alwaysShowTutorial,
+        setAlwaysShowTutorial: onSetAlwaysShowTutorialPreference,
+      }}>
       {children}
     </TutorialContext.Provider>
   );

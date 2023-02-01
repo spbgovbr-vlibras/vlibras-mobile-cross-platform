@@ -30,7 +30,7 @@ import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
 import { RootState } from 'store';
-import { Creators } from 'store/ducks/customization';
+import { Creators, CustomizationState } from 'store/ducks/customization';
 
 import { Strings } from './string';
 
@@ -41,7 +41,7 @@ const unityContent = new UnityContent(
   'final/Build/UnityLoader.js',
   {
     adjustOnWindowResize: true,
-  },
+  }
 );
 
 const buttonColors = {
@@ -50,7 +50,13 @@ const buttonColors = {
   VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
-export interface CustomizationArray {
+export interface CustomizationArrayHair {
+  color: string;
+}
+export interface CustomizationArrayPants {
+  color: string;
+}
+export interface CustomizationArrayShirt {
   color: string;
 }
 export interface CustomizationBody {
@@ -68,24 +74,47 @@ const IcaroDefault = {
   icaroPants: '#121420',
 };
 
+function hasChanges(
+  current: {
+    colorbody: string;
+    coloreye: string;
+    colorhair: string;
+    colorshirt: string;
+    colorpants: string;
+  },
+  currentSaved: CustomizationState
+): boolean {
+  return (
+    current.colorbody !== currentSaved.currentbody ||
+    current.coloreye !== currentSaved.currenteye ||
+    current.colorhair !== currentSaved.currenthair ||
+    current.colorpants !== currentSaved.currentpants ||
+    current.colorshirt !== currentSaved.currentshirt
+  );
+}
+
 function Customization() {
   const currentBody = useSelector(
-    ({ customization }: RootState) => customization.currentbody,
+    ({ customization }: RootState) => customization.currentbody
   );
   const currentEye = useSelector(
-    ({ customization }: RootState) => customization.currenteye,
+    ({ customization }: RootState) => customization.currenteye
   );
 
   const currentHair = useSelector(
-    ({ customization }: RootState) => customization.currenthair,
+    ({ customization }: RootState) => customization.currenthair
   );
 
   const currentShirt = useSelector(
-    ({ customization }: RootState) => customization.currentshirt,
+    ({ customization }: RootState) => customization.currentshirt
   );
 
   const currentPants = useSelector(
-    ({ customization }: RootState) => customization.currentpants,
+    ({ customization }: RootState) => customization.currentpants
+  );
+
+  const currentCustomization = useSelector(
+    ({ customization }: RootState) => customization
   );
 
   const [visiblePlayer, setVisiblePlayer] = useState(false);
@@ -195,7 +224,7 @@ function Customization() {
         calca: colorpants,
         iris: coloreye,
         pos: 'center',
-      }),
+      })
     );
 
     history.push(paths.HOME);
@@ -221,7 +250,7 @@ function Customization() {
     unityContent.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview,
+      preProcessingPreview
     );
   }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
@@ -247,7 +276,7 @@ function Customization() {
     unityContent.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
-      preProcessingPreview,
+      preProcessingPreview
     );
   }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
 
@@ -260,25 +289,35 @@ function Customization() {
     selectcolorhair(IcaroDefault.icaroHair);
     selectcolorpants(IcaroDefault.icaroPants);
     selectcolorshirt(IcaroDefault.icaroShirt);
-
-    dispatch(Creators.setCurrentCustomizationBody(IcaroDefault.icaroBody)); // redux create
-    dispatch(Creators.setCurrentCustomizationEye(IcaroDefault.icaroEye)); // redux create
-    dispatch(Creators.setCurrentCustomizationHair(IcaroDefault.icaroHair)); // redux create
-    dispatch(Creators.setCurrentCustomizationPants(IcaroDefault.icaroPants)); // redux create
-    dispatch(Creators.setCurrentCustomizationShirt(IcaroDefault.icaroShirt)); // redux create
-
-    dispatch(
-      Creators.storeCustomization.request({
-        corpo: IcaroDefault.icaroBody,
-        olhos: '#000',
-        cabelo: IcaroDefault.icaroHair,
-        camisa: IcaroDefault.icaroShirt,
-        calca: IcaroDefault.icaroPants,
-        iris: IcaroDefault.icaroEye,
-        pos: 'center',
-      }),
-    );
   };
+
+  const cancelAndReturnToHome = useCallback(() => {
+    setshowAlertCancel(false);
+    rollbackCustomization();
+    history.push(paths.HOME);
+  }, [setshowAlertCancel, rollbackCustomization, history]);
+
+  const onCloseClick = useCallback(() => {
+    if (
+      hasChanges(
+        { colorbody, colorpants, coloreye, colorhair, colorshirt },
+        currentCustomization
+      )
+    ) {
+      setshowAlertCancel(true);
+    } else {
+      cancelAndReturnToHome();
+    }
+  }, [
+    colorbody,
+    colorpants,
+    coloreye,
+    colorhair,
+    colorshirt,
+    currentCustomization,
+    setshowAlertCancel,
+    cancelAndReturnToHome,
+  ]);
 
   const showColorsBody = (item: CustomizationBody) => {
     if (showbody) {
@@ -288,16 +327,14 @@ function Customization() {
           style={{
             borderColor:
               colorbody === item.colorBody ? item.colorBody : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.colorBody }}
             type="button"
             onClick={() => {
               selectcolorbody(item.colorBody);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -312,16 +349,14 @@ function Customization() {
           className="customization-item-colors"
           style={{
             borderColor: coloreye === item.colorEye ? item.colorEye : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.colorEye }}
             type="button"
             onClick={() => {
               selectcoloreye(item.colorEye);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -330,23 +365,21 @@ function Customization() {
     return null;
   };
 
-  const showColorsHair = (item: CustomizationArray) => {
+  const showColorsHair = (item: CustomizationArrayHair) => {
     if (showhair) {
       return (
         <div
           className="customization-item-colors"
           style={{
             borderColor: colorhair === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorhair(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -355,23 +388,21 @@ function Customization() {
     return null;
   };
 
-  const showColorPants = (item: CustomizationArray) => {
+  const showColorPants = (item: CustomizationArrayPants) => {
     if (showpants) {
       return (
         <div
           className="customization-item-colors"
           style={{
             borderColor: colorpants === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorpants(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -380,23 +411,21 @@ function Customization() {
     return null;
   };
 
-  const showColorShirt = (item: CustomizationArray) => {
+  const showColorShirt = (item: CustomizationArrayShirt) => {
     if (showshirt) {
       return (
         <div
           className="customization-item-colors"
           style={{
             borderColor: colorshirt === item.color ? item.color : 'white',
-          }}
-        >
+          }}>
           <button
             className="customization-button-colors"
             style={{ background: item.color }}
             type="button"
             onClick={() => {
               selectcolorshirt(item.color);
-            }}
-          >
+            }}>
             &#8203;
           </button>
         </div>
@@ -417,7 +446,7 @@ function Customization() {
             Personalização
           </IonTitle>
 
-          <IonButtons slot="start" onClick={() => setshowAlertCancel(true)}>
+          <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">
               <IconArrowLeft color="#1447a6" />
             </div>
@@ -434,8 +463,7 @@ function Customization() {
             display: 'flex',
             background:
               isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
-          }}
-        >
+          }}>
           <Unity unityContent={unityContent} className="player-content" />
         </div>
 
@@ -450,8 +478,7 @@ function Customization() {
               borderBottomColor: showbody
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconBody
               color={
                 showbody
@@ -471,8 +498,7 @@ function Customization() {
               borderBottomColor: showeye
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconEye
               color={
                 showeye
@@ -492,8 +518,7 @@ function Customization() {
               borderBottomColor: showhair
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconHair
               color={
                 showhair
@@ -513,8 +538,7 @@ function Customization() {
               borderBottomColor: showshirt
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconShirt
               color={
                 showshirt
@@ -534,8 +558,7 @@ function Customization() {
               borderBottomColor: showpants
                 ? buttonColors.VARIANT_WHITE_ACTIVE
                 : buttonColors.VARAINT_WHITE,
-            }}
-          >
+            }}>
             <IconPants
               color={
                 showpants
@@ -561,8 +584,7 @@ function Customization() {
           <button
             className="customization-reset"
             onClick={() => setshowAlert(true)}
-            type="button"
-          >
+            type="button">
             {Strings.BUTTON_RESET}
             <IonAlert
               isOpen={showAlert}
@@ -597,11 +619,7 @@ function Customization() {
                 {
                   text: Strings.BUTTON_NAME_YES,
                   cssClass: 'popup-yes',
-                  handler: () => {
-                    setshowAlertCancel(false);
-                    rollbackCustomization();
-                    history.push(paths.HOME);
-                  },
+                  handler: cancelAndReturnToHome,
                 },
                 {
                   text: Strings.BUTTON_NAME_NO,
@@ -617,8 +635,7 @@ function Customization() {
           <button
             className="customization-save"
             onClick={() => SaveChanges()}
-            type="button"
-          >
+            type="button">
             {Strings.BUTTON_SALVAR}
           </button>
         </div>

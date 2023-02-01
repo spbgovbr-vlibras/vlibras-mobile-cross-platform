@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { Avatar } from 'constants/types';
+
 export enum VideoTranslationStatus {
   QUEUED = 'queued',
   PROCESSING = 'processing',
@@ -23,6 +25,16 @@ interface TranslateData {
 
 interface TranslateVideoData {
   gloss: string;
+  calca?: string;
+  camisa?: string;
+  cabelo?: string;
+  corpo?: string;
+  iris?: string;
+  olhos?: string;
+  sombrancelhas?: string;
+  pos?: string;
+  logo?: string;
+  avatar?: Avatar;
 }
 
 interface TranslationVideoResponse {
@@ -33,6 +45,7 @@ interface TranslationVideoResponse {
 const defaultTranslateData = {
   avatar: 'icaro',
   caption: 'on',
+  pos: 'center',
 };
 
 const api = axios.create({
@@ -40,7 +53,7 @@ const api = axios.create({
 });
 
 export async function fetchVideoStatus(
-  id: string,
+  id: string
 ): Promise<VideoStatusResponse> {
   const response = await api.get(`/video/status/${id}`);
   return response.data;
@@ -52,11 +65,11 @@ export async function translate(data: TranslateData): Promise<string> {
 }
 
 export async function generateVideoTranslate(
-  data: TranslateVideoData,
+  data: TranslateVideoData
 ): Promise<TranslationVideoResponse> {
   const response = await api.post('/video', {
-    ...data,
     ...defaultTranslateData,
+    ...data,
   });
   return response.data;
 }

@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 export async function getDictionary(
-  params: MetadataParams,
+  params: MetadataParams
 ): Promise<ListResponseDictionary> {
   const response = await api.get('/list', { params });
   return response.data;

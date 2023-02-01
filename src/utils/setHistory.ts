@@ -3,13 +3,13 @@ import { NativeStorage } from '@ionic-native/native-storage';
 export const reloadHistory = async (
   payloadDate: string,
   payloadData: string[] | string,
-  key: string,
+  key: string
 ) => {
   const promiseHistory = NativeStorage.getItem('history').then(
     data => data,
     error => {
       return {};
-    },
+    }
   );
 
   const resultPromise = await promiseHistory;
@@ -28,7 +28,7 @@ export const reloadHistory = async (
 
   NativeStorage.setItem('history', resultPromise).then(
     () => console.log(NativeStorage.getItem('history')),
-    error => console.error('Error storing item', error),
+    error => console.error('Error storing item', error)
   );
 };
 
@@ -36,7 +36,7 @@ export const lastTranslation = (data: string[], key: string): void => {
   if (key === 'video') {
     NativeStorage.setItem('lastTranslation', data).then(
       () => console.log(NativeStorage.getItem('lastTranslation')),
-      error => console.error('Error storing lastTranslationitem', error),
+      error => console.error('Error storing lastTranslationitem', error)
     );
   }
 };
