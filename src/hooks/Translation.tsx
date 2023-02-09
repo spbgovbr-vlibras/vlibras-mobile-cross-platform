@@ -5,6 +5,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
 
 import { NativeStorage } from '@ionic-native/native-storage';
@@ -93,6 +94,8 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
 
+  const modalRef = useRef<HTMLIonModalElement>(null);
+
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY)
       .then(recents => setRecentTranslation(recents))
@@ -109,9 +112,27 @@ const TranslationProvider: React.FC = ({ children }) => {
       .finally(() => setVideoGenerationLoading(false));
   }
 
+  const setModalVisible = useCallback(
+    (isVisible: boolean) => {
+      if (!isVisible) {
+        modalRef?.current?.dismiss();
+      }
+      switch (translateRequestType) {
+        case TranslationRequestType.GLOSS_ONLY: {
+          setTextTranslationLoading(isVisible);
+          break;
+        }
+        default: {
+          setVideoGenerationLoading(isVisible);
+        }
+      }
+    },
+    [translateRequestType, modalRef]
+  );
+
   async function generateVideo(videoOptions: videoOptions) {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
-    setVideoGenerationLoading(true);
+    setModalVisible(true);
     setTranslationError(false);
     try {
       const gloss = await translate({ text: textPtBr });
@@ -140,7 +161,7 @@ const TranslationProvider: React.FC = ({ children }) => {
     async (text: string, fromDictionary: boolean) => {
       let translation: string = text;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
-      setTextTranslationLoading(true);
+      setModalVisible(true);
       setTranslationError(false);
       if (fromDictionary) {
         const recents =
@@ -158,15 +179,15 @@ const TranslationProvider: React.FC = ({ children }) => {
         const gloss = await translate({ text });
         setTextGloss(gloss);
         translation = gloss;
+        setModalVisible(false);
       } catch {
         setTranslationError(true);
         // don't need
       }
 
-      setTextTranslationLoading(false);
       return translation;
     },
-    [recentTranslation]
+    [recentTranslation, setModalVisible]
   );
 
   const handleTextGloss = useCallback(
@@ -190,17 +211,6 @@ const TranslationProvider: React.FC = ({ children }) => {
   );
 
   const isLoading = loadingVideoGeneration || loadingTextTranslation;
-  const setModalVisible = (isVisible: boolean) => {
-    switch (translateRequestType) {
-      case TranslationRequestType.GLOSS_ONLY: {
-        setTextTranslationLoading(isVisible);
-        break;
-      }
-      default: {
-        setVideoGenerationLoading(isVisible);
-      }
-    }
-  };
 
   const onModalPresented = () => {
     if (translationError) {
@@ -224,6 +234,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         setVisible={setModalVisible}
         translationRequestType={translateRequestType}
         onModalPresented={onModalPresented}
+        modalRef={modalRef}
       />
 
       <ErrorModal
