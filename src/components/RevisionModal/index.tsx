@@ -180,7 +180,10 @@ const RevisionModal = ({
             </div>
           </div>
           <div className="chip-area">
-            <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
+            <IonChip
+              class="chip-1"
+              disabled={auxValueText.trim().length === 0}
+              onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip
