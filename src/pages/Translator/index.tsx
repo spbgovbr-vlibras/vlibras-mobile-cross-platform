@@ -18,6 +18,7 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getService();
+const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
 
 const Translator = () => {
   const [text, setText] = useState('');
@@ -64,7 +65,7 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-              disabled={text.trim().length === 0}>
+              disabled={text.trim().length === 0 || !regex.test(text)}>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
