@@ -30,14 +30,14 @@ const SuggestionFeedbackModal = ({
   return (
     <IonModal
       isOpen={showSuggestionFeedbackModal}
-      cssClass="suggestion-feedback-modal"
+      className="suggestion-feedback-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose>
+      canDismiss>
       <div className="text-container">
-        <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
+        <IonText className="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
         <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>
       </div>
-      <IonChip class="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
+      <IonChip className="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
         <span className="chip-text-space">{Strings.CHIP_TEXT}</span>
         <IconArrowUpRight />
       </IonChip>

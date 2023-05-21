@@ -15,9 +15,9 @@ const LoadingModal = ({ loading, setLoading, text }: LoadingModalProps) => {
   return (
     <IonModal
       isOpen={loading}
-      cssClass="translating-modal"
+      className="translating-modal"
       onDidDismiss={() => setLoading(false)}
-      swipeToClose>
+      canDismiss>
       <p className="modal-title"> {text} </p>
       <img className="loading" src={gifTranslating} alt="Carregando" />
     </IonModal>

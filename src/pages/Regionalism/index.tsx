@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { RadioGroupChangeEventDetail } from '@ionic/core';
+import { RadioGroupChangeEventDetail } from '@ionic/core/components';
 import {
   IonContent,
   IonList,
@@ -44,9 +44,9 @@ function Regionalism() {
   const [regionalism, setregionalism] = useState(currentRegionalism);
 
   const renderItem = (item: RegionalismItem) => (
-    <IonItem class="regionalism-item">
+    <IonItem className="regionalism-item">
       <IonImg src={item.url} />
-      <IonText class="regionalism-text">{item.name}</IonText>
+      <IonText className="regionalism-text">{item.name}</IonText>
       <IonRadio slot="end" value={item.name} />
     </IonItem>
   );
@@ -78,7 +78,7 @@ function Regionalism() {
         <div className="regionalism-list">
           <IonList lines="none">
             <IonListHeader>
-              <IonText class="regionalism-infobasic">
+              <IonText className="regionalism-infobasic">
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>

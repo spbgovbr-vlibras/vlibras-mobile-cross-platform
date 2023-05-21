@@ -335,7 +335,6 @@ function Player() {
             type="button"
             onClick={() => {
               history.push(paths.DICTIONARY_PLAYER);
-              //   setVisiblePlayer(false);
             }}>
             <IconDictionary color={buttonColors.VARAINT_WHITE} />
           </button>
@@ -436,7 +435,7 @@ function Player() {
         />
       </div>
       <IonPopover
-        cssClass="player-popover"
+        className="player-popover"
         event={popoverState.event}
         isOpen={popoverState.showPopover}
         onDidDismiss={() =>

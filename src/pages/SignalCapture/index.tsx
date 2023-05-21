@@ -317,7 +317,7 @@ const SignalCapture = () => {
         />
         <IonAlert
           isOpen={showAlert}
-          cssClass="popup-box-signal-cap"
+          className="popup-box-signal-cap"
           header={Strings.TITLE_POPUPCANCEL}
           message={Strings.MESSAGE_POPUPCANCEL}
           buttons={[
@@ -343,7 +343,7 @@ const SignalCapture = () => {
         />
         <IonAlert
           isOpen={showAlertpage}
-          cssClass="popup-box-signal-cap"
+          className="popup-box-signal-cap"
           header={Strings.TITLE_POPUP_REMOVE}
           message={Strings.MESSAGE_POPUP_REMOVE}
           buttons={[

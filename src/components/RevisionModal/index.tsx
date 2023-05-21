@@ -91,7 +91,7 @@ const RevisionModal = ({
   const renderWord = (item: Words) => (
     <div className="revision-modal-word-item">
       <IonChip
-        class="suggestion-chips"
+        className="suggestion-chips"
         onClick={() => handleWordSuggestion(item.name)}
         key={item.name}>
         {item.name}
@@ -142,9 +142,9 @@ const RevisionModal = ({
     <div>
       <IonModal
         isOpen={show}
-        cssClass="revision-modal"
+        className="revision-modal"
         onDidDismiss={() => setShow(false)}
-        swipeToClose>
+        canDismiss>
         <div className="revision-modal-header">
           <div style={{ width: 10 }} />
           <div>
@@ -158,9 +158,9 @@ const RevisionModal = ({
           </button>
         </div>
         <div className="text-area-container">
-          <IonText class="text-area-title">{Strings.TEXT_AREA_TITLE}</IonText>
+          <IonText className="text-area-title">{Strings.TEXT_AREA_TITLE}</IonText>
           <IonTextarea
-            class="text-area"
+            className="text-area"
             placeholder="Digite aqui..."
             rows={5}
             cols={5}
@@ -180,11 +180,11 @@ const RevisionModal = ({
             </div>
           </div>
           <div className="chip-area">
-            <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
+            <IonChip className="chip-1" onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip
-              class="chip-2"
+              className="chip-2"
               disabled={auxValueText.trim().length === 0}
               onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}

@@ -588,7 +588,7 @@ function Customization() {
             {Strings.BUTTON_RESET}
             <IonAlert
               isOpen={showAlert}
-              cssClass="popup-box-signal-cap"
+              className="popup-box-signal-cap"
               header={Strings.TITLE_POPUP_RESET}
               message={Strings.MESSAGE_POPUPCANCEL}
               buttons={[
@@ -612,7 +612,7 @@ function Customization() {
             />
             <IonAlert
               isOpen={showAlertCancel}
-              cssClass="popup-box-signal-cap"
+              className="popup-box-signal-cap"
               header={Strings.TITLE_POPUPCANCEL}
               message={Strings.MESSAGE_POPUPCANCEL}
               buttons={[

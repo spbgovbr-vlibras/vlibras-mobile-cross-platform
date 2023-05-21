@@ -2,7 +2,7 @@
 /* eslint-disable import/order */
 import React, { useEffect, useState, useRef } from 'react';
 
-import { menuController } from '@ionic/core';
+import { menuController } from '@ionic/core/components';
 import {
   IonMenu,
   IonHeader,

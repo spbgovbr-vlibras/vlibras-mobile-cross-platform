@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import { Capacitor } from '@capacitor/core';
-import { BackgroundMode } from '@ionic-native/background-mode';
 import { File, DirectoryEntry } from '@ionic-native/file';
 import { NativeStorage } from '@ionic-native/native-storage';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';

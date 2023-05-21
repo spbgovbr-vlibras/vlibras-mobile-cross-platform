@@ -210,7 +210,7 @@ function Historic() {
           <div className="historic-container-ion-chips">
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(0)}
                 style={activeKey === 0 ? style : {}}>
                 {Strings.CHIP_TEXT_1}
@@ -218,7 +218,7 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(1)}
                 style={activeKey === 1 ? style : {}}>
                 {Strings.CHIP_TEXT_2}
@@ -226,7 +226,7 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(2)}
                 style={activeKey === 2 ? style : {}}>
                 {Strings.CHIP_TEXT_3}

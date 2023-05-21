@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { IonApp, setupConfig } from '@ionic/react';
+import { IonApp, setupIonicReact } from '@ionic/react';
 import { Provider } from 'react-redux';
 
 /* Core CSS required for Ionic components to work properly */
@@ -28,7 +28,7 @@ import Routes from './routes';
 import PlayerService from './services/unity';
 import store from './store';
 
-setupConfig({
+setupIonicReact({
   animated: true,
 });
 

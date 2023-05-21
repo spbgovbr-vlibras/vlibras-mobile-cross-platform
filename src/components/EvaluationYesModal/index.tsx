@@ -26,9 +26,9 @@ const EvaluationYesModal = ({
   return (
     <IonModal
       isOpen={showYes}
-      cssClass="evaluation-yes-modal"
+      className="evaluation-yes-modal"
       onDidDismiss={handleCloseModal}
-      swipeToClose>
+      canDismiss>
       <div className="modal-title">
         <IconThumbUp color="black" />
         <p className="text-space">{Strings.TITLE_MENU_MODAL}</p>

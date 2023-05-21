@@ -45,9 +45,9 @@ const GenerateModal = ({
   return (
     <IonModal
       isOpen={visible}
-      cssClass="generate-modal"
+      className="generate-modal"
       onDidDismiss={() => setVisible(false)}
-      swipeToClose={false}
+      canDismiss={false}
       backdropDismiss={false}
       onDidPresent={() => {
         if (onModalPresented) {

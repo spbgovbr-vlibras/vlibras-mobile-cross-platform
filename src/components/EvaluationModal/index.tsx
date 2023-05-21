@@ -60,9 +60,9 @@ const EvaluationModal = ({
     <div>
       <IonModal
         isOpen={show}
-        cssClass="evaluation-modal"
+        className="evaluation-modal"
         onDidDismiss={closeModal}
-        swipeToClose>
+        canDismiss>
         <div className="evaluation-modal-container-close-button-container">
           <button type="button" onClick={closeModal}>
             <IconCloseCircle color="#4E4E4E" />
@@ -73,21 +73,21 @@ const EvaluationModal = ({
 
         <div className="evaluation-modal-container-rating-chips">
           <IonChip
-            class="evaluation-modal-container-rating-chips-yes"
+            className="evaluation-modal-container-rating-chips-yes"
             onClick={handlePositiveRevision}>
             <IconThumbUp color="#4E4E4E" />
-            <IonText class="evaluation-modal-container-rating-chips-texts">
+            <IonText className="evaluation-modal-container-rating-chips-texts">
               {Strings.CHIP_YES}
             </IonText>
           </IonChip>
           <IonChip
-            class="evaluation-modal-container-rating-chips-no"
+            className="evaluation-modal-container-rating-chips-no"
             onClick={() => {
               setShow(false);
               setShowNo(true);
             }}>
             <IconThumbDown color="#4E4E4E" />
-            <IonText class="evaluation-modal-container-rating-chips-texts">
+            <IonText className="evaluation-modal-container-rating-chips-texts">
               {Strings.CHIP_NO}
             </IonText>
           </IonChip>

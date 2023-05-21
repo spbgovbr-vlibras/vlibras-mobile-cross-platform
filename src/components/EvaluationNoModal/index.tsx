@@ -31,9 +31,8 @@ const EvaluationNoModal = ({
     <div>
       <IonModal
         isOpen={showNo}
-        cssClass="evaluation-no-modal"
-        onDidDismiss={() => setShowNo(false)}
-        swipeToClose>
+        className="evaluation-no-modal"
+        onDidDismiss={() => setShowNo(false)}>
         <div className="evaluation-modal-container-close-button-container">
           <button
             type="button"
@@ -51,7 +50,7 @@ const EvaluationNoModal = ({
         </div>
         <div>
           <IonChip
-            class="evaluation-modal-container-chip-suggestion"
+            className="evaluation-modal-container-chip-suggestion"
             onClick={() => {
               setShowSuggestionModal(true);
               setShowNo(false);

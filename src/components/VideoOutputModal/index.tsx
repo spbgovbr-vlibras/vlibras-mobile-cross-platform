@@ -153,10 +153,10 @@ const VideoOutputModal = ({
     <>
       <IonModal
         isOpen={showModal}
-        cssClass={`videooutput-modal${openPlayer ? ' player' : ''}${
+        className={`videooutput-modal${openPlayer ? ' player' : ''}${
           !showButtons ? ' buttons-off' : ''
         }`}
-        swipeToClose
+        canDismiss
         onDidDismiss={closeModal}>
         <div className="modal-title">
           <span> Resultado tradução </span>
