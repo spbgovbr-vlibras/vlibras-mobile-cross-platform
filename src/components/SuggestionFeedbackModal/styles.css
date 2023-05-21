@@ -3,13 +3,13 @@
   font-family: Rawline;
 }
 
-.suggestion-feedback-modal .modal-wrapper {
+.suggestion-feedback-modal::part(content) {
   border-radius: 8px;
   height: 124px;
   margin: 0px 50px;
 }
 
-.suggestion-feedback-modal .ion-page {
+.suggestion-feedback-modal .ion-delegate-host {
   padding: 16px 20px;
   justify-content: center;
   display: flex;
@@ -43,7 +43,7 @@
   text-align: center;
   margin: 20px 0px 0px 0px;
 }
-.suggestion-feedback-modal .ion-page {
+.suggestion-feedback-modal .ion-delegate-host {
   padding-right: 0px;
   padding-bottom: 0px;
   padding-top: 0px;

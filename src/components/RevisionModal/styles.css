@@ -3,13 +3,13 @@
   align-items: flex-end;
 }
 
-.revision-modal .modal-wrapper {
+.revision-modal::part(content) {
   border-radius: 16px 16px 0px 0px;
   height: 505px;
   bottom: 0;
 }
 
-.revision-modal .ion-page {
+.revision-modal .ion-delegate-host{
   padding: 16px 20px;
 }
 

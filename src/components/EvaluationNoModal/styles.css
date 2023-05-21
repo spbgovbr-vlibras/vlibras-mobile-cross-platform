@@ -4,14 +4,14 @@
   display: flex;;
 }
 
-.evaluation-no-modal .modal-wrapper {
+.evaluation-no-modal::part(content) {
   border-radius: 8px;
   height: 147px;
   width: 273px;
   margin: 0px 70px;
 }
 
-.evaluation-no-modal .ion-page {
+.evaluation-no-modal .ion-delegate-host {
   padding: 16px 20px;
   display: flex;
   align-items: center;
@@ -37,7 +37,7 @@
   text-align: center;
   margin: 20px 0px 0px 0px;
 }
-.evaluation-no-modal .ion-page {
+.evaluation-no-modal .ion-delegate-host {
   padding-right: 0px;
   padding-bottom: 0px;
   padding-top: 0px;
