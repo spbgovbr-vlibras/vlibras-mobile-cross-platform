@@ -84,12 +84,15 @@ const PROPERTY_KEY = 'recents-dictionary';
 
 const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorTranslationModalVisible, setErrorTranslationModalVisible] =
+    useState(false);
   const [loadingVideoGeneration, setVideoGenerationLoading] = useState(false);
   const [loadingTextTranslation, setTextTranslationLoading] = useState(false);
   const [translateRequestType, setTranslateRequestType] = useState(
     TranslationRequestType.VIDEO_SHARE
   );
   const [translationError, setTranslationError] = useState(false);
+  const [translationGlossError, setTranslationGlossError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
@@ -157,7 +160,7 @@ const TranslationProvider: React.FC = ({ children }) => {
       let translation: string = text;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
       setModalVisible(true);
-      setTranslationError(false);
+      setTranslationGlossError(false);
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
@@ -176,7 +179,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         translation = gloss;
         setModalVisible(false);
       } catch {
-        setTranslationError(true);
+        setTranslationGlossError(true);
         // don't need
       }
 
@@ -208,9 +211,10 @@ const TranslationProvider: React.FC = ({ children }) => {
   const isLoading = loadingVideoGeneration || loadingTextTranslation;
 
   const onModalPresented = () => {
-    if (translationError) {
+    if (translationGlossError) {
       requestAnimationFrame(() => {
         setModalVisible(false);
+        setErrorTranslationModalVisible(true);
       });
     }
   };
@@ -237,6 +241,11 @@ const TranslationProvider: React.FC = ({ children }) => {
         errorMsg="Erro ao gerar vídeo"
         show={errorModalVisible}
         setShow={setErrorModalVisible}
+      />
+      <ErrorModal
+        errorMsg="Erro ao traduzir. Poderemos usar datilologia."
+        show={errorTranslationModalVisible}
+        setShow={setErrorTranslationModalVisible}
       />
     </TranslationContext.Provider>
   );
