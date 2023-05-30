@@ -1,4 +1,5 @@
 import { NativeStorage } from '@ionic-native/native-storage';
+import _ from 'lodash';
 
 export const reloadHistory = async (
   payloadDate: string,
@@ -15,12 +16,11 @@ export const reloadHistory = async (
   const resultPromise = await promiseHistory;
 
   if (resultPromise[payloadDate]) {
-    if (resultPromise[payloadDate][key]) {
-      resultPromise[payloadDate][key].unshift(payloadData);
-    } else {
+    if (!resultPromise[payloadDate][key]) {
       resultPromise[payloadDate][key] = [];
-      resultPromise[payloadDate][key].unshift(payloadData);
     }
+    const translations = resultPromise[payloadDate][key];
+    resultPromise[payloadDate][key] = _.uniq(translations.unshift(payloadData));
   } else {
     resultPromise[payloadDate] = {};
     resultPromise[payloadDate][key] = [payloadData];
