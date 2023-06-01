@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react';
-
 import { IonModal, IonText, IonChip } from '@ionic/react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { IconCloseCircle, IconThumbDown, IconThumbUp } from 'assets';
 import EvaluationNoModal from 'components/EvaluationNoModal';
@@ -38,23 +37,29 @@ const EvaluationModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: EvaluationModalProps) => {
-  const { textPtBr, textGloss } = useTranslation();
+  const { textPtBr, textGloss, setTextPtBr } = useTranslation();
 
   const closeModal = () => {
     setShow(false);
   };
 
-  const handlePositiveRevision = useCallback(() => {
+  const handlePositiveRevision = useCallback(async () => {
     setShow(false);
     setShowYes(true);
 
-    sendReview({
+    await sendReview({
       text: textPtBr,
       translation: textGloss,
       review: textGloss,
       rating: 'good',
     });
-  }, [textPtBr, textGloss, setShow, setShowYes]);
+  }, [textPtBr, textGloss, setShow, setShowYes, setTextPtBr, sendReview]);
+
+  useEffect(() => {
+    if (textPtBr != textGloss) {
+      setTextPtBr(textGloss, false);
+    }
+  }, [setTextPtBr]);
 
   return (
     <div>
