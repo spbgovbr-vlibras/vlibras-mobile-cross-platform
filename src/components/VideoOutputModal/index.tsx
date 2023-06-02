@@ -156,7 +156,7 @@ const VideoOutputModal = ({
           !showButtons ? ' buttons-off' : ''
         }`}
         canDismiss
-        onDidDismiss={closeModal}>
+        onIonModalDidDismiss={closeModal}>
         <div className="modal-title">
           <span> Resultado tradução </span>
           {!openPlayer ? (

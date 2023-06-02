@@ -142,7 +142,7 @@ const RevisionModal = ({
       <IonModal
         isOpen={show}
         className="revision-modal"
-        onDidDismiss={() => setShow(false)}
+        onIonModalDidDismiss={() => setShow(false)}
         canDismiss>
         <div className="revision-modal-header">
           <div style={{ width: 10 }} />

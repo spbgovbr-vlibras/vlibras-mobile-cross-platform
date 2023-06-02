@@ -26,7 +26,7 @@ const EvaluationYesModal = ({
     <IonModal
       isOpen={showYes}
       className="evaluation-yes-modal"
-      onDidDismiss={handleCloseModal}
+      onIonModalDidDismiss={handleCloseModal}
       canDismiss>
       <div className="modal-title">
         <IconThumbUp color="black" />

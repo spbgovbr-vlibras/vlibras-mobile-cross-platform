@@ -87,6 +87,7 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [translateRequestType, setTranslateRequestType] = useState(
     TranslationRequestType.VIDEO_SHARE
   );
+  const [translationGlossError, setTranslationGlossError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
@@ -145,6 +146,7 @@ const TranslationProvider: React.FC = ({ children }) => {
       let translation: string = text;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
       setModalVisible(true);
+      setTranslationGlossError(false);
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
@@ -166,6 +168,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         setModalVisible(false);
       } catch {
         setIsLoading(false);
+        setTranslationGlossError(true);
         // don't need
       }
 
@@ -215,6 +218,11 @@ const TranslationProvider: React.FC = ({ children }) => {
         errorMsg="Erro ao gerar vídeo"
         show={errorModalVisible}
         setShow={setErrorModalVisible}
+      />
+      <ErrorModal
+        errorMsg="Erro ao traduzir. Poderemos usar datilologia."
+        show={translationGlossError}
+        setShow={setTranslationGlossError}
       />
     </TranslationContext.Provider>
   );

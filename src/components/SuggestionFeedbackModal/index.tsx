@@ -30,7 +30,7 @@ const SuggestionFeedbackModal = ({
     <IonModal
       isOpen={showSuggestionFeedbackModal}
       className="suggestion-feedback-modal"
-      onDidDismiss={handleCloseModal}
+      onIonModalDidDismiss={handleCloseModal}
       canDismiss>
       <div className="text-container">
         <IonText className="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
