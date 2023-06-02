@@ -1,12 +1,4 @@
-import React, { useState } from 'react';
-
 import { Capacitor } from '@capacitor/core';
-import { File, DirectoryEntry } from '@ionic-native/file';
-import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
 import {
   IonItem,
   IonHeader,
@@ -17,6 +9,13 @@ import {
   IonContent,
   IonAlert,
 } from '@ionic/react';
+import { File, DirectoryEntry } from '@ionic-native/file';
+import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
+import {
+  CreateThumbnailOptions,
+  VideoEditor,
+} from '@ionic-native/video-editor';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,9 +30,9 @@ import {
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
+import { Strings } from './strings';
 import { ErrorModal, LoadingModal } from '../../components';
 import paths from '../../constants/paths';
-import { Strings } from './strings';
 
 import './styles.css';
 
@@ -132,7 +131,7 @@ const SignalCapture = () => {
                     VideoEditor.getVideoInfo({
                       fileUri: resolvedPath.nativeURL + media.name,
                     }).then(
-                      info => {
+                      (info) => {
                         setLoading(false);
                         dispatch(
                           Creators.setCurrentArrayVideo([
@@ -147,7 +146,7 @@ const SignalCapture = () => {
                         );
                         history.push(paths.SIGNALCAPTURE);
                       },
-                      err => {
+                      (err) => {
                         setLoading(false);
                         setShowErrorModal([
                           true,
@@ -156,7 +155,7 @@ const SignalCapture = () => {
                       }
                     );
                   },
-                  error => {
+                  (error) => {
                     setLoading(false);
                     setShowErrorModal([
                       true,

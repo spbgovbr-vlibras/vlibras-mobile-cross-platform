@@ -1,5 +1,3 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-
 import {
   IonChip,
   IonContent,
@@ -11,6 +9,7 @@ import {
   IonInfiniteScrollContent,
 } from '@ionic/react';
 import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
@@ -89,7 +88,7 @@ function Dictionary() {
   );
 
   const onSearch = useCallback(
-    event => {
+    (event) => {
       setSearchText(event.target.value || '');
       dispatch(
         Creators.fetchWords.request({
@@ -163,10 +162,10 @@ function Dictionary() {
           <div className="dictionary-words-container">
             <IonList lines="none" className="dictionary-words-list">
               {filter === 'alphabetical'
-                ? dictionary.map(item => renderWord(item))
+                ? dictionary.map((item) => renderWord(item))
                 : recentTranslation
-                    .filter(item => item.includes(searchText.toUpperCase()))
-                    .map(item => renderRecents(item))}
+                    .filter((item) => item.includes(searchText.toUpperCase()))
+                    .map((item) => renderRecents(item))}
             </IonList>
           </div>
         </div>

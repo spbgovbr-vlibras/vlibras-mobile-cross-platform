@@ -142,7 +142,7 @@ const RevisionModal = ({
       <IonModal
         isOpen={show}
         className="revision-modal"
-        onDidDismiss={() => setShow(false)}
+        onIonModalDidDismiss={() => setShow(false)}
         canDismiss>
         <div className="revision-modal-header">
           <div style={{ width: 10 }} />
@@ -181,7 +181,10 @@ const RevisionModal = ({
             </div>
           </div>
           <div className="chip-area">
-            <IonChip className="chip-1" onClick={handlePlaySuggestionGlosa}>
+            <IonChip
+              className="chip-1"
+              disabled={auxValueText.trim().length === 0}
+              onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip

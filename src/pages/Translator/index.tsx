@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-
 import { IonText, IonTextarea, IonContent } from '@ionic/react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -18,6 +17,7 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getService();
+const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
 
 const Translator = () => {
   const [text, setText] = useState('');
@@ -55,7 +55,7 @@ const Translator = () => {
                 cols={5}
                 wrap="soft"
                 required
-                onIonChange={e => setText(e.detail.value || '')}
+                onIonChange={(e) => setText(e.detail.value || '')}
               />
             </div>
           </div>
@@ -64,7 +64,7 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-              disabled={text.trim().length === 0}>
+              disabled={text.trim().length === 0 || !regex.test(text)}>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

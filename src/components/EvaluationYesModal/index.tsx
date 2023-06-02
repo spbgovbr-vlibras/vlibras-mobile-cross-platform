@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal } from '@ionic/react';
+import React from 'react';
 
 import { IconThumbUp } from 'assets';
 
@@ -27,7 +26,7 @@ const EvaluationYesModal = ({
     <IonModal
       isOpen={showYes}
       className="evaluation-yes-modal"
-      onDidDismiss={handleCloseModal}
+      onIonModalDidDismiss={handleCloseModal}
       canDismiss>
       <div className="modal-title">
         <IconThumbUp color="black" />

@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 import { RadioGroupChangeEventDetail } from '@ionic/core/components';
 import {
   IonContent,
@@ -17,6 +15,7 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -24,8 +23,8 @@ import regionalismData from 'data/regionalism';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
-import { IconArrowLeft } from '../../assets';
 import { Strings } from './strings';
+import { IconArrowLeft } from '../../assets';
 import './styles.css';
 
 export interface RegionalismItem {
@@ -83,7 +82,7 @@ function Regionalism() {
               </IonText>
             </IonListHeader>
             <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
-              {regionalismData.map(item => renderItem(item))}
+              {regionalismData.map((item) => renderItem(item))}
             </IonRadioGroup>
           </IonList>
         </div>

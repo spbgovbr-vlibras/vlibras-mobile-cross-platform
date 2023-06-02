@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal, IonChip } from '@ionic/react';
+import React from 'react';
 
 import { IconCloseCircle, IconThumbDown } from 'assets';
 import './styles.css';

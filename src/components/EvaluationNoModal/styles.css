@@ -1,7 +1,7 @@
 .evaluation-no-modal {
   background: var(--ion-color-grey-65);
   font-family: Rawline;
-  display: flex;;
+  display: flex;
 }
 
 .evaluation-no-modal::part(content) {

@@ -38,7 +38,28 @@ VLibras Mobile Cross-Platform.
 
 
 ### Installing
+<ul>
+  <li>
+    Primeiro, é necessário instalar o NodeJS. As últimas versões podem gerar erros no projeto, portanto uma versão de referência para se utilizar é a
+    <a href="https://nodejs.org/en/blog/release/v16.14.2">16.14.2</a>.
+  </li>
+  <li>
+    Em seguida, instale o Yarn e o Ionic no seu computador, para isso basta inserir os seguintes comandos no Prompt de Comando:
+    <br>
+    <strong>$ npm install --global yarn</strong> e <strong>$ npm install -g @ionic/cli</strong>.
+  </li>
+  <li>
+    Dentro da pasta do seu repositório, execute o seguinte comando para instalar as dependências necessárias:
+    <br>
+    <strong>$ npm install</strong> ou <strong>$ yarn install</strong>.
+  </li>
+  <li>
+    Também na pasta do seu repositório, navegue até a pasta <code>node_modules</code> e, em seguida, vá para a pasta <code>cordova-plugin-video-capture-plus</code>. Abra o arquivo <code>plugin.xml</code> em sua IDE ou editor de texto e comente o trecho do código que contém a tag <strong>provider</strong>.
+  </li>
+</ul>
 
+
+ 
 
 ## Deployment
 

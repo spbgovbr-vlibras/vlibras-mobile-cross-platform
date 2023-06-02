@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal, IonSpinner } from '@ionic/react';
+import React from 'react';
 
 import { TranslationRequestType } from 'constants/types';
 
@@ -11,7 +10,6 @@ interface GenerateModalProps {
   visible: boolean;
   setVisible: (show: boolean) => void;
   translationRequestType?: TranslationRequestType;
-  onModalPresented?: () => void;
 }
 
 const getModalTexts = (
@@ -38,7 +36,6 @@ const GenerateModal = ({
   visible,
   setVisible,
   translationRequestType = TranslationRequestType.VIDEO_SHARE,
-  onModalPresented,
 }: GenerateModalProps) => {
   const modalTexts = getModalTexts(translationRequestType);
 
@@ -46,14 +43,9 @@ const GenerateModal = ({
     <IonModal
       isOpen={visible}
       className="generate-modal"
-      onDidDismiss={() => setVisible(false)}
-      canDismiss={false}
-      backdropDismiss={false}
-      onDidPresent={() => {
-        if (onModalPresented) {
-          onModalPresented();
-        }
-      }}>
+      onIonModalDidDismiss={() => setVisible(false)}
+      canDismiss
+      backdropDismiss={false}>
       <h1>{modalTexts.title}</h1>
       <h2>{modalTexts.description}</h2>
       <IonSpinner className="generate-modal-spinner" name="crescent" />

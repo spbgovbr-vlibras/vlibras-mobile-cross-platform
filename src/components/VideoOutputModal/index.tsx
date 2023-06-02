@@ -1,3 +1,4 @@
+import { IonModal, IonButton } from '@ionic/react';
 import React, {
   useRef,
   Dispatch,
@@ -5,8 +6,6 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-
-import { IonModal, IonButton } from '@ionic/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
@@ -157,7 +156,7 @@ const VideoOutputModal = ({
           !showButtons ? ' buttons-off' : ''
         }`}
         canDismiss
-        onDidDismiss={closeModal}>
+        onIonModalDidDismiss={closeModal}>
         <div className="modal-title">
           <span> Resultado tradução </span>
           {!openPlayer ? (

@@ -2,16 +2,14 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  background-color: #E5E5E5;
+  background-color: #e5e5e5;
 }
 
 .player-content {
   display: flex;
   flex: 1;
   flex-shrink: inherit;
-
 }
-
 
 .player-action-container {
   position: absolute;
@@ -25,7 +23,7 @@
   z-index: 1;
 }
 
-.play-action-content {   
+.play-action-content {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -134,7 +132,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #1B1B1B;
+  background: #1b1b1b;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -174,7 +172,7 @@
 }
 
 .player-popover-content-item-none {
-  background:none;
+  background: none;
   border: 0;
   margin: 4px;
   border-radius: 4px;
@@ -186,7 +184,7 @@
   font-style: normal;
   font-weight: bold;
   font-size: 18px;
-  color: #1447A6;
+  color: #1447a6;
 }
 
 .player-popover-content-divider {

@@ -1,7 +1,6 @@
 /* eslint-disable react/button-has-type */
-import React, { useEffect, useRef, useState } from 'react';
-
 import { IonPopover, isPlatform } from '@ionic/react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';

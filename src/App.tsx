@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-
 import { IonApp, setupIonicReact } from '@ionic/react';
+import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 
 /* Core CSS required for Ionic components to work properly */

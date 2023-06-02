@@ -66,7 +66,7 @@ const EvaluationModal = ({
       <IonModal
         isOpen={show}
         className="evaluation-modal"
-        onDidDismiss={closeModal}
+        onIonModalDidDismiss={closeModal}
         canDismiss>
         <div className="evaluation-modal-container-close-button-container">
           <button type="button" onClick={closeModal}>

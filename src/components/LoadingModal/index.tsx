@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal } from '@ionic/react';
+import React from 'react';
 
 import { gifTranslating } from '../../assets';
 import './styles.css';
