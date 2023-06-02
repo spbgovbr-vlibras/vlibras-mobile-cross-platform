@@ -3,14 +3,14 @@
   font-family: Rawline;
 }
 
-.evaluation-yes-modal .modal-wrapper {
+.evaluation-yes-modal::part(content) {
   border-radius: 8px;
   height: 147px;
   width: 273px;
   margin: 0px 70px;
 }
 
-.evaluation-yes-modal .ion-page {
+.evaluation-yes-modal .ion-delegate-host {
   padding: 16px 20px;
   justify-content: center;
   display: flex;
@@ -34,19 +34,19 @@
   text-align: center;
   margin: 20px 0px 0px 0px;
 }
-.evaluation-yes-modal .ion-page{
+.evaluation-yes-modal .ion-delegate-host {
   padding-right: 0px;
   padding-bottom: 0px;
   padding-top: 0px;
   padding-left: 0px;
 }
 
-.evaluation-yes-modal .text-space{
+.evaluation-yes-modal .text-space {
   margin: 0 !important;
   margin-left: 6px;
   color: black;
 }
-.evaluation-yes-modal .subtitle{
+.evaluation-yes-modal .subtitle {
   margin: 0 !important;
   margin-top: 6px;
   color: black;

@@ -308,7 +308,7 @@ body {
 .tutorial-box-shadow .button-outlined {
   flex: 1;
   background: transparent;
-  border: 1px solid #4E4E4E;
+  border: 1px solid #4e4e4e;
   box-sizing: border-box;
   /* border-radius: 50%; */
   font-family: Roboto;

@@ -1,5 +1,3 @@
-import React, { useState, useEffect, useCallback } from 'react';
-
 import {
   IonList,
   IonAlert,
@@ -10,6 +8,7 @@ import {
   IonButtons,
   isPlatform,
 } from '@ionic/react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
@@ -281,7 +280,7 @@ function Customization() {
   }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
 
   // Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
-  //------------------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------------------
 
   const resetColor = () => {
     selectcolorbody(IcaroDefault.icaroBody);
@@ -570,11 +569,11 @@ function Customization() {
         </div>
 
         <IonList className="customization-list-colors">
-          {CustomizationBody.map(item => showColorsBody(item))}
-          {CustomizationEye.map(item => showColorsEye(item))}
-          {CustomizationArrayHair.map(item => showColorsHair(item))}
-          {CustomizationArrayShirt.map(item => showColorShirt(item))}
-          {CustomizationArrayPants.map(item => showColorPants(item))}
+          {CustomizationBody.map((item) => showColorsBody(item))}
+          {CustomizationEye.map((item) => showColorsEye(item))}
+          {CustomizationArrayHair.map((item) => showColorsHair(item))}
+          {CustomizationArrayShirt.map((item) => showColorShirt(item))}
+          {CustomizationArrayPants.map((item) => showColorPants(item))}
         </IonList>
         {/* <button onClick={() => resetColor()} type="button">
           Reset Color
@@ -588,7 +587,7 @@ function Customization() {
             {Strings.BUTTON_RESET}
             <IonAlert
               isOpen={showAlert}
-              cssClass="popup-box-signal-cap"
+              className="popup-box-signal-cap"
               header={Strings.TITLE_POPUP_RESET}
               message={Strings.MESSAGE_POPUPCANCEL}
               buttons={[
@@ -612,7 +611,7 @@ function Customization() {
             />
             <IonAlert
               isOpen={showAlertCancel}
-              cssClass="popup-box-signal-cap"
+              className="popup-box-signal-cap"
               header={Strings.TITLE_POPUPCANCEL}
               message={Strings.MESSAGE_POPUPCANCEL}
               buttons={[

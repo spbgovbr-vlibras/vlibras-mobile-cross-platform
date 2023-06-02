@@ -2,7 +2,7 @@
 /* eslint-disable import/order */
 import React, { useEffect, useState, useRef } from 'react';
 
-import { menuController } from '@ionic/core';
+import { menuController } from '@ionic/core/components';
 import {
   IonMenu,
   IonHeader,
@@ -147,7 +147,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      onClick={e => navLink(e, tab)}>
+      onClick={(e) => navLink(e, tab)}>
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
@@ -173,7 +173,10 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
       {title === Strings.TITLE_MENU_REGIONALISM && (
         <>
           <p className="drawer-menu-sub-item">
-            {RegionalismArray.find(item => item.name === current)?.abbreviation}
+            {
+              RegionalismArray.find((item) => item.name === current)
+                ?.abbreviation
+            }
           </p>
           <div className="arrow-down"> </div>
         </>

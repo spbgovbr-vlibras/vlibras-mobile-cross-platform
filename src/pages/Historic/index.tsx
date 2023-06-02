@@ -1,7 +1,6 @@
-import React, { useEffect, useCallback, useState } from 'react';
-
-import { NativeStorage } from '@ionic-native/native-storage';
 import { IonChip, IonContent, IonText } from '@ionic/react';
+import { NativeStorage } from '@ionic-native/native-storage';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,11 +13,11 @@ import { Creators } from 'store/ducks/translator';
 import dateFormat from 'utils/dateFormat';
 import { reloadHistory } from 'utils/setHistory';
 
+import { Strings } from './strings';
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
-import { Strings } from './strings';
 
 import './styles.css';
 // import { Creators } from 'store/ducks/customization';
@@ -28,7 +27,6 @@ type GenericObject = { [key: string]: any };
 function Historic() {
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
-  const [log, setLog] = useState([]);
   const history = useHistory();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -45,24 +43,18 @@ function Historic() {
   const { setTextPtBr } = useTranslation();
   const playerService = PlayerService.getService();
 
-  const promiseHistory = NativeStorage.getItem('history').then(
-    data => {
-      return data;
-    },
-    error => {
-      setLog(error);
-      return {};
-    }
-  );
-
   const openModalOutput = (actualItem: any) => {
     setShowModal(true);
     setResults(actualItem);
   };
 
   const loadHistory = useCallback(async () => {
-    setHistoryStorage(await promiseHistory);
-  }, [promiseHistory]);
+    try {
+      const result = await NativeStorage.getItem('history');
+      setHistoryStorage(result);
+      // eslint-disable-next-line no-empty
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (location.pathname === paths.HISTORY) loadHistory();
@@ -73,7 +65,7 @@ function Historic() {
     const dates = Object.keys(arrayState);
     const formattedObjDate: any = {};
 
-    dates.forEach(element => {
+    dates.forEach((element) => {
       const formattedDate = dateFormat(element);
       if (formattedObjDate[formattedDate]) {
         if (formattedObjDate[formattedDate].video) {
@@ -116,14 +108,14 @@ function Historic() {
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 
-    return datesMapped.map(column => {
+    return datesMapped.map((column) => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
         if (formattedHistoric[column][key].length !== 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
-                <div>
+                <div key={elementKey}>
                   {elementKey === 0 &&
                     (keyOfKeys === 0 || doesntHaveKey === 1) && (
                       <p className="date-desc"> {column} </p>
@@ -210,7 +202,7 @@ function Historic() {
           <div className="historic-container-ion-chips">
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(0)}
                 style={activeKey === 0 ? style : {}}>
                 {Strings.CHIP_TEXT_1}
@@ -218,7 +210,7 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(1)}
                 style={activeKey === 1 ? style : {}}>
                 {Strings.CHIP_TEXT_2}
@@ -226,7 +218,7 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(2)}
                 style={activeKey === 2 ? style : {}}>
                 {Strings.CHIP_TEXT_3}

@@ -1,5 +1,3 @@
-import React, { useMemo } from 'react';
-
 import { menuController } from '@ionic/core';
 import {
   IonButtons,
@@ -10,6 +8,7 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 

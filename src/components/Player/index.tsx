@@ -1,7 +1,6 @@
 /* eslint-disable react/button-has-type */
-import React, { useEffect, useRef, useState } from 'react';
-
 import { IonPopover, isPlatform } from '@ionic/react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
@@ -335,7 +334,6 @@ function Player() {
             type="button"
             onClick={() => {
               history.push(paths.DICTIONARY_PLAYER);
-              //   setVisiblePlayer(false);
             }}>
             <IconDictionary color={buttonColors.VARAINT_WHITE} />
           </button>
@@ -436,7 +434,7 @@ function Player() {
         />
       </div>
       <IonPopover
-        cssClass="player-popover"
+        className="player-popover"
         event={popoverState.event}
         isOpen={popoverState.showPopover}
         onDidDismiss={() =>
