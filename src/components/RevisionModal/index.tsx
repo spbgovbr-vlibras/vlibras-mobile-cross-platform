@@ -36,7 +36,7 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
-  const { textPtBr, textGloss, setTextGloss } = useTranslation();
+  const { textPtBr, textGloss, setTextGloss, setTextPtBr } = useTranslation();
   // Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState(textGloss);
   const [isPreview, setIsPreview] = useState(false);
@@ -59,15 +59,17 @@ const RevisionModal = ({
     setIsPreview(true);
   };
 
-  const handleOpenSuggestionFeedbackModal = () => {
+  const handleOpenSuggestionFeedbackModal = async () => {
     setShow(false);
     setSuggestionFeedbackModal(true);
-    sendReview({
+
+    await sendReview({
       text: textPtBr,
       translation: textGloss,
       review: auxValueText,
       rating: 'bad',
     });
+
     setAuxValueText('');
   };
 
@@ -105,7 +107,7 @@ const RevisionModal = ({
       const searchText = textGloss.split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
-          page: 1,
+          page: FIRST_PAGE_INDEX,
           limit: 10,
           name: `${searchText}%`,
         })
@@ -132,10 +134,8 @@ const RevisionModal = ({
         })
       );
     },
-    [dispatch]
+    [dispatch, setAuxValueText]
   );
-
-  const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
 
   return (
     <div>
@@ -167,7 +167,7 @@ const RevisionModal = ({
             cols={5}
             wrap="soft"
             required
-            onIonChange={debouncedSearch}
+            onIonChange={onSearch}
             value={auxValueText}
           />
           <div className="suggestion-container">
