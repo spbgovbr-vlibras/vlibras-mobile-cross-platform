@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   IonContent,
   IonImg,
@@ -10,6 +8,7 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
@@ -55,7 +54,7 @@ function About() {
               {Strings.CHARACTERS_TEXT_VLIBRAS}
             </span>
           </h1>
-          <IonImg class="about-container-characters" src={logoAvatares} />
+          <IonImg className="about-container-characters" src={logoAvatares} />
         </div>
         <div className="about-content">
           <div className="about-content-text-vlibras">

@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-
 import { IonContent } from '@ionic/react';
+import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import paths from '../../constants/paths';
-import { MenuLayout } from '../../layouts';
 import Presentation from './Steps/Presentation';
 import StepFour from './Steps/StepFour';
 import StepOne from './Steps/StepOne';
 import StepThree from './Steps/StepThree';
 import StepTwo from './Steps/StepTwo';
 import { Strings } from './strings';
+import paths from '../../constants/paths';
+import { MenuLayout } from '../../layouts';
 
 import './styles.css';
 

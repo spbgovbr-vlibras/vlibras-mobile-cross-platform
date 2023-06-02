@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-
 import { IonText, IonTextarea, IonContent } from '@ionic/react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -45,18 +44,18 @@ const Translator = () => {
       <IonContent>
         <div className="scroll-content">
           <div className="translator-box">
-            <IonText class="translator-header">
+            <IonText className="translator-header">
               {Strings.TRANSLATOR_HEADER}
             </IonText>
             <div className="translator-input-box">
               <IonTextarea
-                class="translator-textarea"
+                className="translator-textarea"
                 //  placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 rows={5}
                 cols={5}
                 wrap="soft"
                 required
-                onIonChange={e => setText(e.detail.value || '')}
+                onIonChange={(e) => setText(e.detail.value || '')}
               />
             </div>
           </div>

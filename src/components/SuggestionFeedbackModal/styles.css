@@ -3,20 +3,20 @@
   font-family: Rawline;
 }
 
-.suggestion-feedback-modal .modal-wrapper {
+.suggestion-feedback-modal::part(content) {
   border-radius: 8px;
   height: 124px;
   margin: 0px 50px;
 }
 
-.suggestion-feedback-modal .ion-page {
+.suggestion-feedback-modal .ion-delegate-host {
   padding: 16px 20px;
   justify-content: center;
   display: flex;
   align-items: center;
 }
 
-.suggestion-feedback-modal .text-container{
+.suggestion-feedback-modal .text-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -43,13 +43,13 @@
   text-align: center;
   margin: 20px 0px 0px 0px;
 }
-.suggestion-feedback-modal .ion-page {
+.suggestion-feedback-modal .ion-delegate-host {
   padding-right: 0px;
   padding-bottom: 0px;
   padding-top: 0px;
   padding-left: 0px;
 }
-.suggestion-feedback-modal .subtitle{
+.suggestion-feedback-modal .subtitle {
   margin: 0 !important;
   margin-top: 6px;
   color: black;
@@ -78,18 +78,18 @@
   line-height: 100%;
 }
 
-.suggestion-feedback-modal .chip-text-space{
+.suggestion-feedback-modal .chip-text-space {
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 12px;
   line-height: 100%;
   /* identical to box height, or 12px */
-  
+
   display: flex;
   align-items: center;
   text-align: center;
-  
-  color: #3E4049;
+
+  color: #3e4049;
   margin-right: 4px;
 }

@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonText, IonToggle, IonItem, IonLabel } from '@ionic/react';
+import React from 'react';
 
 import { IconYoutube } from 'assets';
 import { useTutorial } from 'hooks/Tutorial';
@@ -18,12 +17,14 @@ function Tutorial() {
         <IonLabel>{Strings.ALWAYS_SEE_TUTORIAL}</IonLabel>
         <IonToggle
           checked={alwaysShowTutorial}
-          onIonChange={e => setAlwaysShowTutorial(e.detail.checked)}
+          onIonChange={(e) => setAlwaysShowTutorial(e.detail.checked)}
         />
       </IonItem>
       <div className="tutorial-container">
         <div className="tutorial-text-container">
-          <IonText class="tutorial-texts-1">{Strings.SEND_MESSAGE_1}</IonText>
+          <IonText className="tutorial-texts-1">
+            {Strings.SEND_MESSAGE_1}
+          </IonText>
           <h1 className="tutorial-texts-2">
             {Strings.SEND_MESSAGE_2}
             <br />
@@ -32,7 +33,7 @@ function Tutorial() {
               {Strings.SEND_MESSAGE_4}
             </a>
           </h1>
-          <IonText class="tutorial-texts-4">{Strings.FOLLOW_STEPS}</IonText>
+          <IonText className="tutorial-texts-4">{Strings.FOLLOW_STEPS}</IonText>
           <a href="https://www.youtube.com/channel/UCF94lq7TwAu5OmlwIu44qpA">
             <IconYoutube color="#939293" />
           </a>

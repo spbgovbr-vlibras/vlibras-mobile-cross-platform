@@ -3,7 +3,7 @@
   align-items: flex-end;
 }
 
-.videooutput-modal .modal-wrapper {
+.videooutput-modal::part(::content) {
   border-radius: 16px 16px 0px 0px;
   height: auto;
   max-height: 500px;
@@ -11,18 +11,10 @@
   bottom: 0;
 }
 
-.videooutput-modal .modal-wrapper .ion-page {
+.videooutput-modal .ion-delegate-host {
   display: block;
   position: inherit;
   contain: inherit;
-}
-
-.videooutput-modal.player .modal-wrapper {
-  /* height: 440px; */
-}
-
-.videooutput-modal.buttons-off .modal-wrapper {
-  /* height: 350px; */
 }
 
 .videooutput-modal.doNotShowModal {
@@ -33,7 +25,7 @@
   z-index: 9999 !important;
 }
 
-.videooutput-modal .ion-page {
+.videooutput-modal .ion-delegate-host {
   padding: 16px 20px;
   height: 100%;
 }
