@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { NativeStorage } from '@ionic-native/native-storage';
+import { SocialSharing } from '@ionic-native/social-sharing/';
 import React, {
   createContext,
   useContext,
   useState,
   useCallback,
   useEffect,
-  useRef,
 } from 'react';
-
-import { NativeStorage } from '@ionic-native/native-storage';
-import { SocialSharing } from '@ionic-native/social-sharing/';
 
 import { ErrorModal, GenerateModal } from 'components';
 import { Avatar, TranslationRequestType } from 'constants/types';
@@ -84,14 +83,10 @@ const PROPERTY_KEY = 'recents-dictionary';
 
 const TranslationProvider: React.FC = ({ children }) => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
-  const [errorTranslationModalVisible, setErrorTranslationModalVisible] =
-    useState(false);
-  const [loadingVideoGeneration, setVideoGenerationLoading] = useState(false);
-  const [loadingTextTranslation, setTextTranslationLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [translateRequestType, setTranslateRequestType] = useState(
     TranslationRequestType.VIDEO_SHARE
   );
-  const [translationError, setTranslationError] = useState(false);
   const [translationGlossError, setTranslationGlossError] = useState(false);
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
@@ -99,39 +94,30 @@ const TranslationProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY)
-      .then(recents => setRecentTranslation(recents))
-      .catch(_ => false);
+      .then((recents) => setRecentTranslation(recents))
+      .catch((_) => false);
   }, []);
 
   function handleShareVideo(uuid: string) {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
-    setVideoGenerationLoading(true);
+    setIsLoading(true);
     // Move this function to a service [MA]
 
     SocialSharing.share('', '', `${URL_API}/${uuid}`)
-      .catch(_ => false) // TODO: Enable error modal if fails [MA]
-      .finally(() => setVideoGenerationLoading(false));
+      .catch((_) => false) // TODO: Enable error modal if fails [MA]
+      .finally(() => setIsLoading(false));
   }
 
   const setModalVisible = useCallback(
     (isVisible: boolean) => {
-      switch (translateRequestType) {
-        case TranslationRequestType.GLOSS_ONLY: {
-          setTextTranslationLoading(isVisible);
-          break;
-        }
-        default: {
-          setVideoGenerationLoading(isVisible);
-        }
-      }
+      setIsLoading(isVisible);
     },
-    [translateRequestType]
+    [setIsLoading]
   );
 
   async function generateVideo(videoOptions: videoOptions) {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
-    setModalVisible(true);
-    setTranslationError(false);
+    setIsLoading(true);
     try {
       const gloss = await translate({ text: textPtBr });
       const response = await generateVideoTranslate({ gloss, ...videoOptions });
@@ -146,11 +132,11 @@ const TranslationProvider: React.FC = ({ children }) => {
       })
         .then(() => handleShareVideo(uuid))
         .catch(() => {
-          setTranslationError(true);
+          setIsLoading(false);
           setErrorModalVisible(true);
         });
     } catch {
-      setTranslationError(true);
+      setIsLoading(false);
       setErrorModalVisible(true);
     }
   }
@@ -164,10 +150,12 @@ const TranslationProvider: React.FC = ({ children }) => {
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
-            ? [text, ...recentTranslation.filter(item => item !== text)]
+            ? [text, ...recentTranslation.filter((item) => item !== text)]
             : [
                 text,
-                ...recentTranslation.slice(0, -1).filter(item => item !== text),
+                ...recentTranslation
+                  .slice(0, -1)
+                  .filter((item) => item !== text),
               ];
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
@@ -179,6 +167,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         translation = gloss;
         setModalVisible(false);
       } catch {
+        setIsLoading(false);
         setTranslationGlossError(true);
         // don't need
       }
@@ -193,12 +182,12 @@ const TranslationProvider: React.FC = ({ children }) => {
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
-            ? [gloss, ...recentTranslation.filter(item => item !== gloss)]
+            ? [gloss, ...recentTranslation.filter((item) => item !== gloss)]
             : [
                 gloss,
                 ...recentTranslation
                   .slice(0, -1)
-                  .filter(item => item !== gloss),
+                  .filter((item) => item !== gloss),
               ];
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
@@ -207,17 +196,6 @@ const TranslationProvider: React.FC = ({ children }) => {
     },
     [recentTranslation]
   );
-
-  const isLoading = loadingVideoGeneration || loadingTextTranslation;
-
-  const onModalPresented = () => {
-    if (translationGlossError) {
-      requestAnimationFrame(() => {
-        setModalVisible(false);
-        setErrorTranslationModalVisible(true);
-      });
-    }
-  };
 
   return (
     <TranslationContext.Provider
@@ -232,9 +210,8 @@ const TranslationProvider: React.FC = ({ children }) => {
       {children}
       <GenerateModal
         visible={isLoading}
-        setVisible={setModalVisible}
+        setVisible={setIsLoading}
         translationRequestType={translateRequestType}
-        onModalPresented={onModalPresented}
       />
 
       <ErrorModal
@@ -244,8 +221,8 @@ const TranslationProvider: React.FC = ({ children }) => {
       />
       <ErrorModal
         errorMsg="Erro ao traduzir. Poderemos usar datilologia."
-        show={errorTranslationModalVisible}
-        setShow={setErrorTranslationModalVisible}
+        show={translationGlossError}
+        setShow={setTranslationGlossError}
       />
     </TranslationContext.Provider>
   );

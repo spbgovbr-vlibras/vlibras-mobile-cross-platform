@@ -1,5 +1,3 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-
 import {
   IonChip,
   IonContent,
@@ -11,6 +9,7 @@ import {
   IonInfiniteScrollContent,
 } from '@ionic/react';
 import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
@@ -73,23 +72,23 @@ function Dictionary() {
   const renderWord = (item: Words) => (
     <IonItem
       key={item.id}
-      class="dictionary-word-item"
+      className="dictionary-word-item"
       onClick={() => translate(item.name)}>
-      <IonText class="dictionary-words-style">{item.name}</IonText>
+      <IonText className="dictionary-words-style">{item.name}</IonText>
     </IonItem>
   );
 
   const renderRecents = (item: string) => (
     <IonItem
       key={item}
-      class="dictionary-word-item"
+      className="dictionary-word-item"
       onClick={() => translate(item)}>
-      <IonText class="dictionary-words-style">{item}</IonText>
+      <IonText className="dictionary-words-style">{item}</IonText>
     </IonItem>
   );
 
   const onSearch = useCallback(
-    event => {
+    (event) => {
       setSearchText(event.target.value || '');
       dispatch(
         Creators.fetchWords.request({
@@ -144,30 +143,29 @@ function Dictionary() {
               placeholder={Strings.TEXT_PLACEHOLDER}
               onIonChange={debouncedSearch}
               inputmode="text"
-              searchIcon="none"
             />
           </div>
           <div className="dictionary-container-ion-chips">
             <IonChip
-              class="dictionary-container-ion-chips-suggestions"
+              className="dictionary-container-ion-chips-suggestions"
               onClick={handleFilterAlpha}
               style={getChipClassName(filter, 'alphabetical')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_1}
             </IonChip>
             <IonChip
-              class="dictionary-container-ion-chips-suggestions"
+              className="dictionary-container-ion-chips-suggestions"
               onClick={handleFilterRecents}
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
           </div>
           <div className="dictionary-words-container">
-            <IonList lines="none" class="dictionary-words-list">
+            <IonList lines="none" className="dictionary-words-list">
               {filter === 'alphabetical'
-                ? dictionary.map(item => renderWord(item))
+                ? dictionary.map((item) => renderWord(item))
                 : recentTranslation
-                    .filter(item => item.includes(searchText.toUpperCase()))
-                    .map(item => renderRecents(item))}
+                    .filter((item) => item.includes(searchText.toUpperCase()))
+                    .map((item) => renderRecents(item))}
             </IonList>
           </div>
         </div>

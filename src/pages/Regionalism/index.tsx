@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-
-import { RadioGroupChangeEventDetail } from '@ionic/core';
+import { RadioGroupChangeEventDetail } from '@ionic/core/components';
 import {
   IonContent,
   IonList,
@@ -17,6 +15,7 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -24,8 +23,8 @@ import regionalismData from 'data/regionalism';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
-import { IconArrowLeft } from '../../assets';
 import { Strings } from './strings';
+import { IconArrowLeft } from '../../assets';
 import './styles.css';
 
 export interface RegionalismItem {
@@ -44,9 +43,9 @@ function Regionalism() {
   const [regionalism, setregionalism] = useState(currentRegionalism);
 
   const renderItem = (item: RegionalismItem) => (
-    <IonItem class="regionalism-item">
+    <IonItem className="regionalism-item">
       <IonImg src={item.url} />
-      <IonText class="regionalism-text">{item.name}</IonText>
+      <IonText className="regionalism-text">{item.name}</IonText>
       <IonRadio slot="end" value={item.name} />
     </IonItem>
   );
@@ -78,12 +77,12 @@ function Regionalism() {
         <div className="regionalism-list">
           <IonList lines="none">
             <IonListHeader>
-              <IonText class="regionalism-infobasic">
+              <IonText className="regionalism-infobasic">
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
             <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
-              {regionalismData.map(item => renderItem(item))}
+              {regionalismData.map((item) => renderItem(item))}
             </IonRadioGroup>
           </IonList>
         </div>

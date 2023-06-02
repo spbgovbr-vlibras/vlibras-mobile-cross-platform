@@ -6,7 +6,7 @@ declare global {
       system: number,
       status: number,
       fn: (fs: any) => void,
-      err: (error: string) => void,
+      err: (error: string) => void
     ): void;
     // Load and mount unity webgl [MA]
     onLoadPlayer(): void;
@@ -16,7 +16,7 @@ declare global {
       isPaused: string,
       isPlayingIntervalAnimation: string,
       isLoading: string,
-      isRepeatable: string,
+      isRepeatable: string
     ): void;
     // Trriggers when is playing an animation with the gloss length [MA]
     CounterGloss(counter: number, glossLength: number): void;

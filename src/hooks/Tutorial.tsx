@@ -1,3 +1,4 @@
+import { NativeStorage } from '@ionic-native/native-storage';
 import React, {
   createContext,
   useContext,
@@ -5,8 +6,6 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-
-import { NativeStorage } from '@ionic-native/native-storage';
 
 export enum TutorialSteps {
   IDLE,
@@ -65,21 +64,21 @@ const TutorialProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY_TUTORIAL)
-      .then(value =>
+      .then((value) =>
         value
           ? setCurrentStep(TutorialSteps.IDLE)
           : setCurrentStep(TutorialSteps.INITIAL)
       )
-      .catch(_ => false);
+      .catch((_) => false);
 
     NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
-      .then(value => {
+      .then((value) => {
         setAlwaysShowTutorial(value);
         if (value) {
           presentTutorial();
         }
       })
-      .catch(_ => false);
+      .catch((_) => false);
   }, [presentTutorial]);
 
   const onFinishTutorial = useCallback(() => {

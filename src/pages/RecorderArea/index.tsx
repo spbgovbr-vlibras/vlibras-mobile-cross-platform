@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-
 import { Capacitor } from '@capacitor/core';
-import { BackgroundMode } from '@ionic-native/background-mode';
+import { IonContent } from '@ionic/react';
 import { File, DirectoryEntry } from '@ionic-native/file';
 import { NativeStorage } from '@ionic-native/native-storage';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
@@ -9,8 +7,8 @@ import {
   CreateThumbnailOptions,
   VideoEditor,
 } from '@ionic-native/video-editor';
-import { IonContent } from '@ionic/react';
 import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -142,7 +140,7 @@ const RecorderArea = () => {
                   VideoEditor.getVideoInfo({
                     fileUri: resolvedPath.nativeURL + media.name,
                   }).then(
-                    info => {
+                    (info) => {
                       dispatch(
                         Creators.setCurrentArrayVideo([
                           [
@@ -156,7 +154,7 @@ const RecorderArea = () => {
                       setLoading(false);
                       history.push(paths.SIGNALCAPTURE);
                     },
-                    err => {
+                    (err) => {
                       setLoading(false);
                       setShowErrorModal([
                         true,
@@ -165,7 +163,7 @@ const RecorderArea = () => {
                     }
                   );
                 },
-                error => {
+                (error) => {
                   setLoading(false);
                   setShowErrorModal([
                     true,

@@ -7,7 +7,7 @@ interface BulletsProps {
 
 const Bullets = ({ active }: BulletsProps) => {
   const loadBullets = () => {
-    return [1, 2, 3, 4].map(item => (
+    return [1, 2, 3, 4].map((item) => (
       <div className={`bullet${item <= active ? ' active' : ''}`} key={item} />
     ));
   };
