@@ -2513,15 +2513,14 @@
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.60.tgz#a4a97dcdbebad76612c188fc06440e4995fd8ad2"
   integrity sha512-pCH7bqWIfzHs3D+PDs3O/COCQJka+Kcw3RnO9rFA2zalqoXg7cNjJDh6mZ7oRtY1wmY4LVwDdAbA1F7Z8tv3BQ==
   dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    csstype "^3.0.2"
+    "@types/node" "*"
 
 "@types/resolve@1.17.1":
   version "1.17.1"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-1.17.1.tgz#3afd6ad8967c77e4376c598a82ddd58f46ec45d6"
   integrity sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==
   dependencies:
+    "@types/mime" "^1"
     "@types/node" "*"
 
 "@types/retry@0.12.0":
@@ -3403,7 +3402,7 @@ bplist-parser@^0.2.0:
   resolved "https://registry.yarnpkg.com/bplist-parser/-/bplist-parser-0.2.0.tgz#43a9d183e5bf9d545200ceac3e712f79ebbe8d0e"
   integrity sha512-z0M+byMThzQmD9NILRniCUXYsYpjwnlO8N5uCFaCqIOpqRsJCrQL9NK3JsD67CN5a08nF5oIL2bD6loTdHOuKw==
   dependencies:
-    big-integer "^1.6.44"
+    big-integer "1.6.x"
 
 bplist-parser@^0.3.2:
   version "0.3.2"
@@ -4722,12 +4721,10 @@ eslint-plugin-jsx-a11y@^6.5.1:
     object.fromentries "^2.0.6"
     semver "^6.3.0"
 
-eslint-plugin-prettier@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-prettier/-/eslint-plugin-prettier-4.2.1.tgz#651cbb88b1dab98bfd42f017a12fa6b2d993f94b"
-  integrity sha512-f/0rXLXUt0oFYs8ra4w49wYZBG5GKZpAYsJSm6rnYL5uVDjd+zowwMwVZHnAjf4edNrKpCDYfXDgmRE/Ak7QyQ==
-  dependencies:
-    prettier-linter-helpers "^1.0.0"
+eslint-plugin-react-hooks@^4.3.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz#4c3e697ad95b77e93f8646aaa1630c1ba607edd3"
+  integrity sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==
 
 eslint-plugin-react-hooks@^4.3.0, eslint-plugin-react-hooks@^4.6.0:
   version "4.6.0"
@@ -8575,7 +8572,6 @@ react@^17.0.0:
   integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==
   dependencies:
     loose-envify "^1.1.0"
-    object-assign "^4.1.1"
 
 read-cache@^1.0.0:
   version "1.0.0"
@@ -8918,7 +8914,6 @@ scheduler@^0.20.0:
   integrity sha512-2eWfGgAqqWFGqtdMmcL5zCMK1U8KlXv8SQFGglL3CEtd0aDVDWgeF/YoCmvln55m5zSk3J/20hTaSBeSObsQDQ==
   dependencies:
     loose-envify "^1.1.0"
-    object-assign "^4.1.1"
 
 schema-utils@2.7.0:
   version "2.7.0"
