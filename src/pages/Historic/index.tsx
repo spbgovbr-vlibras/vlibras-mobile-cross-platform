@@ -225,7 +225,7 @@ function Historic() {
               </IonChip>
             )}
           </div>
-          <div className="container-render-historic">{renderAllItems()}</div>
+          <div className="container-render-historic">{Object.keys(historyStorage).length === 0 ? <p>Histórico vazio</p> : renderAllItems()}</div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}
