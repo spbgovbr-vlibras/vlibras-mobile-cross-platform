@@ -1218,6 +1218,11 @@
   dependencies:
     tslib "^2.1.0"
 
+"@capacitor/filesystem@^5.0.4":
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/@capacitor/filesystem/-/filesystem-5.0.4.tgz#2610ed5308878b0c2d62beeb0a3b1daa7be5645f"
+  integrity sha512-dsmy8Hz19+SMI5hwTzHto3TXT3ckbgCJ5kfI4oel73yyn3G7zjdKZuHoZRINoX1BbFNSZryzpbMQ69lSOLCpnQ==
+
 "@capacitor/haptics@^5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@capacitor/haptics/-/haptics-5.0.2.tgz#77a4e686c394d83627c8c82bd293a2a2f5744b51"
@@ -1232,6 +1237,11 @@
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@capacitor/keyboard/-/keyboard-5.0.2.tgz#6070f15b3257ce72aedc79ed005d084f45c57e35"
   integrity sha512-5qauopAd9Dlltzi87i/WHMBsocCf0BJqVxRZ3H+kifQm4BLHGokrzuanddEJd6MPOnglSl3H3C9oElJB3wkVVQ==
+
+"@capacitor/share@^5.0.4":
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/@capacitor/share/-/share-5.0.4.tgz#ec5b5792e83333831a2c376e26a0b163647e2712"
+  integrity sha512-Owkg6xmpWAoUZxu+joc+L5PxrWdGR/nAhKYGb2mVenf0Fljm1kwjKKJRySLmaO4uHiDD2JVwV2azV2w6ZC6DTg==
 
 "@capacitor/status-bar@^5.0.2":
   version "5.0.2"

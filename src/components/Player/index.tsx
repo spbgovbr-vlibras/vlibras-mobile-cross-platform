@@ -1,3 +1,6 @@
+/* eslint-disable no-var */
+/* eslint-disable quotes */
+/* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -26,7 +29,7 @@ import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
-import { Avatar } from 'constants/types';
+import { Avatar, TranslationRequestType } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
@@ -34,6 +37,10 @@ import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { getVideo, postVideo } from 'services/shareVideo';
+import GenerateModal from 'components/GenerateModal';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
@@ -59,7 +66,113 @@ function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
 }
 
+let recording = false;
+let isLoading = true;
+let contador = 30;
+
+let mediaRecorder: MediaRecorder;
+let recordedChunks: BlobPart[] | undefined;
+let canvas: HTMLCanvasElement | null | undefined;
+
 function Player() {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openModal = () => {
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleClick = () => {
+    if (!recording && isLoading) {
+      openModal();
+    }
+  };
+
+  // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
+  async function initRecorder() {
+    canvas = document.querySelector('canvas');
+    const stream = canvas!.captureStream(25);
+    mediaRecorder = new MediaRecorder(stream!, {
+      mimeType: 'video/webm',
+    });
+    recordedChunks = [];
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        recordedChunks?.push(e.data);
+      }
+    };
+    mediaRecorder.start();
+  }
+
+  // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
+  // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
+  const checkBlob = (cont: number, id: string) => {
+    setTimeout(() => {
+      if (cont == 0 || !isLoading) {
+        getVideo(id).then((blob) => {
+          console.log('[LOG: VALOR FINAL DO BLOB]: ', blob);
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = async () => {
+            const base64data = reader.result as string;
+            await Filesystem.writeFile({
+              path: 'video.mp4',
+              data: base64data,
+              directory: Directory.Cache,
+              recursive: true,
+            })
+              .then(() =>
+                Filesystem.getUri({
+                  directory: Directory.Cache,
+                  path: 'video.mp4',
+                })
+              )
+              .then((uriReult) => {
+                Share.share({
+                  title: 'Compartilhar',
+                  text: 'Compartilhando VLibras',
+                  url: uriReult.uri,
+                });
+              });
+          };
+        });
+        contador = 30;
+        isLoading = !isLoading;
+        return;
+      }
+      if (cont > 0 || isLoading) {
+        console.log('[LOG: VALOR DO CONTADOR]: ', cont);
+        getVideo(id).then((blob) => {
+          if (blob.size > 24) {
+            closeModal();
+            isLoading = !isLoading;
+          }
+        });
+      }
+      checkBlob(cont - 1, id);
+    }, 1000);
+  };
+
+  // STOPA/PARA A GRAVAÇÃO DO VIDEO E ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
+  async function stopRecorder() {
+    setTimeout(async () => {
+      const blob = new Blob(recordedChunks, {
+        type: 'video/webm',
+      });
+      await postVideo({ blob: blob }).then(async (id) => {
+        if (contador > 0) {
+          await getVideo(id).then((newBlob) => {
+            console.log('[LOG: VALOR INICIAL DO BLOB]: ', newBlob);
+            checkBlob(contador, id);
+          });
+        }
+      });
+    }, 0);
+  }
+
   const [popoverState, setShowPopover] = useState({
     showPopover: false,
     event: undefined,
@@ -151,8 +264,16 @@ function Player() {
     setIsPaused(toBoolean(_isPaused));
     setLoading(toBoolean(_isLoading));
 
+    if (toBoolean(_isPlaying) && recording === false) {
+      initRecorder();
+      recording = !recording;
+    }
     if (!toBoolean(_isPlaying)) {
       setHasFinished(true);
+    }
+    if (!toBoolean(_isPlaying) && recording === true) {
+      mediaRecorder.stop();
+      recording = !recording;
     }
   };
 
@@ -577,9 +698,21 @@ function Player() {
             }
             className="player-button-rounded"
             type="button"
-            onClick={handleShare}>
+            // onClick={handleShare}>
+            onClick={() => {
+              // // STOPANDO A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
+              if (!recording) {
+                stopRecorder();
+                handleClick();
+              }
+            }}>
             <IconShare color="#FFF" size={18} />
           </button>
+          <GenerateModal
+            visible={modalOpen}
+            setVisible={closeModal}
+            translationRequestType={TranslationRequestType.VIDEO_SHARE}
+          />
         </div>
       )}
       <div className="player-action-container">
