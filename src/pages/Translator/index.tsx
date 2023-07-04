@@ -55,7 +55,7 @@ const Translator = () => {
                 cols={5}
                 wrap="soft"
                 required
-                onIonChange={(e) => setText(e.detail.value || '')}
+                onIonInput={(e) => setText(e.detail.value || '')}
               />
             </div>
           </div>
