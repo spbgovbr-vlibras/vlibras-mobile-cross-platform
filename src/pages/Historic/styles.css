@@ -168,10 +168,27 @@
   margin-bottom: 20px;
 }
 
+.container-render-historic p {
+  font-size: 18px; 
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .empty-historic {
   font-family: Rawline;
   color: #565656;
   font-size: 13px;
   text-align: center;
   margin-top: 70px;
+}
+
+.empty-historic-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
 }
