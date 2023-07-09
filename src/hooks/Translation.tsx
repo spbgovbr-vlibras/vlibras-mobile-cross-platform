@@ -19,6 +19,7 @@ import {
   VideoStatusResponse,
   VideoTranslationStatus,
 } from 'services/translate';
+import { delay } from 'utils/delay';
 
 interface PollParams {
   fn: () => Promise<VideoStatusResponse>;
@@ -131,11 +132,13 @@ const TranslationProvider: React.FC = ({ children }) => {
         maxAttempts: MAX_ATTEMPTS,
       })
         .then(() => handleShareVideo(uuid))
-        .catch(() => {
+        .catch(async () => {
+          await delay(500);
           setIsLoading(false);
           setErrorModalVisible(true);
         });
     } catch {
+      await delay(500);
       setIsLoading(false);
       setErrorModalVisible(true);
     }
@@ -167,9 +170,9 @@ const TranslationProvider: React.FC = ({ children }) => {
         translation = gloss;
         setModalVisible(false);
       } catch {
+        await delay(500);
         setIsLoading(false);
         setTranslationGlossError(true);
-        // don't need
       }
 
       return translation;
