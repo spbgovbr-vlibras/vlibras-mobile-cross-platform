@@ -32,7 +32,7 @@ const Translator = () => {
     const today = new Date().toLocaleDateString('pt-BR');
 
     reloadHistory(today, formatted, 'text');
-    const gloss = await setTextPtBr(formatted, false);
+    const gloss = (await setTextPtBr(formatted, false)).toString();
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
