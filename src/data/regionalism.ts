@@ -37,7 +37,7 @@ const RegionalismArray = [
   { name: 'Amazonas', url: logoAmazonas, abbreviation: 'AM' },
   { name: 'Bahia', url: logoBahia, abbreviation: 'BA' },
   { name: 'Ceará', url: logoCeara, abbreviation: 'CE' },
-  { name: 'Distrito Federal', url: logoDF },
+  { name: 'Distrito Federal', url: logoDF, abbreviation: 'DF' },
   { name: 'Espirito Santo', url: logoEspiritoSanto, abbreviation: 'ES' },
   { name: 'Goiás', url: logoGoiás, abbreviation: 'GO' },
   { name: 'Maranhão', url: logoMaranhao, abbreviation: 'MA' },
