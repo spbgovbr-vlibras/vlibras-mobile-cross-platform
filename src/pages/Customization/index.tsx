@@ -457,7 +457,7 @@ function Customization() {
           style={{
             width: '100vw',
             zIndex: 0,
-            flexShrink: 0,
+            flexShrink: 1,
             flex: 1,
             display: 'flex',
             background:
