@@ -55,12 +55,6 @@ const EvaluationModal = ({
     });
   }, [textPtBr, textGloss, setShow, setShowYes, setTextPtBr, sendReview]);
 
-  useEffect(() => {
-    if (textPtBr != textGloss) {
-      setTextPtBr(textGloss, false);
-    }
-  }, [setTextPtBr]);
-
   return (
     <div>
       <IonModal

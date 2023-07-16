@@ -36,7 +36,7 @@ const RevisionModal = ({
   setSuggestionFeedbackModal,
   isPlaying,
 }: RevisionModalProps) => {
-  const { textPtBr, textGloss, setTextGloss, setTextPtBr } = useTranslation();
+  const { textPtBr, textGloss } = useTranslation();
   // Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState(textGloss);
   const [isPreview, setIsPreview] = useState(false);
@@ -50,7 +50,6 @@ const RevisionModal = ({
 
   const handlePlaySuggestionGlosa = () => {
     setShow(false);
-    // setTextGloss(auxValueText, false);
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
