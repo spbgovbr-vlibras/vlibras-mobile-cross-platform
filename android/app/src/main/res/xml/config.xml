@@ -11,14 +11,6 @@
     <param name="android-package" value="NativeStorage"/>
   </feature>
 
-  <feature name="VideoCapturePlus">
-    <param name="android-package" value="nl.xservices.plugins.videocaptureplus.VideoCapturePlus"/>
-  </feature>
-
-  <feature name="VideoEditor">
-    <param name="android-package" value="org.apache.cordova.videoeditor.VideoEditor"/>
-  </feature>
-
   <feature name="SocialSharing">
     <param name="android-package" value="nl.xservices.plugins.SocialSharing"/>
   </feature>

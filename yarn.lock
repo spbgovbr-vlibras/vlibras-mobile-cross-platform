@@ -1428,20 +1428,6 @@
   dependencies:
     "@types/cordova" latest
 
-"@ionic-native/video-capture-plus@^5.33.0":
-  version "5.36.0"
-  resolved "https://registry.yarnpkg.com/@ionic-native/video-capture-plus/-/video-capture-plus-5.36.0.tgz#acbab6c86a7588d56c445e83a8c776fa09d97fc5"
-  integrity sha512-NPnwN4m/MGT8PxVT7Wds8JEvsiTSHb5kin/Qh50Smkn9oe7P1zAJ6sLSAStypL1O87Cklujzbq00g6d7oTCb0g==
-  dependencies:
-    "@types/cordova" latest
-
-"@ionic-native/video-editor@^5.35.0":
-  version "5.36.0"
-  resolved "https://registry.yarnpkg.com/@ionic-native/video-editor/-/video-editor-5.36.0.tgz#f24a53da1b89374e07a9494bdb528c5212f94f25"
-  integrity sha512-CgdCx4fKeLnVj/4CfziinrfimIC9cPmz+9WFx8FqULjziDkhKu4DDt9zZPAsWwvKj8zqAey4hYAn57H7bx/1BA==
-  dependencies:
-    "@types/cordova" latest
-
 "@ionic/cli-framework-output@^2.2.5":
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/@ionic/cli-framework-output/-/cli-framework-output-2.2.6.tgz#abbbe4982e82a9a4bfab3d34c372447cd48f25b3"
@@ -3345,7 +3331,7 @@ bfj@^7.0.2:
     hoopy "^0.1.4"
     tryer "^1.0.1"
 
-big-integer@1.6.x:
+big-integer@1.6.x, big-integer@^1.6.44:
   version "1.6.51"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
   integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
@@ -3811,16 +3797,6 @@ cordova-plugin-nativestorage@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/cordova-plugin-nativestorage/-/cordova-plugin-nativestorage-2.3.2.tgz#d6a1d50632aff2a70227102f68bc605e91aabca2"
   integrity sha512-olg/BzYRk0NGbKQ5f7rf21RYQEyJI19CCZn6RpVMO9/kbRRFqae/6ixjDNy81dXSu2TQ42brjBddGe1Qpn5ViA==
-
-cordova-plugin-video-capture-plus@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/cordova-plugin-video-capture-plus/-/cordova-plugin-video-capture-plus-1.0.0.tgz#6a47aa611403c128f7f753eb534074b218f8050d"
-  integrity sha512-Ldxm2sn54Ghy0y35Lspt3y6Vckm9LKD0ImA/uPP1uYTk+QI1MZkRV3xrt1NzGCUIxlaw2c1VfQAXSNAug/+pog==
-
-cordova-plugin-video-editor@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/cordova-plugin-video-editor/-/cordova-plugin-video-editor-1.1.3.tgz#a5fdd2548c1d7e20d33650ca258913ba18fbfcd6"
-  integrity sha512-ChAp/GYBSbSeblHJh8LlAdhN9p4LJBBSt07hBkqWVKzdivPVa+g6yoAvsINSJyKcYX6m43NzPjozRIT+iZDwNQ==
 
 cordova-plugin-x-socialsharing@^6.0.3:
   version "6.0.4"

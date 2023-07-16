@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+// import { Capacitor } from '@capacitor/core';
 import {
   IonItem,
   IonHeader,
@@ -9,12 +9,12 @@ import {
   IonContent,
   IonAlert,
 } from '@ionic/react';
-import { File, DirectoryEntry } from '@ionic-native/file';
-import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
+// import { File, DirectoryEntry } from '@ionic-native/file';
+// import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
+// import {
+//   CreateThumbnailOptions,
+//   VideoEditor,
+// } from '@ionic-native/video-editor';
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -75,114 +75,114 @@ const SignalCapture = () => {
     }
   };
 
+  // TODO: Add updated dependency that enables capturing video.
   const takeVideo = async () => {
-    if (currentVideoArray.length < 5) {
-      try {
-        const options = { limit: 1, duration: 30, highquality: true };
-        // BackgroundMode.enable();
-        const mediafile = await VideoCapturePlus.captureVideo(options);
-        // BackgroundMode.disable();
+    // if (currentVideoArray.length < 5) {
+    //   try {
+    //     const options = { limit: 1, duration: 30, highquality: true };
+        
+    //     const mediafile = await VideoCapturePlus.captureVideo(options);
+    //     setLoadingDescription('Processando...');
+    //     setLoading(true);
 
-        setLoadingDescription('Processando...');
-        setLoading(true);
+    //     const media = mediafile[0] as MediaFile;
+    //     const path = media.fullPath.substring(
+    //       0,
+    //       media.fullPath.lastIndexOf('/')
+    //     );
+    //     let resolvedPath: DirectoryEntry;
 
-        const media = mediafile[0] as MediaFile;
-        const path = media.fullPath.substring(
-          0,
-          media.fullPath.lastIndexOf('/')
-        );
-        let resolvedPath: DirectoryEntry;
+    //     if (Capacitor.getPlatform() === 'ios') {
+    //       resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
+    //     } else {
+    //       resolvedPath = await File.resolveDirectoryUrl(path);
+    //     }
 
-        if (Capacitor.getPlatform() === 'ios') {
-          resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
-        } else {
-          resolvedPath = await File.resolveDirectoryUrl(path);
-        }
+    //     File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
+    //       (buffer: ArrayBuffer) => {
+    //         const imgBlob = new Blob([buffer], {
+    //           type: media.type,
+    //         });
 
-        File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
-          (buffer: ArrayBuffer) => {
-            const imgBlob = new Blob([buffer], {
-              type: media.type,
-            });
+    //         const fname = `thumb-${currentVideoArray.length}`;
 
-            const fname = `thumb-${currentVideoArray.length}`;
+    //         const thumbnailoption: CreateThumbnailOptions = {
+    //           fileUri: resolvedPath.nativeURL + media.name,
+    //           quality: 100,
+    //           atTime: 1,
+    //           outputFileName: fname,
+    //         };
 
-            const thumbnailoption: CreateThumbnailOptions = {
-              fileUri: resolvedPath.nativeURL + media.name,
-              quality: 100,
-              atTime: 1,
-              outputFileName: fname,
-            };
+    //         VideoEditor.createThumbnail(thumbnailoption)
+    //           .then(async (thumbnailPath: string) => {
+    //             const pathThumbs = thumbnailPath.substring(
+    //               0,
+    //               thumbnailPath.lastIndexOf('/')
+    //             );
+    //             const resolvedPathThumb: DirectoryEntry =
+    //               await File.resolveDirectoryUrl(`file://${pathThumbs}`);
 
-            VideoEditor.createThumbnail(thumbnailoption)
-              .then(async (thumbnailPath: string) => {
-                const pathThumbs = thumbnailPath.substring(
-                  0,
-                  thumbnailPath.lastIndexOf('/')
-                );
-                const resolvedPathThumb: DirectoryEntry =
-                  await File.resolveDirectoryUrl(`file://${pathThumbs}`);
-
-                File.readAsDataURL(
-                  resolvedPathThumb.nativeURL,
-                  `${fname}.jpg`
-                ).then(
-                  (thumbPath: string) => {
-                    VideoEditor.getVideoInfo({
-                      fileUri: resolvedPath.nativeURL + media.name,
-                    }).then(
-                      (info) => {
-                        setLoading(false);
-                        dispatch(
-                          Creators.setCurrentArrayVideo([
-                            ...currentVideoArray,
-                            [
-                              ...mediafile,
-                              imgBlob,
-                              { thumbBlob: thumbPath },
-                              { duration: Math.trunc(info.duration) },
-                            ],
-                          ])
-                        );
-                        history.push(paths.SIGNALCAPTURE);
-                      },
-                      (err) => {
-                        setLoading(false);
-                        setShowErrorModal([
-                          true,
-                          'Não foi possível obter informações do vídeo',
-                        ]);
-                      }
-                    );
-                  },
-                  (error) => {
-                    setLoading(false);
-                    setShowErrorModal([
-                      true,
-                      'Não foi possível carregar a prévia do vídeo',
-                    ]);
-                  }
-                );
-              })
-              .catch((err: Error) => {
-                setLoading(false);
-                setShowErrorModal([
-                  true,
-                  'Não foi possível criar a prévia do vídeo',
-                ]);
-              });
-          },
-          (error: Error) => {
-            setLoading(false);
-            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
-          }
-        );
-      } catch (error: any) {
-        setLoading(false);
-        if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
-      }
-    }
+    //             File.readAsDataURL(
+    //               resolvedPathThumb.nativeURL,
+    //               `${fname}.jpg`
+    //             ).then(
+    //               (thumbPath: string) => {
+    //                 VideoEditor.getVideoInfo({
+    //                   fileUri: resolvedPath.nativeURL + media.name,
+    //                 }).then(
+    //                   (info) => {
+    //                     setLoading(false);
+    //                     dispatch(
+    //                       Creators.setCurrentArrayVideo([
+    //                         ...currentVideoArray,
+    //                         [
+    //                           ...mediafile,
+    //                           imgBlob,
+    //                           { thumbBlob: thumbPath },
+    //                           { duration: Math.trunc(info.duration) },
+    //                         ],
+    //                       ])
+    //                     );
+    //                     history.push(paths.SIGNALCAPTURE);
+    //                   },
+    //                   (err) => {
+    //                     setLoading(false);
+    //                     setShowErrorModal([
+    //                       true,
+    //                       'Não foi possível obter informações do vídeo',
+    //                     ]);
+    //                   }
+    //                 );
+    //               },
+    //               (error) => {
+    //                 setLoading(false);
+    //                 setShowErrorModal([
+    //                   true,
+    //                   'Não foi possível carregar a prévia do vídeo',
+    //                 ]);
+    //               }
+    //             );
+    //           })
+    //           .catch((err: Error) => {
+    //             setLoading(false);
+    //             setShowErrorModal([
+    //               true,
+    //               'Não foi possível criar a prévia do vídeo',
+    //             ]);
+    //           });
+    //       },
+    //       (error: Error) => {
+    //         setLoading(false);
+    //         setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+    //       }
+    //     );
+    //   } catch (error: any) {
+    //     setLoading(false);
+    //     if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+    //   }
+    // }
   };
+
   function popupCancel() {
     setShowAlertPage(true);
   }
