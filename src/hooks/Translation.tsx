@@ -194,6 +194,8 @@ const TranslationProvider: React.FC = ({ children }) => {
               ];
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
+        // Words from the dictionary have no PT BR text, only gloss. [TF]
+        setTextPtBr(gloss);
       }
       setTextGloss(gloss);
     },
