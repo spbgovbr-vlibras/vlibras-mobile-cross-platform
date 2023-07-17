@@ -6,30 +6,23 @@ export const reloadHistory = async (
   payloadData: string[] | string,
   key: string
 ) => {
-  const promiseHistory = NativeStorage.getItem('history').then(
-    (data) => data,
-    (error) => {
-      return {};
+  try {
+    const resultPromise = await NativeStorage.getItem('history');
+    if (resultPromise[payloadDate]) {
+      if (!resultPromise[payloadDate][key]) {
+        resultPromise[payloadDate][key] = [];
+      }
+      // eslint-disable-next-line prefer-const
+      const translations = resultPromise[payloadDate][key];
+      resultPromise[payloadDate][key] = _.uniq(_.concat([payloadData], translations));
+    } else {
+      resultPromise[payloadDate] = {};
+      resultPromise[payloadDate][key] = [payloadData];
     }
-  );
-
-  const resultPromise = await promiseHistory;
-
-  if (resultPromise[payloadDate]) {
-    if (!resultPromise[payloadDate][key]) {
-      resultPromise[payloadDate][key] = [];
-    }
-    const translations = resultPromise[payloadDate][key];
-    resultPromise[payloadDate][key] = _.uniq(translations.unshift(payloadData));
-  } else {
-    resultPromise[payloadDate] = {};
-    resultPromise[payloadDate][key] = [payloadData];
-  }
-
-  NativeStorage.setItem('history', resultPromise).then(
-    () => console.log(NativeStorage.getItem('history')),
-    (error) => console.error('Error storing item', error)
-  );
+  
+    await NativeStorage.setItem('history', resultPromise);
+  // eslint-disable-next-line no-empty
+  } catch { }
 };
 
 export const lastTranslation = (data: string[], key: string): void => {
