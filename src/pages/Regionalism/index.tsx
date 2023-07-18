@@ -19,6 +19,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { LoadingModal } from 'components';
 import RegionalismModal from 'components/RegionalismModal';
 import regionalismData from 'data/regionalism';
 import { fetchBundles } from 'services/regionalism';
@@ -46,6 +47,15 @@ function Regionalism() {
   const [regionalism, setregionalism] = useState(currentRegionalism);
   const [abbreviation, setAbbreviation] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
+  const [modalOpen, setOpenModal] = useState(false);
+
+  const openModal = () => {
+    setOpenModal(true);
+  };
+
+  const closeModal = () => {
+    setOpenModal(false);
+  };
 
   useEffect(() => {
     if (isEmpty > 0) {
@@ -77,21 +87,29 @@ function Regionalism() {
   }
 
   async function SaveRegionalism() {
-    await fetchBundles(abbreviation).then((res) => {
-      if (res.length > 0) {
-        history.goBack();
-      }
-      if (res.length <= 0) {
-        handleOpenModal();
-      }
-      isEmpty = res.length;
-    });
+    openModal();
+    await fetchBundles(abbreviation)
+      .then((res) => {
+        if (res.length > 0) {
+          closeModal();
+          history.goBack();
+        }
+        if (res.length <= 0) {
+          closeModal();
+          handleOpenModal();
+        }
+        isEmpty = res.length;
+      })
+      .catch(() => {
+        closeModal();
+      });
     dispatch(Creators.setCurrentRegionalism(regionalism));
   }
 
   return (
     <IonPage>
       <RegionalismModal isOpen={showModal} onClose={handleCloseModal} />
+      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" />
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title-signalcap">

@@ -10,6 +10,6 @@ export async function fetchBundles(siglaRegiao: string): Promise<string> {
     return response.data;
   } catch (error) {
     console.error(error);
-    throw new Error('[LOG: ERRO AO BUSCAR REGIÃO]');
+    return Promise.resolve('');
   }
 }
