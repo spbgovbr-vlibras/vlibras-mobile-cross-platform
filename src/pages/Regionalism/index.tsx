@@ -15,11 +15,14 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
+import { LoadingModal } from 'components';
+import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
 import regionalismData from 'data/regionalism';
+import { fetchBundles } from 'services/regionalism';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
@@ -34,13 +37,42 @@ export interface RegionalismItem {
 
 function Regionalism() {
   const dispatch = useDispatch();
-  const location = useLocation();
   const history = useHistory();
+  let isEmpty = 0;
 
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
   const [regionalism, setregionalism] = useState(currentRegionalism);
+  const [abbreviation, setAbbreviation] = useState<string>('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalOpen, setOpenModal] = useState(false);
+
+  const closeLoadingModal = useCallback(() => {
+    setOpenModal(false);
+  }, [setOpenModal]);
+
+  const openLoadingModal = useCallback(() => {
+    setOpenModal(true);
+    setTimeout(() => {
+      closeLoadingModal();
+      history.goBack();
+    }, 2000);
+  }, [setOpenModal, closeLoadingModal, history]);
+
+  useEffect(() => {
+    if (isEmpty > 0) {
+      history.goBack();
+    }
+  }, [isEmpty, history]);
+
+  const handleOpenEmptyRegionalismModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   const renderItem = (item: RegionalismItem) => (
     <IonItem className="regionalism-item">
@@ -49,17 +81,35 @@ function Regionalism() {
       <IonRadio slot="end" value={item.name} />
     </IonItem>
   );
+
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
+    const abbr = regionalismData.find((item) => item.name === evt.detail.value)
+      ?.abbreviation as string;
     setregionalism(evt.detail.value);
+    setAbbreviation(abbr);
   }
 
-  function SaveRegionalism() {
-    dispatch(Creators.setCurrentRegionalism(regionalism));
-    history.goBack();
+  async function SaveRegionalism() {
+    try {
+      const bundles = await fetchBundles(abbreviation);
+      if (bundles.length > 0) {
+        openLoadingModal();
+      }
+      if (bundles.length <= 0) {
+        handleOpenEmptyRegionalismModal();
+      }
+      isEmpty = bundles.length;
+      dispatch(Creators.setCurrentRegionalism(regionalism));
+    } catch(error: unknown) {
+      closeLoadingModal();
+      handleOpenEmptyRegionalismModal();
+    }  
   }
 
   return (
     <IonPage>
+      <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
+      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" canDismiss={false} />
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title-signalcap">
