@@ -15,12 +15,12 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { LoadingModal } from 'components';
-import RegionalismModal from 'components/RegionalismModal';
+import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
 import regionalismData from 'data/regionalism';
 import { fetchBundles } from 'services/regionalism';
 import { RootState } from 'store';
@@ -37,7 +37,6 @@ export interface RegionalismItem {
 
 function Regionalism() {
   const dispatch = useDispatch();
-  const location = useLocation();
   const history = useHistory();
   let isEmpty = 0;
 
@@ -49,13 +48,17 @@ function Regionalism() {
   const [showModal, setShowModal] = useState(false);
   const [modalOpen, setOpenModal] = useState(false);
 
-  const openModal = () => {
-    setOpenModal(true);
-  };
-
-  const closeModal = () => {
+  const closeLoadingModal = useCallback(() => {
     setOpenModal(false);
-  };
+  }, [setOpenModal]);
+
+  const openLoadingModal = useCallback(() => {
+    setOpenModal(true);
+    setTimeout(() => {
+      closeLoadingModal();
+      history.goBack();
+    }, 2000);
+  }, [setOpenModal, closeLoadingModal, history]);
 
   useEffect(() => {
     if (isEmpty > 0) {
@@ -63,7 +66,7 @@ function Regionalism() {
     }
   }, [isEmpty, history]);
 
-  const handleOpenModal = () => {
+  const handleOpenEmptyRegionalismModal = () => {
     setShowModal(true);
   };
 
@@ -87,29 +90,26 @@ function Regionalism() {
   }
 
   async function SaveRegionalism() {
-    openModal();
     try {
       const bundles = await fetchBundles(abbreviation);
       if (bundles.length > 0) {
-        closeModal();
-        history.goBack();
+        openLoadingModal();
       }
       if (bundles.length <= 0) {
-        closeModal();
-        handleOpenModal();
+        handleOpenEmptyRegionalismModal();
       }
       isEmpty = bundles.length;
       dispatch(Creators.setCurrentRegionalism(regionalism));
     } catch(error: unknown) {
-      closeModal();
-      handleOpenModal();
+      closeLoadingModal();
+      handleOpenEmptyRegionalismModal();
     }  
   }
 
   return (
     <IonPage>
-      <RegionalismModal isOpen={showModal} onClose={handleCloseModal} />
-      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" />
+      <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
+      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" canDismiss={false} />
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title-signalcap">

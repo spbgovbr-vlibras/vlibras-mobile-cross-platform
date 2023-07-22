@@ -10,7 +10,7 @@ interface ModalProps {
   onClose: () => void;
 }
 
-const RegionalismModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const EmptyRegionalismModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const history = useHistory();
   const handleButtonClick = () => {
     history.goBack();
@@ -36,4 +36,4 @@ const RegionalismModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default RegionalismModal;
+export default EmptyRegionalismModal;
