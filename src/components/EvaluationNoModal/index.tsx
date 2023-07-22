@@ -15,6 +15,7 @@ interface EvaluationNoModalProps {
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
   isPlaying: boolean;
+  onSubmittedRevision?: () => void;
 }
 
 const EvaluationNoModal = ({
@@ -25,6 +26,7 @@ const EvaluationNoModal = ({
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
   isPlaying,
+  onSubmittedRevision,
 }: EvaluationNoModalProps) => {
   return (
     <div>
@@ -64,6 +66,7 @@ const EvaluationNoModal = ({
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setSuggestionFeedbackModal}
         isPlaying={isPlaying}
+        onSubmittedRevision={onSubmittedRevision}
       />
     </div>
   );
