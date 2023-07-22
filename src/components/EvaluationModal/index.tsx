@@ -22,6 +22,7 @@ interface EvaluationModalProps {
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
   isPlaying: boolean;
+  onSubmittedRevision?: () => void;
 }
 
 const EvaluationModal = ({
@@ -36,6 +37,7 @@ const EvaluationModal = ({
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
   isPlaying,
+  onSubmittedRevision,
 }: EvaluationModalProps) => {
   const { textPtBr, textGloss, setTextPtBr } = useTranslation();
 
@@ -46,6 +48,9 @@ const EvaluationModal = ({
   const handlePositiveRevision = useCallback(async () => {
     setShow(false);
     setShowYes(true);
+    if(onSubmittedRevision) {
+      onSubmittedRevision();
+    }
 
     await sendReview({
       text: textPtBr,
@@ -53,7 +58,7 @@ const EvaluationModal = ({
       review: textGloss,
       rating: 'good',
     });
-  }, [textPtBr, textGloss, setShow, setShowYes, setTextPtBr, sendReview]);
+  }, [textPtBr, textGloss, setShow, setShowYes, setTextPtBr, sendReview, onSubmittedRevision]);
 
   return (
     <div>
@@ -101,6 +106,7 @@ const EvaluationModal = ({
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setSuggestionFeedbackModal}
         isPlaying={isPlaying}
+        onSubmittedRevision={onSubmittedRevision}
       />
     </div>
   );

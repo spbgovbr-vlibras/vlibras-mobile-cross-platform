@@ -24,10 +24,10 @@ interface RevisionModalProps {
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
   isPlaying: boolean;
+  onSubmittedRevision?: () => void;
 }
 
 const playerService = PlayerService.getService();
-const TIME_DEBOUNCE_MS = 1000;
 
 const RevisionModal = ({
   show,
@@ -35,6 +35,7 @@ const RevisionModal = ({
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
   isPlaying,
+  onSubmittedRevision,
 }: RevisionModalProps) => {
   const { textPtBr, textGloss } = useTranslation();
   // Aux var for the TextArea value
@@ -61,6 +62,9 @@ const RevisionModal = ({
   const handleOpenSuggestionFeedbackModal = async () => {
     setShow(false);
     setSuggestionFeedbackModal(true);
+    if(onSubmittedRevision) {
+      onSubmittedRevision();
+    }
 
     await sendReview({
       text: textPtBr,

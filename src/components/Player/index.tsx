@@ -1,6 +1,6 @@
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
@@ -135,6 +135,7 @@ function Player() {
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [submittedRevision, setSubmittedRevision] = useState(false);
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
 
@@ -156,7 +157,6 @@ function Player() {
 
   function resetTranslation() {
     setHasFinished(false);
-
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'hidden';
       progressContainerRef.current.style.width = '0%';
@@ -168,6 +168,16 @@ function Player() {
   useEffect(() => {
     if (location.pathname === paths.HOME) resetTranslation();
   }, [location]);
+
+  useEffect(() => {
+    if(hasFinished === false) {
+      setSubmittedRevision(false);
+    }
+  }, [setSubmittedRevision, hasFinished]);
+
+  const onSubmittedRevision = useCallback(() => {
+    setSubmittedRevision(true);
+  }, []);
 
   window.CounterGloss = (counter: number, glossLength: number) => {
     if (counter === cache - 1) {
@@ -537,14 +547,15 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             />
           </div>
-          <button
-            disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
-            className="player-button-rounded"
-            type="button"
-            onClick={() => setShowModal(true)}>
-            <IconThumbs color="#FFF" size={18} />
-          </button>
-
+          {!submittedRevision && 
+            <button
+              disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
+              className="player-button-rounded"
+              type="button"
+              onClick={() => setShowModal(true)}>
+              <IconThumbs color="#FFF" size={18} />
+            </button>
+          }
           <div
             style={{
               top: -2,
@@ -589,6 +600,7 @@ function Player() {
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setShowSuggestionFeedbackModal}
         isPlaying={isPlaying}
+        onSubmittedRevision={onSubmittedRevision}
       />
       {TutorialSteps.INITIAL === currentStep && (
         <div className="tutorial-box-shadow">
