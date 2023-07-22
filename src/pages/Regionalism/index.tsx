@@ -88,22 +88,22 @@ function Regionalism() {
 
   async function SaveRegionalism() {
     openModal();
-    await fetchBundles(abbreviation)
-      .then((res) => {
-        if (res.length > 0) {
-          closeModal();
-          history.goBack();
-        }
-        if (res.length <= 0) {
-          closeModal();
-          handleOpenModal();
-        }
-        isEmpty = res.length;
-      })
-      .catch(() => {
+    try {
+      const bundles = await fetchBundles(abbreviation);
+      if (bundles.length > 0) {
         closeModal();
-      });
-    dispatch(Creators.setCurrentRegionalism(regionalism));
+        history.goBack();
+      }
+      if (bundles.length <= 0) {
+        closeModal();
+        handleOpenModal();
+      }
+      isEmpty = bundles.length;
+      dispatch(Creators.setCurrentRegionalism(regionalism));
+    } catch(error: unknown) {
+      closeModal();
+      handleOpenModal();
+    }  
   }
 
   return (
