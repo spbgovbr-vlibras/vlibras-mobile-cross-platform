@@ -170,6 +170,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         translation = gloss;
         setModalVisible(false);
       } catch {
+        setTextGloss(text);
         await delay(500);
         setIsLoading(false);
         setTranslationGlossError(true);
