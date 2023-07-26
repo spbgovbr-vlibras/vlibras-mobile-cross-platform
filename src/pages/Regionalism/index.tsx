@@ -22,7 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { LoadingModal } from 'components';
 import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
 import regionalismData from 'data/regionalism';
-import { fetchBundles } from 'services/regionalism';
+import { fetchBundles, setRegion } from 'services/regionalism';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
@@ -87,6 +87,7 @@ function Regionalism() {
       ?.abbreviation as string;
     setregionalism(evt.detail.value);
     setAbbreviation(abbr);
+    setRegion(abbr);
   }
 
   async function SaveRegionalism() {
