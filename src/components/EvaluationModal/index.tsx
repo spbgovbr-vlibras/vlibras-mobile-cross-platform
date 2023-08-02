@@ -48,7 +48,7 @@ const EvaluationModal = ({
   const handlePositiveRevision = useCallback(async () => {
     setShow(false);
     setShowYes(true);
-    if(onSubmittedRevision) {
+    if (onSubmittedRevision) {
       onSubmittedRevision();
     }
 
@@ -58,7 +58,15 @@ const EvaluationModal = ({
       review: textGloss,
       rating: 'good',
     });
-  }, [textPtBr, textGloss, setShow, setShowYes, setTextPtBr, sendReview, onSubmittedRevision]);
+  }, [
+    textPtBr,
+    textGloss,
+    setShow,
+    setShowYes,
+    setTextPtBr,
+    sendReview,
+    onSubmittedRevision,
+  ]);
 
   return (
     <div>
