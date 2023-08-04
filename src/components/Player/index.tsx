@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-var */
 /* eslint-disable quotes */
 /* eslint-disable import/order */
@@ -41,6 +42,8 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { getVideo, postVideo } from 'services/shareVideo';
 import GenerateModal from 'components/GenerateModal';
+import { Device } from '@capacitor/device';
+import ErrorModal from 'components/ErrorModal';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
@@ -68,14 +71,29 @@ function toInteger(flag: boolean): number {
 
 let recording = false;
 let isLoading = true;
-let contador = 30;
+let contador = 60;
+let isBreak = false;
 
 let mediaRecorder: MediaRecorder;
 let recordedChunks: BlobPart[] | undefined;
 let canvas: HTMLCanvasElement | null | undefined;
+const info = Device.getInfo();
 
 function Player() {
+  const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+
+  const openErrorModal = () => {
+    setErrorModalOpen(true);
+    closeModal();
+  };
+
+  const closeErrorModal = () => {
+    setErrorModalOpen(false);
+  };
 
   const openModal = () => {
     setModalOpen(true);
@@ -86,9 +104,15 @@ function Player() {
   };
 
   const handleClick = () => {
+    setShowCloseButton(false);
     if (!recording && isLoading) {
       openModal();
     }
+  };
+
+  const onBreak = () => {
+    closeModal();
+    isBreak = !isBreak;
   };
 
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
@@ -109,42 +133,36 @@ function Player() {
 
   // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
   // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
-  const checkBlob = (cont: number, id: string) => {
-    setTimeout(() => {
-      if (cont == 0 || !isLoading) {
-        getVideo(id).then((blob) => {
-          console.log('[LOG: VALOR FINAL DO BLOB]: ', blob);
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onloadend = async () => {
-            const base64data = reader.result as string;
-            await Filesystem.writeFile({
-              path: 'video.mp4',
-              data: base64data,
-              directory: Directory.Cache,
-              recursive: true,
-            })
-              .then(() =>
-                Filesystem.getUri({
-                  directory: Directory.Cache,
-                  path: 'video.mp4',
-                })
-              )
-              .then((uriReult) => {
-                Share.share({
-                  title: 'Compartilhar',
-                  text: 'Compartilhando VLibras',
-                  url: uriReult.uri,
-                });
-              });
-          };
-        });
-        contador = 30;
+  const checkBlob = (count: number, id: string) => {
+    setTimeout(async () => {
+      if (count === 0 || !isLoading) {
+        let blob = new Blob();
+        try {
+          blob = await getVideo(id);
+        } catch (_) {
+          openErrorModal();
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async () => {
+          const base64data = reader.result as string;
+          const uri = await Filesystem.writeFile({
+            path: 'video.mp4',
+            data: base64data,
+            directory: Directory.Cache,
+            recursive: true,
+          });
+          Share.share({
+            title: 'Compartilhar',
+            text: 'Compartilhando VLibras',
+            url: uri.uri,
+          });
+        };
+        contador = 60;
         isLoading = !isLoading;
         return;
       }
-      if (cont > 0 || isLoading) {
-        console.log('[LOG: VALOR DO CONTADOR]: ', cont);
+      if (count > 0 || isLoading) {
         getVideo(id).then((blob) => {
           if (blob.size > 24) {
             closeModal();
@@ -152,25 +170,59 @@ function Player() {
           }
         });
       }
-      checkBlob(cont - 1, id);
+      if (count === 51) {
+        setShowCloseButton(true);
+      }
+      if (isBreak) {
+        isBreak = !isBreak;
+        return;
+      }
+
+      checkBlob(count - 1, id);
     }, 1000);
   };
 
-  // STOPA/PARA A GRAVAÇÃO DO VIDEO E ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
+  // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
+  // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
   async function stopRecorder() {
-    setTimeout(async () => {
-      const blob = new Blob(recordedChunks, {
-        type: 'video/webm',
-      });
-      await postVideo({ blob: blob }).then(async (id) => {
-        if (contador > 0) {
-          await getVideo(id).then((newBlob) => {
-            console.log('[LOG: VALOR INICIAL DO BLOB]: ', newBlob);
+    if ((await info).platform === 'android') {
+      let id = '';
+      setTimeout(async () => {
+        const blob = new Blob(recordedChunks, {
+          type: 'video/webm',
+        });
+        try {
+          id = await postVideo({ blob: blob });
+          const jsonId = JSON.stringify(id);
+          if (jsonId !== '') {
             checkBlob(contador, id);
-          });
+          }
+        } catch (_) {
+          openErrorModal();
         }
+      }, 0);
+    }
+    if ((await info).platform === 'ios') {
+      const blob = new Blob(recordedChunks, {
+        type: 'video/mp4',
       });
-    }, 0);
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        const uri = await Filesystem.writeFile({
+          path: 'video.mp4',
+          data: base64data,
+          directory: Directory.Cache,
+          recursive: true,
+        });
+        Share.share({
+          title: 'Compartilhar',
+          text: 'Compartilhando VLibras',
+          url: uri.uri,
+        });
+      };
+    }
   }
 
   const [popoverState, setShowPopover] = useState({
@@ -698,7 +750,6 @@ function Player() {
             }
             className="player-button-rounded"
             type="button"
-            // onClick={handleShare}>
             onClick={() => {
               // // STOPANDO A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
               if (!recording) {
@@ -712,6 +763,13 @@ function Player() {
             visible={modalOpen}
             setVisible={closeModal}
             translationRequestType={TranslationRequestType.VIDEO_SHARE}
+            showCloseButton={showCloseButton}
+            onBreak={onBreak}
+          />
+          <ErrorModal
+            show={errorModalOpen}
+            setShow={closeErrorModal}
+            errorMsg={errorMessage}
           />
         </div>
       )}

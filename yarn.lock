@@ -1218,6 +1218,11 @@
   dependencies:
     tslib "^2.1.0"
 
+"@capacitor/device@^5.0.6":
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/@capacitor/device/-/device-5.0.6.tgz#11322a9c737196f2df8f82abbe6d1a5b32e35fb7"
+  integrity sha512-tmjK0H8IKbDLMcmzZzJPbV+9yLkKJ76QOdz4A7fZAOYx2GnFHsFngxldq/wKotGAJuDX/ih3ZzHNrzVguzlv2g==
+
 "@capacitor/filesystem@^5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@capacitor/filesystem/-/filesystem-5.0.4.tgz#2610ed5308878b0c2d62beeb0a3b1daa7be5645f"
