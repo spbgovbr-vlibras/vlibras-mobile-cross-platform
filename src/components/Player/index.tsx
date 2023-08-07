@@ -38,7 +38,7 @@ import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { getVideo, postVideo } from 'services/shareVideo';
 import GenerateModal from 'components/GenerateModal';
@@ -70,18 +70,17 @@ function toInteger(flag: boolean): number {
 }
 
 let recording = false;
-let isLoading = true;
+let isLoading = false;
 let contador = 60;
 let isBreak = false;
 
 let mediaRecorder: MediaRecorder;
 let recordedChunks: BlobPart[] | undefined;
-let canvas: HTMLCanvasElement | null | undefined;
 const info = Device.getInfo();
 
 function Player() {
   const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
-
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
@@ -115,20 +114,49 @@ function Player() {
     isBreak = !isBreak;
   };
 
+  const handleVideoReading = (fileReader: FileReader, blob: Blob) => {
+    fileReader.readAsDataURL(blob);
+    return async () => {
+      const base64data = fileReader.result as string;
+      const uri = await Filesystem.writeFile({
+        path: 'VLibras.mp4',
+        data: base64data,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+      try {
+        await Share.share({
+          title: 'Compartilhar',
+          text: 'Compartilhando tradução.',
+          url: uri.uri,
+        });
+      } catch (error: unknown) {
+        /** ignore */
+      }
+      closeModal();
+      isLoading = false;
+    };
+  }
+
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
-    canvas = document.querySelector('canvas');
-    const stream = canvas!.captureStream(25);
-    mediaRecorder = new MediaRecorder(stream!, {
-      mimeType: 'video/webm',
-    });
-    recordedChunks = [];
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        recordedChunks?.push(e.data);
-      }
-    };
-    mediaRecorder.start();
+    const mimeType = (await info).platform === 'android' ? 
+      'video/webm' :
+      'video/mp4';
+    const canvas = document.querySelector('canvas');
+    const stream = canvas?.captureStream(25);
+    if(stream) {
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+      });
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordedChunks?.push(e.data);
+        }
+      };
+      mediaRecorder.start();
+    }
   }
 
   // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
@@ -141,34 +169,22 @@ function Player() {
           blob = await getVideo(id);
         } catch (_) {
           openErrorModal();
+          isLoading = false;
         }
         const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = async () => {
-          const base64data = reader.result as string;
-          const uri = await Filesystem.writeFile({
-            path: 'video.mp4',
-            data: base64data,
-            directory: Directory.Cache,
-            recursive: true,
-          });
-          Share.share({
-            title: 'Compartilhar',
-            text: 'Compartilhando VLibras',
-            url: uri.uri,
-          });
-        };
-        contador = 60;
-        isLoading = !isLoading;
-        return;
+        reader.onloadend = handleVideoReading(reader, blob)
       }
       if (count > 0 || isLoading) {
-        getVideo(id).then((blob) => {
+        try {
+          const blob = await getVideo(id);
           if (blob.size > 24) {
             closeModal();
-            isLoading = !isLoading;
+            isLoading = false;
           }
-        });
+        } catch (_) {
+          isLoading = false;
+          openErrorModal();
+        }
       }
       if (count === 51) {
         setShowCloseButton(true);
@@ -177,51 +193,36 @@ function Player() {
         isBreak = !isBreak;
         return;
       }
-
       checkBlob(count - 1, id);
     }, 1000);
   };
 
   // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
   // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
-  async function stopRecorder() {
+  async function initVideoSharing() {
+    isLoading = true;
     if ((await info).platform === 'android') {
       let id = '';
-      setTimeout(async () => {
-        const blob = new Blob(recordedChunks, {
-          type: 'video/webm',
-        });
-        try {
-          id = await postVideo({ blob: blob });
-          const jsonId = JSON.stringify(id);
-          if (jsonId !== '') {
-            checkBlob(contador, id);
-          }
-        } catch (_) {
-          openErrorModal();
+      const blob = new Blob(recordedChunks, {
+        type: 'video/webm',
+      });
+      try {
+        id = await postVideo({ blob: blob });
+        const jsonId = JSON.stringify(id);
+        if (jsonId !== '') {
+          checkBlob(contador, id);
         }
-      }, 0);
+      } catch (_) {
+        openErrorModal();
+      }
     }
     if ((await info).platform === 'ios') {
       const blob = new Blob(recordedChunks, {
         type: 'video/mp4',
       });
+    
       const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-        const uri = await Filesystem.writeFile({
-          path: 'video.mp4',
-          data: base64data,
-          directory: Directory.Cache,
-          recursive: true,
-        });
-        Share.share({
-          title: 'Compartilhar',
-          text: 'Compartilhando VLibras',
-          url: uri.uri,
-        });
-      };
+      reader.onloadend = handleVideoReading(reader, blob)
     }
   }
 
@@ -259,7 +260,6 @@ function Player() {
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
 
@@ -314,18 +314,17 @@ function Player() {
   ) => {
     setIsPlaying(toBoolean(_isPlaying));
     setIsPaused(toBoolean(_isPaused));
-    setLoading(toBoolean(_isLoading));
 
     if (toBoolean(_isPlaying) && recording === false) {
       initRecorder();
-      recording = !recording;
+      recording = true;
     }
     if (!toBoolean(_isPlaying)) {
       setHasFinished(true);
     }
     if (!toBoolean(_isPlaying) && recording === true) {
       mediaRecorder.stop();
-      recording = !recording;
+      recording = false;
     }
   };
 
@@ -753,7 +752,7 @@ function Player() {
             onClick={() => {
               // // STOPANDO A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
               if (!recording) {
-                stopRecorder();
+                initVideoSharing();
                 handleClick();
               }
             }}>
