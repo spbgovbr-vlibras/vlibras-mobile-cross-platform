@@ -126,6 +126,7 @@ function Player() {
   }
 
   function handleStop() {
+    history.push(paths.TRANSLATOR);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
   }
