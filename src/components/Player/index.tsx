@@ -88,6 +88,8 @@ function Player() {
     ({ customization }: RootState) => customization.currentpants
   );
 
+  const translatorText = useSelector(({translator}: RootState) => translator.translatorText);
+
   // Dynamic states [MA]
   const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
   const [visiblePlayer, setVisiblePlayer] = useState(false);
