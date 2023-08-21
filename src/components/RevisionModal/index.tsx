@@ -60,9 +60,9 @@ const RevisionModal = ({
   };
 
   const handleOpenSuggestionFeedbackModal = async () => {
-    setShow(false);
+    handleCloseModal();
     setSuggestionFeedbackModal(true);
-    if(onSubmittedRevision) {
+    if (onSubmittedRevision) {
       onSubmittedRevision();
     }
 
