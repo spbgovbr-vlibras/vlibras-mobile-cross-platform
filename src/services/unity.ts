@@ -41,19 +41,34 @@ export default class UnityService {
     this.unityContent.send(fn, action, params);
   }
 
-  load(): void {
+  setPlayerRegion(regionAbreviation: string) {
+    this.setBaseURL(regionAbreviation);
+  }
+
+  load(regionAbreviation = ''): void {
     window.onLoadPlayer = () => {
       this.unityContent.send(
         PlayerKeys.PLAYER_MANAGER,
         PlayerKeys.INIT_RANDOM_ANIMATION
       );
       this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
-      this.unityContent.send(
-        PlayerKeys.PLAYER_MANAGER,
-        PlayerKeys.SET_BASE_URL,
-        DICTIONAY_URL
-      );
+      this.setBaseURL(regionAbreviation);
       this.isReady = true;
     };
   }
+
+  private setBaseURL(regionAbreviation: string) {
+    let newDictionary = DICTIONAY_URL;
+    if (regionAbreviation.length > 0 && regionAbreviation !== 'BR') {
+      newDictionary = `${DICTIONAY_URL}${regionAbreviation}/`
+    }
+    
+    this.send(
+      PlayerKeys.PLAYER_MANAGER,
+      PlayerKeys.SET_BASE_URL,
+      newDictionary
+    )
+  }
 }
+
+export {DICTIONAY_URL}
