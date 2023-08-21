@@ -23,7 +23,7 @@
   font-style: normal;
   font-weight: bold;
   font-size: 16px;
-  line-height: 150%;
+  line-height: 100%;
   color: #1b1b1b;
   margin: 0 !important;
   padding: 0 !important;
@@ -35,7 +35,7 @@
   font-weight: normal;
   font-size: 14px;
   line-height: 150%;
-  margin: 60px 10px !important;
+  margin: 40px 10px 10px 10px !important;
   padding: 0 !important;
   text-align: center;
   color: #1b1b1b;
@@ -62,4 +62,51 @@
 
   color: #fff;
   background-color: #1447a6;
+}
+
+.regionalism-modal .wikilibras-chip {
+  height: 34px;
+
+  margin-top: 20px;
+  padding: 8px 16px;
+
+  border: 1px solid #8e8e8e;
+  box-sizing: border-box;
+  border-radius: 25px;
+  background-color: #fff;
+
+  font-family: Helvetica Neue;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+}
+
+.regionalism-modal .chip-text-space {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+  /* identical to box height, or 12px */
+
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  color: #3e4049;
+  margin-right: 4px;
+}
+
+.regionalism-modal .regionalism-modal-container-close-button-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: -20px;
+  padding-right: 8px;
+}
+
+.regionalism-modal .regionalism-modal-container-close-button-container button {
+  border: none;
+  background: none;
 }
