@@ -21,6 +21,7 @@ import { useHistory } from 'react-router-dom';
 
 import { LoadingModal } from 'components';
 import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
+import RadioItem from 'components/RadioItem'; // TODO
 import regionalismData from 'data/regionalism';
 import { fetchBundles, setRegion } from 'services/regionalism';
 import { RootState } from 'store';
@@ -90,6 +91,12 @@ function Regionalism() {
     setRegion(abbr);
   }
 
+  const handleCustomRadioChange = (value: any) => {
+    setregionalism(value);
+    const abbr = regionalismData.find((item) => item.name === value)?.abbreviation as string;
+    setAbbreviation(abbr);
+  };
+
   async function SaveRegionalism() {
     try {
       const bundles = await fetchBundles(abbreviation);
@@ -133,7 +140,14 @@ function Regionalism() {
               </IonText>
             </IonListHeader>
             <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
-              {regionalismData.map((item) => renderItem(item))}
+              {regionalismData.map((item) => (
+                <RadioItem
+                  key={item.name}
+                  item={item}
+                  isSelected={regionalism === item.name}
+                  onRadioChange={handleCustomRadioChange}
+                />
+              ))}
             </IonRadioGroup>
           </IonList>
         </div>

@@ -1,6 +1,6 @@
 import { IonText, IonTextarea, IonContent } from '@ionic/react';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
@@ -9,18 +9,20 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 
-import './styles.css';
+import './styles.css'; 
 
 const playerService = PlayerService.getService();
 const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
 
 const Translator = () => {
-  const [text, setText] = useState('');
+  const translatorText = useSelector(({translator}: RootState) => translator.translatorText);
+  const [text, setText] = useState(translatorText);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -54,6 +56,7 @@ const Translator = () => {
                 rows={5}
                 cols={5}
                 wrap="soft"
+                value={text}
                 required
                 onIonInput={(e) => setText(e.detail.value || '')}
               />
