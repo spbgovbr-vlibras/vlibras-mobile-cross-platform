@@ -9,13 +9,13 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 
-import './styles.css';
-import { RootState } from 'store';
+import './styles.css'; 
 
 const playerService = PlayerService.getService();
 const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
