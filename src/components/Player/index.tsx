@@ -88,6 +88,8 @@ function Player() {
     ({ customization }: RootState) => customization.currentpants
   );
 
+  const translatorText = useSelector(({translator}: RootState) =>translator.translatorText)
+
   // Dynamic states [MA]
   const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
   const [visiblePlayer, setVisiblePlayer] = useState(false);
@@ -303,7 +305,7 @@ function Player() {
           <button
             className="player-action-button player-action-button-insert"
             type="button"
-            onClick={() => handlePlay(textGloss)}>
+            onClick={() => handlePlay(translatorText)}>
             <img src={logoRefresh} alt="refresh" />
           </button>
           <button
