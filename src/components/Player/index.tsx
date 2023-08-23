@@ -80,7 +80,7 @@ const info = Device.getInfo();
 
 function Player() {
   const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
@@ -136,16 +136,15 @@ function Player() {
       closeModal();
       isLoading = false;
     };
-  }
+  };
 
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
-    const mimeType = (await info).platform === 'android' ? 
-      'video/webm' :
-      'video/mp4';
+    const mimeType =
+      (await info).platform === 'android' ? 'video/webm' : 'video/mp4';
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
-    if(stream) {
+    if (stream) {
       mediaRecorder = new MediaRecorder(stream, {
         mimeType,
       });
@@ -172,7 +171,8 @@ function Player() {
           isLoading = false;
         }
         const reader = new FileReader();
-        reader.onloadend = handleVideoReading(reader, blob)
+        reader.onloadend = handleVideoReading(reader, blob);
+        return;
       }
       if (count > 0 || isLoading) {
         try {
@@ -220,9 +220,9 @@ function Player() {
       const blob = new Blob(recordedChunks, {
         type: 'video/mp4',
       });
-    
+
       const reader = new FileReader();
-      reader.onloadend = handleVideoReading(reader, blob)
+      reader.onloadend = handleVideoReading(reader, blob);
     }
   }
 
@@ -343,7 +343,7 @@ function Player() {
   }, [location]);
 
   useEffect(() => {
-    if(hasFinished === false) {
+    if (hasFinished === false) {
       setSubmittedRevision(false);
     }
   }, [setSubmittedRevision, hasFinished]);
@@ -720,7 +720,7 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             />
           </div>
-          {!submittedRevision && 
+          {!submittedRevision && (
             <button
               disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
               className="player-button-rounded"
@@ -728,7 +728,7 @@ function Player() {
               onClick={() => setShowModal(true)}>
               <IconThumbs color="#FFF" size={18} />
             </button>
-          }
+          )}
           <div
             style={{
               top: -2,
