@@ -107,7 +107,7 @@ const RevisionModal = ({
     if (show && !auxValueText) {
       // Setting TextArea value with the current translator
       setAuxValueText(textGloss);
-      const searchText = textGloss.split(' ').pop();
+      const searchText = textGloss.toString().split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
           page: FIRST_PAGE_INDEX,
@@ -186,13 +186,13 @@ const RevisionModal = ({
           <div className="chip-area">
             <IonChip
               className="chip-1"
-              disabled={auxValueText.trim().length === 0}
+              disabled={auxValueText.toString().trim().length === 0}
               onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip
               className="chip-2"
-              disabled={auxValueText.trim().length === 0}
+              disabled={auxValueText.toString().trim().length === 0}
               onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}
             </IonChip>
