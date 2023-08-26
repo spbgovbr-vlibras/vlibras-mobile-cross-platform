@@ -17,6 +17,8 @@ export enum TutorialSteps {
   MENU,
   LIKED_TRANSLATION,
   SHARE,
+  SUBTITLE,
+  PLAYBACK_SPEED,
 }
 
 interface TutorialContextData {
@@ -40,6 +42,8 @@ export const TUTORIAL_QUEUE = [
   TutorialSteps.MENU,
   TutorialSteps.LIKED_TRANSLATION,
   TutorialSteps.SHARE,
+  TutorialSteps.SUBTITLE,
+  TutorialSteps.PLAYBACK_SPEED,
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';
