@@ -1,3 +1,7 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-var */
+/* eslint-disable quotes */
+/* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -26,7 +30,7 @@ import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
-import { Avatar } from 'constants/types';
+import { Avatar, TranslationRequestType } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
@@ -34,6 +38,12 @@ import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { getVideo, postVideo } from 'services/shareVideo';
+import GenerateModal from 'components/GenerateModal';
+import { Device } from '@capacitor/device';
+import ErrorModal from 'components/ErrorModal';
 
 type BooleanParamsPlayer = 'True' | 'False';
 
@@ -59,7 +69,163 @@ function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
 }
 
+let recording = false;
+let isLoading = false;
+let contador = 60;
+let isBreak = false;
+
+let mediaRecorder: MediaRecorder;
+let recordedChunks: BlobPart[] | undefined;
+const info = Device.getInfo();
+
 function Player() {
+  const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+
+  const openErrorModal = () => {
+    setErrorModalOpen(true);
+    closeModal();
+  };
+
+  const closeErrorModal = () => {
+    setErrorModalOpen(false);
+  };
+
+  const openModal = () => {
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleClick = () => {
+    setShowCloseButton(false);
+    if (!recording && isLoading) {
+      openModal();
+    }
+  };
+
+  const onBreak = () => {
+    closeModal();
+    isBreak = !isBreak;
+  };
+
+  const handleVideoReading = (fileReader: FileReader, blob: Blob) => {
+    fileReader.readAsDataURL(blob);
+    return async () => {
+      const base64data = fileReader.result as string;
+      const uri = await Filesystem.writeFile({
+        path: 'VLibras.mp4',
+        data: base64data,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+      try {
+        await Share.share({
+          title: 'Compartilhar',
+          text: 'Compartilhando tradução.',
+          url: uri.uri,
+        });
+      } catch (error: unknown) {
+        /** ignore */
+      }
+      closeModal();
+      isLoading = false;
+    };
+  };
+
+  // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
+  async function initRecorder() {
+    const mimeType =
+      (await info).platform === 'android' ? 'video/webm' : 'video/mp4';
+    const canvas = document.querySelector('canvas');
+    const stream = canvas?.captureStream(25);
+    if (stream) {
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+      });
+      recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordedChunks?.push(e.data);
+        }
+      };
+      mediaRecorder.start();
+    }
+  }
+
+  // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
+  // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
+  const checkBlob = (count: number, id: string) => {
+    setTimeout(async () => {
+      if (count === 0 || !isLoading) {
+        let blob = new Blob();
+        try {
+          blob = await getVideo(id);
+        } catch (_) {
+          openErrorModal();
+          isLoading = false;
+        }
+        const reader = new FileReader();
+        reader.onloadend = handleVideoReading(reader, blob);
+        return;
+      }
+      if (count > 0 || isLoading) {
+        try {
+          const blob = await getVideo(id);
+          if (blob.size > 24) {
+            closeModal();
+            isLoading = false;
+          }
+        } catch (_) {
+          isLoading = false;
+          openErrorModal();
+        }
+      }
+      if (count === 51) {
+        setShowCloseButton(true);
+      }
+      if (isBreak) {
+        isBreak = !isBreak;
+        return;
+      }
+      checkBlob(count - 1, id);
+    }, 1000);
+  };
+
+  // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
+  // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
+  async function initVideoSharing() {
+    isLoading = true;
+    if ((await info).platform === 'android') {
+      let id = '';
+      const blob = new Blob(recordedChunks, {
+        type: 'video/webm',
+      });
+      try {
+        id = await postVideo({ blob: blob });
+        const jsonId = JSON.stringify(id);
+        if (jsonId !== '') {
+          checkBlob(contador, id);
+        }
+      } catch (_) {
+        openErrorModal();
+      }
+    }
+    if ((await info).platform === 'ios') {
+      const blob = new Blob(recordedChunks, {
+        type: 'video/mp4',
+      });
+
+      const reader = new FileReader();
+      reader.onloadend = handleVideoReading(reader, blob);
+    }
+  }
+
   const [popoverState, setShowPopover] = useState({
     showPopover: false,
     event: undefined,
@@ -94,7 +260,6 @@ function Player() {
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
 
@@ -149,10 +314,17 @@ function Player() {
   ) => {
     setIsPlaying(toBoolean(_isPlaying));
     setIsPaused(toBoolean(_isPaused));
-    setLoading(toBoolean(_isLoading));
 
+    if (toBoolean(_isPlaying) && recording === false) {
+      initRecorder();
+      recording = true;
+    }
     if (!toBoolean(_isPlaying)) {
       setHasFinished(true);
+    }
+    if (!toBoolean(_isPlaying) && recording === true) {
+      mediaRecorder.stop();
+      recording = false;
     }
   };
 
@@ -171,7 +343,7 @@ function Player() {
   }, [location]);
 
   useEffect(() => {
-    if(hasFinished === false) {
+    if (hasFinished === false) {
       setSubmittedRevision(false);
     }
   }, [setSubmittedRevision, hasFinished]);
@@ -548,7 +720,7 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             />
           </div>
-          {!submittedRevision && 
+          {!submittedRevision && (
             <button
               disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
               className="player-button-rounded"
@@ -556,7 +728,7 @@ function Player() {
               onClick={() => setShowModal(true)}>
               <IconThumbs color="#FFF" size={18} />
             </button>
-          }
+          )}
           <div
             style={{
               top: -2,
@@ -577,9 +749,27 @@ function Player() {
             }
             className="player-button-rounded"
             type="button"
-            onClick={handleShare}>
+            onClick={() => {
+              // // STOPANDO A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
+              if (!recording) {
+                initVideoSharing();
+                handleClick();
+              }
+            }}>
             <IconShare color="#FFF" size={18} />
           </button>
+          <GenerateModal
+            visible={modalOpen}
+            setVisible={closeModal}
+            translationRequestType={TranslationRequestType.VIDEO_SHARE}
+            showCloseButton={showCloseButton}
+            onBreak={onBreak}
+          />
+          <ErrorModal
+            show={errorModalOpen}
+            setShow={closeErrorModal}
+            errorMsg={errorMessage}
+          />
         </div>
       )}
       <div className="player-action-container">
