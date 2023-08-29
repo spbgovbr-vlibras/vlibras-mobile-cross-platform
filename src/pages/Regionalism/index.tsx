@@ -46,7 +46,9 @@ function Regionalism() {
     ({ regionalism }: RootState) => regionalism.current
   );
   const [regionalism, setregionalism] = useState(currentRegionalism);
-  const [abbreviation, setAbbreviation] = useState<string>('');
+  const [abbreviation, setAbbreviation] = useState<string>(
+    regionalismData.find((item) => item.name === regionalism)?.abbreviation ?? ''
+  );
   const [showModal, setShowModal] = useState(false);
   const [modalOpen, setOpenModal] = useState(false);
 
@@ -89,7 +91,6 @@ function Regionalism() {
       ?.abbreviation as string;
     setregionalism(evt.detail.value);
     setAbbreviation(abbr);
-    UnityService.getService().setPlayerRegion(abbr);
   }
 
   const handleCustomRadioChange = (value: any) => {
@@ -102,6 +103,7 @@ function Regionalism() {
     try {
       const bundles = await fetchBundles(abbreviation);
       if (bundles.length > 0) {
+        UnityService.getService().setPlayerRegion(abbreviation);
         openLoadingModal();
       }
       if (bundles.length <= 0) {
