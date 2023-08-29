@@ -25,6 +25,7 @@ import {
   IcaroAvatar,
   HozanaAvatar,
   GugaAvatar,
+  IconSubtitle,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
@@ -512,14 +513,19 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={() => {
-              history.push(paths.DICTIONARY_PLAYER);
-            }}>
-            <IconDictionary color={buttonColors.VARAINT_WHITE} />
-          </button>
+          {currentStep === TutorialSteps.PLAYBACK_SPEED 
+            ? (
+              <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
+            ):(
+              <button
+                className="player-action-button-transparent"
+                type="button"
+                onClick={() => {
+                  history.push(paths.DICTIONARY_PLAYER);
+                }}>
+                <IconDictionary color={buttonColors.VARAINT_WHITE} />
+              </button>
+            )}
         </div>
 
         <div>
@@ -570,12 +576,61 @@ function Player() {
             isEnabled={currentStep === TutorialSteps.HISTORY}
           />
         </div>
-        <button
-          className="player-action-button-transparent"
-          type="button"
-          onClick={() => history.push(paths.HISTORY)}>
-          <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
-        </button>
+        {currentStep === TutorialSteps.SUBTITLE 
+        ? (
+          <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
+        ):(
+          <button
+            className="player-action-button-transparent"
+            type="button"
+            onClick={() => history.push(paths.HISTORY)}>
+            <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
+          </button>
+        )}
+        
+        <div>
+          <div
+            style={{
+              margin: 'auto',
+              position: 'absolute',
+              bottom: 70,
+              left: 10,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100vw',
+            }}>
+            <TutorialPopover
+              title="Legenda"
+              description="Habilite legenda para tradução"
+              position="br"
+              isEnabled={currentStep === TutorialSteps.SUBTITLE}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div
+            style={{
+              margin: 'auto',
+              position: 'absolute',
+              bottom: 70,
+              left: 10,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100vw',
+            }}>
+            <TutorialPopover
+              title="Velocidade de reprodução"
+              description="Altere a velocidade de reprodução"
+              position="bl"
+              isEnabled={currentStep === TutorialSteps.PLAYBACK_SPEED}
+            />
+          </div>
+        </div>
       </>
     );
   };
