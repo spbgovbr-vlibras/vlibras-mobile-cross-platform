@@ -59,16 +59,16 @@ export default class UnityService {
 
   private setBaseURL(regionAbreviation: string) {
     let newDictionary = DICTIONAY_URL;
-    if (regionAbreviation.length > 0 && regionAbreviation !== 'BR') {
-      newDictionary = `${DICTIONAY_URL}${regionAbreviation}/`
+    if (regionAbreviation !== '' && regionAbreviation !== 'BR') {
+      newDictionary = `${DICTIONAY_URL}${regionAbreviation}/`;
     }
-    
+
     this.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.SET_BASE_URL,
       newDictionary
-    )
+    );
   }
 }
 
-export {DICTIONAY_URL}
+export { DICTIONAY_URL };

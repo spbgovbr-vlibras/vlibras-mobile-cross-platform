@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import {
   IonChip,
   IonContent,
@@ -7,6 +8,7 @@ import {
   IonText,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -25,7 +27,11 @@ import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import { Creators } from 'store/ducks/dictionary';
+import {
+  Creators,
+  getAbbreviation,
+  getDictionaryRegionalism,
+} from 'store/ducks/dictionary';
 
 import { Strings } from './strings';
 
@@ -47,6 +53,7 @@ function getChipClassName(
 }
 
 function Dictionary() {
+  const [regiolismWords, setRegiolismWords] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('alphabetical');
   const location = useLocation();
@@ -62,6 +69,18 @@ function Dictionary() {
   const history = useHistory();
 
   const { setTextGloss, recentTranslation } = useTranslation();
+
+  const abbreviation = getAbbreviation();
+
+  async function getRegionalism() {
+    const regionalism = await getDictionaryRegionalism();
+    const jsonString = regionalism.toString().split(',');
+    setRegiolismWords(jsonString);
+  }
+
+  useIonViewWillEnter(() => {
+    getRegionalism();
+  });
 
   function translate(text: string) {
     setTextGloss(text, true);
@@ -85,6 +104,18 @@ function Dictionary() {
       onClick={() => translate(item)}>
       <IonText className="dictionary-words-style">{item}</IonText>
     </IonItem>
+  );
+
+  const renderOnRegionalism = (item: string) => (
+    <>
+      <IonItem
+        key={item}
+        className="dictionary-word-item"
+        onClick={() => translate(item)}>
+        <IonText className="dictionary-words-style">{item}</IonText>
+      </IonItem>
+      {item !== '' ? <div className="divider"></div> : null}
+    </>
   );
 
   const onSearch = useCallback(
@@ -158,9 +189,18 @@ function Dictionary() {
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
+            {abbreviation && (
+              <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
+                {abbreviation}
+              </IonChip>
+            )}
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" className="dictionary-words-list">
+              {regiolismWords.length > 0 && filter === 'alphabetical'
+                ? regiolismWords.map((item) => renderOnRegionalism(item))
+                : null}
+
               {filter === 'alphabetical'
                 ? dictionary.map((item) => renderWord(item))
                 : recentTranslation

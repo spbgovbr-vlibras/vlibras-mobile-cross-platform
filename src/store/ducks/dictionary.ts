@@ -4,6 +4,10 @@ import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
 import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { Words } from 'models/dictionary';
+import { fetchBundles } from 'services/regionalism';
+
+let regionalismDictionary = '';
+let abbreviation = '';
 
 export interface MetadataParams {
   limit: number;
@@ -97,3 +101,22 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
 };
 
 export default reducer;
+
+export function getRegionalismAbbreviation(regionalism: string) {
+  if (regionalism !== 'BR') {
+    regionalismDictionary = regionalism;
+    abbreviation = regionalism;
+  } else {
+    regionalismDictionary = '';
+    abbreviation = '';
+  }
+}
+export function getAbbreviation() {
+  return abbreviation;
+}
+export async function getDictionaryRegionalism(): Promise<string> {
+  const value = await fetchBundles(regionalismDictionary);
+  regionalismDictionary = '';
+
+  return value;
+}

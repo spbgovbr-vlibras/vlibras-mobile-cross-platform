@@ -26,6 +26,7 @@ import regionalismData from 'data/regionalism';
 import { fetchBundles } from 'services/regionalism';
 import UnityService from 'services/unity';
 import { RootState } from 'store';
+import { getRegionalismAbbreviation } from 'store/ducks/dictionary';
 import { Creators } from 'store/ducks/regionalism';
 
 import { Strings } from './strings';
@@ -95,7 +96,8 @@ function Regionalism() {
 
   const handleCustomRadioChange = (value: any) => {
     setregionalism(value);
-    const abbr = regionalismData.find((item) => item.name === value)?.abbreviation as string;
+    const abbr = regionalismData.find((item) => item.name === value)
+      ?.abbreviation as string;
     setAbbreviation(abbr);
   };
 
@@ -111,16 +113,22 @@ function Regionalism() {
       }
       isEmpty = bundles.length;
       dispatch(Creators.setCurrentRegionalism(regionalism));
-    } catch(error: unknown) {
+    } catch (error: unknown) {
       closeLoadingModal();
       handleOpenEmptyRegionalismModal();
-    }  
+    }
+    getRegionalismAbbreviation(abbreviation);
   }
 
   return (
     <IonPage>
       <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
-      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" canDismiss={false} />
+      <LoadingModal
+        loading={modalOpen}
+        setLoading={setOpenModal}
+        text=""
+        canDismiss={false}
+      />
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title-signalcap">
