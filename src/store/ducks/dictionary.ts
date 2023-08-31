@@ -116,7 +116,6 @@ export function getAbbreviation() {
 }
 export async function getDictionaryRegionalism(): Promise<string> {
   const value = await fetchBundles(regionalismDictionary);
-  regionalismDictionary = '';
 
   return value;
 }
