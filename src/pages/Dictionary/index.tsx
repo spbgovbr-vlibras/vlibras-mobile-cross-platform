@@ -29,8 +29,6 @@ import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import {
   Creators,
-  getAbbreviation,
-  getDictionaryRegionalism,
 } from 'store/ducks/dictionary';
 
 import { Strings } from './strings';
@@ -53,7 +51,6 @@ function getChipClassName(
 }
 
 function Dictionary() {
-  const [regiolismWords, setRegiolismWords] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('alphabetical');
   const location = useLocation();
@@ -62,25 +59,28 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
 
-  const { metadata, words: dictionary } = useSelector(
+  const { metadata, words: dictionary, regionalismWords } = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer
+  );
+  const currentRegionalism = useSelector(
+    ({ regionalism }: RootState) => regionalism.current
   );
 
   const history = useHistory();
 
   const { setTextGloss, recentTranslation } = useTranslation();
 
-  const abbreviation = getAbbreviation();
-
-  async function getRegionalism() {
-    const regionalism = await getDictionaryRegionalism();
-    const jsonString = regionalism.toString().split(',');
-    setRegiolismWords(jsonString);
-  }
-
   useIonViewWillEnter(() => {
-    getRegionalism();
-  });
+    
+      dispatch(
+        currentRegionalism.abbreviation !== 'BR' ?
+        Creators.fetchRegionalismWords.request(
+          {
+            abbrreviation: currentRegionalism.abbreviation
+          }
+        ) : Creators.clearRegionalismWords()
+      );
+  }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
     setTextGloss(text, true);
@@ -109,7 +109,7 @@ function Dictionary() {
   const renderOnRegionalism = (item: string) => (
     <>
       <IonItem
-        key={item}
+        key={item + '/regionalism'}
         className="dictionary-word-item"
         onClick={() => translate(item)}>
         <IonText className="dictionary-words-style">{item}</IonText>
@@ -197,8 +197,8 @@ function Dictionary() {
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" className="dictionary-words-list">
-              {regiolismWords.length > 0 && filter === 'alphabetical'
-                ? regiolismWords.map((item) => renderOnRegionalism(item))
+              {regionalismWords.length > 0 && filter === 'alphabetical'
+                ? regionalismWords.map((item) => renderOnRegionalism(item))
                 : null}
 
               {filter === 'alphabetical'
