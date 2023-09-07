@@ -189,9 +189,9 @@ function Dictionary() {
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
-            {abbreviation && (
+            {currentRegionalism.abbreviation && (
               <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
-                {abbreviation}
+                {currentRegionalism.abbreviation}
               </IonChip>
             )}
           </div>
