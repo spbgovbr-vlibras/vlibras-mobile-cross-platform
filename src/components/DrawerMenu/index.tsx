@@ -30,7 +30,6 @@ import {
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
-import RegionalismArray from 'data/regionalism';
 
 import { Strings } from './strings';
 
@@ -174,8 +173,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         <>
           <p className="drawer-menu-sub-item">
             {
-              RegionalismArray.find((item) => item.name === current)
-                ?.abbreviation
+              current.abbreviation
             }
           </p>
           <div className="arrow-down"> </div>

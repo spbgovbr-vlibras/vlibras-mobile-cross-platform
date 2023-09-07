@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import {
   IonChip,
   IonContent,
@@ -7,6 +8,7 @@ import {
   IonText,
   IonInfiniteScroll,
   IonInfiniteScrollContent,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -25,7 +27,9 @@ import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import { Creators } from 'store/ducks/dictionary';
+import {
+  Creators,
+} from 'store/ducks/dictionary';
 
 import { Strings } from './strings';
 
@@ -55,13 +59,28 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
 
-  const { metadata, words: dictionary } = useSelector(
+  const { metadata, words: dictionary, regionalismWords } = useSelector(
     ({ dictionaryReducer }: RootState) => dictionaryReducer
+  );
+  const currentRegionalism = useSelector(
+    ({ regionalism }: RootState) => regionalism.current
   );
 
   const history = useHistory();
 
   const { setTextGloss, recentTranslation } = useTranslation();
+
+  useIonViewWillEnter(() => {
+    
+      dispatch(
+        currentRegionalism.abbreviation !== 'BR' ?
+        Creators.fetchRegionalismWords.request(
+          {
+            abbrreviation: currentRegionalism.abbreviation
+          }
+        ) : Creators.clearRegionalismWords()
+      );
+  }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
     setTextGloss(text, true);
@@ -85,6 +104,18 @@ function Dictionary() {
       onClick={() => translate(item)}>
       <IonText className="dictionary-words-style">{item}</IonText>
     </IonItem>
+  );
+
+  const renderOnRegionalism = (item: string) => (
+    <>
+      <IonItem
+        key={item + '/regionalism'}
+        className="dictionary-word-item"
+        onClick={() => translate(item)}>
+        <IonText className="dictionary-words-style">{item}</IonText>
+      </IonItem>
+      {item !== '' ? <div className="divider"></div> : null}
+    </>
   );
 
   const onSearch = useCallback(
@@ -158,9 +189,18 @@ function Dictionary() {
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
+            {abbreviation && (
+              <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
+                {abbreviation}
+              </IonChip>
+            )}
           </div>
           <div className="dictionary-words-container">
             <IonList lines="none" className="dictionary-words-list">
+              {regionalismWords.length > 0 && filter === 'alphabetical'
+                ? regionalismWords.map((item) => renderOnRegionalism(item))
+                : null}
+
               {filter === 'alphabetical'
                 ? dictionary.map((item) => renderWord(item))
                 : recentTranslation

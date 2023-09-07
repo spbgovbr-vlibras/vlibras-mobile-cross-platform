@@ -45,10 +45,7 @@ function Regionalism() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
-  const [regionalism, setregionalism] = useState(currentRegionalism);
-  const [abbreviation, setAbbreviation] = useState<string>(
-    regionalismData.find((item) => item.name === regionalism)?.abbreviation ?? ''
-  );
+  const [currentRegion, setCurrentRegion] = useState(currentRegionalism);
   const [showModal, setShowModal] = useState(false);
   const [modalOpen, setOpenModal] = useState(false);
 
@@ -87,40 +84,52 @@ function Regionalism() {
   );
 
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
-    const abbr = regionalismData.find((item) => item.name === evt.detail.value)
-      ?.abbreviation as string;
-    setregionalism(evt.detail.value);
-    setAbbreviation(abbr);
+    const current = regionalismData.find((item) => item.name === evt.detail.value);
+    if (current) {
+      setCurrentRegion({
+        name: current.name,
+        abbreviation: current.abbreviation,
+      });
+    }
   }
 
-  const handleCustomRadioChange = (value: any) => {
-    setregionalism(value);
-    const abbr = regionalismData.find((item) => item.name === value)?.abbreviation as string;
-    setAbbreviation(abbr);
+  const handleCustomRadioChange = (value: string) => {
+    const current = regionalismData.find((item) => item.name === value);
+    if (current) {
+      setCurrentRegion({
+        name: current.name,
+        abbreviation: current.abbreviation,
+      });
+    }
   };
 
   async function SaveRegionalism() {
     try {
-      const bundles = await fetchBundles(abbreviation);
+      const bundles = await fetchBundles(currentRegion.abbreviation);
       if (bundles.length > 0) {
-        UnityService.getService().setPlayerRegion(abbreviation);
+        UnityService.getService().setPlayerRegion(currentRegion.abbreviation);
         openLoadingModal();
       }
       if (bundles.length <= 0) {
         handleOpenEmptyRegionalismModal();
       }
       isEmpty = bundles.length;
-      dispatch(Creators.setCurrentRegionalism(regionalism));
-    } catch(error: unknown) {
+      dispatch(Creators.setCurrentRegionalism(currentRegion));
+    } catch (error: unknown) {
       closeLoadingModal();
       handleOpenEmptyRegionalismModal();
-    }  
+    }
   }
 
   return (
     <IonPage>
       <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
-      <LoadingModal loading={modalOpen} setLoading={setOpenModal} text="" canDismiss={false} />
+      <LoadingModal
+        loading={modalOpen}
+        setLoading={setOpenModal}
+        text=""
+        canDismiss={false}
+      />
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title-signalcap">
@@ -142,12 +151,12 @@ function Regionalism() {
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
-            <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
+            <IonRadioGroup value={currentRegion.name} onIonChange={handleOnChange}>
               {regionalismData.map((item) => (
                 <RadioItem
                   key={item.name}
                   item={item}
-                  isSelected={regionalism === item.name}
+                  isSelected={currentRegion.name === item.name}
                   onRadioChange={handleCustomRadioChange}
                 />
               ))}
