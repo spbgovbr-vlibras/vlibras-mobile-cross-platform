@@ -290,9 +290,14 @@ function Player() {
     }
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
+  const translatorText = useSelector(
+    ({ translator }: RootState) => translator.translatorText
+  );
 
   function handleStop() {
-    history.push(paths.TRANSLATOR);
+    translatorText !== ''
+      ? history.push(paths.TRANSLATOR)
+      : history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
   }
@@ -513,19 +518,18 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
-          {currentStep === TutorialSteps.PLAYBACK_SPEED 
-            ? (
-              <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
-            ):(
-              <button
-                className="player-action-button-transparent"
-                type="button"
-                onClick={() => {
-                  history.push(paths.DICTIONARY_PLAYER);
-                }}>
-                <IconDictionary color={buttonColors.VARAINT_WHITE} />
-              </button>
-            )}
+          {currentStep === TutorialSteps.PLAYBACK_SPEED ? (
+            <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
+          ) : (
+            <button
+              className="player-action-button-transparent"
+              type="button"
+              onClick={() => {
+                history.push(paths.DICTIONARY_PLAYER);
+              }}>
+              <IconDictionary color={buttonColors.VARAINT_WHITE} />
+            </button>
+          )}
         </div>
 
         <div>
@@ -576,10 +580,9 @@ function Player() {
             isEnabled={currentStep === TutorialSteps.HISTORY}
           />
         </div>
-        {currentStep === TutorialSteps.SUBTITLE 
-        ? (
+        {currentStep === TutorialSteps.SUBTITLE ? (
           <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
-        ):(
+        ) : (
           <button
             className="player-action-button-transparent"
             type="button"
@@ -587,7 +590,7 @@ function Player() {
             <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
           </button>
         )}
-        
+
         <div>
           <div
             style={{
