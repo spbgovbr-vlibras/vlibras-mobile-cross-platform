@@ -1,10 +1,5 @@
-import {
-  IonText,
-  IonTextarea,
-  IonContent,
-  useIonViewWillEnter,
-} from '@ionic/react';
-import React, { useEffect, useState } from 'react';
+import { IonText, IonTextarea, IonContent } from '@ionic/react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -29,18 +24,14 @@ const Translator = () => {
   const translatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText
   );
-  const [text, setText] = useState(translatorText);
+
   const history = useHistory();
   const dispatch = useDispatch();
-
-  useIonViewWillEnter(() => {
-    setText('');
-  });
 
   const { setTextPtBr } = useTranslation();
 
   async function translate() {
-    const formatted = text.trim();
+    const formatted = translatorText.trim();
 
     const today = new Date().toLocaleDateString('pt-BR');
 
@@ -67,9 +58,11 @@ const Translator = () => {
                 rows={5}
                 cols={5}
                 wrap="soft"
-                value={translatorText !== '' ? translatorText : text}
+                value={translatorText}
                 required
-                onIonInput={(e) => setText(e.detail.value || '')}
+                onIonInput={(e) =>
+                  dispatch(Creators.setTranslatorText(e.detail.value || ''))
+                }
               />
             </div>
           </div>
@@ -78,7 +71,10 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-              disabled={text.trim().length === 0 || !regex.test(text)}>
+              disabled={
+                translatorText.trim().length === 0 ||
+                !regex.test(translatorText)
+              }>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
