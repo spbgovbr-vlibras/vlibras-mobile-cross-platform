@@ -1,5 +1,10 @@
-import { IonText, IonTextarea, IonContent } from '@ionic/react';
-import React, { useState } from 'react';
+import {
+  IonText,
+  IonTextarea,
+  IonContent,
+  useIonViewWillEnter,
+} from '@ionic/react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -15,16 +20,22 @@ import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 
-import './styles.css'; 
+import './styles.css';
 
 const playerService = PlayerService.getService();
 const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
 
 const Translator = () => {
-  const translatorText = useSelector(({translator}: RootState) => translator.translatorText);
+  const translatorText = useSelector(
+    ({ translator }: RootState) => translator.translatorText
+  );
   const [text, setText] = useState(translatorText);
   const history = useHistory();
   const dispatch = useDispatch();
+
+  useIonViewWillEnter(() => {
+    setText('');
+  });
 
   const { setTextPtBr } = useTranslation();
 
@@ -56,7 +67,7 @@ const Translator = () => {
                 rows={5}
                 cols={5}
                 wrap="soft"
-                value={text}
+                value={translatorText !== '' ? translatorText : text}
                 required
                 onIonInput={(e) => setText(e.detail.value || '')}
               />
