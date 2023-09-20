@@ -189,7 +189,7 @@ function Dictionary() {
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
-            {currentRegionalism.abbreviation && (
+            {currentRegionalism.abbreviation !== 'BR' && (
               <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
                 {currentRegionalism.abbreviation}
               </IonChip>

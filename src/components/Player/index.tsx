@@ -518,18 +518,20 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
-          {currentStep === TutorialSteps.PLAYBACK_SPEED ? (
-            <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
-          ) : (
-            <button
-              className="player-action-button-transparent"
-              type="button"
-              onClick={() => {
-                history.push(paths.DICTIONARY_PLAYER);
-              }}>
-              <IconDictionary color={buttonColors.VARAINT_WHITE} />
-            </button>
-          )}
+          {currentStep === TutorialSteps.PLAYBACK_SPEED 
+            ? (
+              <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
+            ):(
+              <button
+                className="player-action-button-transparent"
+                type="button"
+                onClick={() => {
+                  history.push(paths.DICTIONARY_PLAYER);
+                  onCancel();
+                }}>
+                <IconDictionary color={buttonColors.VARAINT_WHITE} />
+              </button>
+            )}
         </div>
 
         <div>
@@ -556,7 +558,10 @@ function Player() {
         <button
           className="player-action-button player-action-button-insert"
           type="button"
-          onClick={() => history.push(paths.TRANSLATOR)}>
+          onClick={() => {
+            history.push(paths.TRANSLATOR);
+            onCancel();
+            }}>
           <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
         </button>
 
@@ -586,7 +591,10 @@ function Player() {
           <button
             className="player-action-button-transparent"
             type="button"
-            onClick={() => history.push(paths.HISTORY)}>
+            onClick={() => {
+              history.push(paths.HISTORY);
+              onCancel();
+              }}>
             <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
           </button>
         )}
