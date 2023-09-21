@@ -21,6 +21,7 @@ import {
   logoUfpb,
   logoYoutube,
   IconArrowLeft,
+  logoMinGestInov,
 } from 'assets';
 
 import { Strings } from './strings';
@@ -64,8 +65,7 @@ function About() {
             <IonText>{Strings.TEXT_REALIZADORES}</IonText>
             <div className="ministries-container">
               <div className="ministry">
-                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[0]}</span>
-                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[1]}</span>
+                <IonImg src={logoMinGestInov}></IonImg>
               </div>
               <div className="ministry">
                 <span>{Strings.MINISTRIES_TEXT.DIREITOS_HUMANOS[0]}</span>

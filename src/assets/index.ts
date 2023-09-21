@@ -113,6 +113,7 @@ import logoCalca from './images/calça.png';
 import logoSubtitleOn from './images/subtitle-on.png';
 import logoSubtitleOff from './images/subtitle-off.png';
 import Vlibraslogo from './images/vlibraslogo.png';
+import logoMinGestInov from './images/ministerioGestao.svg';
 
 export { ReactComponent as IcaroAvatar } from './images/icaro.svg';
 export { ReactComponent as GugaAvatar } from './images/guga.svg';
@@ -120,6 +121,7 @@ export { ReactComponent as HozanaAvatar } from './images/hozana.svg';
 export { ReactComponent as ArrowLeft } from './images/arrow-left.svg';
 
 export {
+  logoMinGestInov,
   logoSubtitleOff,
   logoSubtitleOn,
   LogoIcaro,
