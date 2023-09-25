@@ -12,7 +12,6 @@ import { Strings } from './strings';
 import './styles.css';
 
 
-
 function Home() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
@@ -20,7 +19,7 @@ function Home() {
   useEffect(() => {
     UnityService.getService().load(
       RegionalismArray.find(
-        (item) => item.name === currentRegionalism
+        (item) => item.name === currentRegionalism.name
       )?.abbreviation ?? ''
     )
   }, []);
