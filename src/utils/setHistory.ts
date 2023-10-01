@@ -7,7 +7,7 @@ export const reloadHistory = async (
   key: string
 ) => {
   try {
-    const resultPromise = await NativeStorage.getItem('history');
+    const resultPromise = await getStorageItem('history', {});
     if (resultPromise[payloadDate]) {
       if (!resultPromise[payloadDate][key]) {
         resultPromise[payloadDate][key] = [];
@@ -33,3 +33,12 @@ export const lastTranslation = (data: string[], key: string): void => {
     );
   }
 };
+
+const getStorageItem = async (key: string, defaultValue: unknown) => {
+  try {
+    const data = await NativeStorage.getItem(key);
+    return data;
+  } catch (error) {
+    return defaultValue;
+  }
+}
