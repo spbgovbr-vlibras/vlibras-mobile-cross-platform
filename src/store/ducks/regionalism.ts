@@ -8,6 +8,7 @@ import regionalismData from 'data/regionalism';
 export interface RegionalismData {
   abbreviation: string;
   name: string;
+  url: string;
 }
 
 export const Types = {
@@ -21,7 +22,8 @@ export interface RegionalismState {
 const INITIAL_STATE: RegionalismState = {
   current: {
     abbreviation: regionalismData[0].abbreviation,
-    name: regionalismData[0].name
+    name: regionalismData[0].name,
+    url: regionalismData[0].url
   },
 };
 
