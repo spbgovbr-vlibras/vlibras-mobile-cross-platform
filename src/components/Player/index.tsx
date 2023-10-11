@@ -142,7 +142,7 @@ function Player() {
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
     const mimeType =
-      (await info).platform === 'android' ? 'video/webm' : 'video/mp4';
+      (await info).platform === ('android'||'web') ? 'video/webm' : 'video/webm';
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
@@ -236,6 +236,10 @@ function Player() {
 
   const { generateVideo, textGloss } = useTranslation();
 
+  const currentAvatar = useSelector(
+    ({ customization }: RootState) => customization.currentavatar
+  );
+
   const currentBody = useSelector(
     ({ customization }: RootState) => customization.currentbody
   );
@@ -256,7 +260,7 @@ function Player() {
   );
 
   // Dynamic states [MA]
-  const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
+  // const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
   const [visiblePlayer, setVisiblePlayer] = useState(false);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -278,11 +282,12 @@ function Player() {
   useEffect(() => {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
+        dispatch(Creators.loadAvatar.request({currentAvatar}));
         dispatch(Creators.loadCustomization.request({}));
         setVisiblePlayer(true);
       }
     });
-  }, [dispatch]);
+  }, [dispatch]);  
 
   function handlePlay(gloss: string) {
     if (progressContainerRef.current) {
@@ -391,22 +396,18 @@ function Player() {
   }
 
   function handleChangeAvatar() {
-    let nextAvatar: Avatar;
-
     if (currentAvatar === 'icaro') {
-      nextAvatar = 'hozana';
+      dispatch(Creators.setCurrentAvatar('hozana'))
     } else if (currentAvatar === 'hozana') {
-      nextAvatar = 'guga';
+      dispatch(Creators.setCurrentAvatar('guga'))
     } else {
-      nextAvatar = 'icaro';
+      dispatch(Creators.setCurrentAvatar('icaro'))
     }
-
-    setCurrentAvatar(nextAvatar);
 
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.CHANGE_AVATAR,
-      nextAvatar
+      currentAvatar
     );
   }
 
@@ -648,6 +649,7 @@ function Player() {
 
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
+      avatar: currentAvatar,
       corpo: currentBody,
       olhos: '#fffafa',
       cabelo: currentHair,
@@ -661,8 +663,9 @@ function Player() {
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
       preProcessingPreview
-    );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+    );    
+
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye, currentAvatar]);
 
   return (
     <div className="player-container">

@@ -141,6 +141,7 @@ function Customization() {
   useEffect(() => {
     unityContent.on('progress', (progression: any) => {
       if (progression === 1) {
+        dispatch(Creators.loadAvatar.request({}));
         dispatch(Creators.loadCustomization.request({}));
         setVisiblePlayer(true);
       }
