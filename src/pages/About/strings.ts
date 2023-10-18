@@ -8,7 +8,6 @@ export const Strings = {
   TEXT_REALIZADORES: 'Realizadores',
   TEXT_REDES_SOCIAIS: 'Redes sociais',
   MINISTRIES_TEXT: {
-    GESTAO_INOVACAO: ['Ministério da', 'Gestão e Inovação'],
     DIREITOS_HUMANOS: ['Ministério dos Direitos', 'Humanos e da Cidadania'],
   },
 };

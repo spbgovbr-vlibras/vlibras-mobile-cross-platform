@@ -206,6 +206,13 @@ function Dictionary() {
                 : recentTranslation
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))}
+
+              {recentTranslation.length === 0
+                ? <div className="dictionary-word-item">
+                  Nenhuma pesquisa recente
+                </div> 
+                : null
+              }
             </IonList>
           </div>
         </div>

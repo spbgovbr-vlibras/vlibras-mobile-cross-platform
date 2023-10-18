@@ -26,6 +26,7 @@ import {
   HozanaAvatar,
   GugaAvatar,
   IconSubtitle,
+  IconRefresh,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
@@ -519,7 +520,8 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
-          {currentStep === TutorialSteps.PLAYBACK_SPEED 
+          {(currentStep >= TutorialSteps.CLOSE 
+          && currentStep <= TutorialSteps.PLAYBACK_SPEED) 
             ? (
               <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
             ):(
@@ -556,15 +558,44 @@ function Player() {
             />
           </div>
         </div>
-        <button
-          className="player-action-button player-action-button-insert"
-          type="button"
-          onClick={() => {
-            history.push(paths.TRANSLATOR);
-            onCancel();
+        {(currentStep >= TutorialSteps.CLOSE && currentStep <= TutorialSteps.PLAYBACK_SPEED) ? 
+        (
+          <button
+            className="player-action-button player-action-button-insert"
+            type="button">
+            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
+          </button>
+        ):(
+          <button
+            className="player-action-button player-action-button-insert"
+            type="button"
+            onClick={() => {
+              history.push(paths.TRANSLATOR);
+              onCancel();
+              }}>
+            <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
+          </button>
+        )}
+        
+        <div
+            style={{
+              margin: 'auto',
+              position: 'absolute',
+              bottom: 70,
+              left: 0,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100vw',
             }}>
-          <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
-        </button>
+            <TutorialPopover
+              title="Repetir tradução"
+              description="Repita a última tradução feita"
+              position="bc"
+              isEnabled={currentStep === TutorialSteps.REPEAT}
+            />
+          </div>     
 
         <div
           style={{
@@ -586,7 +617,8 @@ function Player() {
             isEnabled={currentStep === TutorialSteps.HISTORY}
           />
         </div>
-        {currentStep === TutorialSteps.SUBTITLE ? (
+        {(currentStep >= TutorialSteps.CLOSE 
+        && currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
           <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
         ) : (
           <button
@@ -678,12 +710,12 @@ function Player() {
           alignItems: 'flex-start',
           zIndex: 2,
         }}>
-        <TutorialPopover
-          title="Menu"
-          description="Informações e ajustes adicionais do tradudor"
-          position="tl"
-          isEnabled={currentStep === TutorialSteps.MENU}
-        />
+          <TutorialPopover
+            title="Menu"
+            description="Informações e ajustes adicionais do tradudor"
+            position="tl"
+            isEnabled={currentStep === TutorialSteps.MENU}
+          />
       </div>
       <IonPopover
         className="player-popover"
@@ -728,13 +760,26 @@ function Player() {
         </div>
       </IonPopover>
       <div className="player-container-button">
-        {isPlaying || hasFinished ? (
-          <button
-            className="player-button-rounded-top"
-            type="button"
-            onClick={handleStop}>
-            <IconClose color="#FFF" size={24} />
-          </button>
+        {isPlaying || hasFinished || (currentStep >= TutorialSteps.CLOSE &&
+       currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
+              <div style={{ marginRight: 6 }}>
+                <TutorialPopover
+                  title="Fechar"
+                  description="Feche tradução e volte à tela anterior"
+                  position="rb"
+                  isEnabled={currentStep === TutorialSteps.CLOSE}
+                />
+              </div>
+              <button
+                className="player-button-rounded-top"
+                type="button"
+                onClick={handleStop}>
+                <IconClose color="#FFF" size={24} />
+              </button>
+            </div>
+          </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row' }}>
             <div style={{ marginRight: 6 }}>
@@ -743,6 +788,7 @@ function Player() {
                 description="Alterne entre os avatares disponíveis"
                 position="rb"
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
+
               />
             </div>
             <button
@@ -772,8 +818,8 @@ function Player() {
         />
       </div>
 
-      {(currentStep === TutorialSteps.LIKED_TRANSLATION ||
-        currentStep === TutorialSteps.SHARE ||
+      {((currentStep >= TutorialSteps.CLOSE 
+        && currentStep <= TutorialSteps.PLAYBACK_SPEED) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
           <div

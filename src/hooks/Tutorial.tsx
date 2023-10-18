@@ -15,9 +15,11 @@ export enum TutorialSteps {
   HISTORY,
   CHANGE_AVATAR,
   MENU,
+  CLOSE,
   LIKED_TRANSLATION,
   SHARE,
   SUBTITLE,
+  REPEAT,
   PLAYBACK_SPEED,
 }
 
@@ -40,9 +42,11 @@ export const TUTORIAL_QUEUE = [
   TutorialSteps.HISTORY,
   TutorialSteps.CHANGE_AVATAR,
   TutorialSteps.MENU,
+  TutorialSteps.CLOSE,
   TutorialSteps.LIKED_TRANSLATION,
   TutorialSteps.SHARE,
   TutorialSteps.SUBTITLE,
+  TutorialSteps.REPEAT,
   TutorialSteps.PLAYBACK_SPEED,
 ];
 

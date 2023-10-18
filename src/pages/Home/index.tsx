@@ -12,6 +12,7 @@ import { Strings } from './strings';
 
 import './styles.css';
 
+
 function Home() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
