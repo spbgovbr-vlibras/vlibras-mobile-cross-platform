@@ -398,18 +398,18 @@ function Player() {
 
   function handleChangeAvatar() {
     if (currentAvatar === 'icaro') {
-      dispatch(Creators.setCurrentAvatar('hozana'))
+      dispatch(Creators.storeAvatar.request('hozana'));
     } else if (currentAvatar === 'hozana') {
-      dispatch(Creators.setCurrentAvatar('guga'))
+      dispatch(Creators.storeAvatar.request('guga'))
     } else {
-      dispatch(Creators.setCurrentAvatar('icaro'))
+      dispatch(Creators.storeAvatar.request('icaro'))
     }
 
-    playerService.send(
+    PlayerService.getService().send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.CHANGE_AVATAR,
-      currentAvatar
-    );
+      'guga'
+    )
   }
 
   function handleSubtitle() {

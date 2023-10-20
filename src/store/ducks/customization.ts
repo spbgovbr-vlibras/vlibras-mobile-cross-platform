@@ -48,7 +48,7 @@ const INITIAL_STATE: CustomizationState = {
   currenthair: '#000000',
   currentpants: '#121420',
   currentshirt: '#202763',
-  currentavatar: 'guga'
+  currentavatar: 'icaro'
 };
 
 export type CustomizationColors = {
@@ -62,9 +62,6 @@ export type CustomizationColors = {
 };
 
 export const Creators = {
-  setCurrentAvatar: createAction(
-    AvatarType.SET_CURRENT_AVATAR
-  )<Avatar>(),
   setCurrentCustomizationBody: createAction(
     Types.SET_CURRENT_CUSTOMIZATION_BODY
   )<string>(),
@@ -99,7 +96,7 @@ export const Creators = {
     AvatarType.LOAD_CURRENT_AVATAR_REQUEST,
     AvatarType.LOAD_CURRENT_AVATAR_SUCCESS,
     AvatarType.LOAD_CURRENT_AVATAR_FAILURE
-  )<unknown, Avatar, unknown>(),
+  )<void, Avatar, unknown>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -126,7 +123,7 @@ const reducer: Reducer<CustomizationState, ActionTypes> = (
       case Types.SET_CURRENT_CUSTOMIZATION_SHIRT:
         draft.currentshirt = payload;
         break;
-      case AvatarType.SET_CURRENT_AVATAR:
+      case AvatarType.STORE_CURRENT_AVATAR_REQUEST:
         draft.currentavatar = payload;
         break;      
       case AvatarType.LOAD_CURRENT_AVATAR_SUCCESS:
