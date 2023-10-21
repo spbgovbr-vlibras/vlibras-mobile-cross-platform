@@ -118,8 +118,8 @@ function Historic() {
                 <div key={elementKey}>
                   {elementKey === 0 &&
                     (keyOfKeys === 0 || doesntHaveKey === 1) && (
-                    <p className="date-desc"> {column} </p>
-                  )}
+                      <p className="date-desc"> {column} </p>
+                    )}
                   {key === 'video' ? (
                     <>
                       {elementKey === 0 && (
@@ -181,17 +181,17 @@ function Historic() {
   const setScreenKey = (param: number) => {
     setActiveKey(param);
     switch (param) {
-    case 0:
-      setKeysToShow(['text', 'video']);
-      break;
-    case 1:
-      setKeysToShow(['text']);
-      break;
-    case 2:
-      setKeysToShow(['video']);
-      break;
-    default:
-      break;
+      case 0:
+        setKeysToShow(['text', 'video']);
+        break;
+      case 1:
+        setKeysToShow(['text']);
+        break;
+      case 2:
+        setKeysToShow(['video']);
+        break;
+      default:
+        break;
     }
   };
 
@@ -225,7 +225,13 @@ function Historic() {
               </IonChip>
             )}
           </div>
-          <div className="container-render-historic">{Object.keys(historyStorage).length === 0 ? <p>Histórico vazio</p> : renderAllItems()}</div>
+          <div className="container-render-historic">
+            {Object.keys(historyStorage).length === 0 ? (
+              <p>Histórico vazio</p>
+            ) : (
+              renderAllItems()
+            )}
+          </div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}

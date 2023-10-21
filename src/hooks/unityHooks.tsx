@@ -23,7 +23,7 @@ function toBoolean(flag: BooleanParamsPlayer): boolean {
   return flag === 'True';
 }
 
-class UnityEventEmitter {
+export class UnityEventEmitter {
   private static instance: UnityEventEmitter;
   private events: { [key in UnityEventEmitterEvents]: unknown[] } = {
     onLoadPlayer: [],
@@ -119,7 +119,10 @@ class UnityEventEmitter {
   }
 }
 
-export function useGetAvatar(handler: GetAvatarHandler, dependencies: never[]) {
+export function useAvatarLoaded(
+  handler: GetAvatarHandler,
+  dependencies: unknown[]
+) {
   useEffect(() => {
     UnityEventEmitter.getInstance().subscribe('GetAvatar', handler);
 
@@ -131,7 +134,7 @@ export function useGetAvatar(handler: GetAvatarHandler, dependencies: never[]) {
 
 export function useFinisheWelcome(
   handler: FinishWelcomeHandler,
-  dependencies: never[]
+  dependencies: unknown[]
 ) {
   useEffect(() => {
     UnityEventEmitter.getInstance().subscribe('FinishWelcome', handler);
@@ -144,7 +147,7 @@ export function useFinisheWelcome(
 
 export function useCounterGloss(
   handler: CounterGlossHandler,
-  dependencies: never[]
+  dependencies: unknown[]
 ) {
   useEffect(() => {
     UnityEventEmitter.getInstance().subscribe('CounterGloss', handler);
@@ -157,7 +160,7 @@ export function useCounterGloss(
 
 export function useOnPlayingStateChangeHandler(
   handler: OnPlayingStateChangeHandler,
-  dependencies: never[]
+  dependencies: unknown[]
 ) {
   useEffect(() => {
     UnityEventEmitter.getInstance().subscribe('onPlayingStateChange', handler);
@@ -173,7 +176,7 @@ export function useOnPlayingStateChangeHandler(
 
 export function useOnLoadPlayer(
   handler: OnLoadPlayerHandler,
-  dependencies: never[]
+  dependencies: unknown[]
 ) {
   useEffect(() => {
     UnityEventEmitter.getInstance().subscribe('onLoadPlayer', handler);
