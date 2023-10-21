@@ -31,10 +31,10 @@ function* storeAvatar(
   action: ReturnType<typeof Creators.storeAvatar.request>
 ): Generator<unknown, void, unknown> {
   try {
-    yield NativeStorage.setItem(PLAYER_AVATAR_KEY_STORE, action.payload)
-    yield put(Creators.storeAvatar.success({}))
+    yield NativeStorage.setItem(PLAYER_AVATAR_KEY_STORE, action.payload);
+    yield put(Creators.storeAvatar.success({}));
   } catch (error) {
-    yield put(Creators.storeAvatar.failure({}))
+    yield put(Creators.storeAvatar.failure({}));
   }
 }
 

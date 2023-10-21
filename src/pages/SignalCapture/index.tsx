@@ -80,7 +80,7 @@ const SignalCapture = () => {
     // if (currentVideoArray.length < 5) {
     //   try {
     //     const options = { limit: 1, duration: 30, highquality: true };
-        
+
     //     const mediafile = await VideoCapturePlus.captureVideo(options);
     //     setLoadingDescription('Processando...');
     //     setLoading(true);

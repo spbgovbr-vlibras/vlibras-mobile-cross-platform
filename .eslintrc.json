@@ -26,6 +26,7 @@
       "spaced-comment": "error",
       "quotes": ["error", "single"],
       "no-duplicate-imports": "error",
+      "semi": ["error", "always"],
       "import/order": [
         "error",
         {
@@ -48,7 +49,11 @@
             "caseInsensitive": true
           }
         }
-      ]
+      ],
+      "react/jsx-indent": ["error", 2],
+      "react/jsx-indent-props": ["error", 2],
+      "no-trailing-spaces": "error",
+      "max-len": ["error", { "code": 120 }]
     },
     "settings": {
       "import/resolver": {

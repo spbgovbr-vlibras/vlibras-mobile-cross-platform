@@ -41,40 +41,40 @@ const reducer: Reducer<LibrasState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<LibrasState>) => {
     switch (type) {
-      case Types.SET_ARRAY_LIBRAS:
-        draft.current = payload;
-        break;
-      case Types.SET_LAST_TRANSLATOR:
-        // draft.lastTranslate = payload.data;
-        draft.lastTranslate = ['alo']; // mock
+    case Types.SET_ARRAY_LIBRAS:
+      draft.current = payload;
+      break;
+    case Types.SET_LAST_TRANSLATOR:
+      // draft.lastTranslate = payload.data;
+      draft.lastTranslate = ['alo']; // mock
 
-        reloadHistory(payload.date, payload.data, payload.key);
+      reloadHistory(payload.date, payload.data, payload.key);
 
-        // mock
-        if (draft.translationsHistoric[payload.date]) {
-          if (draft.translationsHistoric[payload.date][payload.key]) {
-            draft.translationsHistoric[payload.date][payload.key].unshift(
-              payload.data
-            );
-          } else {
-            draft.translationsHistoric[payload.date][payload.key] = [];
-            draft.translationsHistoric[payload.date][payload.key].unshift(
-              payload.data
-            );
-          }
+      // mock
+      if (draft.translationsHistoric[payload.date]) {
+        if (draft.translationsHistoric[payload.date][payload.key]) {
+          draft.translationsHistoric[payload.date][payload.key].unshift(
+            payload.data
+          );
         } else {
-          draft.translationsHistoric[payload.date] = {};
-          draft.translationsHistoric[payload.date][payload.key] = [
-            payload.data,
-          ];
+          draft.translationsHistoric[payload.date][payload.key] = [];
+          draft.translationsHistoric[payload.date][payload.key].unshift(
+            payload.data
+          );
         }
+      } else {
+        draft.translationsHistoric[payload.date] = {};
+        draft.translationsHistoric[payload.date][payload.key] = [
+          payload.data,
+        ];
+      }
 
-        break;
-      case Types.SET_IS_LIBRAS_SCREEN:
-        draft.isLibrasScreen = payload;
-        break;
-      default:
-        break;
+      break;
+    case Types.SET_IS_LIBRAS_SCREEN:
+      draft.isLibrasScreen = payload;
+      break;
+    default:
+      break;
     }
   });
 };

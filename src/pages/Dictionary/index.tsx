@@ -71,15 +71,15 @@ function Dictionary() {
   const { setTextGloss, recentTranslation } = useTranslation();
 
   useIonViewWillEnter(() => {
-    
-      dispatch(
-        currentRegionalism.abbreviation !== 'BR' ?
+
+    dispatch(
+      currentRegionalism.abbreviation !== 'BR' ?
         Creators.fetchRegionalismWords.request(
           {
             abbrreviation: currentRegionalism.abbreviation
           }
         ) : Creators.clearRegionalismWords()
-      );
+    );
   }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
@@ -204,13 +204,13 @@ function Dictionary() {
               {filter === 'alphabetical'
                 ? dictionary.map((item) => renderWord(item))
                 : recentTranslation
-                    .filter((item) => item.includes(searchText.toUpperCase()))
-                    .map((item) => renderRecents(item))}
+                  .filter((item) => item.includes(searchText.toUpperCase()))
+                  .map((item) => renderRecents(item))}
 
               {recentTranslation.length === 0
                 ? <div className="dictionary-word-item">
                   Nenhuma pesquisa recente
-                </div> 
+                </div>
                 : null
               }
             </IonList>

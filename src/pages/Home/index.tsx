@@ -16,7 +16,7 @@ import './styles.css';
 function Home() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
-  );  
+  );
   useEffect(() => {
     UnityService.getService().load(
       RegionalismArray.find(

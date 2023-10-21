@@ -32,50 +32,50 @@ const OnBoarding = () => {
 
   useEffect(() => {
     switch (currentStep) {
-      case 0:
-        setChooseRender(
-          <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />
-        );
-        break;
-      case 1:
-        setChooseRender(
-          <StepOne
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 2:
-        setChooseRender(
-          <StepTwo
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 3:
-        setChooseRender(
-          <StepThree
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 4:
-        setChooseRender(
-          <StepFour
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      default:
-        setChooseRender(<> </>);
-        break;
+    case 0:
+      setChooseRender(
+        <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />
+      );
+      break;
+    case 1:
+      setChooseRender(
+        <StepOne
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 2:
+      setChooseRender(
+        <StepTwo
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 3:
+      setChooseRender(
+        <StepThree
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 4:
+      setChooseRender(
+        <StepFour
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    default:
+      setChooseRender(<> </>);
+      break;
     }
   }, [currentStep]);
 

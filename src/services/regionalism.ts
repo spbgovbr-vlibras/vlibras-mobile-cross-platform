@@ -5,6 +5,6 @@ const api = axios.create({
 });
 
 export async function fetchBundles(siglaRegiao: string): Promise<[string]> {
-    const response = await api.get(`/bundles?region=${siglaRegiao}`);
-    return response.data;
+  const response = await api.get(`/bundles?region=${siglaRegiao}`);
+  return response.data;
 }

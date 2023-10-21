@@ -38,12 +38,12 @@ const reducer: Reducer<RegionalismState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<RegionalismState>) => {
     switch (type) {
-      case Types.SET_CURRENT_REGIONALISM:
-        draft.current = payload;
-        break;
+    case Types.SET_CURRENT_REGIONALISM:
+      draft.current = payload;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
   });
 };
