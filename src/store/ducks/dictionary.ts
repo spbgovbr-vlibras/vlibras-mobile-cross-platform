@@ -88,49 +88,49 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<DictionaryState>) => {
     switch (type) {
-      case Types.SET_CURRENT_DICTIONARY: {
-        draft.words = payload;
-        break;
+    case Types.SET_CURRENT_DICTIONARY: {
+      draft.words = payload;
+      break;
+    }
+    case Types.GET_REQUEST: {
+      draft.loading = true;
+      break;
+    }
+    case Types.GET_SUCCESS: {
+      draft.loading = false;
+      const { meta, data } = payload as ListResponseDictionary;
+      if (meta.current_page === FIRST_PAGE_INDEX) {
+        draft.words = data;
+      } else {
+        draft.words = [...draft.words, ...data];
       }
-      case Types.GET_REQUEST: {
-        draft.loading = true;
-        break;
-      }
-      case Types.GET_SUCCESS: {
-        draft.loading = false;
-        const { meta, data } = payload as ListResponseDictionary;
-        if (meta.current_page === FIRST_PAGE_INDEX) {
-          draft.words = data;
-        } else {
-          draft.words = [...draft.words, ...data];
-        }
-        draft.metadata = meta;
-        break;
-      }
-      case Types.GET_FAILURE: {
-        draft.loading = false;
-        break;
-      }
-      case Types.GET_BUNDLE_REQUEST: {
-        draft.loadingBundle = true;
-        draft.regionalismWords = [];
-        break;
-      }
-      case Types.GET_BUNDLE_SUCCESS: {
-        draft.loadingBundle = false;
-        draft.regionalismWords = (payload as ListBundleDictionary).data;
-        break;
-      }
-      case Types.GET_BUNDLE_FAILURE: {
-        draft.loadingBundle = false;
-        break;
-      }
-      case Types.BUNDLE_CLEAR: {
-        draft.regionalismWords = [];
-        break;
-      }
-      default:
-        break;
+      draft.metadata = meta;
+      break;
+    }
+    case Types.GET_FAILURE: {
+      draft.loading = false;
+      break;
+    }
+    case Types.GET_BUNDLE_REQUEST: {
+      draft.loadingBundle = true;
+      draft.regionalismWords = [];
+      break;
+    }
+    case Types.GET_BUNDLE_SUCCESS: {
+      draft.loadingBundle = false;
+      draft.regionalismWords = (payload as ListBundleDictionary).data;
+      break;
+    }
+    case Types.GET_BUNDLE_FAILURE: {
+      draft.loadingBundle = false;
+      break;
+    }
+    case Types.BUNDLE_CLEAR: {
+      draft.regionalismWords = [];
+      break;
+    }
+    default:
+      break;
     }
   });
 };

@@ -27,7 +27,7 @@ interface RevisionModalProps {
   onSubmittedRevision?: () => void;
 }
 
-const playerService = PlayerService.getService();
+const playerService = PlayerService.getPlayerInstance();
 
 const RevisionModal = ({
   show,

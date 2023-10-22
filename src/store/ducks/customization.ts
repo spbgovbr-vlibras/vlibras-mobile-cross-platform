@@ -4,6 +4,8 @@ import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
+import { Avatar } from 'constants/types';
+
 export const Types = {
   SET_CURRENT_CUSTOMIZATION_BODY:
     '@customization/SET_CURRENT_CUSTOMIZATION_BODY',
@@ -22,12 +24,23 @@ export const Types = {
   STORE_CUSTOMIZATION_FAILURE: '@customization/STORE_CUSTOMIZATION_FAILURE',
 };
 
+export const AvatarType = {
+  SET_CURRENT_AVATAR:
+    '@avatar/SET_CURRENT_AVATAR',
+  LOAD_CURRENT_AVATAR_REQUEST: '@avatar/LOAD_CURRENT_AVATAR_REQUEST',
+  LOAD_CURRENT_AVATAR_SUCCESS: '@avatar/LOAD_AVATAR_SUCCESS',
+  LOAD_CURRENT_AVATAR_FAILURE: '@avatar/LOAD_AVATAR_FAILURE',
+  STORE_CURRENT_AVATAR_REQUEST: '@avatar/STORE_AVATAR_REQUEST',
+  STORE_CURRENT_AVATAR_SUCCESS: '@avatar/STORE_AVATAR_SUCCESS',
+  STORE_CURRENT_AVATAR_FAILURE: '@avatar/STORE_AVATAR_FAILURE',
+};
 export interface CustomizationState {
   currentbody: string;
   currenteye: string;
   currenthair: string;
   currentpants: string;
   currentshirt: string;
+  currentavatar: Avatar;
 }
 const INITIAL_STATE: CustomizationState = {
   currentbody: '#f3a78f',
@@ -35,6 +48,7 @@ const INITIAL_STATE: CustomizationState = {
   currenthair: '#000000',
   currentpants: '#121420',
   currentshirt: '#202763',
+  currentavatar: 'icaro'
 };
 
 export type CustomizationColors = {
@@ -73,6 +87,16 @@ export const Creators = {
     Types.LOAD_CUSTOMIZATION_SUCCESS,
     Types.LOAD_CUSTOMIZATION_FAILURE
   )<unknown, CustomizationColors, unknown>(),
+  storeAvatar: createAsyncAction(
+    AvatarType.STORE_CURRENT_AVATAR_REQUEST,
+    AvatarType.STORE_CURRENT_AVATAR_SUCCESS,
+    AvatarType.STORE_CURRENT_AVATAR_FAILURE
+  )<Avatar, unknown, unknown>(),
+  loadAvatar: createAsyncAction(
+    AvatarType.LOAD_CURRENT_AVATAR_REQUEST,
+    AvatarType.LOAD_CURRENT_AVATAR_SUCCESS,
+    AvatarType.LOAD_CURRENT_AVATAR_FAILURE
+  )<void, Avatar, unknown>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -84,31 +108,37 @@ const reducer: Reducer<CustomizationState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<CustomizationState>) => {
     switch (type) {
-      case Types.SET_CURRENT_CUSTOMIZATION_BODY:
-        draft.currentbody = payload;
-        break;
-      case Types.SET_CURRENT_CUSTOMIZATION_EYE:
-        draft.currenteye = payload;
-        break;
-      case Types.SET_CURRENT_CUSTOMIZATION_HAIR:
-        draft.currenthair = payload;
-        break;
-      case Types.SET_CURRENT_CUSTOMIZATION_PANTS:
-        draft.currentpants = payload;
-        break;
-      case Types.SET_CURRENT_CUSTOMIZATION_SHIRT:
-        draft.currentshirt = payload;
-        break;
-      case Types.LOAD_CUSTOMIZATION_SUCCESS:
-        const colors = payload as CustomizationColors;
-        draft.currentbody = colors.corpo;
-        draft.currenteye = colors.iris;
-        draft.currenthair = colors.cabelo;
-        draft.currentpants = colors.calca;
-        draft.currentshirt = colors.camisa;
-        break;
-      default:
-        break;
+    case Types.SET_CURRENT_CUSTOMIZATION_BODY:
+      draft.currentbody = payload;
+      break;
+    case Types.SET_CURRENT_CUSTOMIZATION_EYE:
+      draft.currenteye = payload;
+      break;
+    case Types.SET_CURRENT_CUSTOMIZATION_HAIR:
+      draft.currenthair = payload;
+      break;
+    case Types.SET_CURRENT_CUSTOMIZATION_PANTS:
+      draft.currentpants = payload;
+      break;
+    case Types.SET_CURRENT_CUSTOMIZATION_SHIRT:
+      draft.currentshirt = payload;
+      break;
+    case AvatarType.STORE_CURRENT_AVATAR_REQUEST:
+      draft.currentavatar = payload;
+      break;
+    case AvatarType.LOAD_CURRENT_AVATAR_SUCCESS:
+      draft.currentavatar = payload;
+      break;
+    case Types.LOAD_CUSTOMIZATION_SUCCESS:
+      const colors = payload as CustomizationColors;
+      draft.currentbody = colors.corpo;
+      draft.currenteye = colors.iris;
+      draft.currenthair = colors.cabelo;
+      draft.currentpants = colors.calca;
+      draft.currentshirt = colors.camisa;
+      break;
+    default:
+      break;
     }
   });
 };

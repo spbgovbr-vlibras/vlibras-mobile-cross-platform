@@ -28,20 +28,15 @@ import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
+import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
+import UnityService from 'services/unity';
 import { RootState } from 'store';
 import { Creators, CustomizationState } from 'store/ducks/customization';
 
 import { Strings } from './string';
-
 import './styles.css';
 
-const unityContent = new UnityContent(
-  'final/Build/final.json',
-  'final/Build/UnityLoader.js',
-  {
-    adjustOnWindowResize: true,
-  }
-);
+const unityContent = UnityService.getEditorInstance().getUnity();
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
@@ -93,6 +88,10 @@ function hasChanges(
 }
 
 function Customization() {
+  const currentAvatar = useSelector(
+    ({ customization }: RootState) => customization.currentavatar
+  );
+
   const currentBody = useSelector(
     ({ customization }: RootState) => customization.currentbody
   );
@@ -206,6 +205,12 @@ function Customization() {
   const selectcolorshirt = (color: string) => {
     setcolorshirt(color);
   };
+
+  useLoadCurrentAvatar(
+    currentAvatar,
+    UnityService.getEditorInstance(),
+    currentAvatar
+  );
 
   function SaveChanges() {
     dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create

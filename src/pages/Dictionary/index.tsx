@@ -27,9 +27,7 @@ import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import {
-  Creators,
-} from 'store/ducks/dictionary';
+import { Creators } from 'store/ducks/dictionary';
 
 import { Strings } from './strings';
 
@@ -37,7 +35,7 @@ import './styles.css';
 
 type DictionaryFilter = 'alphabetical' | 'recents';
 
-const playerService = PlayerService.getService();
+const playerService = PlayerService.getPlayerInstance();
 
 const TIME_DEBOUNCE_MS = 1000;
 
@@ -59,9 +57,11 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
 
-  const { metadata, words: dictionary, regionalismWords } = useSelector(
-    ({ dictionaryReducer }: RootState) => dictionaryReducer
-  );
+  const {
+    metadata,
+    words: dictionary,
+    regionalismWords,
+  } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
@@ -71,15 +71,13 @@ function Dictionary() {
   const { setTextGloss, recentTranslation } = useTranslation();
 
   useIonViewWillEnter(() => {
-    
-      dispatch(
-        currentRegionalism.abbreviation !== 'BR' ?
-        Creators.fetchRegionalismWords.request(
-          {
-            abbrreviation: currentRegionalism.abbreviation
-          }
-        ) : Creators.clearRegionalismWords()
-      );
+    dispatch(
+      currentRegionalism.abbreviation !== 'BR'
+        ? Creators.fetchRegionalismWords.request({
+            abbrreviation: currentRegionalism.abbreviation,
+          })
+        : Creators.clearRegionalismWords()
+    );
   }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
@@ -207,12 +205,11 @@ function Dictionary() {
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))}
 
-              {recentTranslation.length === 0
-                ? <div className="dictionary-word-item">
+              {recentTranslation.length === 0 ? (
+                <div className="dictionary-word-item">
                   Nenhuma pesquisa recente
-                </div> 
-                : null
-              }
+                </div>
+              ) : null}
             </IonList>
           </div>
         </div>

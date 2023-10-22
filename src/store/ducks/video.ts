@@ -59,47 +59,47 @@ const reducer: Reducer<VideoState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<VideoState>) => {
     switch (type) {
-      case Types.SET_ARRAY_VIDEOS:
-        draft.current = payload;
-        break;
-      case Types.SET_LAST_TRANSLATOR:
-        draft.lastTranslate = payload.data;
-        // draft.lastTranslate = ['alo']; //mock
+    case Types.SET_ARRAY_VIDEOS:
+      draft.current = payload;
+      break;
+    case Types.SET_LAST_TRANSLATOR:
+      draft.lastTranslate = payload.data;
+      // draft.lastTranslate = ['alo']; //mock
 
-        // eslint-disable-next-line no-case-declarations
-        const { date, data, key }: payloadVideoTranslator = payload;
+      // eslint-disable-next-line no-case-declarations
+      const { date, data, key }: payloadVideoTranslator = payload;
 
-        reloadHistory(date, data, key);
-        lastTranslation(data, key);
+      reloadHistory(date, data, key);
+      lastTranslation(data, key);
 
-        // mock
-        // if (draft.translationsHistoric[date]) {
-        //   if (draft.translationsHistoric[date][key]) {
-        //     draft.translationsHistoric[date][key].unshift(data)
-        //   } else {
-        //     draft.translationsHistoric[date][key] = []
-        //     draft.translationsHistoric[date][key].unshift(data)
-        //   }
-        // } else {
-        //   draft.translationsHistoric[date] = {}
-        //   draft.translationsHistoric[date][key] = [data]
-        // }
+      // mock
+      // if (draft.translationsHistoric[date]) {
+      //   if (draft.translationsHistoric[date][key]) {
+      //     draft.translationsHistoric[date][key].unshift(data)
+      //   } else {
+      //     draft.translationsHistoric[date][key] = []
+      //     draft.translationsHistoric[date][key].unshift(data)
+      //   }
+      // } else {
+      //   draft.translationsHistoric[date] = {}
+      //   draft.translationsHistoric[date][key] = [data]
+      // }
 
-        break;
-      case Types.SET_DOMAIN:
-        draft.domain = payload;
-        break;
-      case Types.SET_IS_VIDEO_SCREEN:
-        draft.isVideoScreen = payload;
-        break;
-      case Types.SET_FIRST_ACCESS:
-        draft.onboardingFirstAccess = payload;
-        break;
-      case Types.SET_PROGRESS:
-        draft.progressOutput = payload;
-        break;
-      default:
-        break;
+      break;
+    case Types.SET_DOMAIN:
+      draft.domain = payload;
+      break;
+    case Types.SET_IS_VIDEO_SCREEN:
+      draft.isVideoScreen = payload;
+      break;
+    case Types.SET_FIRST_ACCESS:
+      draft.onboardingFirstAccess = payload;
+      break;
+    case Types.SET_PROGRESS:
+      draft.progressOutput = payload;
+      break;
+    default:
+      break;
     }
   });
 };

@@ -84,7 +84,9 @@ function Regionalism() {
   );
 
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
-    const current = regionalismData.find((item) => item.name === evt.detail.value);
+    const current = regionalismData.find(
+      (item) => item.name === evt.detail.value
+    );
     if (current) {
       setCurrentRegion({
         name: current.name,
@@ -107,7 +109,9 @@ function Regionalism() {
     try {
       const bundles = await fetchBundles(currentRegion.abbreviation);
       if (bundles.length > 0) {
-        UnityService.getService().setPlayerRegion(currentRegion.abbreviation);
+        UnityService.getPlayerInstance().setPlayerRegion(
+          currentRegion.abbreviation
+        );
         openLoadingModal();
       }
       if (bundles.length <= 0) {
@@ -151,7 +155,9 @@ function Regionalism() {
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
-            <IonRadioGroup value={currentRegion.name} onIonChange={handleOnChange}>
+            <IonRadioGroup
+              value={currentRegion.name}
+              onIonChange={handleOnChange}>
               {regionalismData.map((item) => (
                 <RadioItem
                   key={item.name}

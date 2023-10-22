@@ -39,7 +39,6 @@ const EvaluationNoModal = ({
             type="button"
             onClick={() => {
               setShowNo(false);
-              console.log(`NO MODAL:${showNo}`);
             }}>
             <IconCloseCircle color="#4e4e4e" />
           </button>
