@@ -12,16 +12,14 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-
 function Home() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
   useEffect(() => {
-    UnityService.getService().load(
-      RegionalismArray.find(
-        (item) => item.name === currentRegionalism.name
-      )?.abbreviation ?? ''
+    UnityService.getPlayerInstance().load(
+      RegionalismArray.find((item) => item.name === currentRegionalism.name)
+        ?.abbreviation ?? ''
     );
   }, []);
 

@@ -48,12 +48,12 @@ import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
 import {
   useOnCounterGloss,
-  useOnAvatarLoaded,
   useOnPlayingStateChangeHandler,
 } from 'hooks/unityHooks';
-import usePrevious from 'hooks/usePrevious';
 
-const playerService = PlayerService.getService();
+import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
+
+const playerService = PlayerService.getPlayerInstance();
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
@@ -370,23 +370,10 @@ function Player() {
     setSubmittedRevision(true);
   }, []);
 
-  const loadCurrentAvatar = useCallback(() => {
-    const timeout = setTimeout(() => {
-      PlayerService.getService().send(
-        PlayerKeys.PLAYER_MANAGER,
-        PlayerKeys.CHANGE_AVATAR,
-        currentAvatar
-      );
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [currentAvatar]);
-
-  useOnAvatarLoaded(
-    (_avatarName: string) => {
-      loadCurrentAvatar();
-    },
-    [loadCurrentAvatar]
+  useLoadCurrentAvatar(
+    currentAvatar,
+    PlayerService.getPlayerInstance(),
+    currentAvatar
   );
 
   useOnCounterGloss((counter: number, _glossLength: number) => {
@@ -422,23 +409,13 @@ function Player() {
   }
 
   function handleChangeAvatar() {
-    let nextAvatar: Avatar;
     if (currentAvatar === 'icaro') {
       dispatch(Creators.storeAvatar.request('hozana'));
-      nextAvatar = 'hozana';
     } else if (currentAvatar === 'hozana') {
       dispatch(Creators.storeAvatar.request('guga'));
-      nextAvatar = 'guga';
     } else {
-      nextAvatar = 'icaro';
       dispatch(Creators.storeAvatar.request('icaro'));
     }
-
-    PlayerService.getService().send(
-      PlayerKeys.PLAYER_MANAGER,
-      PlayerKeys.CHANGE_AVATAR,
-      nextAvatar
-    );
   }
 
   function handleSubtitle() {

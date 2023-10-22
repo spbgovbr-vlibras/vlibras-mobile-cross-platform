@@ -41,7 +41,7 @@ function Historic() {
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const { setTextPtBr } = useTranslation();
-  const playerService = PlayerService.getService();
+  const playerService = PlayerService.getPlayerInstance();
 
   const openModalOutput = (actualItem: any) => {
     setShowModal(true);

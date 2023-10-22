@@ -8,7 +8,8 @@ const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 export default class UnityService {
   private readonly unityContent: UnityContent;
 
-  private static service: UnityService;
+  private static playerInstance: UnityService;
+  private static editorInstance: UnityService;
 
   private isReady: boolean;
 
@@ -23,11 +24,30 @@ export default class UnityService {
     this.isReady = false;
   }
 
-  static getService(): UnityService {
-    if (!UnityService.service) {
-      UnityService.service = new UnityService();
+  static allInstances(): UnityService[] {
+    if (!UnityService.playerInstance) {
+      UnityService.playerInstance = new UnityService();
     }
-    return UnityService.service;
+
+    if (!UnityService.editorInstance) {
+      UnityService.editorInstance = new UnityService();
+    }
+
+    return [UnityService.playerInstance, UnityService.editorInstance];
+  }
+
+  static getPlayerInstance(): UnityService {
+    if (!UnityService.playerInstance) {
+      UnityService.playerInstance = new UnityService();
+    }
+    return UnityService.playerInstance;
+  }
+
+  static getEditorInstance(): UnityService {
+    if (!UnityService.editorInstance) {
+      UnityService.editorInstance = new UnityService();
+    }
+    return UnityService.editorInstance;
   }
 
   getUnity(): UnityContent {
