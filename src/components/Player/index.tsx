@@ -47,12 +47,11 @@ import GenerateModal from 'components/GenerateModal';
 import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
 import {
-  useCounterGloss,
-  useAvatarLoaded,
+  useOnCounterGloss,
+  useOnAvatarLoaded,
   useOnPlayingStateChangeHandler,
 } from 'hooks/unityHooks';
-
-type BooleanParamsPlayer = 'True' | 'False';
+import usePrevious from 'hooks/usePrevious';
 
 const playerService = PlayerService.getService();
 
@@ -146,7 +145,7 @@ function Player() {
     const mimeType =
       (await info).platform === ('android' || 'web')
         ? 'video/webm'
-        : 'video/webm';
+        : 'video/mp4';
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
@@ -270,6 +269,7 @@ function Player() {
   const [isPaused, setIsPaused] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
+  const wasPlaying = useRef<boolean>(false);
 
   // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -327,22 +327,23 @@ function Player() {
       _isLoading: boolean,
       _isRepeatable: boolean
     ) => {
-      setIsPlaying(isPlaying);
-      setIsPaused(isPaused);
-
       if (isPlaying && recording === false) {
         initRecorder();
         recording = true;
       }
-      if (!isPlaying) {
+
+      if (wasPlaying.current && !isPlaying) {
         setHasFinished(true);
       }
       if (!isPlaying && recording === true) {
         mediaRecorder.stop();
         recording = false;
       }
+      setIsPlaying(isPlaying);
+      setIsPaused(isPaused);
+      wasPlaying.current = isPlaying;
     },
-    [setIsPlaying, setIsPaused]
+    [setIsPlaying, setIsPaused, currentAvatar]
   );
 
   function resetTranslation() {
@@ -381,14 +382,14 @@ function Player() {
     return () => clearTimeout(timeout);
   }, [currentAvatar]);
 
-  useAvatarLoaded(
+  useOnAvatarLoaded(
     (_avatarName: string) => {
       loadCurrentAvatar();
     },
     [loadCurrentAvatar]
   );
 
-  useCounterGloss((counter: number, _glossLength: number) => {
+  useOnCounterGloss((counter: number, _glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
     }
@@ -706,7 +707,6 @@ function Player() {
       iris: currentEye,
       pos: 'center',
     });
-    console.log(preProcessingPreview);
     playerService.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,

@@ -17,9 +17,7 @@ export interface SendReviewBody {
 export async function sendReview(data: SendReviewBody): Promise<any> {
   try {
     await suggestionGloss.post('/', data);
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) { /* empty */ }
 }
 
 export default suggestionGloss;

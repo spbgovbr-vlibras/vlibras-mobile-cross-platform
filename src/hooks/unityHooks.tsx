@@ -119,7 +119,7 @@ export class UnityEventEmitter {
   }
 }
 
-export function useAvatarLoaded(
+export function useOnAvatarLoaded(
   handler: GetAvatarHandler,
   dependencies: unknown[]
 ) {
@@ -132,7 +132,7 @@ export function useAvatarLoaded(
   }, dependencies);
 }
 
-export function useFinisheWelcome(
+export function useOnFinisheWelcome(
   handler: FinishWelcomeHandler,
   dependencies: unknown[]
 ) {
@@ -145,7 +145,7 @@ export function useFinisheWelcome(
   }, dependencies);
 }
 
-export function useCounterGloss(
+export function useOnCounterGloss(
   handler: CounterGlossHandler,
   dependencies: unknown[]
 ) {

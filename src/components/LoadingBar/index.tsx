@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import { useCounterGloss } from 'hooks/unityHooks';
+import { useOnCounterGloss } from 'hooks/unityHooks';
 
 interface loadingBarProps {
   className: any;
@@ -19,7 +19,7 @@ const LoadingBar = ({
   let glossLen = UNDEFINED_GLOSS;
   let cache = UNDEFINED_GLOSS;
 
-  useCounterGloss((counter: number, _glossLength: number) => {
+  useOnCounterGloss((counter: number, _glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
     }
