@@ -18,7 +18,7 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getPlayerInstance();
-const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
+const regex = /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/;
 
 const Translator = () => {
   const translatorText = useSelector(
