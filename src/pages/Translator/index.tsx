@@ -73,8 +73,9 @@ const Translator = () => {
               type="button"
               disabled={
                 translatorText.trim().length === 0 ||
-                !regex.test(translatorText)
-              }>
+                regex.test(translatorText)
+              }
+            >
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
