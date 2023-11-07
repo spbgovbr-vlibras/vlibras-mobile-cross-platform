@@ -86,12 +86,16 @@ function Dictionary() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
+  const formattedGloss = (gloss: string) => {
+    return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
+  };
+
   const renderWord = (item: Words) => (
     <IonItem
       key={item.id}
       className="dictionary-word-item"
       onClick={() => translate(item.name)}>
-      <IonText className="dictionary-words-style">{item.name}</IonText>
+      <IonText className="dictionary-words-style">{formattedGloss(item.name)}</IonText>
     </IonItem>
   );
 
@@ -100,7 +104,7 @@ function Dictionary() {
       key={item}
       className="dictionary-word-item"
       onClick={() => translate(item)}>
-      <IonText className="dictionary-words-style">{item}</IonText>
+      <IonText className="dictionary-words-style">{formattedGloss(item)}</IonText>
     </IonItem>
   );
 
