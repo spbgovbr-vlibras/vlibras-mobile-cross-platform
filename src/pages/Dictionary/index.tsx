@@ -172,6 +172,7 @@ function Dictionary() {
               placeholder={Strings.TEXT_PLACEHOLDER}
               onIonChange={debouncedSearch}
               inputmode="text"
+              searchIcon='search-sharp'
             />
           </div>
           <div className="dictionary-container-ion-chips">
