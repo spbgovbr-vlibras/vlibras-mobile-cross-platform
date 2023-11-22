@@ -164,6 +164,7 @@ const TranslationProvider: React.FC = ({ children }) => {
         NativeStorage.setItem(PROPERTY_KEY, recents);
       }
       setTextPtBr(text);
+
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
@@ -174,6 +175,8 @@ const TranslationProvider: React.FC = ({ children }) => {
         await delay(500);
         setIsLoading(false);
         setTranslationGlossError(true);
+        await delay(1500);
+        translation = text;
       }
 
       return translation;
