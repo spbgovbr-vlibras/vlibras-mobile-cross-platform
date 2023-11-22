@@ -119,25 +119,6 @@ const VideoOutputModal = ({
     }
   }, [outputs, showModal]);
 
-  // window.CounterGloss = (counter: number, glossLength: number) => {
-  //   if (counter === cache - 1) {
-  //     glossLen = counter;
-  //   }
-  //   cache = counter;
-
-  //   console.log(window);
-
-  //   const progress = (1 / glossLen) * 100;
-  //   console.log(progress);
-  //   if (progressBarOutputRef.current && progressContainerOutputRef.current) {
-  //     progressContainerOutputRef.current.style.visibility = 'visible';
-  //     progressBarOutputRef.current.style.visibility = 'visible';
-  //     progressBarOutputRef.current.style.width = `${
-  //       progress > MAX_PROGRESS ? MAX_PROGRESS : progress
-  //     }%`;
-  //   }
-  // };
-
   useEffect(() => {
     if (progressBarOutputRef.current && progressContainerOutputRef.current) {
       progressContainerOutputRef.current.style.visibility = 'visible';

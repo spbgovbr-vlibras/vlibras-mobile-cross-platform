@@ -1,19 +1,21 @@
 import { UnityContent } from 'react-unity-webgl';
 
 import { PlayerKeys } from 'constants/player';
+import { UnityEventEmitter } from 'hooks/unityHooks';
 
 const DICTIONAY_URL = 'https://dicionario2.vlibras.gov.br/2018.3.1/WEBGL/';
 
 export default class UnityService {
   private readonly unityContent: UnityContent;
 
-  private static service: UnityService;
+  private static playerInstance: UnityService;
+  private static editorInstance: UnityService;
 
   private isReady: boolean;
 
   private constructor() {
     this.unityContent = new UnityContent(
-      'final/Build/final.json',
+      'final/Build/09-10-23.json',
       'final/Build/UnityLoader.js',
       {
         adjustOnWindowResize: true,
@@ -22,11 +24,30 @@ export default class UnityService {
     this.isReady = false;
   }
 
-  static getService(): UnityService {
-    if (!UnityService.service) {
-      UnityService.service = new UnityService();
+  static allInstances(): UnityService[] {
+    if (!UnityService.playerInstance) {
+      UnityService.playerInstance = new UnityService();
     }
-    return UnityService.service;
+
+    if (!UnityService.editorInstance) {
+      UnityService.editorInstance = new UnityService();
+    }
+
+    return [UnityService.playerInstance, UnityService.editorInstance];
+  }
+
+  static getPlayerInstance(): UnityService {
+    if (!UnityService.playerInstance) {
+      UnityService.playerInstance = new UnityService();
+    }
+    return UnityService.playerInstance;
+  }
+
+  static getEditorInstance(): UnityService {
+    if (!UnityService.editorInstance) {
+      UnityService.editorInstance = new UnityService();
+    }
+    return UnityService.editorInstance;
   }
 
   getUnity(): UnityContent {
@@ -46,7 +67,9 @@ export default class UnityService {
   }
 
   load(regionAbreviation = ''): void {
-    window.onLoadPlayer = () => {
+    let onLoadPlayer: () => void;
+    // eslint-disable-next-line prefer-const
+    onLoadPlayer = () => {
       this.unityContent.send(
         PlayerKeys.PLAYER_MANAGER,
         PlayerKeys.INIT_RANDOM_ANIMATION
@@ -54,7 +77,9 @@ export default class UnityService {
       this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
       this.setBaseURL(regionAbreviation);
       this.isReady = true;
+      UnityEventEmitter.getInstance().unsubscribe('onLoadPlayer', onLoadPlayer);
     };
+    UnityEventEmitter.getInstance().subscribe('onLoadPlayer', onLoadPlayer);
   }
 
   private setBaseURL(regionAbreviation: string) {

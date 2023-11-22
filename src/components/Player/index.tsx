@@ -46,10 +46,14 @@ import { getVideo, postVideo } from 'services/shareVideo';
 import GenerateModal from 'components/GenerateModal';
 import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
+import {
+  useOnCounterGloss,
+  useOnPlayingStateChangeHandler,
+} from 'hooks/unityHooks';
 
-type BooleanParamsPlayer = 'True' | 'False';
+import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 
-const playerService = PlayerService.getService();
+const playerService = PlayerService.getPlayerInstance();
 
 const buttonColors = {
   VARIANT_BLUE: '#FFF',
@@ -62,10 +66,6 @@ const X2 = 2;
 const X3 = 3;
 const UNDEFINED_GLOSS = -1;
 const MAX_PROGRESS = 100;
-
-function toBoolean(flag: BooleanParamsPlayer): boolean {
-  return flag === 'True';
-}
 
 function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
@@ -143,7 +143,9 @@ function Player() {
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
     const mimeType =
-      (await info).platform === 'android' ? 'video/webm' : 'video/mp4';
+      (await info).platform === ('android' || 'web')
+        ? 'video/webm'
+        : 'video/webm';
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
@@ -235,7 +237,11 @@ function Player() {
   const history = useHistory();
   const { currentStep, goNextStep, onCancel } = useTutorial();
 
-  const { generateVideo, textGloss } = useTranslation();
+  const { textGloss } = useTranslation();
+
+  const currentAvatar = useSelector(
+    ({ customization }: RootState) => customization.currentavatar
+  );
 
   const currentBody = useSelector(
     ({ customization }: RootState) => customization.currentbody
@@ -257,13 +263,13 @@ function Player() {
   );
 
   // Dynamic states [MA]
-  const [currentAvatar, setCurrentAvatar] = useState<Avatar>('icaro');
   const [visiblePlayer, setVisiblePlayer] = useState(false);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [hasFinished, setHasFinished] = useState(false);
   const [isShowSubtitle, setIsShowSubtitle] = useState(true);
+  const wasPlaying = useRef<boolean>(false);
 
   // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -279,6 +285,7 @@ function Player() {
   useEffect(() => {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
+        dispatch(Creators.loadAvatar.request());
         dispatch(Creators.loadCustomization.request({}));
         setVisiblePlayer(true);
       }
@@ -312,28 +319,32 @@ function Player() {
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
 
-  window.onPlayingStateChange = (
-    _isPlaying: BooleanParamsPlayer,
-    _isPaused: BooleanParamsPlayer,
-    _isPlayingIntervalAnimation: BooleanParamsPlayer,
-    _isLoading: BooleanParamsPlayer,
-    _isRepeatable: BooleanParamsPlayer
-  ) => {
-    setIsPlaying(toBoolean(_isPlaying));
-    setIsPaused(toBoolean(_isPaused));
+  useOnPlayingStateChangeHandler(
+    (
+      isPlaying: boolean,
+      isPaused: boolean,
+      _isPlayingIntervalAnimation: boolean,
+      _isLoading: boolean,
+      _isRepeatable: boolean
+    ) => {
+      if (isPlaying && recording === false) {
+        initRecorder();
+        recording = true;
+      }
 
-    if (toBoolean(_isPlaying) && recording === false) {
-      initRecorder();
-      recording = true;
-    }
-    if (!toBoolean(_isPlaying)) {
-      setHasFinished(true);
-    }
-    if (!toBoolean(_isPlaying) && recording === true) {
-      mediaRecorder.stop();
-      recording = false;
-    }
-  };
+      if (wasPlaying.current && !isPlaying) {
+        setHasFinished(true);
+      }
+      if (!isPlaying && recording === true) {
+        mediaRecorder.stop();
+        recording = false;
+      }
+      setIsPlaying(isPlaying);
+      setIsPaused(isPaused);
+      wasPlaying.current = isPlaying;
+    },
+    [setIsPlaying, setIsPaused, currentAvatar]
+  );
 
   function resetTranslation() {
     setHasFinished(false);
@@ -359,7 +370,13 @@ function Player() {
     setSubmittedRevision(true);
   }, []);
 
-  window.CounterGloss = (counter: number, glossLength: number) => {
+  useLoadCurrentAvatar(
+    currentAvatar,
+    PlayerService.getPlayerInstance(),
+    currentAvatar
+  );
+
+  useOnCounterGloss((counter: number, _glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
     }
@@ -375,7 +392,7 @@ function Player() {
       }%`;
     }
     dispatch(CreatorsVideo.setProgress(progress));
-  };
+  }, []);
 
   function handlePause() {
     playerService.send(
@@ -392,23 +409,13 @@ function Player() {
   }
 
   function handleChangeAvatar() {
-    let nextAvatar: Avatar;
-
     if (currentAvatar === 'icaro') {
-      nextAvatar = 'hozana';
+      dispatch(Creators.storeAvatar.request('hozana'));
     } else if (currentAvatar === 'hozana') {
-      nextAvatar = 'guga';
+      dispatch(Creators.storeAvatar.request('guga'));
     } else {
-      nextAvatar = 'icaro';
+      dispatch(Creators.storeAvatar.request('icaro'));
     }
-
-    setCurrentAvatar(nextAvatar);
-
-    playerService.send(
-      PlayerKeys.PLAYER_MANAGER,
-      PlayerKeys.CHANGE_AVATAR,
-      nextAvatar
-    );
   }
 
   function handleSubtitle() {
@@ -418,17 +425,6 @@ function Player() {
       toInteger(!isShowSubtitle)
     );
     setIsShowSubtitle(!isShowSubtitle);
-  }
-
-  function handleShare() {
-    generateVideo({
-      calca: currentPants,
-      camisa: currentShirt,
-      cabelo: currentHair,
-      corpo: currentBody,
-      olhos: currentEye,
-      avatar: currentAvatar,
-    });
   }
 
   const renderPlayerButtons = () => {
@@ -519,21 +515,20 @@ function Player() {
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
-          {(currentStep >= TutorialSteps.CLOSE 
-          && currentStep <= TutorialSteps.PLAYBACK_SPEED) 
-            ? (
-              <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
-            ):(
-              <button
-                className="player-action-button-transparent"
-                type="button"
-                onClick={() => {
-                  history.push(paths.DICTIONARY_PLAYER);
-                  onCancel();
-                }}>
-                <IconDictionary color={buttonColors.VARAINT_WHITE} />
-              </button>
-            )}
+          {currentStep >= TutorialSteps.CLOSE &&
+          currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
+            <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
+          ) : (
+            <button
+              className="player-action-button-transparent"
+              type="button"
+              onClick={() => {
+                history.push(paths.DICTIONARY_PLAYER);
+                onCancel();
+              }}>
+              <IconDictionary color={buttonColors.VARAINT_WHITE} />
+            </button>
+          )}
         </div>
 
         <div>
@@ -557,44 +552,44 @@ function Player() {
             />
           </div>
         </div>
-        {(currentStep >= TutorialSteps.CLOSE && currentStep <= TutorialSteps.PLAYBACK_SPEED) ? 
-        (
+        {currentStep >= TutorialSteps.CLOSE &&
+        currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
           <button
             className="player-action-button player-action-button-insert"
             type="button">
             <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
           </button>
-        ):(
+        ) : (
           <button
             className="player-action-button player-action-button-insert"
             type="button"
             onClick={() => {
               history.push(paths.TRANSLATOR);
               onCancel();
-              }}>
+            }}>
             <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
           </button>
         )}
-        
+
         <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 70,
-              left: 0,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Repetir tradução"
-              description="Repita a última tradução feita"
-              position="bc"
-              isEnabled={currentStep === TutorialSteps.REPEAT}
-            />
-          </div>     
+          style={{
+            margin: 'auto',
+            position: 'absolute',
+            bottom: 70,
+            left: 0,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+          }}>
+          <TutorialPopover
+            title="Repetir tradução"
+            description="Repita a última tradução feita"
+            position="bc"
+            isEnabled={currentStep === TutorialSteps.REPEAT}
+          />
+        </div>
 
         <div
           style={{
@@ -616,8 +611,8 @@ function Player() {
             isEnabled={currentStep === TutorialSteps.HISTORY}
           />
         </div>
-        {(currentStep >= TutorialSteps.CLOSE 
-        && currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
+        {currentStep >= TutorialSteps.CLOSE &&
+        currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
           <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
         ) : (
           <button
@@ -626,7 +621,7 @@ function Player() {
             onClick={() => {
               history.push(paths.HISTORY);
               onCancel();
-              }}>
+            }}>
             <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
           </button>
         )}
@@ -680,6 +675,7 @@ function Player() {
 
   useEffect(() => {
     const preProcessingPreview = JSON.stringify({
+      avatar: currentAvatar,
       corpo: currentBody,
       olhos: '#fffafa',
       cabelo: currentHair,
@@ -688,13 +684,19 @@ function Player() {
       iris: currentEye,
       pos: 'center',
     });
-    console.log(preProcessingPreview);
     playerService.send(
       PlayerKeys.AVATAR,
       PlayerKeys.SETEDITOR,
       preProcessingPreview
     );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+  }, [
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+    currentAvatar,
+  ]);
 
   return (
     <div className="player-container">
@@ -707,12 +709,12 @@ function Player() {
           alignItems: 'flex-start',
           zIndex: 2,
         }}>
-          <TutorialPopover
-            title="Menu"
-            description="Informações e ajustes adicionais do tradudor"
-            position="tl"
-            isEnabled={currentStep === TutorialSteps.MENU}
-          />
+        <TutorialPopover
+          title="Menu"
+          description="Informações e ajustes adicionais do tradudor"
+          position="tl"
+          isEnabled={currentStep === TutorialSteps.MENU}
+        />
       </div>
       <IonPopover
         className="player-popover"
@@ -757,8 +759,10 @@ function Player() {
         </div>
       </IonPopover>
       <div className="player-container-button">
-        {isPlaying || hasFinished || (currentStep >= TutorialSteps.CLOSE &&
-       currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
+        {isPlaying ||
+        hasFinished ||
+        (currentStep >= TutorialSteps.CLOSE &&
+          currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
           <>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
               <div style={{ marginRight: 6 }}>
@@ -785,7 +789,6 @@ function Player() {
                 description="Alterne entre os avatares disponíveis"
                 position="rb"
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
-
               />
             </div>
             <button
@@ -815,8 +818,8 @@ function Player() {
         />
       </div>
 
-      {((currentStep >= TutorialSteps.CLOSE 
-        && currentStep <= TutorialSteps.PLAYBACK_SPEED) ||
+      {((currentStep >= TutorialSteps.CLOSE &&
+        currentStep <= TutorialSteps.PLAYBACK_SPEED) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
           <div

@@ -80,39 +80,32 @@ const SignalCapture = () => {
     // if (currentVideoArray.length < 5) {
     //   try {
     //     const options = { limit: 1, duration: 30, highquality: true };
-        
     //     const mediafile = await VideoCapturePlus.captureVideo(options);
     //     setLoadingDescription('Processando...');
     //     setLoading(true);
-
     //     const media = mediafile[0] as MediaFile;
     //     const path = media.fullPath.substring(
     //       0,
     //       media.fullPath.lastIndexOf('/')
     //     );
     //     let resolvedPath: DirectoryEntry;
-
     //     if (Capacitor.getPlatform() === 'ios') {
     //       resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
     //     } else {
     //       resolvedPath = await File.resolveDirectoryUrl(path);
     //     }
-
     //     File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
     //       (buffer: ArrayBuffer) => {
     //         const imgBlob = new Blob([buffer], {
     //           type: media.type,
     //         });
-
     //         const fname = `thumb-${currentVideoArray.length}`;
-
     //         const thumbnailoption: CreateThumbnailOptions = {
     //           fileUri: resolvedPath.nativeURL + media.name,
     //           quality: 100,
     //           atTime: 1,
     //           outputFileName: fname,
     //         };
-
     //         VideoEditor.createThumbnail(thumbnailoption)
     //           .then(async (thumbnailPath: string) => {
     //             const pathThumbs = thumbnailPath.substring(
@@ -121,7 +114,6 @@ const SignalCapture = () => {
     //             );
     //             const resolvedPathThumb: DirectoryEntry =
     //               await File.resolveDirectoryUrl(`file://${pathThumbs}`);
-
     //             File.readAsDataURL(
     //               resolvedPathThumb.nativeURL,
     //               `${fname}.jpg`
@@ -325,7 +317,6 @@ const SignalCapture = () => {
               cssClass: 'popup-yes',
               handler: () => {
                 removeRecord(toDelete);
-                console.log('Confirm Yes');
                 setShowAlert(false);
               },
             },
@@ -335,7 +326,6 @@ const SignalCapture = () => {
               role: 'cancel',
               handler: () => {
                 setShowAlert(false);
-                console.log('Confirm No');
               },
             },
           ]}
@@ -350,7 +340,6 @@ const SignalCapture = () => {
               text: Strings.BUTTON_NAME_YES,
               cssClass: 'popup-yes',
               handler: () => {
-                console.log('Confirm Yes');
                 dispatch(Creators.setCurrentArrayVideo([]));
                 setShowAlertPage(false);
                 history.goBack();
@@ -361,7 +350,6 @@ const SignalCapture = () => {
               cssClass: 'popup-no',
               role: 'cancel',
               handler: () => {
-                console.log('Confirm No');
                 setShowAlertPage(false);
               },
             },

@@ -17,8 +17,8 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-const playerService = PlayerService.getService();
-const regex = /^[a-zA-Z0-9_\p{L} ]+[!?.]*?$/u;
+const playerService = PlayerService.getPlayerInstance();
+const regex = /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/;
 
 const Translator = () => {
   const translatorText = useSelector(
@@ -73,8 +73,9 @@ const Translator = () => {
               type="button"
               disabled={
                 translatorText.trim().length === 0 ||
-                !regex.test(translatorText)
-              }>
+                regex.test(translatorText)
+              }
+            >
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

@@ -69,7 +69,7 @@ export async function translate(data: TranslateData): Promise<string> {
   try {
     return String(response.data);
   } catch(error: unknown) {
-    throw Error('Could parse received gloss data to string.')
+    throw Error('Could parse received gloss data to string.');
   }
 }
 

@@ -1,5 +1,3 @@
-import { LocalFileSystem } from '@ionic-native/file';
-
 declare global {
   interface Window {
     requestFileSystem(
@@ -22,5 +20,6 @@ declare global {
     CounterGloss(counter: number, glossLength: number): void;
     // Triggers when the splash screen closes [MA]
     FinishWelcome(flag: boolean): void;
+    GetAvatar(avatarName: string): void;
   }
 }

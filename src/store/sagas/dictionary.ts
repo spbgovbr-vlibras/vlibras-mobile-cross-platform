@@ -19,7 +19,7 @@ function* fetchRegionalistWords(
   action: ReturnType<typeof Creators.fetchRegionalismWords.request>
 ): Generator<unknown, void, [string]> {
   try {
-    const response = yield fetchBundles(action.payload.abbrreviation);    
+    const response = yield fetchBundles(action.payload.abbrreviation);
     yield put(Creators.fetchRegionalismWords.success(
       { data: response }
     ));
@@ -29,6 +29,6 @@ function* fetchRegionalistWords(
 }
 
 export default all(
-  [takeLatest(Creators.fetchWords.request, fetchWords), 
-  takeLatest(Creators.fetchRegionalismWords.request, fetchRegionalistWords)]
+  [takeLatest(Creators.fetchWords.request, fetchWords),
+    takeLatest(Creators.fetchRegionalismWords.request, fetchRegionalistWords)]
 );

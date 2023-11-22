@@ -22,16 +22,16 @@ const getModalTexts = (
   description: string;
 } => {
   switch (translationRequestType) {
-    case TranslationRequestType.GLOSS_ONLY:
-      return {
-        title: Strings.GLOSS_ONLY_TITLE,
-        description: Strings.GLOSS_ONLY_DESCRIPTION,
-      };
-    default:
-      return {
-        title: Strings.VIDEO_SHARE_TITLE,
-        description: Strings.VIDEO_SHARE_DESCRIPTION,
-      };
+  case TranslationRequestType.GLOSS_ONLY:
+    return {
+      title: Strings.GLOSS_ONLY_TITLE,
+      description: Strings.GLOSS_ONLY_DESCRIPTION,
+    };
+  default:
+    return {
+      title: Strings.VIDEO_SHARE_TITLE,
+      description: Strings.VIDEO_SHARE_DESCRIPTION,
+    };
   }
 };
 

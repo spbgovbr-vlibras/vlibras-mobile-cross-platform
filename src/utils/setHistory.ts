@@ -19,7 +19,7 @@ export const reloadHistory = async (
       resultPromise[payloadDate] = {};
       resultPromise[payloadDate][key] = [payloadData];
     }
-  
+
     await NativeStorage.setItem('history', resultPromise);
   // eslint-disable-next-line no-empty
   } catch { }
@@ -41,4 +41,4 @@ const getStorageItem = async (key: string, defaultValue: unknown) => {
   } catch (error) {
     return defaultValue;
   }
-}
+};

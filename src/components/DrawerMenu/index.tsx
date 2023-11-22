@@ -248,17 +248,17 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           </IonListHeader>
           {isVideoScreen
             ? renderItemTab(
-                paths.DOMAIN,
-                Strings.TITLE_MENU_DOMAIN,
-                IconDomain,
-                true
-              )
+              paths.DOMAIN,
+              Strings.TITLE_MENU_DOMAIN,
+              IconDomain,
+              true
+            )
             : renderItemTab(
-                paths.REGIONALISM,
-                Strings.TITLE_MENU_REGIONALISM,
-                IconRegionalism,
-                true
-              )}
+              paths.REGIONALISM,
+              Strings.TITLE_MENU_REGIONALISM,
+              IconRegionalism,
+              true
+            )}
           {renderItemTab(
             paths.CUSTOMIZATION,
             Strings.TITLE_MENU_CUSTOMIZATION,

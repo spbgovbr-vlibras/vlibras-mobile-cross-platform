@@ -155,15 +155,16 @@ const TranslationProvider: React.FC = ({ children }) => {
           recentTranslation.length <= MAX_RECENTS_WORD
             ? [text, ...recentTranslation.filter((item) => item !== text)]
             : [
-                text,
-                ...recentTranslation
-                  .slice(0, -1)
-                  .filter((item) => item !== text),
-              ];
+              text,
+              ...recentTranslation
+                .slice(0, -1)
+                .filter((item) => item !== text),
+            ];
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
       }
       setTextPtBr(text);
+
       try {
         const gloss = await translate({ text });
         setTextGloss(gloss);
@@ -174,6 +175,8 @@ const TranslationProvider: React.FC = ({ children }) => {
         await delay(500);
         setIsLoading(false);
         setTranslationGlossError(true);
+        await delay(1500);
+        translation = text;
       }
 
       return translation;
@@ -188,11 +191,11 @@ const TranslationProvider: React.FC = ({ children }) => {
           recentTranslation.length <= MAX_RECENTS_WORD
             ? [gloss, ...recentTranslation.filter((item) => item !== gloss)]
             : [
-                gloss,
-                ...recentTranslation
-                  .slice(0, -1)
-                  .filter((item) => item !== gloss),
-              ];
+              gloss,
+              ...recentTranslation
+                .slice(0, -1)
+                .filter((item) => item !== gloss),
+            ];
         setRecentTranslation(recents);
         NativeStorage.setItem(PROPERTY_KEY, recents);
         // Words from the dictionary have no PT BR text, only gloss. [TF]
