@@ -205,7 +205,7 @@ function Dictionary() {
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))}
 
-              {recentTranslation.length === 0 ? (
+              {recentTranslation.length === 0 && filter !== 'alphabetical'? (
                 <div className="dictionary-word-item">
                   Nenhuma pesquisa recente
                 </div>
