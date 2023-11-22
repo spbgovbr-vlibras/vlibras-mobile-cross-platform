@@ -91,6 +91,7 @@ function Regionalism() {
       setCurrentRegion({
         name: current.name,
         abbreviation: current.abbreviation,
+        url: current.url
       });
     }
   }
@@ -101,6 +102,7 @@ function Regionalism() {
       setCurrentRegion({
         name: current.name,
         abbreviation: current.abbreviation,
+        url: current.url
       });
     }
   };

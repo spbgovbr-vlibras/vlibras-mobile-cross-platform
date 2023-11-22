@@ -9,6 +9,7 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   useIonViewWillEnter,
+  IonImg,
 } from '@ionic/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -194,7 +195,7 @@ function Dictionary() {
             </IonChip>
             {currentRegionalism.abbreviation !== 'BR' && (
               <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
-                {currentRegionalism.abbreviation}
+                {<IonImg src={currentRegionalism.url} />}
               </IonChip>
             )}
           </div>
