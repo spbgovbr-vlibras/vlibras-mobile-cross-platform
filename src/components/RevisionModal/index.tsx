@@ -131,7 +131,6 @@ const RevisionModal = ({
   const onSearch = useCallback(
     (event) => {
       setAuxValueText(event.target.value || '');
-      console.log(auxValueText);
 
       const searchText = (event.target.value || '').split(' ').pop();
       dispatch(
