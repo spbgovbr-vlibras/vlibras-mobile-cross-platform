@@ -40,6 +40,7 @@ const RevisionModal = ({
   const { textPtBr, textGloss } = useTranslation();
   // Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState(textGloss);
+  const [firstEntry, setFirstEntry] = useState(true);
   const [isPreview, setIsPreview] = useState(false);
   const dispatch = useDispatch();
 
@@ -47,6 +48,7 @@ const RevisionModal = ({
     setShow(false);
     setIsPreview(false);
     setAuxValueText('');
+    setFirstEntry(true);
   };
 
   const handlePlaySuggestionGlosa = () => {
@@ -104,9 +106,10 @@ const RevisionModal = ({
   );
 
   useEffect(() => {
-    if (show && !auxValueText) {
+    if (show && firstEntry) {
       // Setting TextArea value with the current translator
       setAuxValueText(textGloss);
+      setFirstEntry(false);
       const searchText = textGloss.toString().split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
@@ -128,6 +131,7 @@ const RevisionModal = ({
   const onSearch = useCallback(
     (event) => {
       setAuxValueText(event.target.value || '');
+
       const searchText = (event.target.value || '').split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
