@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://homonimos.lavid.ufpb.br:8088/api/v1',
+  baseURL: 'https://transcodificador-dth.vlibras.gov.br/api/v1/',
 });
 
 export interface VideoData {
