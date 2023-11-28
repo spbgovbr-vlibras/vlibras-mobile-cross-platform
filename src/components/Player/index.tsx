@@ -38,6 +38,7 @@ import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
+import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -285,8 +286,10 @@ function Player() {
   useEffect(() => {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
+        console.log('UNITY LOADED');
         dispatch(Creators.loadAvatar.request());
         dispatch(Creators.loadCustomization.request({}));
+        dispatch(CreatorLoading.setIsLoading({ isLoading: true }));
         setVisiblePlayer(true);
       }
     });
