@@ -96,7 +96,9 @@ function Dictionary() {
       key={item.id}
       className="dictionary-word-item"
       onClick={() => translate(item.name)}>
-      <IonText className="dictionary-words-style">{formattedGloss(item.name)}</IonText>
+      <IonText className="dictionary-words-style">
+        {formattedGloss(item.name)}
+      </IonText>
     </IonItem>
   );
 
@@ -105,7 +107,9 @@ function Dictionary() {
       key={item}
       className="dictionary-word-item"
       onClick={() => translate(item)}>
-      <IonText className="dictionary-words-style">{formattedGloss(item)}</IonText>
+      <IonText className="dictionary-words-style">
+        {formattedGloss(item)}
+      </IonText>
     </IonItem>
   );
 
@@ -195,7 +199,9 @@ function Dictionary() {
             </IonChip>
             {currentRegionalism.abbreviation !== 'BR' && (
               <IonChip className="dictionary-container-ion-chips-abbreviation disabled-chip-abbreviation">
-                {<IonImg src={currentRegionalism.url} />}
+                {currentRegionalism.url.length > 0 && (
+                  <IonImg src={currentRegionalism.url} />
+                )}
               </IonChip>
             )}
           </div>
@@ -211,7 +217,7 @@ function Dictionary() {
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))}
 
-              {recentTranslation.length === 0 && filter !== 'alphabetical'? (
+              {recentTranslation.length === 0 && filter !== 'alphabetical' ? (
                 <div className="dictionary-word-item">
                   Nenhuma pesquisa recente
                 </div>

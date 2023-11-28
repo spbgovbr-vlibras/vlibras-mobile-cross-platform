@@ -145,7 +145,7 @@ function Player() {
     const mimeType =
       (await info).platform === ('android' || 'web')
         ? 'video/webm'
-        : 'video/webm';
+        : 'video/mp4';
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
