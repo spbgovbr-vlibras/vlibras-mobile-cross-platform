@@ -15,7 +15,7 @@ export default class UnityService {
 
   private constructor() {
     this.unityContent = new UnityContent(
-      'final/Build/09-10-23.json',
+      'final/Build/24-11-23.json',
       'final/Build/UnityLoader.js',
       {
         adjustOnWindowResize: true,
@@ -70,10 +70,6 @@ export default class UnityService {
     let onLoadPlayer: () => void;
     // eslint-disable-next-line prefer-const
     onLoadPlayer = () => {
-      this.unityContent.send(
-        PlayerKeys.PLAYER_MANAGER,
-        PlayerKeys.INIT_RANDOM_ANIMATION
-      );
       this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
       this.setBaseURL(regionAbreviation);
       this.isReady = true;

@@ -18,7 +18,9 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getPlayerInstance();
-const regex = /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/;
+const regex =
+  // eslint-disable-next-line no-useless-escape
+  /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/;
 
 const Translator = () => {
   const translatorText = useSelector(
@@ -72,10 +74,8 @@ const Translator = () => {
               onClick={translate}
               type="button"
               disabled={
-                translatorText.trim().length === 0 ||
-                regex.test(translatorText)
-              }
-            >
+                translatorText.trim().length === 0 || regex.test(translatorText)
+              }>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
