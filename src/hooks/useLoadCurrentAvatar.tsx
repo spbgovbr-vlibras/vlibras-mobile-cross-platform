@@ -9,7 +9,8 @@ import { useOnAvatarLoaded } from './unityHooks';
 export const useLoadCurrentAvatar = (
   initialAvatar: Avatar,
   unityService: UnityService,
-  nextAvatar: Avatar
+  nextAvatar: Avatar,
+  onAvatarFirstLoaded?: () => void
 ) => {
   const [isFirstLoaded, setIsFirstLoaded] = useState(false);
 
@@ -21,6 +22,12 @@ export const useLoadCurrentAvatar = (
         initialAvatar
       );
       setIsFirstLoaded(true);
+
+      setTimeout(() => {
+        if (onAvatarFirstLoaded) {
+          onAvatarFirstLoaded();
+        }
+      }, 100);
     }, 500);
 
     return () => clearTimeout(timeout);
@@ -28,9 +35,11 @@ export const useLoadCurrentAvatar = (
 
   useOnAvatarLoaded(
     (_avatarName: string) => {
-      loadCurrentAvatar();
+      if (!isFirstLoaded) {
+        loadCurrentAvatar();
+      }
     },
-    [loadCurrentAvatar]
+    [loadCurrentAvatar, isFirstLoaded]
   );
 
   useEffect(() => {

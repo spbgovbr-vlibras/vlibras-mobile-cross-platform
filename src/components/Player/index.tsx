@@ -373,7 +373,10 @@ function Player() {
   useLoadCurrentAvatar(
     currentAvatar,
     PlayerService.getPlayerInstance(),
-    currentAvatar
+    currentAvatar,
+    () => {
+      playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_WELCOME);
+    }
   );
 
   useOnCounterGloss((counter: number, _glossLength: number) => {
