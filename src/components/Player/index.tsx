@@ -774,6 +774,8 @@ function Player() {
                 />
               </div>
               <button
+              disabled={currentStep >= TutorialSteps.CLOSE &&
+                currentStep <= TutorialSteps.PLAYBACK_SPEED}
                 className="player-button-rounded-top"
                 type="button"
                 onClick={handleStop}>
@@ -837,7 +839,8 @@ function Player() {
           </div>
           {!submittedRevision && (
             <button
-              disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
+              disabled={currentStep >= TutorialSteps.CLOSE &&
+                currentStep <= TutorialSteps.PLAYBACK_SPEED}
               className="player-button-rounded"
               type="button"
               onClick={() => setShowModal(true)}>
@@ -858,10 +861,8 @@ function Player() {
             />
           </div>
           <button
-            disabled={
-              currentStep === TutorialSteps.SHARE ||
-              currentStep === TutorialSteps.LIKED_TRANSLATION
-            }
+            disabled={currentStep >= TutorialSteps.CLOSE &&
+              currentStep <= TutorialSteps.PLAYBACK_SPEED}
             className="player-button-rounded"
             type="button"
             onClick={() => {
