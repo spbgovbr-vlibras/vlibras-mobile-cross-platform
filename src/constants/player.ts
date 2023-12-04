@@ -13,4 +13,5 @@ export enum PlayerKeys {
   SEND_REVIEW = 'sendReview',
   AVATAR = 'Avatar',
   SETEDITOR = 'setEditorCustomization',
+  PLAY_WELCOME = 'playWellcome',
 }
