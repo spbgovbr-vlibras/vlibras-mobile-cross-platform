@@ -259,7 +259,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 IconRegionalism,
                 true
               )}
-          {isLoadingAction ? (
+          {!isLoadingAction ? (
             renderItemTab(
               paths.CUSTOMIZATION,
               Strings.TITLE_MENU_CUSTOMIZATION,
