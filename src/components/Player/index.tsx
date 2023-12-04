@@ -142,10 +142,12 @@ function Player() {
 
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
-    const mimeType =
-      (await info).platform === ('android' || 'web')
-        ? 'video/webm'
-        : 'video/mp4';
+    const platform = (await info).platform;
+    const mimeType = ['android', 'web'].includes(platform)
+      ? 'video/webm'
+      : 'video/mp4';
+
+    console.log(mimeType);
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
