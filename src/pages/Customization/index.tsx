@@ -23,6 +23,7 @@ import {
 } from 'assets';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import CustomizationBody from 'data/CustomizationArrayBody';
 import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
@@ -241,22 +242,30 @@ function Customization() {
     selectcolorpants(currentPants);
     selectcoloreye(currentEye);
 
-    const preProcessingPreview = JSON.stringify({
+    const customizedAvatar = updateAvatarCustomizationProperties({
+      avatar: currentAvatar,
       corpo: currentBody,
-      olhos: '#000',
       cabelo: currentHair,
       camisa: currentShirt,
       calca: currentPants,
       iris: currentEye,
-      pos: 'center',
     });
 
+    const preProcessingPreview = JSON.stringify(customizedAvatar);
+
     unityContent.send(
-      PlayerKeys.AVATAR,
-      PlayerKeys.SETEDITOR,
+      PlayerKeys.CUSTOMIZATION_BRIDGE,
+      PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+  }, [
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+    currentAvatar,
+  ]);
 
   // CUSTOMIZER ICARO
 
@@ -267,22 +276,22 @@ function Customization() {
   }, [visiblePlayer, rollbackCustomization]);
 
   useEffect(() => {
-    const preProcessingPreview = JSON.stringify({
+    const customizedAvatar = updateAvatarCustomizationProperties({
+      avatar: currentAvatar,
       corpo: colorbody,
-      olhos: '#000',
       cabelo: colorhair,
       camisa: colorshirt,
       calca: colorpants,
       iris: coloreye,
-      pos: 'center',
     });
+    const preProcessingPreview = JSON.stringify(customizedAvatar);
 
     unityContent.send(
-      PlayerKeys.AVATAR,
-      PlayerKeys.SETEDITOR,
+      PlayerKeys.CUSTOMIZATION_BRIDGE,
+      PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
+  }, [colorbody, colorhair, colorshirt, colorpants, coloreye, currentAvatar]);
 
   // Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
   // ------------------------------------------------------------------------------------------------
