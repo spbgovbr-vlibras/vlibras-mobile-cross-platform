@@ -53,6 +53,7 @@ import {
 } from 'hooks/unityHooks';
 
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
+import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -287,7 +288,6 @@ function Player() {
   useEffect(() => {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
-        console.log('UNITY LOADED');
         dispatch(Creators.loadAvatar.request());
         dispatch(Creators.loadCustomization.request({}));
         dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
@@ -681,29 +681,22 @@ function Player() {
   };
 
   useEffect(() => {
-    const preProcessingPreview = JSON.stringify({
+    const customizedAvatar = updateAvatarCustomizationProperties({
       avatar: currentAvatar,
       corpo: currentBody,
-      olhos: '#fffafa',
       cabelo: currentHair,
       camisa: currentShirt,
       calca: currentPants,
       iris: currentEye,
-      pos: 'center',
     });
+    const preProcessingPreview = JSON.stringify(customizedAvatar);
+
     playerService.send(
-      PlayerKeys.AVATAR,
-      PlayerKeys.SETEDITOR,
+      PlayerKeys.CUSTOMIZATION_BRIDGE,
+      PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [
-    currentBody,
-    currentHair,
-    currentShirt,
-    currentPants,
-    currentEye,
-    currentAvatar,
-  ]);
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
   return (
     <div className="player-container">

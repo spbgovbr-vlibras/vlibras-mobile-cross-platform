@@ -23,6 +23,7 @@ import {
 } from 'assets';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import CustomizationBody from 'data/CustomizationArrayBody';
 import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
@@ -222,12 +223,10 @@ function Customization() {
     dispatch(
       Creators.storeCustomization.request({
         corpo: colorbody,
-        olhos: '#000',
         cabelo: colorhair,
         camisa: colorshirt,
         calca: colorpants,
         iris: coloreye,
-        pos: 'center',
       })
     );
 
@@ -241,22 +240,30 @@ function Customization() {
     selectcolorpants(currentPants);
     selectcoloreye(currentEye);
 
-    const preProcessingPreview = JSON.stringify({
+    const customizedAvatar = updateAvatarCustomizationProperties({
+      avatar: currentAvatar,
       corpo: currentBody,
-      olhos: '#000',
       cabelo: currentHair,
       camisa: currentShirt,
       calca: currentPants,
       iris: currentEye,
-      pos: 'center',
     });
 
+    const preProcessingPreview = JSON.stringify(customizedAvatar);
+
     unityContent.send(
-      PlayerKeys.AVATAR,
-      PlayerKeys.SETEDITOR,
+      PlayerKeys.CUSTOMIZATION_BRIDGE,
+      PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+  }, [
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+    currentAvatar,
+  ]);
 
   // CUSTOMIZER ICARO
 
@@ -267,22 +274,22 @@ function Customization() {
   }, [visiblePlayer, rollbackCustomization]);
 
   useEffect(() => {
-    const preProcessingPreview = JSON.stringify({
+    const customizedAvatar = updateAvatarCustomizationProperties({
+      avatar: currentAvatar,
       corpo: colorbody,
-      olhos: '#000',
       cabelo: colorhair,
       camisa: colorshirt,
       calca: colorpants,
       iris: coloreye,
-      pos: 'center',
     });
+    const preProcessingPreview = JSON.stringify(customizedAvatar);
 
     unityContent.send(
-      PlayerKeys.AVATAR,
-      PlayerKeys.SETEDITOR,
+      PlayerKeys.CUSTOMIZATION_BRIDGE,
+      PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [colorbody, colorhair, colorshirt, colorpants, coloreye]);
+  }, [colorbody, colorhair, colorshirt, colorpants, coloreye, currentAvatar]);
 
   // Selection Menu ( body, eye, shirt, pants, hair) -----------------------------------------------
   // ------------------------------------------------------------------------------------------------
@@ -296,22 +303,22 @@ function Customization() {
   };
 
   const cancelAndReturnToHome = useCallback(() => {
-    setshowAlertCancel(false);
-    rollbackCustomization();
+    // rollbackCustomization();
     history.push(paths.HOME);
-  }, [setshowAlertCancel, rollbackCustomization, history]);
+  }, [rollbackCustomization, history]);
 
   const onCloseClick = useCallback(() => {
-    if (
-      hasChanges(
-        { colorbody, colorpants, coloreye, colorhair, colorshirt },
-        currentCustomization
-      )
-    ) {
-      setshowAlertCancel(true);
-    } else {
-      cancelAndReturnToHome();
-    }
+    cancelAndReturnToHome();
+    // if (
+    //   hasChanges(
+    //     { colorbody, colorpants, coloreye, colorhair, colorshirt },
+    //     currentCustomization
+    //   )
+    // ) {
+    //   setshowAlertCancel(true);
+    // } else {
+    //   cancelAndReturnToHome();
+    // }
   }, [
     colorbody,
     colorpants,
@@ -590,35 +597,12 @@ function Customization() {
             onClick={() => setshowAlert(true)}
             type="button">
             {Strings.BUTTON_RESET}
-            <IonAlert
-              isOpen={showAlert}
-              className="popup-box-signal-cap"
-              header={Strings.TITLE_POPUP_RESET}
-              message={Strings.MESSAGE_POPUPCANCEL}
-              buttons={[
-                {
-                  text: Strings.BUTTON_NAME_YES,
-                  cssClass: 'popup-yes',
-                  handler: () => {
-                    setshowAlert(false);
-                    resetColor();
-                  },
-                },
-                {
-                  text: Strings.BUTTON_NAME_NO,
-                  cssClass: 'popup-no',
-                  role: 'cancel',
-                  handler: () => {
-                    setshowAlert(false);
-                  },
-                },
-              ]}
-            />
-            <IonAlert
+            {/* <IonAlert
               isOpen={showAlertCancel}
               className="popup-box-signal-cap"
               header={Strings.TITLE_POPUPCANCEL}
               message={Strings.MESSAGE_POPUPCANCEL}
+              onDidDismiss={() => setshowAlertCancel(false)}
               buttons={[
                 {
                   text: Strings.BUTTON_NAME_YES,
@@ -629,9 +613,31 @@ function Customization() {
                   text: Strings.BUTTON_NAME_NO,
                   cssClass: 'popup-no',
                   role: 'cancel',
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  handler: () => {},
+                },
+              ]}
+            /> */}
+            <IonAlert
+              isOpen={showAlert}
+              className="popup-box-signal-cap"
+              header={Strings.TITLE_POPUP_RESET}
+              message={Strings.MESSAGE_POPUPCANCEL}
+              onDidDismiss={() => setshowAlert(false)}
+              buttons={[
+                {
+                  text: Strings.BUTTON_NAME_YES,
+                  cssClass: 'popup-yes',
                   handler: () => {
-                    setshowAlertCancel(false);
+                    resetColor();
                   },
+                },
+                {
+                  text: Strings.BUTTON_NAME_NO,
+                  cssClass: 'popup-no',
+                  role: 'cancel',
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  handler: () => {},
                 },
               ]}
             />

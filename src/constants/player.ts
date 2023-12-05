@@ -11,7 +11,7 @@ export enum PlayerKeys {
   SET_BASE_URL = 'setBaseUrl',
   SET_SLIDER = 'setSlider',
   SEND_REVIEW = 'sendReview',
-  AVATAR = 'Avatar',
-  SETEDITOR = 'setEditorCustomization',
+  CUSTOMIZATION_BRIDGE = 'CustomizationBridge',
+  APPLY_JSON = 'ApplyJSON',
   PLAY_WELCOME = 'playWellcome',
 }
