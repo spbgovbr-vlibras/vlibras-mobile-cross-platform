@@ -303,22 +303,22 @@ function Customization() {
   };
 
   const cancelAndReturnToHome = useCallback(() => {
-    setshowAlertCancel(false);
-    rollbackCustomization();
+    // rollbackCustomization();
     history.push(paths.HOME);
-  }, [setshowAlertCancel, rollbackCustomization, history]);
+  }, [rollbackCustomization, history]);
 
   const onCloseClick = useCallback(() => {
-    if (
-      hasChanges(
-        { colorbody, colorpants, coloreye, colorhair, colorshirt },
-        currentCustomization
-      )
-    ) {
-      setshowAlertCancel(true);
-    } else {
-      cancelAndReturnToHome();
-    }
+    cancelAndReturnToHome();
+    // if (
+    //   hasChanges(
+    //     { colorbody, colorpants, coloreye, colorhair, colorshirt },
+    //     currentCustomization
+    //   )
+    // ) {
+    //   setshowAlertCancel(true);
+    // } else {
+    //   cancelAndReturnToHome();
+    // }
   }, [
     colorbody,
     colorpants,
@@ -597,35 +597,12 @@ function Customization() {
             onClick={() => setshowAlert(true)}
             type="button">
             {Strings.BUTTON_RESET}
-            <IonAlert
-              isOpen={showAlert}
-              className="popup-box-signal-cap"
-              header={Strings.TITLE_POPUP_RESET}
-              message={Strings.MESSAGE_POPUPCANCEL}
-              buttons={[
-                {
-                  text: Strings.BUTTON_NAME_YES,
-                  cssClass: 'popup-yes',
-                  handler: () => {
-                    setshowAlert(false);
-                    resetColor();
-                  },
-                },
-                {
-                  text: Strings.BUTTON_NAME_NO,
-                  cssClass: 'popup-no',
-                  role: 'cancel',
-                  handler: () => {
-                    setshowAlert(false);
-                  },
-                },
-              ]}
-            />
-            <IonAlert
+            {/* <IonAlert
               isOpen={showAlertCancel}
               className="popup-box-signal-cap"
               header={Strings.TITLE_POPUPCANCEL}
               message={Strings.MESSAGE_POPUPCANCEL}
+              onDidDismiss={() => setshowAlertCancel(false)}
               buttons={[
                 {
                   text: Strings.BUTTON_NAME_YES,
@@ -636,9 +613,31 @@ function Customization() {
                   text: Strings.BUTTON_NAME_NO,
                   cssClass: 'popup-no',
                   role: 'cancel',
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  handler: () => {},
+                },
+              ]}
+            /> */}
+            <IonAlert
+              isOpen={showAlert}
+              className="popup-box-signal-cap"
+              header={Strings.TITLE_POPUP_RESET}
+              message={Strings.MESSAGE_POPUPCANCEL}
+              onDidDismiss={() => setshowAlert(false)}
+              buttons={[
+                {
+                  text: Strings.BUTTON_NAME_YES,
+                  cssClass: 'popup-yes',
                   handler: () => {
-                    setshowAlertCancel(false);
+                    resetColor();
                   },
+                },
+                {
+                  text: Strings.BUTTON_NAME_NO,
+                  cssClass: 'popup-no',
+                  role: 'cancel',
+                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                  handler: () => {},
                 },
               ]}
             />
