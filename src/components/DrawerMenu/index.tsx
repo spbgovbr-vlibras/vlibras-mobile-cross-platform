@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
 import React, { useEffect, useState, useRef } from 'react';
