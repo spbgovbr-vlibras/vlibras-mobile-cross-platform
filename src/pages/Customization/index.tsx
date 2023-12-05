@@ -223,12 +223,10 @@ function Customization() {
     dispatch(
       Creators.storeCustomization.request({
         corpo: colorbody,
-        olhos: '#000',
         cabelo: colorhair,
         camisa: colorshirt,
         calca: colorpants,
         iris: coloreye,
-        pos: 'center',
       })
     );
 

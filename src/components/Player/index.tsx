@@ -696,14 +696,7 @@ function Player() {
       PlayerKeys.APPLY_JSON,
       preProcessingPreview
     );
-  }, [
-    currentBody,
-    currentHair,
-    currentShirt,
-    currentPants,
-    currentEye,
-    currentAvatar,
-  ]);
+  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
 
   return (
     <div className="player-container">

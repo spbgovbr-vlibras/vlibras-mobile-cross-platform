@@ -53,12 +53,10 @@ const INITIAL_STATE: CustomizationState = {
 
 export type CustomizationColors = {
   corpo: string;
-  olhos: string;
   cabelo: string;
   camisa: string;
   calca: string;
   iris: string;
-  pos: 'center';
 };
 
 export const Creators = {

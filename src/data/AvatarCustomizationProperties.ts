@@ -1,6 +1,6 @@
 import { Avatar } from 'constants/types';
 
-type AvatarCustomizationProperties = {
+export type AvatarCustomizationProperties = {
   cabelo: string;
   calca: string;
   camisa: string;
