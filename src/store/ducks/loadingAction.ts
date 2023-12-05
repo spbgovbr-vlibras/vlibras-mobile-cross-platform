@@ -15,7 +15,7 @@ export interface LoadingActionState {
 }
 
 const INITIAL_STATE: LoadingActionState = {
-  isLoading: false,
+  isLoading: true,
 };
 
 export const Creators = {

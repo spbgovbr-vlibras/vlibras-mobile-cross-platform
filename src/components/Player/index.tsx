@@ -148,7 +148,6 @@ function Player() {
       ? 'video/webm'
       : 'video/mp4';
 
-    console.log(mimeType);
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
@@ -291,7 +290,7 @@ function Player() {
         console.log('UNITY LOADED');
         dispatch(Creators.loadAvatar.request());
         dispatch(Creators.loadCustomization.request({}));
-        dispatch(CreatorLoading.setIsLoading({ isLoading: true }));
+        dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
         setVisiblePlayer(true);
       }
     });
@@ -782,8 +781,10 @@ function Player() {
                 />
               </div>
               <button
-              disabled={currentStep >= TutorialSteps.CLOSE &&
-                currentStep <= TutorialSteps.PLAYBACK_SPEED}
+                disabled={
+                  currentStep >= TutorialSteps.CLOSE &&
+                  currentStep <= TutorialSteps.PLAYBACK_SPEED
+                }
                 className="player-button-rounded-top"
                 type="button"
                 onClick={handleStop}>
@@ -847,8 +848,10 @@ function Player() {
           </div>
           {!submittedRevision && (
             <button
-              disabled={currentStep >= TutorialSteps.CLOSE &&
-                currentStep <= TutorialSteps.PLAYBACK_SPEED}
+              disabled={
+                currentStep >= TutorialSteps.CLOSE &&
+                currentStep <= TutorialSteps.PLAYBACK_SPEED
+              }
               className="player-button-rounded"
               type="button"
               onClick={() => setShowModal(true)}>
@@ -869,8 +872,10 @@ function Player() {
             />
           </div>
           <button
-            disabled={currentStep >= TutorialSteps.CLOSE &&
-              currentStep <= TutorialSteps.PLAYBACK_SPEED}
+            disabled={
+              currentStep >= TutorialSteps.CLOSE &&
+              currentStep <= TutorialSteps.PLAYBACK_SPEED
+            }
             className="player-button-rounded"
             type="button"
             onClick={() => {
