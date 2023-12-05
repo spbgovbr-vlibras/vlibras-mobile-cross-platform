@@ -38,6 +38,7 @@ import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
+import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -142,10 +143,11 @@ function Player() {
 
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   async function initRecorder() {
-    const mimeType =
-      (await info).platform === ('android' || 'web')
-        ? 'video/webm'
-        : 'video/mp4';
+    const platform = (await info).platform;
+    const mimeType = ['android', 'web'].includes(platform)
+      ? 'video/webm'
+      : 'video/mp4';
+
     const canvas = document.querySelector('canvas');
     const stream = canvas?.captureStream(25);
     if (stream) {
@@ -285,8 +287,10 @@ function Player() {
   useEffect(() => {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
+        console.log('UNITY LOADED');
         dispatch(Creators.loadAvatar.request());
         dispatch(Creators.loadCustomization.request({}));
+        dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
         setVisiblePlayer(true);
       }
     });
@@ -777,6 +781,10 @@ function Player() {
                 />
               </div>
               <button
+                disabled={
+                  currentStep >= TutorialSteps.CLOSE &&
+                  currentStep <= TutorialSteps.PLAYBACK_SPEED
+                }
                 className="player-button-rounded-top"
                 type="button"
                 onClick={handleStop}>
@@ -840,7 +848,10 @@ function Player() {
           </div>
           {!submittedRevision && (
             <button
-              disabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
+              disabled={
+                currentStep >= TutorialSteps.CLOSE &&
+                currentStep <= TutorialSteps.PLAYBACK_SPEED
+              }
               className="player-button-rounded"
               type="button"
               onClick={() => setShowModal(true)}>
@@ -862,8 +873,8 @@ function Player() {
           </div>
           <button
             disabled={
-              currentStep === TutorialSteps.SHARE ||
-              currentStep === TutorialSteps.LIKED_TRANSLATION
+              currentStep >= TutorialSteps.CLOSE &&
+              currentStep <= TutorialSteps.PLAYBACK_SPEED
             }
             className="player-button-rounded"
             type="button"

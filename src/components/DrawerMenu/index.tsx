@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
 import React, { useEffect, useState, useRef } from 'react';
@@ -68,6 +69,10 @@ function getColor(value: string, expected: string): string {
 }
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
+  const isLoadingAction = useSelector(
+    ({ loading }: RootState) => loading.isLoading
+  );
+
   const isVideoScreen = useSelector(
     ({ video }: RootState) => video.isVideoScreen
   );
@@ -171,11 +176,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
       )}
       {title === Strings.TITLE_MENU_REGIONALISM && (
         <>
-          <p className="drawer-menu-sub-item">
-            {
-              current.abbreviation
-            }
-          </p>
+          <p className="drawer-menu-sub-item">{current.abbreviation}</p>
           <div className="arrow-down"> </div>
         </>
       )}
@@ -248,22 +249,26 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           </IonListHeader>
           {isVideoScreen
             ? renderItemTab(
-              paths.DOMAIN,
-              Strings.TITLE_MENU_DOMAIN,
-              IconDomain,
+                paths.DOMAIN,
+                Strings.TITLE_MENU_DOMAIN,
+                IconDomain,
+                true
+              )
+            : renderItemTab(
+                paths.REGIONALISM,
+                Strings.TITLE_MENU_REGIONALISM,
+                IconRegionalism,
+                true
+              )}
+          {!isLoadingAction ? (
+            renderItemTab(
+              paths.CUSTOMIZATION,
+              Strings.TITLE_MENU_CUSTOMIZATION,
+              IconCustomization,
               true
             )
-            : renderItemTab(
-              paths.REGIONALISM,
-              Strings.TITLE_MENU_REGIONALISM,
-              IconRegionalism,
-              true
-            )}
-          {renderItemTab(
-            paths.CUSTOMIZATION,
-            Strings.TITLE_MENU_CUSTOMIZATION,
-            IconCustomization,
-            true
+          ) : (
+            <></>
           )}
         </IonList>
         <IonList lines="none">
