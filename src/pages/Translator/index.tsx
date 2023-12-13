@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { regex } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
@@ -18,9 +19,6 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getPlayerInstance();
-const regex =
-  // eslint-disable-next-line no-useless-escape
-  /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/s;
 
 const Translator = () => {
   const translatorText = useSelector(
