@@ -49,6 +49,7 @@ import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
 import {
   useOnCounterGloss,
+  useOnFinisheWelcome,
   useOnPlayingStateChangeHandler,
 } from 'hooks/unityHooks';
 
@@ -88,6 +89,14 @@ function Player() {
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  const tutorialHandler = () => {
+    setShowTutorial(true);
+    handleStop();
+  };
+
+  useOnFinisheWelcome(tutorialHandler, []);
 
   const openErrorModal = () => {
     setErrorModalOpen(true);
@@ -823,7 +832,8 @@ function Player() {
       </div>
 
       {((currentStep >= TutorialSteps.CLOSE &&
-        currentStep <= TutorialSteps.PLAYBACK_SPEED) ||
+        currentStep <= TutorialSteps.PLAYBACK_SPEED &&
+        currentStep !== TutorialSteps.INITIAL) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
           <div
@@ -915,7 +925,7 @@ function Player() {
         isPlaying={isPlaying}
         onSubmittedRevision={onSubmittedRevision}
       />
-      {TutorialSteps.INITIAL === currentStep && (
+      {TutorialSteps.INITIAL === currentStep && showTutorial && (
         <div className="tutorial-box-shadow">
           <h1>Veja como usar</h1>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
