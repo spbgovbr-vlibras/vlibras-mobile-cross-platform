@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import produce, { Draft } from 'immer';
 import { Reducer } from 'redux';
 import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
@@ -24,7 +25,21 @@ export interface Metadata {
   per_page: number;
   previous_page_url: string;
   total: number;
+  hasNextPage: boolean;
 }
+
+const METADATA_INITIAL_STATE: Metadata = {
+  current_page: FIRST_PAGE_INDEX,
+  first_page: FIRST_PAGE_INDEX,
+  first_page_url: '',
+  last_page: FIRST_PAGE_INDEX,
+  last_page_url: '',
+  next_page_url: '',
+  per_page: 0,
+  previous_page_url: '',
+  total: 0,
+  hasNextPage: false,
+};
 
 export interface ListResponseDictionary {
   meta: Metadata;
@@ -58,7 +73,7 @@ export interface DictionaryState {
 const INITIAL_STATE: DictionaryState = {
   words: [],
   recents: [],
-  metadata: {} as Metadata,
+  metadata: METADATA_INITIAL_STATE,
   loading: false,
   loadingBundle: false,
   regionalismWords: []
@@ -93,6 +108,11 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       break;
     }
     case Types.GET_REQUEST: {
+      if (payload.page === FIRST_PAGE_INDEX) {
+        draft.metadata = METADATA_INITIAL_STATE;
+        draft.words = [];
+      }
+
       draft.loading = true;
       break;
     }
@@ -104,7 +124,10 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       } else {
         draft.words = [...draft.words, ...data];
       }
-      draft.metadata = meta;
+      draft.metadata = {
+        ...meta,
+        hasNextPage: meta.current_page < meta.last_page
+      };
       break;
     }
     case Types.GET_FAILURE: {

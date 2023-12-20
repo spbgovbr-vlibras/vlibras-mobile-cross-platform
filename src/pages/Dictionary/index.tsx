@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
+import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
   MAX_PER_PAGE,
@@ -38,7 +39,7 @@ type DictionaryFilter = 'alphabetical' | 'recents';
 
 const playerService = PlayerService.getPlayerInstance();
 
-const TIME_DEBOUNCE_MS = 1000;
+const TIME_DEBOUNCE_MS = 200;
 
 function getChipClassName(
   filter: DictionaryFilter,
@@ -62,6 +63,7 @@ function Dictionary() {
     metadata,
     words: dictionary,
     regionalismWords,
+    loading,
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
@@ -125,14 +127,31 @@ function Dictionary() {
     </>
   );
 
+  const renderEmptyOrLoadingState = () => {
+    if (dictionary.length === 0 && filter === 'alphabetical') {
+      if (loading) {
+        return <LoadingSpinner loadingDescription="Carregando sinais..." />;
+      } else {
+        return <LoadingSpinner loadingDescription="Carregando sinais..." />;
+        return (
+          <div className="dictionary-word-item">Nenhum sinal encontrado</div>
+        );
+      }
+    }
+    return null;
+  };
+
   const onSearch = useCallback(
     (event) => {
-      setSearchText(event.target.value || '');
+      const searchedWord: string | undefined = event.target.value;
+      setSearchText(searchedWord || '');
       dispatch(
         Creators.fetchWords.request({
           page: FIRST_PAGE_INDEX,
           limit: MAX_PER_PAGE,
-          name: `${event.target.value}%`,
+          ...((searchedWord?.length || 0) > 0 && {
+            name: `${searchedWord}%`,
+          }),
         })
       );
     },
@@ -140,6 +159,12 @@ function Dictionary() {
   );
 
   const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
+
+  useEffect(() => {
+    if (!loading) {
+      infiniteScrollRef.current?.complete();
+    }
+  }, [infiniteScrollRef, loading]);
 
   useEffect(() => {
     dispatch(
@@ -155,10 +180,11 @@ function Dictionary() {
       Creators.fetchWords.request({
         page: metadata.current_page + PAGE_STEP_SIZE,
         limit: MAX_PER_PAGE,
-        name: `${searchText}%`,
+        ...(searchText.length > 0 && {
+          name: `${searchText}%`,
+        }),
       })
     );
-    infiniteScrollRef.current?.complete();
   }, [dispatch, infiniteScrollRef, metadata, searchText]);
 
   function handleFilterAlpha() {
@@ -179,9 +205,9 @@ function Dictionary() {
             <IonSearchbar
               className="dictionary-textarea"
               placeholder={Strings.TEXT_PLACEHOLDER}
-              onIonChange={debouncedSearch}
+              onIonInput={debouncedSearch}
               inputmode="text"
-              searchIcon='search-sharp'
+              searchIcon="search-sharp"
             />
           </div>
           <div className="dictionary-container-ion-chips">
@@ -217,6 +243,8 @@ function Dictionary() {
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))}
 
+              {renderEmptyOrLoadingState()}
+
               {recentTranslation.length === 0 && filter !== 'alphabetical' ? (
                 <div className="dictionary-word-item">
                   Nenhuma pesquisa recente
@@ -225,15 +253,18 @@ function Dictionary() {
             </IonList>
           </div>
         </div>
-        <IonInfiniteScroll
-          ref={infiniteScrollRef}
-          threshold="100px"
-          onIonInfinite={fetchWords}>
-          <IonInfiniteScrollContent
-            loadingSpinner="bubbles"
-            loadingText="Carregando sinais..."
-          />
-        </IonInfiniteScroll>
+        {metadata.hasNextPage && (
+          <IonInfiniteScroll
+            ref={infiniteScrollRef}
+            threshold="100px"
+            onIonInfinite={fetchWords}>
+            <IonInfiniteScrollContent
+              loadingSpinner={loading ? 'bubbles' : undefined}
+              color="dark"
+              loadingText={loading ? 'Carregando sinais...' : ''}
+            />
+          </IonInfiniteScroll>
+        )}
       </IonContent>
     </MenuLayout>
   );
