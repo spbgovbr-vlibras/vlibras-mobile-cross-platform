@@ -132,7 +132,6 @@ function Dictionary() {
       if (loading) {
         return <LoadingSpinner loadingDescription="Carregando sinais..." />;
       } else {
-        return <LoadingSpinner loadingDescription="Carregando sinais..." />;
         return (
           <div className="dictionary-word-item">Nenhum sinal encontrado</div>
         );
