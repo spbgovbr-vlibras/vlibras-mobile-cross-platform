@@ -22,7 +22,7 @@ export const DefaultAvatarCustomizationProperties: AvatarCustomizationProperties
   olhos: '#ffffff',
   sombrancelhas: '#FF0000',
   pos: 'center',
-  logo: 'https://vlibras.gov.br/config/img/logo-lavid.png',
+  logo: '',
   avatar: 'icaro',
 };
 
