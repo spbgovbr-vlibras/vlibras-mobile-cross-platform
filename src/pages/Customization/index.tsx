@@ -303,7 +303,7 @@ function Customization() {
   };
 
   const cancelAndReturnToHome = useCallback(() => {
-    // rollbackCustomization();
+    rollbackCustomization();
     history.push(paths.HOME);
   }, [rollbackCustomization, history]);
 
