@@ -7,6 +7,7 @@ import { IconCloseCircle } from 'assets';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
 import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { PlayerKeys } from 'constants/player';
+import { regex } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { Words } from 'models/dictionary';
 import { sendReview } from 'services/suggestionGloss';
@@ -174,7 +175,7 @@ const RevisionModal = ({
             cols={5}
             wrap="soft"
             required
-            onIonChange={onSearch}
+            onIonInput={onSearch}
             value={auxValueText}
           />
           <div className="suggestion-container">
@@ -190,13 +191,17 @@ const RevisionModal = ({
           <div className="chip-area">
             <IonChip
               className="chip-1"
-              disabled={auxValueText.toString().trim().length === 0}
+              disabled={
+                auxValueText.toString().trim().length === 0 || !regex.test(auxValueText)
+              }
               onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip
               className="chip-2"
-              disabled={auxValueText.toString().trim().length === 0}
+              disabled={
+                auxValueText.toString().trim().length === 0 || !regex.test(auxValueText)
+              }
               onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}
             </IonChip>

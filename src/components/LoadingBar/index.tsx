@@ -27,8 +27,6 @@ const LoadingBar = ({
 
     const progress = (1 / glossLen) * 100;
 
-    console.log(progressBarRef.current, className);
-
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
       progressBarRef.current.style.visibility = 'visible';

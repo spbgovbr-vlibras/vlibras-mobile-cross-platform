@@ -10,29 +10,18 @@ import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
 
 import {
-  IconDictionary,
-  IconHistory,
-  IconEdit,
-  IconPauseOutlined,
-  IconRunning,
-  IconPause,
   IconShare,
   IconThumbs,
   IconClose,
-  logoRefresh,
-  logoSubtitleOn,
-  logoSubtitleOff,
   IcaroAvatar,
   HozanaAvatar,
   GugaAvatar,
-  IconSubtitle,
-  IconRefresh,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
-import { Avatar, TranslationRequestType } from 'constants/types';
+import { TranslationRequestType } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
@@ -45,10 +34,12 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { getVideo, postVideo } from 'services/shareVideo';
 import GenerateModal from 'components/GenerateModal';
+import PlayerButtons from './PlayerButtons';
 import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
 import {
   useOnCounterGloss,
+  useOnFinisheWelcome,
   useOnPlayingStateChangeHandler,
 } from 'hooks/unityHooks';
 
@@ -56,12 +47,6 @@ import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 
 const playerService = PlayerService.getPlayerInstance();
-
-const buttonColors = {
-  VARIANT_BLUE: '#FFF',
-  VARAINT_WHITE: '#939293',
-  VARIANT_WHITE_ACTIVE: '#003F86',
-};
 
 const X1 = 1;
 const X2 = 2;
@@ -88,6 +73,58 @@ function Player() {
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [visiblePlayer, setVisiblePlayer] = useState(false);
+  const [speedValue, setSpeedValue] = useState(X1);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [hasFinished, setHasFinished] = useState(false);
+  const [isShowSubtitle, setIsShowSubtitle] = useState(true);
+  const [popoverState, setShowPopover] = useState<{
+    showPopover: boolean;
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>;
+  }>({
+    showPopover: false,
+    event: undefined,
+  });
+
+  const history = useHistory();
+  const { currentStep, goNextStep, onCancel } = useTutorial();
+  const { textGloss } = useTranslation();
+
+  const currentAvatar = useSelector(
+    ({ customization }: RootState) => customization.currentavatar
+  );
+  const currentBody = useSelector(
+    ({ customization }: RootState) => customization.currentbody
+  );
+  const currentEye = useSelector(
+    ({ customization }: RootState) => customization.currenteye
+  );
+  const currentHair = useSelector(
+    ({ customization }: RootState) => customization.currenthair
+  );
+  const currentShirt = useSelector(
+    ({ customization }: RootState) => customization.currentshirt
+  );
+  const currentPants = useSelector(
+    ({ customization }: RootState) => customization.currentpants
+  );
+
+  const wasPlaying = useRef<boolean>(false);
+  // Reference to handle the progress bar [MA]
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  const location = useLocation();
+  const dispatch = useDispatch();
+
+  const tutorialHandler = (hasFinished: boolean) => {
+    if (hasFinished) {
+      setShowTutorial(true);
+      handleStop();
+    }
+  };
 
   const openErrorModal = () => {
     setErrorModalOpen(true);
@@ -143,7 +180,7 @@ function Player() {
   };
 
   // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
-  async function initRecorder() {
+  const initRecorder = async () => {
     const platform = (await info).platform;
     const mimeType = ['android', 'web'].includes(platform)
       ? 'video/webm'
@@ -163,7 +200,7 @@ function Player() {
       };
       mediaRecorder.start();
     }
-  }
+  };
 
   // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
   // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
@@ -206,7 +243,7 @@ function Player() {
 
   // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
   // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
-  async function initVideoSharing() {
+  const initVideoSharing = async () => {
     isLoading = true;
     if ((await info).platform === 'android') {
       let id = '';
@@ -231,58 +268,9 @@ function Player() {
       const reader = new FileReader();
       reader.onloadend = handleVideoReading(reader, blob);
     }
-  }
+  };
 
-  const [popoverState, setShowPopover] = useState({
-    showPopover: false,
-    event: undefined,
-  });
-  const history = useHistory();
-  const { currentStep, goNextStep, onCancel } = useTutorial();
-
-  const { textGloss } = useTranslation();
-
-  const currentAvatar = useSelector(
-    ({ customization }: RootState) => customization.currentavatar
-  );
-
-  const currentBody = useSelector(
-    ({ customization }: RootState) => customization.currentbody
-  );
-  const currentEye = useSelector(
-    ({ customization }: RootState) => customization.currenteye
-  );
-
-  const currentHair = useSelector(
-    ({ customization }: RootState) => customization.currenthair
-  );
-
-  const currentShirt = useSelector(
-    ({ customization }: RootState) => customization.currentshirt
-  );
-
-  const currentPants = useSelector(
-    ({ customization }: RootState) => customization.currentpants
-  );
-
-  // Dynamic states [MA]
-  const [visiblePlayer, setVisiblePlayer] = useState(false);
-  const [speedValue, setSpeedValue] = useState(X1);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [hasFinished, setHasFinished] = useState(false);
-  const [isShowSubtitle, setIsShowSubtitle] = useState(true);
-  const wasPlaying = useRef<boolean>(false);
-
-  // Reference to handle the progress bar [MA]
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const progressContainerRef = useRef<HTMLDivElement>(null);
-
-  const location = useLocation();
-  const dispatch = useDispatch();
-
-  let glossLen = UNDEFINED_GLOSS;
-  let cache = UNDEFINED_GLOSS;
+  useOnFinisheWelcome(tutorialHandler, []);
 
   // To avoid the unity splash screen [MA]
   useEffect(() => {
@@ -383,6 +371,9 @@ function Player() {
     }
   );
 
+  let glossLen = UNDEFINED_GLOSS;
+  let cache = UNDEFINED_GLOSS;
+
   useOnCounterGloss((counter: number, _glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
@@ -435,248 +426,20 @@ function Player() {
   }
 
   const renderPlayerButtons = () => {
-    if (isPlaying) {
-      return (
-        <>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={(e: any) => {
-              e.persist();
-              setShowPopover({ showPopover: true, event: e });
-            }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
-          </button>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={handlePause}>
-            {isPaused ? (
-              <IconPauseOutlined color={buttonColors.VARIANT_BLUE} size={24} />
-            ) : (
-              <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
-            )}
-          </button>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={handleSubtitle}>
-            {isShowSubtitle ? (
-              <img src={logoSubtitleOn} alt="refresh" />
-            ) : (
-              <img src={logoSubtitleOff} alt="refresh" />
-            )}
-          </button>
-        </>
-      );
-    }
-    if (hasFinished) {
-      return (
-        <>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={(e: any) => {
-              e.persist();
-              setShowPopover({ showPopover: true, event: e });
-            }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
-          </button>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={() => handlePlay(textGloss)}>
-            <img src={logoRefresh} alt="refresh" />
-          </button>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={handleSubtitle}>
-            {isShowSubtitle ? (
-              <img src={logoSubtitleOn} alt="refresh" />
-            ) : (
-              <img src={logoSubtitleOff} alt="refresh" />
-            )}
-          </button>
-        </>
-      );
-    }
     return (
-      <>
-        <div
-          style={{
-            position: 'relative',
-          }}>
-          <div
-            style={{
-              marginRight: 6,
-              position: 'absolute',
-              width: '100vw',
-              bottom: 50,
-              left: 0,
-            }}>
-            <TutorialPopover
-              title="Dicionário"
-              description="Consulte os sinais disponíveis no vlibras"
-              position="bl"
-              isEnabled={currentStep === TutorialSteps.DICTIONARY}
-            />
-          </div>
-          {currentStep >= TutorialSteps.CLOSE &&
-          currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
-            <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
-          ) : (
-            <button
-              className="player-action-button-transparent"
-              type="button"
-              onClick={() => {
-                history.push(paths.DICTIONARY_PLAYER);
-                onCancel();
-              }}>
-              <IconDictionary color={buttonColors.VARAINT_WHITE} />
-            </button>
-          )}
-        </div>
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 70,
-              left: 0,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Tradução PT-BR"
-              description="Escreva ou cole o texto para ser traduzido"
-              position="bc"
-              isEnabled={currentStep === TutorialSteps.TRANSLATION}
-            />
-          </div>
-        </div>
-        {currentStep >= TutorialSteps.CLOSE &&
-        currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button">
-            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
-        ) : (
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={() => {
-              history.push(paths.TRANSLATOR);
-              onCancel();
-            }}>
-            <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
-        )}
-
-        <div
-          style={{
-            margin: 'auto',
-            position: 'absolute',
-            bottom: 70,
-            left: 0,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-          }}>
-          <TutorialPopover
-            title="Repetir tradução"
-            description="Repita a última tradução feita"
-            position="bc"
-            isEnabled={currentStep === TutorialSteps.REPEAT}
-          />
-        </div>
-
-        <div
-          style={{
-            margin: 'auto',
-            position: 'absolute',
-            bottom: 60,
-            left: 0,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            paddingRight: '28px',
-          }}>
-          <TutorialPopover
-            title="Histórico"
-            description="Acesse as traduções dos últimos 30 dias"
-            position="br"
-            isEnabled={currentStep === TutorialSteps.HISTORY}
-          />
-        </div>
-        {currentStep >= TutorialSteps.CLOSE &&
-        currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
-          <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
-        ) : (
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={() => {
-              history.push(paths.HISTORY);
-              onCancel();
-            }}>
-            <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
-          </button>
-        )}
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 70,
-              left: 10,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Legenda"
-              description="Habilite legenda para tradução"
-              position="br"
-              isEnabled={currentStep === TutorialSteps.SUBTITLE}
-            />
-          </div>
-        </div>
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 70,
-              left: 10,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Velocidade de reprodução"
-              description="Altere a velocidade de reprodução"
-              position="bl"
-              isEnabled={currentStep === TutorialSteps.PLAYBACK_SPEED}
-            />
-          </div>
-        </div>
-      </>
+      <PlayerButtons
+        isPlaying={isPlaying}
+        isPaused={isPaused}
+        isShowSubtitle={isShowSubtitle}
+        hasFinished={hasFinished}
+        currentStep={currentStep}
+        setShowPopover={setShowPopover}
+        textGloss={textGloss}
+        handlePause={handlePause}
+        handlePlay={handlePlay}
+        handleSubtitle={handleSubtitle}
+        onCancel={onCancel}
+      />
     );
   };
 
@@ -823,7 +586,8 @@ function Player() {
       </div>
 
       {((currentStep >= TutorialSteps.CLOSE &&
-        currentStep <= TutorialSteps.PLAYBACK_SPEED) ||
+        currentStep <= TutorialSteps.PLAYBACK_SPEED &&
+        currentStep !== TutorialSteps.INITIAL) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
           <div
@@ -915,7 +679,7 @@ function Player() {
         isPlaying={isPlaying}
         onSubmittedRevision={onSubmittedRevision}
       />
-      {TutorialSteps.INITIAL === currentStep && (
+      {TutorialSteps.INITIAL === currentStep && showTutorial && (
         <div className="tutorial-box-shadow">
           <h1>Veja como usar</h1>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>

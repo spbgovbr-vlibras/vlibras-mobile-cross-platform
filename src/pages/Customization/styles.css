@@ -62,6 +62,9 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+}
+
+.ios .customization-all-save {
   padding-bottom: var(--ion-safe-area-bottom);
 }
 
