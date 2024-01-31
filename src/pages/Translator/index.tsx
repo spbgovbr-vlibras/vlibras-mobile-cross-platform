@@ -18,9 +18,7 @@ import { Strings } from './strings';
 import './styles.css';
 
 const playerService = PlayerService.getPlayerInstance();
-const regex =
-  // eslint-disable-next-line no-useless-escape
-  /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/s;
+const regex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
 
 const Translator = () => {
   const translatorText = useSelector(
