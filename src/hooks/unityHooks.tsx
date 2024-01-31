@@ -45,12 +45,12 @@ export class UnityEventEmitter {
       }
     };
 
-    window.FinishWelcome = (flag: boolean) => {
+    window.FinishWelcome = (flag: string) => {
       const event = this.events['FinishWelcome'];
       if (event) {
         event.forEach((callback) => {
           const castedFunction = callback as FinishWelcomeHandler;
-          castedFunction(flag);
+          castedFunction(flag == 'True');
         });
       }
     };
