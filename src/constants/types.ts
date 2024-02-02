@@ -5,6 +5,4 @@ export enum TranslationRequestType {
 
 export type Avatar = 'hozana' | 'icaro' | 'guga';
 
-export const regex =
-  // eslint-disable-next-line no-useless-escape
-  /^(?![!@#$%^&"'*()_+{}\[\]:;<>,.?~\\ ])(?!.*[!@#$%^&*"'()_+{}\[\]:;<>,/.?~=\\]{2}).*$/s;
+export const regex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
