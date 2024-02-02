@@ -70,24 +70,42 @@ const TutorialProvider: React.FC = ({ children }) => {
     setCurrentStepIndex(-1);
   }, []);
 
-  useEffect(() => {
-    NativeStorage.getItem(PROPERTY_KEY_TUTORIAL)
-      .then((value) =>
-        value
-          ? setCurrentStep(TutorialSteps.IDLE)
-          : setCurrentStep(TutorialSteps.INITIAL)
-      )
-      .catch((_) => false);
+  const markTutorialAsSeen = useCallback(() => {
+    NativeStorage.setItem(PROPERTY_KEY_TUTORIAL, true);
+  }, []);
 
-    NativeStorage.getItem(PROPERTY_KEY_PRESENT_TUTORIAL)
-      .then((value) => {
-        setAlwaysShowTutorial(value);
-        if (value) {
+  useEffect(() => {
+    async function loadUserDefaults() {
+      try {
+        const hasSeenTutorial = await NativeStorage.getItem(
+          PROPERTY_KEY_TUTORIAL
+        );
+        if (hasSeenTutorial) {
+          setCurrentStep(TutorialSteps.IDLE);
+        } else {
+          setCurrentStep(TutorialSteps.INITIAL);
+        }
+      } catch (error) {
+        /* empty */
+      }
+
+      markTutorialAsSeen();
+
+      try {
+        const shouldAlwaysSeeTutorial = await NativeStorage.getItem(
+          PROPERTY_KEY_PRESENT_TUTORIAL
+        );
+        setAlwaysShowTutorial(shouldAlwaysSeeTutorial);
+        if (shouldAlwaysSeeTutorial) {
           presentTutorial();
         }
-      })
-      .catch((_) => false);
-  }, [presentTutorial]);
+      } catch (error) {
+        /* empty */
+      }
+    }
+
+    loadUserDefaults();
+  }, [presentTutorial, markTutorialAsSeen]);
 
   const onFinishTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.IDLE);
@@ -95,8 +113,6 @@ const TutorialProvider: React.FC = ({ children }) => {
   }, []);
 
   const goNextStep = useCallback(() => {
-    NativeStorage.setItem(PROPERTY_KEY_TUTORIAL, true);
-
     const index = currentStepIndex + 1;
     if (index < TUTORIAL_QUEUE.length) {
       setCurrentStep(TUTORIAL_QUEUE[index]);
