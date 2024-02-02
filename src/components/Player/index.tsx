@@ -73,7 +73,7 @@ function Player() {
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [tryShowTutorial, setTryShowTutorial] = useState(false);
   const [visiblePlayer, setVisiblePlayer] = useState(false);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -121,7 +121,7 @@ function Player() {
 
   const tutorialHandler = (hasFinished: boolean) => {
     if (hasFinished) {
-      setShowTutorial(true);
+      setTryShowTutorial(true);
       handleStop();
     }
   };
@@ -679,7 +679,7 @@ function Player() {
         isPlaying={isPlaying}
         onSubmittedRevision={onSubmittedRevision}
       />
-      {TutorialSteps.INITIAL === currentStep && showTutorial && (
+      {TutorialSteps.INITIAL === currentStep && tryShowTutorial && (
         <div className="tutorial-box-shadow">
           <h1>Veja como usar</h1>
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
