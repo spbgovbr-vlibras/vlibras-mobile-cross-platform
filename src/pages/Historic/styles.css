@@ -100,6 +100,10 @@
   font-family: Rawline;
   color: #747474;
   font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  justify-content: left;
+  align-items: left;
 }
 
 .historic-container-ion-chips-box {
@@ -158,37 +162,22 @@
 }
 
 .date-desc {
-  font-size: 12px;
+  font-size: 16px;
   color: #1b1b1b;
   font-family: Rawline;
   text-align: center;
+  font-weight: bold;
 }
 
 .container-render-historic {
   margin-bottom: 20px;
 }
 
-.container-render-historic p {
-  font-size: 18px; 
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .empty-historic {
   font-family: Rawline;
   color: #565656;
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
   margin-top: 70px;
-}
-
-.empty-historic-text {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
 }

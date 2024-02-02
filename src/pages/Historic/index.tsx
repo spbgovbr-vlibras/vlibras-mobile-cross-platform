@@ -227,7 +227,7 @@ function Historic() {
           </div>
           <div className="container-render-historic">
             {Object.keys(historyStorage).length === 0 ? (
-              <p>Histórico vazio</p>
+              <p className='empty-historic'>Histórico vazio</p>
             ) : (
               renderAllItems()
             )}
