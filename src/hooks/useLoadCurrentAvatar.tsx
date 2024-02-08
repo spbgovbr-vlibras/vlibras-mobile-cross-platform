@@ -15,6 +15,8 @@ export const useLoadCurrentAvatar = (
   const [isFirstLoaded, setIsFirstLoaded] = useState(false);
 
   const loadCurrentAvatar = useCallback(() => {
+    let innerTimeout: NodeJS.Timeout | undefined;
+
     const timeout = setTimeout(() => {
       unityService.send(
         PlayerKeys.PLAYER_MANAGER,
@@ -23,14 +25,19 @@ export const useLoadCurrentAvatar = (
       );
       setIsFirstLoaded(true);
 
-      setTimeout(() => {
+      innerTimeout = setTimeout(() => {
         if (onAvatarFirstLoaded) {
           onAvatarFirstLoaded();
         }
       }, 100);
     }, 500);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      if (innerTimeout) {
+        clearTimeout(innerTimeout);
+      }
+    };
   }, [initialAvatar, setIsFirstLoaded]);
 
   useOnAvatarLoaded(
