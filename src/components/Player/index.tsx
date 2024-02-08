@@ -479,6 +479,22 @@ function Player() {
           isEnabled={currentStep === TutorialSteps.MENU}
         />
       </div>
+      <div
+        style={{
+          position: 'absolute',
+          padding: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          zIndex: 2,
+        }}>
+        <TutorialPopover
+          title="Central de ajuda"
+          description="Habilitação permanente do tutorial, dúvidas e sugestões"
+          position="tl"
+          isEnabled={currentStep === TutorialSteps.SEE_ALWAYS}
+        />
+      </div>
       <IonPopover
         className="player-popover"
         event={popoverState.event}

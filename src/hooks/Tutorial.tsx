@@ -21,6 +21,7 @@ export enum TutorialSteps {
   SUBTITLE,
   REPEAT,
   PLAYBACK_SPEED,
+  SEE_ALWAYS,
 }
 
 interface TutorialContextData {
@@ -48,6 +49,7 @@ export const TUTORIAL_QUEUE = [
   TutorialSteps.SUBTITLE,
   TutorialSteps.REPEAT,
   TutorialSteps.PLAYBACK_SPEED,
+  TutorialSteps.SEE_ALWAYS,
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';
