@@ -87,9 +87,15 @@ function Player() {
     showPopover: false,
     event: undefined,
   });
+  const [hasLoadedAvatarOnce, setHasLoadedAvatarOnce] = useState(false);
 
   const history = useHistory();
-  const { currentStep, goNextStep, onCancel } = useTutorial();
+  const {
+    currentStep,
+    goNextStep,
+    onCancel,
+    hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
+  } = useTutorial();
   const { textGloss } = useTranslation();
 
   const currentAvatar = useSelector(
@@ -358,6 +364,14 @@ function Player() {
     }
   }, [setSubmittedRevision, hasFinished]);
 
+  useEffect(() => {
+    if (hasLoadedAvatarOnce && hasLoadedTutotiralConfigurations) {
+      if (currentStep == TutorialSteps.INITIAL) {
+        playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_WELCOME);
+      }
+    }
+  }, [hasLoadedAvatarOnce, hasLoadedTutotiralConfigurations]);
+
   const onSubmittedRevision = useCallback(() => {
     setSubmittedRevision(true);
   }, []);
@@ -367,7 +381,7 @@ function Player() {
     PlayerService.getPlayerInstance(),
     currentAvatar,
     () => {
-      playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_WELCOME);
+      setHasLoadedAvatarOnce(true);
     }
   );
 

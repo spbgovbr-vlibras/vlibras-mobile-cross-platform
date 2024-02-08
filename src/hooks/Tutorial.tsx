@@ -31,6 +31,7 @@ interface TutorialContextData {
   currentStepIndex: number;
   alwaysShowTutorial: boolean;
   setAlwaysShowTutorial: (alwaysShow: boolean) => void;
+  hasLoadedConfigurations: boolean;
 }
 
 const TutorialContext = createContext<TutorialContextData>(
@@ -61,6 +62,7 @@ const TutorialProvider: React.FC = ({ children }) => {
   );
   const [alwaysShowTutorial, setAlwaysShowTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [hasLoadedConfigurations, setHasLoadedConfigurations] = useState(false);
 
   const onSetAlwaysShowTutorialPreference = (alwaysShow: boolean) => {
     setAlwaysShowTutorial(alwaysShow);
@@ -104,6 +106,8 @@ const TutorialProvider: React.FC = ({ children }) => {
       } catch (error) {
         /* empty */
       }
+
+      setHasLoadedConfigurations(true);
     }
 
     loadUserDefaults();
@@ -133,6 +137,7 @@ const TutorialProvider: React.FC = ({ children }) => {
         onCancel: onFinishTutorial,
         alwaysShowTutorial,
         setAlwaysShowTutorial: onSetAlwaysShowTutorialPreference,
+        hasLoadedConfigurations: hasLoadedConfigurations,
       }}>
       {children}
     </TutorialContext.Provider>
