@@ -16,6 +16,15 @@
   flex: 1;
 }
 
+.tutorial-left-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 16px;
+  flex: 1;
+}
+
 .tutorial-column {
   display: flex;
   flex-direction: column;

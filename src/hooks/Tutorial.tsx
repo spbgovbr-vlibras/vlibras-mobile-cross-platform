@@ -13,6 +13,7 @@ export enum TutorialSteps {
   TRANSLATION,
   DICTIONARY,
   HISTORY,
+  TUTORIAL,
   CHANGE_AVATAR,
   MENU,
   CLOSE,
@@ -21,7 +22,6 @@ export enum TutorialSteps {
   SUBTITLE,
   REPEAT,
   PLAYBACK_SPEED,
-  SEE_ALWAYS,
 }
 
 interface TutorialContextData {
@@ -42,6 +42,7 @@ export const TUTORIAL_QUEUE = [
   TutorialSteps.TRANSLATION,
   TutorialSteps.DICTIONARY,
   TutorialSteps.HISTORY,
+  TutorialSteps.TUTORIAL,
   TutorialSteps.CHANGE_AVATAR,
   TutorialSteps.MENU,
   TutorialSteps.CLOSE,
@@ -50,7 +51,6 @@ export const TUTORIAL_QUEUE = [
   TutorialSteps.SUBTITLE,
   TutorialSteps.REPEAT,
   TutorialSteps.PLAYBACK_SPEED,
-  TutorialSteps.SEE_ALWAYS,
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';

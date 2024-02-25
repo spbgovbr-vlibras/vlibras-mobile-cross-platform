@@ -13,13 +13,6 @@ function Tutorial() {
   const { alwaysShowTutorial, setAlwaysShowTutorial } = useTutorial();
   return (
     <MenuLayout title="Central de ajuda" mode="back">
-      <IonItem>
-        <IonLabel>{Strings.ALWAYS_SEE_TUTORIAL}</IonLabel>
-        <IonToggle
-          checked={alwaysShowTutorial}
-          onIonChange={(e) => setAlwaysShowTutorial(e.detail.checked)}
-        />
-      </IonItem>
       <div className="tutorial-container">
         <div className="tutorial-text-container">
           <IonText className="tutorial-texts-1">

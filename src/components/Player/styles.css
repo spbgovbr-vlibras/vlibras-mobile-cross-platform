@@ -129,6 +129,18 @@
   align-items: center;
 }
 
+.player-button-tutorial-rounded-top {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1b1b1b;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .player-button-avatar-rounded-top {
   width: 36px;
   height: 36px;
