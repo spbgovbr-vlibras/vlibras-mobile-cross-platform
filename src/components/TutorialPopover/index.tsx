@@ -1,7 +1,7 @@
 /* eslint-disable react/button-has-type */
 import React from 'react';
 
-import { ArrowLeft } from 'assets';
+import { ArrowLeft, IconClose } from 'assets';
 import './styles.css';
 import { TUTORIAL_QUEUE, useTutorial } from 'hooks/Tutorial';
 
@@ -32,11 +32,16 @@ const TutorialPopover = ({
   position,
   isEnabled = false,
 }: TutorialPopoverProps) => {
-  const { currentStepIndex, goNextStep } = useTutorial();
+  const { currentStepIndex, goNextStep, onCancel } = useTutorial();
 
   return isEnabled ? (
     <div className="tutorial-popover-container">
       <div className="tutorial-row">
+        <div className="tutorial-left-column">
+          <button onClick={onCancel}>
+            <IconClose color='#3880ff'/>
+          </button>
+        </div>
         <div>
           <h1>{title}</h1>
           <h2>{description}</h2>

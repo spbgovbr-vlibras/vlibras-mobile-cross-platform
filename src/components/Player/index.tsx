@@ -27,6 +27,7 @@ import {
   GugaAvatar,
   IconSubtitle,
   IconRefresh,
+  IconTutorial,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
@@ -750,12 +751,6 @@ function Player() {
           alignItems: 'flex-start',
           zIndex: 2,
         }}>
-        <TutorialPopover
-          title="Central de ajuda"
-          description="Habilitação permanente do tutorial, dúvidas e sugestões"
-          position="tl"
-          isEnabled={currentStep === TutorialSteps.SEE_ALWAYS}
-        />
       </div>
       <IonPopover
         className="player-popover"
@@ -828,22 +823,41 @@ function Player() {
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div style={{ marginRight: 6 }}>
+            <div style={{ marginRight: 6, marginTop: 25}}>
               <TutorialPopover
                 title="Trocar avatar"
                 description="Alterne entre os avatares disponíveis"
-                position="rb"
+                position="rt"
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
               />
             </div>
-            <button
-              className="player-button-avatar-rounded-top"
-              type="button"
-              onClick={handleChangeAvatar}>
-              {currentAvatar === 'icaro' && <HozanaAvatar />}
-              {currentAvatar === 'hozana' && <GugaAvatar />}
-              {currentAvatar === 'guga' && <IcaroAvatar />}
-            </button>
+            <div style={{ marginRight: 6}}>
+              <TutorialPopover
+                title="Mostrar tutorial"
+                description="Reveja as ações disponíveis no player"
+                position="rb"
+                isEnabled={currentStep === TutorialSteps.TUTORIAL}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <>
+                <button
+                disabled={currentStep !== TutorialSteps.IDLE }
+                className="player-button-tutorial-rounded-top"
+                type="button"
+                onClick={goNextStep}>
+                <IconTutorial color='white'/>
+                </button>
+              </>
+              <button
+                className="player-button-avatar-rounded-top"
+                type="button"
+                onClick={handleChangeAvatar}>
+                {currentAvatar === 'icaro' && <HozanaAvatar />}
+                {currentAvatar === 'hozana' && <GugaAvatar />}
+                {currentAvatar === 'guga' && <IcaroAvatar />}
+              </button>
+            </div>
           </div>
         )}
       </div>
