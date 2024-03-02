@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import Unity from 'react-unity-webgl';
+import { App, StateChangeListener } from '@capacitor/app';
 
 import {
   IconDictionary,
@@ -105,6 +106,9 @@ function Player() {
     event: undefined,
   });
   const [hasLoadedAvatarOnce, setHasLoadedAvatarOnce] = useState(false);
+  const [isInBackground, setIsInBackground] = useState(false);
+  const [shouldUnPauseOnForeground, setShouldUnPauseOnForeground] =
+    useState(false);
 
   const history = useHistory();
   const {
@@ -299,6 +303,35 @@ function Player() {
 
   let glossLen = UNDEFINED_GLOSS;
   let cache = UNDEFINED_GLOSS;
+
+  useEffect(() => {
+    const handleAppStateChange: StateChangeListener = ({ isActive }) => {
+      // isActive is true if the app is in the foreground, and false if in background
+      setIsInBackground(!isActive);
+    };
+
+    // Add the app state change listener
+    const listener = App.addListener('appStateChange', handleAppStateChange);
+
+    // Clean up the event listener when component unmounts
+    return () => {
+      listener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isInBackground && !isPaused && !shouldUnPauseOnForeground) {
+      setShouldUnPauseOnForeground(true);
+      handlePause();
+    }
+  }, [shouldUnPauseOnForeground, isInBackground, isPaused]);
+
+  useEffect(() => {
+    if (shouldUnPauseOnForeground && !isInBackground && isPaused) {
+      setShouldUnPauseOnForeground(false);
+      handlePause();
+    }
+  }, [shouldUnPauseOnForeground, isInBackground, isPaused]);
 
   useOnFinisheWelcome(tutorialHandler, []);
 
