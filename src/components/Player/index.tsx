@@ -111,6 +111,10 @@ function Player() {
     useState(false);
 
   const history = useHistory();
+  history.listen(() => {
+    location.pathname !== '/' ? onCancel() : null;
+  });
+
   const {
     currentStep,
     goNextStep,
@@ -590,7 +594,6 @@ function Player() {
               type="button"
               onClick={() => {
                 history.push(paths.DICTIONARY_PLAYER);
-                onCancel();
               }}>
               <IconDictionary color={buttonColors.VARAINT_WHITE} />
             </button>
@@ -631,7 +634,6 @@ function Player() {
             type="button"
             onClick={() => {
               history.push(paths.TRANSLATOR);
-              onCancel();
             }}>
             <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
           </button>
@@ -686,7 +688,6 @@ function Player() {
             type="button"
             onClick={() => {
               history.push(paths.HISTORY);
-              onCancel();
             }}>
             <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
           </button>
