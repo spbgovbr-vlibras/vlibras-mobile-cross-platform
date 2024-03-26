@@ -40,6 +40,7 @@ import { TutorialSteps, useTutorial } from 'hooks/Tutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
+import { Creators as TranslatorCreators } from 'store/ducks/translator';
 import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import './styles.css';
@@ -612,6 +613,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Tradução PT-BR"
+
               description="Escreva ou cole o texto para ser traduzido"
               position="bc"
               isEnabled={currentStep === TutorialSteps.TRANSLATION}
@@ -630,6 +632,7 @@ function Player() {
             className="player-action-button player-action-button-insert"
             type="button"
             onClick={() => {
+              dispatch(TranslatorCreators.setTranslatorText(''));
               history.push(paths.TRANSLATOR);
               onCancel();
             }}>
