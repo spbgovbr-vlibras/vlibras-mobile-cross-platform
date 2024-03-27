@@ -133,7 +133,9 @@ function Dictionary() {
         return <LoadingSpinner loadingDescription="Carregando sinais..." />;
       } else {
         return (
-          <div className="dictionary-word-item">Nenhum sinal encontrado</div>
+          <div className="dictionary-word-item centered">
+            {Strings.DICTIONARY_WORD_NOT_FOUND}
+          </div>
         );
       }
     }

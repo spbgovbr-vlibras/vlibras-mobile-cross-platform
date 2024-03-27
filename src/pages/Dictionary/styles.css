@@ -135,6 +135,10 @@
 
   margin-left: 31px;
 }
+.dictionary-word-item.centered {
+  margin-right: 31px;
+  text-align: center;
+}
 .dictionary-container-box-ion-text {
   display: flex;
   align-items: center;
