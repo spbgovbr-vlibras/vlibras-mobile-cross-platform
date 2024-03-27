@@ -54,6 +54,7 @@ import {
   useOnFinisheWelcome,
   useOnPlayingStateChangeHandler,
 } from 'hooks/unityHooks';
+import { Strings } from './Strings';
 
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
@@ -172,15 +173,15 @@ function Player() {
     return async () => {
       const base64data = fileReader.result as string;
       const uri = await Filesystem.writeFile({
-        path: 'VLibras.mp4',
+        path: Strings.VIDEO_SHARE_FILENAME,
         data: base64data,
         directory: Directory.Cache,
         recursive: true,
       });
       try {
         await Share.share({
-          title: 'Compartilhar',
-          text: 'Compartilhando tradução.',
+          dialogTitle: Strings.VIDEO_SHARE_TITLE_DIALOG,
+          title: Strings.VIDEO_SHARE_TITLE_DIALOG,
           url: uri.uri,
         });
       } catch (error: unknown) {
@@ -784,8 +785,7 @@ function Player() {
           flexDirection: 'column',
           alignItems: 'flex-start',
           zIndex: 2,
-        }}>
-      </div>
+        }}></div>
       <IonPopover
         className="player-popover"
         event={popoverState.event}
@@ -857,7 +857,7 @@ function Player() {
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div style={{ marginRight: 6, marginTop: 25}}>
+            <div style={{ marginRight: 6, marginTop: 25 }}>
               <TutorialPopover
                 title="Trocar avatar"
                 description="Alterne entre os avatares disponíveis"
@@ -865,7 +865,7 @@ function Player() {
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
               />
             </div>
-            <div style={{ marginRight: 6}}>
+            <div style={{ marginRight: 6 }}>
               <TutorialPopover
                 title="Mostrar tutorial"
                 description="Reveja as ações disponíveis no player"
@@ -876,11 +876,11 @@ function Player() {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <>
                 <button
-                disabled={currentStep !== TutorialSteps.IDLE }
-                className="player-button-tutorial-rounded-top"
-                type="button"
-                onClick={goNextStep}>
-                <IconTutorial color='white'/>
+                  disabled={currentStep !== TutorialSteps.IDLE}
+                  className="player-button-tutorial-rounded-top"
+                  type="button"
+                  onClick={goNextStep}>
+                  <IconTutorial color="white" />
                 </button>
               </>
               <button
