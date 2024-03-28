@@ -42,6 +42,7 @@ import { RootState } from 'store';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
+import { Creators as TranslatorCreators } from 'store/ducks/translator';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -634,6 +635,7 @@ function Player() {
             className="player-action-button player-action-button-insert"
             type="button"
             onClick={() => {
+              dispatch(TranslatorCreators.setTranslatorText(''));
               history.push(paths.TRANSLATOR);
             }}>
             <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
