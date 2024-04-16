@@ -1,7 +1,7 @@
 /* eslint-disable react/button-has-type */
 import React from 'react';
 
-import { ArrowLeft, IconClose } from 'assets';
+import { IconClose } from 'assets';
 import './styles.css';
 import { TUTORIAL_QUEUE, useTutorial } from 'hooks/Tutorial';
 
@@ -32,28 +32,31 @@ const TutorialPopover = ({
   position,
   isEnabled = false,
 }: TutorialPopoverProps) => {
-  const { currentStepIndex, goNextStep, onCancel } = useTutorial();
+  const { currentStepIndex, goNextStep, goPreviousStep, onCancel } = useTutorial();
 
   return isEnabled ? (
     <div className="tutorial-popover-container">
       <div className="tutorial-row">
-        <div className="tutorial-left-column">
-          <button onClick={onCancel}>
-            <IconClose color='#3880ff'/>
-          </button>
-        </div>
+        <h1>{title}</h1>
+        <button onClick={onCancel}>
+          <IconClose color='white' size={15}/>
+        </button>
+      </div>
+      <h2>{description}</h2>
+      <div className={`container__arrow container__arrow--${position}`} />
+      <hr/>
+      <div className="tutorial-row">
+      <span>{`${currentStepIndex + 1} de ${TUTORIAL_QUEUE.length}`}</span>
         <div>
-          <h1>{title}</h1>
-          <h2>{description}</h2>
-        </div>
-        <div className="tutorial-column">
-          <button onClick={goNextStep}>
-            <ArrowLeft />
+          {currentStepIndex != 0 && (
+          <button className='button-outlined-tutorial' onClick={goPreviousStep}>
+            voltar
+          </button>)}
+          <button className='button-solid-tutorial' onClick={goNextStep}>
+            Avançar
           </button>
-          <span>{`${currentStepIndex + 1}/${TUTORIAL_QUEUE.length}`}</span>
         </div>
       </div>
-      <div className={`container__arrow container__arrow--${position}`} />
     </div>
   ) : null;
 };

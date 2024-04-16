@@ -35,6 +35,7 @@ import paths from 'constants/paths';
 import { Strings } from './strings';
 
 import './styles.css';
+import IconDictionary2 from 'assets/icons/IconDictionary2';
 
 interface DrawerMenuProps {
   contentId: string;
@@ -234,7 +235,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           {renderItemTab(
             paths.DICTIONARY,
             Strings.TITLE_MENU_DICTIONARY,
-            IconDictionary,
+            IconDictionary2,
             true
           )}
         </IonList>

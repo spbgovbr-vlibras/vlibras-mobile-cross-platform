@@ -59,6 +59,8 @@ import { Strings } from './Strings';
 
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import IconHand from 'assets/icons/IconHand';
+import { current } from 'immer';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -577,22 +579,60 @@ function Player() {
               marginRight: 6,
               position: 'absolute',
               width: '100vw',
-              bottom: 50,
-              left: 0,
+              bottom: 80,
+              left: 25,
             }}>
             <TutorialPopover
               title="Dicionário"
-              description="Consulte os sinais disponíveis no vlibras"
+              description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
               position="bl"
               isEnabled={currentStep === TutorialSteps.DICTIONARY}
             />
           </div>
+          {currentStep === TutorialSteps.DICTIONARY && (
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: '-10%',
+                left: '7%',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '60px',
+                height: '45px',
+                borderRadius: '5px',
+                border: '2px solid #3885F9',
+                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
+              }}>
+          </div>
+          )}
+          {currentStep === TutorialSteps.TRANSLATION && (
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: '-12%',
+                left: '184%',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                border: '2px solid white',
+                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+              }}>
+          </div>
+          )}
           {currentStep >= TutorialSteps.CLOSE &&
           currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
             <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
           ) : (
             <button
-              className="player-action-button-transparent"
+              className='player-action-button-transparent'
               type="button"
               onClick={() => {
                 history.push(paths.DICTIONARY_PLAYER);
@@ -600,6 +640,26 @@ function Player() {
               <IconDictionary color={buttonColors.VARAINT_WHITE} />
             </button>
           )}
+
+          {currentStep === TutorialSteps.HISTORY && (
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: '-5%',
+                left: '347%',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '60px',
+                height: '45px',
+                borderRadius: '5px',
+                border: '2px solid #3885F9',
+                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
+              }}>
+          </div>
+        )}
         </div>
 
         <div>
@@ -607,8 +667,8 @@ function Player() {
             style={{
               margin: 'auto',
               position: 'absolute',
-              bottom: 70,
-              left: 0,
+              bottom: 80,
+              left: 25,
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'center',
@@ -617,7 +677,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Tradução PT-BR"
-              description="Escreva ou cole o texto para ser traduzido"
+              description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
               position="bc"
               isEnabled={currentStep === TutorialSteps.TRANSLATION}
             />
@@ -627,12 +687,14 @@ function Player() {
         currentStep <= TutorialSteps.PLAYBACK_SPEED ? (
           <button
             className="player-action-button player-action-button-insert"
+            id='refresh-button'
             type="button">
             <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
           </button>
         ) : (
           <button
             className="player-action-button player-action-button-insert"
+            id='translation-button'
             type="button"
             onClick={() => {
               dispatch(TranslatorCreators.setTranslatorText(''));
@@ -646,8 +708,8 @@ function Player() {
           style={{
             margin: 'auto',
             position: 'absolute',
-            bottom: 70,
-            left: 0,
+            bottom: 80,
+            left: 25,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
@@ -666,18 +728,17 @@ function Player() {
           style={{
             margin: 'auto',
             position: 'absolute',
-            bottom: 60,
-            left: 0,
+            bottom: 80,
+            left: 50,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
             width: '100vw',
-            paddingRight: '28px',
           }}>
           <TutorialPopover
             title="Histórico"
-            description="Acesse as traduções dos últimos 30 dias"
+            description="Acesse as traduções que foram realizadas nos últimos 30 dias."
             position="br"
             isEnabled={currentStep === TutorialSteps.HISTORY}
           />
@@ -688,6 +749,7 @@ function Player() {
         ) : (
           <button
             className="player-action-button-transparent"
+            id='history-button'
             type="button"
             onClick={() => {
               history.push(paths.HISTORY);
@@ -702,7 +764,7 @@ function Player() {
               margin: 'auto',
               position: 'absolute',
               bottom: 70,
-              left: 10,
+              left: 20,
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'center',
@@ -724,7 +786,7 @@ function Player() {
               margin: 'auto',
               position: 'absolute',
               bottom: 70,
-              left: 10,
+              left: 20,
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'center',
@@ -774,7 +836,7 @@ function Player() {
         }}>
         <TutorialPopover
           title="Menu"
-          description="Informações e ajustes adicionais do tradudor"
+          description="Acesse outras funcionalidades do tradutor e configure sua experiência no VLibras."
           position="tl"
           isEnabled={currentStep === TutorialSteps.MENU}
         />
@@ -841,7 +903,7 @@ function Player() {
                 <TutorialPopover
                   title="Fechar"
                   description="Feche tradução e volte à tela anterior"
-                  position="rb"
+                  position="rt"
                   isEnabled={currentStep === TutorialSteps.CLOSE}
                 />
               </div>
@@ -850,7 +912,7 @@ function Player() {
                   currentStep >= TutorialSteps.CLOSE &&
                   currentStep <= TutorialSteps.PLAYBACK_SPEED
                 }
-                className="player-button-rounded-top"
+                className="player-button-rounded"
                 type="button"
                 onClick={handleStop}>
                 <IconClose color="#FFF" size={24} />
@@ -859,19 +921,19 @@ function Player() {
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div style={{ marginRight: 6, marginTop: 25 }}>
+            <div style={{ marginRight: 0, marginTop: 25 }}>
               <TutorialPopover
                 title="Trocar avatar"
-                description="Alterne entre os avatares disponíveis"
+                description="Escolha qual avatar interpretará os sinais em LIBRAS."
                 position="rt"
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
               />
             </div>
-            <div style={{ marginRight: 6 }}>
+            <div style={{ marginRight: 0 }}>
               <TutorialPopover
-                title="Mostrar tutorial"
-                description="Reveja as ações disponíveis no player"
-                position="rb"
+                title="Central de ajuda"
+                description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+                position="rt"
                 isEnabled={currentStep === TutorialSteps.TUTORIAL}
               />
             </div>
@@ -882,7 +944,7 @@ function Player() {
                   className="player-button-tutorial-rounded-top"
                   type="button"
                   onClick={goNextStep}>
-                  <IconTutorial color="white" />
+                  <IconTutorial color="black" />
                 </button>
               </>
               <button
@@ -922,12 +984,12 @@ function Player() {
             style={{
               top: -54,
               position: 'absolute',
-              right: 10,
+              right: 25,
             }}>
             <TutorialPopover
               title="Gostou da tradução?"
               description="Avalie e sugira melhorias."
-              position="br"
+              position="rb"
               isEnabled={currentStep === TutorialSteps.LIKED_TRANSLATION}
             />
           </div>
@@ -947,12 +1009,12 @@ function Player() {
             style={{
               top: -2,
               position: 'absolute',
-              right: 10,
+              right: 25,
             }}>
             <TutorialPopover
               title="Compartilhar"
               description="Vídeo com a tradução"
-              position="br"
+              position="rb"
               isEnabled={currentStep === TutorialSteps.SHARE}
             />
           </div>
@@ -1009,16 +1071,23 @@ function Player() {
       />
       {TutorialSteps.INITIAL === currentStep && tryShowTutorial && (
         <div className="tutorial-box-shadow">
-          <h1>Veja como usar</h1>
-          <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+          <div className="upper-side">
+            <IconHand/>
+            <h1>Seja bem-vindo ao VLibras</h1>
+            <h2>
+            Quer saber mais sobre os recursos do nosso aplicativo para dispositivos móveis?
+            </h2>
+          </div>
+          <hr />
+          <div className="lower-side">
+            <button className="button-solid" onClick={goNextStep}>
+              Iniciar tour guiado
+            </button>
             <button className="button-outlined" onClick={onCancel}>
               Pular
             </button>
-            <button className="button-solid" onClick={goNextStep}>
-              Iniciar
-            </button>
           </div>
-        </div>
+      </div>
       )}
     </div>
   );

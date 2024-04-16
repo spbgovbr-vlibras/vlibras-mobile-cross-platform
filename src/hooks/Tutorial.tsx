@@ -27,6 +27,7 @@ export enum TutorialSteps {
 interface TutorialContextData {
   currentStep: TutorialSteps;
   goNextStep: () => void;
+  goPreviousStep: () => void;
   onCancel: () => void;
   currentStepIndex: number;
   alwaysShowTutorial: boolean;
@@ -128,11 +129,20 @@ const TutorialProvider: React.FC = ({ children }) => {
     }
   }, [currentStepIndex, onFinishTutorial]);
 
+  const goPreviousStep = useCallback(() => {
+    const index = currentStepIndex - 1;
+    if (index >= 0) {
+      setCurrentStep(TUTORIAL_QUEUE[index]);
+      setCurrentStepIndex(index);
+    }
+  }, [currentStepIndex]);
+
   return (
     <TutorialContext.Provider
       value={{
         currentStep,
         goNextStep,
+        goPreviousStep,
         currentStepIndex,
         onCancel: onFinishTutorial,
         alwaysShowTutorial,
