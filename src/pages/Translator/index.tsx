@@ -64,6 +64,15 @@ const Translator = () => {
                   dispatch(Creators.setTranslatorText(e.detail.value || ''))
                 }
               />
+              {translatorText.length > 0 && !regex.test(translatorText) && (
+                <IonText color="danger">
+                  <p className="ion-padding-start">
+                    {
+                      'Entrada inválida. Insira pelo menos um caractere alfanumérico (letra ou número).'
+                    }
+                  </p>
+                </IonText>
+              )}
             </div>
           </div>
           <div className="translator-item-button-save">
