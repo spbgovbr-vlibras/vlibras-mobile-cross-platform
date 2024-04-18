@@ -5,4 +5,4 @@ export enum TranslationRequestType {
 
 export type Avatar = 'hozana' | 'icaro' | 'guga';
 
-export const regex = /^[a-zA-ZÀ-ÿ0-9\s]+$/;
+export const regex = /^(?=.*[a-zA-Z0-9])[\s\S]*$/;
