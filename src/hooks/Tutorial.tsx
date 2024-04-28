@@ -30,8 +30,6 @@ interface TutorialContextData {
   goPreviousStep: () => void;
   onCancel: () => void;
   currentStepIndex: number;
-  alwaysShowTutorial: boolean;
-  setAlwaysShowTutorial: (alwaysShow: boolean) => void;
   hasLoadedConfigurations: boolean;
 }
 
@@ -61,14 +59,8 @@ const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
     TutorialSteps.INITIAL
   );
-  const [alwaysShowTutorial, setAlwaysShowTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [hasLoadedConfigurations, setHasLoadedConfigurations] = useState(false);
-
-  const onSetAlwaysShowTutorialPreference = (alwaysShow: boolean) => {
-    setAlwaysShowTutorial(alwaysShow);
-    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, alwaysShow);
-  };
 
   const presentTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.INITIAL);
@@ -95,19 +87,6 @@ const TutorialProvider: React.FC = ({ children }) => {
       }
 
       markTutorialAsSeen();
-
-      try {
-        const shouldAlwaysSeeTutorial = await NativeStorage.getItem(
-          PROPERTY_KEY_PRESENT_TUTORIAL
-        );
-        setAlwaysShowTutorial(shouldAlwaysSeeTutorial);
-        if (shouldAlwaysSeeTutorial) {
-          presentTutorial();
-        }
-      } catch (error) {
-        /* empty */
-      }
-
       setHasLoadedConfigurations(true);
     }
 
@@ -145,8 +124,6 @@ const TutorialProvider: React.FC = ({ children }) => {
         goPreviousStep,
         currentStepIndex,
         onCancel: onFinishTutorial,
-        alwaysShowTutorial,
-        setAlwaysShowTutorial: onSetAlwaysShowTutorialPreference,
         hasLoadedConfigurations: hasLoadedConfigurations,
       }}>
       {children}

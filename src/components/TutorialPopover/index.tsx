@@ -32,27 +32,31 @@ const TutorialPopover = ({
   position,
   isEnabled = false,
 }: TutorialPopoverProps) => {
-  const { currentStepIndex, goNextStep, goPreviousStep, onCancel } = useTutorial();
+  const { currentStepIndex, goNextStep, goPreviousStep, onCancel } =
+    useTutorial();
 
   return isEnabled ? (
     <div className="tutorial-popover-container">
       <div className="tutorial-row">
         <h1>{title}</h1>
         <button onClick={onCancel}>
-          <IconClose color='white' size={15}/>
+          <IconClose color="white" size={15} />
         </button>
       </div>
       <h2>{description}</h2>
       <div className={`container__arrow container__arrow--${position}`} />
-      <hr/>
+      <hr />
       <div className="tutorial-row">
-      <span>{`${currentStepIndex + 1} de ${TUTORIAL_QUEUE.length}`}</span>
+        <span>{`${currentStepIndex + 1} de ${TUTORIAL_QUEUE.length}`}</span>
         <div>
           {currentStepIndex != 0 && (
-          <button className='button-outlined-tutorial' onClick={goPreviousStep}>
-            voltar
-          </button>)}
-          <button className='button-solid-tutorial' onClick={goNextStep}>
+            <button
+              className="button-outlined-tutorial"
+              onClick={goPreviousStep}>
+              Voltar
+            </button>
+          )}
+          <button className="button-solid-tutorial" onClick={goNextStep}>
             Avançar
           </button>
         </div>
