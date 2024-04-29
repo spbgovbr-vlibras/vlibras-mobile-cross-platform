@@ -19,10 +19,7 @@
 .dictionary-input-box {
   position: relative;
 }
-/* .dictionary-textarea:hover {
-  --background: #fff5cc;
-  border: 1px solid #1447a6;
-} */
+
 .dictionary-textarea {
   /*border: 1px solid #B9B9B9;*/
   box-sizing: border-box;
@@ -31,7 +28,8 @@
   z-index: 0;
   color: #000;
 
-  --placeholder-color: #b9b9b9;
+  --placeholder-color: #000;
+  --placeholder-font-weight: bold;
 
   margin-top: 8px;
   /*height: 100%;*/
