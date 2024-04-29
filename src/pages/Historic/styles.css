@@ -181,3 +181,16 @@
   text-align: center;
   margin-top: 70px;
 }
+
+.scroll-buttons {
+  position: fixed; /* Takes it out of the document flow and positions it relative to its nearest positioned ancestor */
+  bottom: 20px; /* Adjusts the position vertically to the middle of the parent */
+  right: 20px; /* Aligns the buttons to the right side of the nearest positioned ancestor */
+  display: flex;
+  flex-direction: column; /* Stacks the buttons vertically */
+  gap: 10px; /* Adds some space between the buttons */
+}
+
+.arrowBtn {
+  --background: #1447a6;
+}
