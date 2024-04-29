@@ -6,7 +6,7 @@ import { SVGProps } from './types';
 const IconTutorial = ({
   style = {},
   color = 'black',
-  size = 24,
+  size = 38,
   viewBox = '0 0 24 24',
 }: SVGProps) => (
   <svg

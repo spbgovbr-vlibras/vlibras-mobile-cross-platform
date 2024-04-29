@@ -45,6 +45,20 @@
   flex-shrink: 0;
 }
 
+.player-action-button-hihglighted {
+  box-shadow: 0px 0px 15px 0px rgba(86, 154, 255, 0.75);
+  border: 2px solid var(--VLibras---Light-White-1, #FDFDFD);;
+  background: #2470E0;
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .player-action-button-microphone {
   margin-right: 28px;
   margin-left: 4px;
@@ -70,8 +84,8 @@
 .player-action-button-transparent {
   background: transparent;
   border: none;
-  height: 32px;
-  width: 32px;
+  height: 40px;
+  width: 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -79,7 +93,7 @@
 }
 
 .player-action-button-transparent img {
-  width: 100%;
+  width: 50%;
   height: auto;
   object-fit: contain; /* This line ensures the aspect ratio is maintained */
 }
@@ -133,7 +147,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #1b1b1b;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
