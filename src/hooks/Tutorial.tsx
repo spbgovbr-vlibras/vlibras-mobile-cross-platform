@@ -53,7 +53,6 @@ export const TUTORIAL_QUEUE = [
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';
-const PROPERTY_KEY_PRESENT_TUTORIAL = 'present-tutorial';
 
 const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
