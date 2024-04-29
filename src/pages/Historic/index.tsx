@@ -1,6 +1,6 @@
-import { IonChip, IonContent, IonText } from '@ionic/react';
+import { IonButton, IonChip, IonContent, IonText } from '@ionic/react';
 import { NativeStorage } from '@ionic-native/native-storage';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,6 +30,7 @@ function Historic() {
   const history = useHistory();
   const location = useLocation();
   const dispatch = useDispatch();
+  const contentRef = useRef<HTMLIonContentElement>(null);
 
   const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
 
@@ -55,6 +56,10 @@ function Historic() {
       // eslint-disable-next-line no-empty
     } catch {}
   }, []);
+
+  const hasItemsToRender = (): boolean => {
+    return Object.keys(historyStorage).length > 0;
+  };
 
   useEffect(() => {
     if (location.pathname === paths.HISTORY) loadHistory();
@@ -102,6 +107,18 @@ function Historic() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
     dispatch(Creators.setTranslatorText(formatted));
   }
+
+  const scrollUp = () => {
+    scrollBy(-100);
+  };
+
+  const scrollDown = () => {
+    scrollBy(100);
+  };
+
+  const scrollBy = (offset: number) => {
+    contentRef.current?.scrollByPoint(0, offset, 500);
+  };
 
   const renderAllItems = () => {
     const formattedHistoric = formatArrayDate();
@@ -197,7 +214,17 @@ function Historic() {
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode="back">
-      <IonContent>
+      <IonContent ref={contentRef}>
+        {hasItemsToRender() && (
+          <div className="scroll-buttons">
+            <IonButton shape="round" className="arrowBtn" onClick={scrollUp}>
+              ↑
+            </IonButton>
+            <IonButton shape="round" className="arrowBtn" onClick={scrollDown}>
+              ↓
+            </IonButton>
+          </div>
+        )}
         <div className="historic-container">
           <div className="historic-container-ion-chips">
             {env.videoTranslator && (
@@ -226,8 +253,8 @@ function Historic() {
             )}
           </div>
           <div className="container-render-historic">
-            {Object.keys(historyStorage).length === 0 ? (
-              <p className='empty-historic'>Histórico vazio</p>
+            {!hasItemsToRender() ? (
+              <p className="empty-historic">Histórico vazio</p>
             ) : (
               renderAllItems()
             )}
