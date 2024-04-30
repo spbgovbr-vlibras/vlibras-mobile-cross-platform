@@ -1,8 +1,7 @@
-import { IonText, IonToggle, IonItem, IonLabel } from '@ionic/react';
+import { IonText } from '@ionic/react';
 import React from 'react';
 
 import { IconYoutube } from 'assets';
-import { useTutorial } from 'hooks/Tutorial';
 import { MenuLayout } from 'layouts';
 
 import { Strings } from './strings';
@@ -10,7 +9,6 @@ import { Strings } from './strings';
 import './styles.css';
 
 function Tutorial() {
-  const { alwaysShowTutorial, setAlwaysShowTutorial } = useTutorial();
   return (
     <MenuLayout title="Central de ajuda" mode="back">
       <div className="tutorial-container">

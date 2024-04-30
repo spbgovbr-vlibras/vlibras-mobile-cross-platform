@@ -4,7 +4,7 @@ import { SVGProps } from './types';
 
 const IconClose = ({
   style = {},
-  color = 'black',
+  color = '',
   size = 24,
   viewBox = '0 0 29 29',
 }: SVGProps) => (

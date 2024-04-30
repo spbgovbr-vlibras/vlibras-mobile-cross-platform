@@ -27,10 +27,9 @@ export enum TutorialSteps {
 interface TutorialContextData {
   currentStep: TutorialSteps;
   goNextStep: () => void;
+  goPreviousStep: () => void;
   onCancel: () => void;
   currentStepIndex: number;
-  alwaysShowTutorial: boolean;
-  setAlwaysShowTutorial: (alwaysShow: boolean) => void;
   hasLoadedConfigurations: boolean;
 }
 
@@ -54,20 +53,13 @@ export const TUTORIAL_QUEUE = [
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';
-const PROPERTY_KEY_PRESENT_TUTORIAL = 'present-tutorial';
 
 const TutorialProvider: React.FC = ({ children }) => {
   const [currentStep, setCurrentStep] = useState<TutorialSteps>(
     TutorialSteps.INITIAL
   );
-  const [alwaysShowTutorial, setAlwaysShowTutorial] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [hasLoadedConfigurations, setHasLoadedConfigurations] = useState(false);
-
-  const onSetAlwaysShowTutorialPreference = (alwaysShow: boolean) => {
-    setAlwaysShowTutorial(alwaysShow);
-    NativeStorage.setItem(PROPERTY_KEY_PRESENT_TUTORIAL, alwaysShow);
-  };
 
   const presentTutorial = useCallback(() => {
     setCurrentStep(TutorialSteps.INITIAL);
@@ -94,19 +86,6 @@ const TutorialProvider: React.FC = ({ children }) => {
       }
 
       markTutorialAsSeen();
-
-      try {
-        const shouldAlwaysSeeTutorial = await NativeStorage.getItem(
-          PROPERTY_KEY_PRESENT_TUTORIAL
-        );
-        setAlwaysShowTutorial(shouldAlwaysSeeTutorial);
-        if (shouldAlwaysSeeTutorial) {
-          presentTutorial();
-        }
-      } catch (error) {
-        /* empty */
-      }
-
       setHasLoadedConfigurations(true);
     }
 
@@ -128,15 +107,22 @@ const TutorialProvider: React.FC = ({ children }) => {
     }
   }, [currentStepIndex, onFinishTutorial]);
 
+  const goPreviousStep = useCallback(() => {
+    const index = currentStepIndex - 1;
+    if (index >= 0) {
+      setCurrentStep(TUTORIAL_QUEUE[index]);
+      setCurrentStepIndex(index);
+    }
+  }, [currentStepIndex]);
+
   return (
     <TutorialContext.Provider
       value={{
         currentStep,
         goNextStep,
+        goPreviousStep,
         currentStepIndex,
         onCancel: onFinishTutorial,
-        alwaysShowTutorial,
-        setAlwaysShowTutorial: onSetAlwaysShowTutorialPreference,
         hasLoadedConfigurations: hasLoadedConfigurations,
       }}>
       {children}

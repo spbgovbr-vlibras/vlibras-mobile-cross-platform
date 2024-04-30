@@ -4,7 +4,8 @@
   font-weight: bold;
   font-size: 18px;
   line-height: 125%;
-  color: #1447a6;
+  color: var(--VLibras---Light-Black-1, #363636);
+  text-align: center;
 }
 
 .menu-layout-container {
@@ -12,7 +13,7 @@
 }
 
 .menu-icon-drawer {
-  color: #1447a6;
+  color: var(--VLibras---Light-Black-1, #363636);
 }
 
 .menu-icon-share {

@@ -199,7 +199,7 @@ function Dictionary() {
   return (
     <MenuLayout
       title={Strings.TOOLBAR_TITLE}
-      mode={location.pathname === paths.DICTIONARY ? 'menu' : 'back'}>
+      mode={'back'}>
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
