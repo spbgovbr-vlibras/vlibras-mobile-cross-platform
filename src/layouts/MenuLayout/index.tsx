@@ -54,46 +54,46 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
 
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
-    case paths.HOME:
-      dispatch(Creators.setIsVideoScreen(false));
-      if (env.videoTranslator) {
+      case paths.HOME:
+        dispatch(Creators.setIsVideoScreen(false));
+        if (env.videoTranslator) {
+          return (
+            <>
+              <button
+                className="menu-item-text"
+                onClick={() =>
+                  history.push(
+                    onboardingFirstAccess
+                      ? paths.ONBOARDING
+                      : paths.RECORDERAREA
+                  )
+                }
+                type="button">
+                {Strings.MENU_PT_BR}
+              </button>
+              <IconTranslate color="#2365DE" />
+            </>
+          );
+        }
+        return <></>;
+
+      case paths.RECORDERAREA:
+      case paths.ONBOARDING:
+        dispatch(Creators.setIsVideoScreen(true));
+        dispatch(Creators.setFirstAccess(false));
         return (
           <>
-            <button
+            <IonLabel
               className="menu-item-text"
-              onClick={() =>
-                history.push(
-                  onboardingFirstAccess
-                    ? paths.ONBOARDING
-                    : paths.RECORDERAREA
-                )
-              }
-              type="button">
-              {Strings.MENU_PT_BR}
-            </button>
-            <IconTranslate color="#2365DE" />
+              onClick={() => history.push(paths.HOME)}>
+              LIBRAS
+            </IonLabel>
+            <IconTranslate color="#315EB1" />
           </>
         );
-      }
-      return <></>;
 
-    case paths.RECORDERAREA:
-    case paths.ONBOARDING:
-      dispatch(Creators.setIsVideoScreen(true));
-      dispatch(Creators.setFirstAccess(false));
-      return (
-        <>
-          <IonLabel
-            className="menu-item-text"
-            onClick={() => history.push(paths.HOME)}>
-            LIBRAS
-          </IonLabel>
-          <IconTranslate color="#315EB1" />
-        </>
-      );
-
-    default:
-      return null;
+      default:
+        return null;
     }
   }, [location, history, dispatch]);
 

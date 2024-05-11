@@ -84,7 +84,7 @@
   line-height: 125%;
 
   border: 2px solid #bababa;
-  width: 100%;
+  width: 100% !important;
   box-sizing: border-box;
   border-radius: 4px;
   font-family: Rawline;
