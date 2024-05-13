@@ -5,9 +5,6 @@
   padding: 16px;
 }
 
-.customization-menu-principal {
-}
-
 .customization-list-colors {
   display: flex;
   flex-direction: row;
@@ -117,3 +114,14 @@
   text-align: center;
   margin-right: 16px;
 }
+
+.md button.alert-button.popup-yes {
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+}
+
+.md button.alert-button.popup-no {
+  background-color: #1447A6;
+  color: rgb(255, 255, 255);
+}
+
