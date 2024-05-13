@@ -26,7 +26,7 @@ function Tutorial() {
           </h1>
           <IonText className="tutorial-texts-4">{Strings.FOLLOW_STEPS}</IonText>
           <a href="https://www.youtube.com/channel/UCF94lq7TwAu5OmlwIu44qpA">
-            <IconYoutube color="#939293" />
+            <IconYoutube color='#1447A6' />
           </a>
         </div>
       </div>
