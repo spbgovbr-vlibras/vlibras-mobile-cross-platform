@@ -269,72 +269,108 @@ body {
 
 .tutorial-box-shadow {
   position: absolute;
-  width: 240px;
-  height: 94px;
-  bottom: 94px;
-  background: #1b1b1b;
-  border-radius: 4px;
+  bottom: 23%;
+  width: 88%;
+  height: fit-content;
+  background: #F7F9FB;
+  border-radius: 10px;
   margin: auto;
   left: 0;
   right: 0;
   z-index: 3;
   display: flex;
   flex-direction: column;
-  align-items: center;
+}
+
+.tutorial-box-shadow .upper-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 25px 20px 10px 20px;
+}
+
+.tutorial-box-shadow .lower-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 10px 20px 20px 20px;
 }
 
 .tutorial-box-shadow .button-solid {
-  flex: 1;
-  background: #1447a6;
-  /* border-radius: 50%; */
+  /*Topography*/
   font-family: Roboto;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
-  line-height: 100%;
-  /* identical to box height, or 14px */
-  border-radius: 46px;
+  line-height: normal;
+  /*Layout*/
+  flex: 1;
+  background: var(--VLibras---Light-Blue-1, #0D459D);
+  width: 100%;
+  border-radius: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 8px 0;
+  padding: 9.5px 24px 11.5px 24px;
   text-align: center;
-  margin: 0 16px 0 4px;
+  gap: 8px;
+  margin-bottom: 12px;
 
-  color: #ffffff;
+  color: var(--VLibras---Light-White-1, #FDFDFD);
 }
 
 .tutorial-box-shadow .button-outlined {
   flex: 1;
   background: transparent;
-  border: 1px solid #4e4e4e;
+  width: 100%;
+  border: 1px solid var(--VLibras---Light-Black-5, #D0D1D2);
   box-sizing: border-box;
   /* border-radius: 50%; */
   font-family: Roboto;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   line-height: 100%;
   /* identical to box height, or 14px */
-  border-radius: 46px;
+  border-radius: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   padding: 8px 0;
   text-align: center;
-  margin: 0 4px 0 16px;
 
-  color: #ffffff;
+  color: var(--VLibras---Light-Black-1, #363636);
 }
 
 .tutorial-box-shadow h1 {
+  color: var(--VLibras---Light-Black-1, #363636);
+  text-align: center;
+  
+  /* b3_Rawline_Bold_16px */
   font-family: Rawline;
-  font-style: normal;
-  font-weight: 600;
   font-size: 16px;
-  line-height: 100%;
-  margin: 16px 0;
-  color: #ffffff;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.tutorial-box-shadow h2 {
+  color: var(--VLibras---Light-Black-2, #52555A);
+  text-align: center;
+  
+  /* b6_Rawline_Medium_14px */
+  font-family: Rawline;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.tutorial-box-shadow hr {
+  background: var(--VLibras---Light-White-5, #D9D9D9);
+  width: 100%;
 }
