@@ -2,6 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
     package="com.lavid.vlibrasdroid" >
 
+  <!-- Permissions -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <!-- Camera, Photos, input file -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <!-- Network API -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <!-- Navigator.getUserMedia -->
+  <!-- Video -->
+  <uses-permission android:name="android.permission.CAMERA" />
+  <!-- Audio -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/vlibras"
@@ -10,7 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true" 
-        tools:targetApi="28" 
+        tools:targetApi="34" 
         android:requestLegacyExternalStorage="true"
         >
 
@@ -22,7 +36,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:exported="true"
-          >
+          tools:ignore="LockedOrientationActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,28 +52,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths"/>
         </provider>
         
     </application>
-
-    <!-- Permissions -->
-
-  <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Camera, Photos, input file -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Geolocation API -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-feature android:name="android.hardware.location.gps" />
-    <!-- Network API -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Navigator.getUserMedia -->
-    <!-- Video -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <!-- Audio -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-
 </manifest>

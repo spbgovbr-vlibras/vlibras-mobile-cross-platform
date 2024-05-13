@@ -14,5 +14,15 @@
 		"SplashScreen": {
 			"launchShowDuration": 0
 		}
-	}
+	},
+	"packageClassList": [
+		"AppPlugin",
+		"DevicePlugin",
+		"FilesystemPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"SharePlugin",
+		"StatusBarPlugin",
+		"CDVPlugin"
+	]
 }

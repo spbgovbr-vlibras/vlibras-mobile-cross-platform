@@ -1,5 +1,4 @@
 import { IonModal, IonText, IonChip, IonTextarea } from '@ionic/react';
-import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -192,7 +191,8 @@ const RevisionModal = ({
             <IonChip
               className="chip-1"
               disabled={
-                auxValueText.toString().trim().length === 0 || !regex.test(auxValueText)
+                auxValueText.toString().trim().length === 0 ||
+                !regex.test(auxValueText)
               }
               onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
@@ -200,7 +200,8 @@ const RevisionModal = ({
             <IonChip
               className="chip-2"
               disabled={
-                auxValueText.toString().trim().length === 0 || !regex.test(auxValueText)
+                auxValueText.toString().trim().length === 0 ||
+                !regex.test(auxValueText)
               }
               onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}

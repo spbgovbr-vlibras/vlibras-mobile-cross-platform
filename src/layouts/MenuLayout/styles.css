@@ -52,3 +52,13 @@
   align-items: center;
   margin-left: 8px;
 }
+
+ion-title {
+  &.md {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    height: 0;
+    text-align: center;
+  }
+}
