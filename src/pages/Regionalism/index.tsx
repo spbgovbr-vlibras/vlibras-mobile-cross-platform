@@ -115,6 +115,7 @@ function Regionalism() {
 
   function defaultRegion() {
     setCurrentRegion(regionalismDataDefault);
+    UnityService.getPlayerInstance().setPlayerRegion('BR');
     dispatch(Creators.setCurrentRegionalism(regionalismDataDefault));
   }
 
