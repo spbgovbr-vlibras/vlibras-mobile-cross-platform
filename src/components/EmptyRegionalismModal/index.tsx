@@ -37,6 +37,7 @@ const EmptyRegionalismModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <span className="chip-text-space">{Strings.CHIP_TEXT_REGIONALISM}</span>
         <IconArrowUpRight />
       </IonChip>
+      <p>{Strings.SUBTEXT_INFORMATION_REGIONALISM}</p>
     </IonModal>
   );
 };
