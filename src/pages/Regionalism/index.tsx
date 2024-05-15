@@ -107,6 +107,18 @@ function Regionalism() {
     }
   };
 
+  const regionalismDataDefault = {
+    name: 'BR - Padrão Nacional',
+    abbreviation: 'BR',
+    url: regionalismData[0].url,
+  };
+
+  function defaultRegion() {
+    setCurrentRegion(regionalismDataDefault);
+    UnityService.getPlayerInstance().setPlayerRegion('BR');
+    dispatch(Creators.setCurrentRegionalism(regionalismDataDefault));
+  }
+
   async function SaveRegionalism() {
     try {
       const bundles = await fetchBundles(currentRegion.abbreviation);
@@ -115,12 +127,13 @@ function Regionalism() {
           currentRegion.abbreviation
         );
         openLoadingModal();
+        dispatch(Creators.setCurrentRegionalism(currentRegion));
       }
-      if (bundles.length <= 0) {
+      else {
+        defaultRegion();
         handleOpenEmptyRegionalismModal();
       }
       isEmpty = bundles.length;
-      dispatch(Creators.setCurrentRegionalism(currentRegion));
     } catch (error: unknown) {
       closeLoadingModal();
       handleOpenEmptyRegionalismModal();

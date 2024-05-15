@@ -35,7 +35,7 @@
   font-weight: normal;
   font-size: 14px;
   line-height: 150%;
-  margin: 40px 10px 10px 10px !important;
+  margin: 15px 10px 10px 10px !important;
   padding: 0 !important;
   text-align: center;
   color: #1b1b1b;
@@ -67,7 +67,7 @@
 .regionalism-modal .wikilibras-chip {
   height: 34px;
 
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 8px 16px;
 
   border: 1px solid #8e8e8e;
