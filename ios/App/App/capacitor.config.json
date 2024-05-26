@@ -21,6 +21,7 @@
 		"FilesystemPlugin",
 		"HapticsPlugin",
 		"KeyboardPlugin",
+		"CAPNetworkPlugin",
 		"SharePlugin",
 		"StatusBarPlugin",
 		"CDVPlugin"
