@@ -1236,6 +1236,11 @@
   resolved "https://registry.yarnpkg.com/@capacitor/keyboard/-/keyboard-6.0.0.tgz#9a09244f0c9cadaf5339b61040cb81e1ceccdfbb"
   integrity sha512-pPX/PQWWjw5ce47kHEYv6IWlHzuhAxgXihqEAAAGLdwK3u3srgGWCljXrYS9juVBPi/lA1uK7UaUzYI0XrgxVQ==
 
+"@capacitor/network@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/network/-/network-6.0.0.tgz#fe6ac4dae45ada4ad0bc9451ddf9d28433917328"
+  integrity sha512-igGbz3VZuchnfQ/kSFxMsQjLGvKYmEKYzK5RD5S7leLaoBox0B3ueW04yRI2HcGC+PSIo9F52qDL8J6qb1N0vg==
+
 "@capacitor/share@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/share/-/share-6.0.0.tgz#fe53f8619c2cccc16afdbe46d17714076d60dda6"

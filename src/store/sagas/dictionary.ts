@@ -11,7 +11,7 @@ function* fetchWords(
     const response = yield getDictionary(action.payload);
     yield put(Creators.fetchWords.success(response));
   } catch (error) {
-    yield put(Creators.fetchWords.failure({}));
+    yield put(Creators.fetchWords.failure(error));
   }
 }
 
@@ -24,7 +24,7 @@ function* fetchRegionalistWords(
       { data: response }
     ));
   } catch (error) {
-    yield put(Creators.fetchRegionalismWords.failure({}));
+    yield put(Creators.fetchRegionalismWords.failure(error));
   }
 }
 

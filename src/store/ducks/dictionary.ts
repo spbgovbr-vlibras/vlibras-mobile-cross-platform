@@ -50,6 +50,11 @@ export interface ListBundleDictionary {
   data: string[];
 }
 
+export enum ErrorDictionaryRequest {
+  INTERNET_CONNECTION='INTERNET_CONNECTION',
+  UNKNOWN='UNKNOWN'
+}
+
 export const Types = {
   SET_CURRENT_DICTIONARY: '@dictionary/SET_CURRENT_DICTIONARY',
   GET_REQUEST: '@dicinario/GET_REQUEST',
@@ -68,6 +73,7 @@ export interface DictionaryState {
   loading: boolean;
   loadingBundle: boolean;
   regionalismWords: string[];
+  error: ErrorDictionaryRequest | null
 }
 
 const INITIAL_STATE: DictionaryState = {
@@ -76,7 +82,8 @@ const INITIAL_STATE: DictionaryState = {
   metadata: METADATA_INITIAL_STATE,
   loading: false,
   loadingBundle: false,
-  regionalismWords: []
+  regionalismWords: [],
+  error: null
 };
 
 export const Creators = {
@@ -96,6 +103,16 @@ export const Creators = {
 
 export type ActionTypes = ActionType<typeof Creators>;
 
+function mapErrorToDictionaryRequest(error: Error): ErrorDictionaryRequest {
+  const errorMessageLower = error.message.toLowerCase();
+
+  if (errorMessageLower.includes('network error') || errorMessageLower.includes('timeout')) {
+    return ErrorDictionaryRequest.INTERNET_CONNECTION;
+  }
+
+  return ErrorDictionaryRequest.UNKNOWN;
+}
+
 const reducer: Reducer<DictionaryState, ActionTypes> = (
   state = INITIAL_STATE,
   action: ActionTypes
@@ -112,7 +129,7 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
         draft.metadata = METADATA_INITIAL_STATE;
         draft.words = [];
       }
-
+      draft.error = null;
       draft.loading = true;
       break;
     }
@@ -131,11 +148,14 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       break;
     }
     case Types.GET_FAILURE: {
+      const error = payload as Error;
+      draft.error = mapErrorToDictionaryRequest(error);
       draft.loading = false;
       break;
     }
     case Types.GET_BUNDLE_REQUEST: {
       draft.loadingBundle = true;
+      draft.error = null;
       draft.regionalismWords = [];
       break;
     }
@@ -145,6 +165,8 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       break;
     }
     case Types.GET_BUNDLE_FAILURE: {
+      const error = payload as Error;
+      draft.error = mapErrorToDictionaryRequest(error);
       draft.loadingBundle = false;
       break;
     }
