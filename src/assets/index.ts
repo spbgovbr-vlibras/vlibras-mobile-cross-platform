@@ -14,6 +14,8 @@ import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
 import IconArrowLeft from './icons/IconArrowLeft';
+import IconArrowUp from './icons/IconArrowUp';
+import IconArrowDown from './icons/IconArrowDown';
 import IconThumbUp from './icons/IconThumbUp';
 import IconThumbDown from './icons/IconThumbDown';
 import IconArrowUpRight from './icons/IconArrowUpRight';
@@ -213,6 +215,8 @@ export {
   IconThumbDown,
   IconIcaro,
   IconArrowUpRight,
+  IconArrowUp,
+  IconArrowDown,
   cameraBlue,
   logoOlho,
   logoCabelo,
