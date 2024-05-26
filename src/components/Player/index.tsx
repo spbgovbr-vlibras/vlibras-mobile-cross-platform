@@ -579,8 +579,8 @@ function Player() {
               marginRight: 6,
               position: 'absolute',
               width: '100vw',
-              bottom: 80,
-              left: 25,
+              bottom: 50,
+              left: 12,
             }}>
             <TutorialPopover
               title="Dicionário"
@@ -725,8 +725,8 @@ function Player() {
           style={{
             margin: 'auto',
             position: 'absolute',
-            bottom: 80,
-            left: 50,
+            bottom: 68,
+            left: 45,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
@@ -896,7 +896,7 @@ function Player() {
           currentStep <= TutorialSteps.PLAYBACK_SPEED) ? (
           <>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
-              <div style={{ marginRight: 6 }}>
+              <div style={{ marginRight: -30, marginTop: -20 }}>
                 <TutorialPopover
                   title="Fechar"
                   description="Feche tradução e volte à tela anterior"
@@ -926,7 +926,7 @@ function Player() {
                 isEnabled={currentStep === TutorialSteps.CHANGE_AVATAR}
               />
             </div>
-            <div style={{ marginRight: 0 }}>
+            <div style={{ marginTop: -21, marginRight: -35 }}>
               <TutorialPopover
                 title="Central de ajuda"
                 description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
