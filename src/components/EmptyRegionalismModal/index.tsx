@@ -1,6 +1,5 @@
 import { IonModal, IonChip } from '@ionic/react';
 import React from 'react';
-import { useHistory } from 'react-router';
 
 import './styles.css';
 import { IconArrowUpRight, IconCloseCircle } from 'assets';

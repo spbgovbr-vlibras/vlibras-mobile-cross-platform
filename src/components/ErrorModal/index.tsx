@@ -16,7 +16,9 @@ const ErrorModal = ({ show, setShow, errorMsg }: ErrorModalProps) => {
       isOpen={show}
       className="error-modal"
       onIonModalDidDismiss={() => setShow(false)}
-      onIonModalDidPresent={() => { setTimeout(() => setShow(false), 2000); } }
+      onIonModalDidPresent={() => {
+        setTimeout(() => setShow(false), 4000);
+      }}
       backdropDismiss={false}
       canDismiss>
       <img className="loading" src={logoWarning} alt="Carregando" />
