@@ -40,7 +40,7 @@ const TutorialPopover = ({
   const { currentStepIndex, goNextStep, goPreviousStep, onCancel } =
     context === 'home' ? useHomeTutorial() : useCustomizationTutorial();
 
-  const QUEUE = context.toLocaleUpperCase+'_TUTORIAL_QUEUE';
+  const QUEUE = context === 'home' ? HOME_TUTORIAL_QUEUE : CUSTOMIZATION_TUTORIAL_QUEUE;
 
   return isEnabled ? (
     <div className="tutorial-popover-container">
