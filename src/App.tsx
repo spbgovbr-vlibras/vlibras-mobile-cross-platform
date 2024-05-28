@@ -20,8 +20,9 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { CustomizationTutorialProvider } from 'hooks/CustomizationTutorial';
+import { HomeTutorialProvider } from 'hooks/HomeTutorial';
 import { TranslationProvider } from 'hooks/Translation';
-import { TutorialProvider } from 'hooks/Tutorial';
 
 import Routes from './routes';
 import store from './store';
@@ -35,9 +36,11 @@ function App() {
     <IonApp>
       <Provider store={store}>
         <TranslationProvider>
-          <TutorialProvider>
+          <HomeTutorialProvider>
+          <CustomizationTutorialProvider>
             <Routes />
-          </TutorialProvider>
+          </CustomizationTutorialProvider>
+          </HomeTutorialProvider>
         </TranslationProvider>
       </Provider>
     </IonApp>

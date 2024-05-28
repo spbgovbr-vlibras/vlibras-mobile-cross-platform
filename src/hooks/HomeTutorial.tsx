@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from 'react';
 
-export enum TutorialSteps {
+export enum HomeTutorialSteps {
   IDLE,
   INITIAL,
   TRANSLATION,
@@ -24,8 +24,8 @@ export enum TutorialSteps {
   PLAYBACK_SPEED,
 }
 
-interface TutorialContextData {
-  currentStep: TutorialSteps;
+interface HomeTutorialContextData {
+  currentStep: HomeTutorialSteps;
   goNextStep: () => void;
   goPreviousStep: () => void;
   onCancel: () => void;
@@ -33,36 +33,36 @@ interface TutorialContextData {
   hasLoadedConfigurations: boolean;
 }
 
-const TutorialContext = createContext<TutorialContextData>(
-  {} as TutorialContextData
+const HomeTutorialContext = createContext<HomeTutorialContextData>(
+  {} as HomeTutorialContextData
 );
 
-export const TUTORIAL_QUEUE = [
-  TutorialSteps.TRANSLATION,
-  TutorialSteps.DICTIONARY,
-  TutorialSteps.HISTORY,
-  TutorialSteps.TUTORIAL,
-  TutorialSteps.CHANGE_AVATAR,
-  TutorialSteps.MENU,
-  TutorialSteps.CLOSE,
-  TutorialSteps.LIKED_TRANSLATION,
-  TutorialSteps.SHARE,
-  TutorialSteps.SUBTITLE,
-  TutorialSteps.REPEAT,
-  TutorialSteps.PLAYBACK_SPEED,
+export const HOME_TUTORIAL_QUEUE = [
+  HomeTutorialSteps.TRANSLATION,
+  HomeTutorialSteps.DICTIONARY,
+  HomeTutorialSteps.HISTORY,
+  HomeTutorialSteps.TUTORIAL,
+  HomeTutorialSteps.CHANGE_AVATAR,
+  HomeTutorialSteps.MENU,
+  HomeTutorialSteps.CLOSE,
+  HomeTutorialSteps.LIKED_TRANSLATION,
+  HomeTutorialSteps.SHARE,
+  HomeTutorialSteps.SUBTITLE,
+  HomeTutorialSteps.REPEAT,
+  HomeTutorialSteps.PLAYBACK_SPEED,
 ];
 
 const PROPERTY_KEY_TUTORIAL = 'tutorial';
 
-const TutorialProvider: React.FC = ({ children }) => {
-  const [currentStep, setCurrentStep] = useState<TutorialSteps>(
-    TutorialSteps.INITIAL
+const HomeTutorialProvider: React.FC = ({ children }) => {
+  const [currentStep, setCurrentStep] = useState<HomeTutorialSteps>(
+    HomeTutorialSteps.INITIAL
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [hasLoadedConfigurations, setHasLoadedConfigurations] = useState(false);
 
   const presentTutorial = useCallback(() => {
-    setCurrentStep(TutorialSteps.INITIAL);
+    setCurrentStep(HomeTutorialSteps.INITIAL);
     setCurrentStepIndex(-1);
   }, []);
 
@@ -77,9 +77,9 @@ const TutorialProvider: React.FC = ({ children }) => {
           PROPERTY_KEY_TUTORIAL
         );
         if (hasSeenTutorial) {
-          setCurrentStep(TutorialSteps.IDLE);
+          setCurrentStep(HomeTutorialSteps.IDLE);
         } else {
-          setCurrentStep(TutorialSteps.INITIAL);
+          setCurrentStep(HomeTutorialSteps.INITIAL);
         }
       } catch (error) {
         /* empty */
@@ -93,14 +93,14 @@ const TutorialProvider: React.FC = ({ children }) => {
   }, [presentTutorial, markTutorialAsSeen]);
 
   const onFinishTutorial = useCallback(() => {
-    setCurrentStep(TutorialSteps.IDLE);
+    setCurrentStep(HomeTutorialSteps.IDLE);
     setCurrentStepIndex(-1);
   }, []);
 
   const goNextStep = useCallback(() => {
     const index = currentStepIndex + 1;
-    if (index < TUTORIAL_QUEUE.length) {
-      setCurrentStep(TUTORIAL_QUEUE[index]);
+    if (index < HOME_TUTORIAL_QUEUE.length) {
+      setCurrentStep(HOME_TUTORIAL_QUEUE[index]);
       setCurrentStepIndex(index);
     } else {
       onFinishTutorial();
@@ -110,13 +110,13 @@ const TutorialProvider: React.FC = ({ children }) => {
   const goPreviousStep = useCallback(() => {
     const index = currentStepIndex - 1;
     if (index >= 0) {
-      setCurrentStep(TUTORIAL_QUEUE[index]);
+      setCurrentStep(HOME_TUTORIAL_QUEUE[index]);
       setCurrentStepIndex(index);
     }
   }, [currentStepIndex]);
 
   return (
-    <TutorialContext.Provider
+    <HomeTutorialContext.Provider
       value={{
         currentStep,
         goNextStep,
@@ -126,12 +126,12 @@ const TutorialProvider: React.FC = ({ children }) => {
         hasLoadedConfigurations: hasLoadedConfigurations,
       }}>
       {children}
-    </TutorialContext.Provider>
+    </HomeTutorialContext.Provider>
   );
 };
 
-function useTutorial(): TutorialContextData {
-  const context = useContext(TutorialContext);
+function useHomeTutorial(): HomeTutorialContextData {
+  const context = useContext(HomeTutorialContext);
 
   if (!context) {
     throw new Error('');
@@ -139,4 +139,4 @@ function useTutorial(): TutorialContextData {
   return context;
 }
 
-export { TutorialContext, TutorialProvider, useTutorial };
+export { HomeTutorialContext, HomeTutorialProvider, useHomeTutorial };
