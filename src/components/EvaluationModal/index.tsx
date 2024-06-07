@@ -98,7 +98,7 @@ const EvaluationModal = ({
               setShow(false);
               setShowNo(true);
             }}>
-            <IconThumbDown color="#4E4E4E" />
+            <IconThumbDown color="white" />
             <IonText className="evaluation-modal-container-rating-chips-texts">
               {Strings.CHIP_NO}
             </IonText>

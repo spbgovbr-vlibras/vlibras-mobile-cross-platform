@@ -104,6 +104,7 @@
   bottom: 64px;
   width: 100%;
   display: flex;
+  margin-bottom: 15px;
   flex-direction: column;
   align-items: flex-end;
   z-index: 1;
@@ -112,8 +113,8 @@
 .player-button-rounded {
   position: relative;
   bottom: 0;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(27, 27, 27, 0.75);
   margin-bottom: 16px;
@@ -144,8 +145,8 @@
 }
 
 .player-button-tutorial-rounded-top {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;
@@ -156,8 +157,8 @@
 }
 
 .player-button-avatar-rounded-top {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #1b1b1b;
   display: flex;

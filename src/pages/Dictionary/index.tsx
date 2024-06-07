@@ -209,6 +209,7 @@ function Dictionary() {
               onIonInput={debouncedSearch}
               inputmode="text"
               searchIcon="search-sharp"
+              onKeyDown={(e) => {(e.key === 'Enter') ? (e.target as HTMLInputElement).blur() : null;}}
             />
           </div>
           <div className="dictionary-container-ion-chips">
@@ -229,6 +230,12 @@ function Dictionary() {
                 {currentRegionalism.url.length > 0 && (
                   <IonImg src={currentRegionalism.url} />
                 )}
+              </IonChip>
+            )}
+            {(searchText && dictionary.length>0) && (
+              <IonChip
+                style={{ color: '#4b4b4b', background: '#FFFFFF'}}>
+                {dictionary.length+' sinais encontrados'}
               </IonChip>
             )}
           </div>

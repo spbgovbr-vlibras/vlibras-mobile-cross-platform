@@ -38,12 +38,12 @@ const HomeTutorialContext = createContext<HomeTutorialContextData>(
 );
 
 export const HOME_TUTORIAL_QUEUE = [
-  HomeTutorialSteps.TRANSLATION,
   HomeTutorialSteps.DICTIONARY,
+  HomeTutorialSteps.TRANSLATION,
   HomeTutorialSteps.HISTORY,
+  HomeTutorialSteps.MENU,
   HomeTutorialSteps.TUTORIAL,
   HomeTutorialSteps.CHANGE_AVATAR,
-  HomeTutorialSteps.MENU,
   HomeTutorialSteps.CLOSE,
   HomeTutorialSteps.LIKED_TRANSLATION,
   HomeTutorialSteps.SHARE,

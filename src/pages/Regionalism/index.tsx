@@ -151,13 +151,13 @@ function Regionalism() {
       />
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
+          <IonTitle className="menu-toolbar-title">
             {Strings.REGIONALISM_TITLE}
           </IonTitle>
 
           <IonButtons slot="start" onClick={() => history.goBack()}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#1447a6" />
+              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
             </div>
           </IonButtons>
         </IonToolbar>
