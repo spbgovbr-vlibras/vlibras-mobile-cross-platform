@@ -5,17 +5,20 @@
   display: flex;
   flex-direction: column;
   padding: 12px;
-  width: 250px;
+  width: auto;
+  max-width: 340px;
+  min-width: 290px;
   height: max-content;
   position: relative;
   margin-right: 50px;
-
 }
 
 .tutorial-row {
   display: flex;
   margin-bottom: 5px;
   flex-direction: row;
+  height: 100%;
+  width: 100%;
   justify-content: space-between;
   flex: 1;
 }
@@ -100,8 +103,8 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  height: fit-content;
-  width: fit-content;
+  height: 44px;
+  width: max-content;
   color: var(--VLibras---Light-Blue-1, #ffffff);
   border: 1px solid var(--VLibras---Light-White-3, #F7F9FB);
   text-align: center;
@@ -110,6 +113,7 @@
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  margin-left: 10px;
 }
 
 .tutorial-popover-container .button-solid-tutorial {
@@ -118,8 +122,8 @@
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  height: fit-content;
-  width: fit-content;
+  height: 44px;
+  width: max-content;
   color: var(--VLibras---Light-Blue-1, #0D459D);
   text-align: center;
   font-family: Rawline;
@@ -127,7 +131,7 @@
   font-style: normal;
   font-weight: 600;
   line-height: normal;
-  margin-left: 7px;
+  margin-left: 10px;
 }
 
 .container__arrow {

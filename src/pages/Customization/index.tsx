@@ -20,7 +20,11 @@ import {
   IconShirt,
   IconHair,
   IconArrowLeft,
+  IconTutorial,
 } from 'assets';
+import ErrorModal from 'components/ErrorModal';
+import LoadingModal from 'components/LoadingModal';
+import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
@@ -29,6 +33,7 @@ import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
+import { CustomizationTutorialSteps, useCustomizationTutorial } from 'hooks/CustomizationTutorial';
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import UnityService from 'services/unity';
 import { RootState } from 'store';
@@ -135,6 +140,10 @@ function Customization() {
   const [showAlert, setshowAlert] = useState(false);
   const [showAlertCancel, setshowAlertCancel] = useState(false);
 
+  // modals management
+  const [showloadingModal, setShowloadingModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -214,23 +223,25 @@ function Customization() {
   );
 
   function SaveChanges() {
-    dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
-    dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
-    dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
-    dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
-    dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
-
-    dispatch(
-      Creators.storeCustomization.request({
-        corpo: colorbody,
-        cabelo: colorhair,
-        camisa: colorshirt,
-        calca: colorpants,
-        iris: coloreye,
-      })
-    );
-
-    history.push(paths.HOME);
+    try {
+      dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
+      dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
+      dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
+      dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
+      dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
+      dispatch(
+        Creators.storeCustomization.request({
+          corpo: colorbody,
+          cabelo: colorhair,
+          camisa: colorshirt,
+          calca: colorpants,
+          iris: coloreye,
+        })
+      );
+      openLoadingModal();
+    } catch (error) {
+      openErrorModal();
+    }
   }
 
   const rollbackCustomization = useCallback(() => {
@@ -308,6 +319,7 @@ function Customization() {
   }, [rollbackCustomization, history]);
 
   const onCloseClick = useCallback(() => {
+    onCancel();
     cancelAndReturnToHome();
     // if (
     //   hasChanges(
@@ -445,21 +457,104 @@ function Customization() {
     return null;
   };
 
-  // criação da tela  ---------------------------------------------------------------
-  // --------------------------------------------------------------------------------
-  // --------------------------------------------------------------------------------
+  const [showSelectedBodyPart, setShowSelectedBodyPart] = useState('');
 
+  useEffect(() => {
+    if (showbody) {
+      setShowSelectedBodyPart('Corpo');
+    } else if (showeye) {
+      setShowSelectedBodyPart('Olhos');
+    } else if (showhair) {
+      setShowSelectedBodyPart('Cabelo');
+    } else if (showshirt) {
+      setShowSelectedBodyPart('Camisa');
+    } else if (showpants) {
+      setShowSelectedBodyPart('Calça');
+    }
+    setTimeout(() => {
+      setShowSelectedBodyPart('');
+    }, 3000);
+  }, [showbody, showeye, showhair, showshirt, showpants]);
+
+  const {
+    currentStep,
+    presentTutorial,
+    onCancel,
+  } = useCustomizationTutorial();
+
+  // modals management ---------------------------------------------------------
+  const closeLoadingModal = useCallback(() => {
+    setShowloadingModal(false);
+  }, [setShowloadingModal]);
+
+  const openLoadingModal = useCallback(() => {
+    setShowloadingModal(true);
+    setTimeout(() => {
+      closeLoadingModal();
+      history.goBack();
+    }, 2000);
+  }, [setShowloadingModal, closeLoadingModal, history]);
+
+  const closeErrorModal = useCallback(() => {
+    setShowErrorModal(false);
+  },[setShowErrorModal]);
+
+  const openErrorModal = useCallback(() => {
+    setShowErrorModal(true);
+    setTimeout(() => {
+      closeErrorModal();
+    }, 3000);
+  }, [setShowErrorModal, closeErrorModal]);
+  // ---------------------------------------------------------------------------
+
+  // criação da tela  ----------------------------------------------------------
   return (
     <IonPage>
+      <ErrorModal
+        show={showErrorModal}
+        setShow={closeErrorModal}
+        errorMsg='Erro ao salvar alterações. Tente novamente.'
+      />
+      <LoadingModal
+        loading={showloadingModal}
+        setLoading={setShowloadingModal}
+        text="Salvando alterações..."
+        canDismiss={false}
+      />
+      <div style={{position:'relative', display:'flex', flexDirection:'row'}}>
+        <p
+          style={{
+            position:'absolute',
+            color:'black',
+            right: '40%',
+            top: '-2vh',
+            fontSize: '1.5rem',
+            zIndex: 3
+          }}>
+          {showSelectedBodyPart}
+        </p>
+        <button
+          className="player-button-tutorial-rounded-top"
+          type="button"
+          onClick={presentTutorial}
+          style={{
+            position: 'absolute',
+            top: '2vh',
+            right: '2vh',
+            zIndex: 9999,
+          }}>
+          <IconTutorial color='black' size={44}/>
+        </button>
+      </div>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
+          <IonTitle className="menu-toolbar-title">
             Personalização
           </IonTitle>
 
           <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#1447a6" />
+              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
             </div>
           </IonButtons>
         </IonToolbar>
@@ -477,177 +572,305 @@ function Customization() {
           }}>
           <Unity unityContent={unityContent} className="player-content" />
         </div>
+        {currentStep === CustomizationTutorialSteps.BODY_PARTS && (
+          <div style={{position:'relative'}}>
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: 0,
+                left: 25,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100vw',
+                zIndex: 9999,
+              }}>
+              <TutorialPopover
+                title="Corpo"
+                context='customization'
+                description="Personalize o avatar de acordo com as características"
+                position="bc"
+                isEnabled={true}
+              />
+            </div>
+          </div>
+        )}
+        {currentStep === CustomizationTutorialSteps.COLORS && (
+          <div style={{position:'relative'}}>
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: -60,
+                left: 25,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100vw',
+                zIndex: 9999,
+              }}>
+              <TutorialPopover
+                title="Cores"
+                context='customization'
+                description="Selecione a cor que desejadar para a parte do corpo "
+                position="bc"
+                isEnabled={true}
+              />
+            </div>
+          </div>
+        )}
 
-        <div className="customization-menu">
-          {/* button Body */}
+        {currentStep === CustomizationTutorialSteps.BUTTONS && (
+          <div style={{position:'relative'}}>
+            <div
+              style={{
+                margin: 'auto',
+                position: 'absolute',
+                bottom: -120,
+                left: 25,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100vw',
+                zIndex: 9999,
+              }}>
+              <TutorialPopover
+                title="Salvar ou redefinir"
+                context='customization'
+                description="Redefina para as cores padrões ou Salve as alterações aplicadas"
+                position="bc"
+                isEnabled={true}
+              />
+            </div>
+          </div>
+        )}
+        <div className="container-menu">
+          {/* Simple solution to desable the menu during tutorial */}
+          {currentStep !== 0 ? (
+            <div style={{position:'absolute',background:'transparent',width:'100%', height:'100%',zIndex:3}}/>
+          ) : null}
+          <div className="customization-menu">
+            {currentStep === CustomizationTutorialSteps.BODY_PARTS && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '0',
+                  width: '100%',
+                  height: '5%',
+                  borderRadius: 50,
+                  border: '2px solid #3885F9',
+                  boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
+                  zIndex: 9999,
+                }}>
+              </div>
+            )}
+            {/* button Body */}
+            <button
+              type="button"
+              className="customization-button-menu"
+              onClick={() =>{
+                showBody();
 
-          <button
-            type="button"
-            className="customization-button-menu"
-            onClick={() => showBody()}
-            style={{
-              borderBottomColor: showbody
-                ? buttonColors.VARIANT_WHITE_ACTIVE
-                : buttonColors.VARAINT_WHITE,
-            }}>
-            <IconBody
-              color={
-                showbody
+              }}
+              style={{
+                borderBottomColor: showbody
                   ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-            />
-          </button>
+                  : buttonColors.VARAINT_WHITE,
+              }}
+              disabled={currentStep !== 0}>
+              <IconBody
+                color={
+                  showbody
+                    ? buttonColors.VARIANT_WHITE_ACTIVE
+                    : buttonColors.VARAINT_WHITE
+                }
+              />
+            </button>
 
-          {/* button Eye */}
-
-          <button
-            className="customization-button-menu"
-            type="button"
-            onClick={() => showEye()}
-            style={{
-              borderBottomColor: showeye
-                ? buttonColors.VARIANT_WHITE_ACTIVE
-                : buttonColors.VARAINT_WHITE,
-            }}>
-            <IconEye
-              color={
-                showeye
+            {/* button Eye */}
+            <button
+              className="customization-button-menu"
+              type="button"
+              onClick={() => showEye()}
+              style={{
+                borderBottomColor: showeye
                   ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-            />
-          </button>
+                  : buttonColors.VARAINT_WHITE,
+              }}
+              disabled={currentStep !== 0}>
+              <IconEye
+                color={
+                  showeye
+                    ? buttonColors.VARIANT_WHITE_ACTIVE
+                    : buttonColors.VARAINT_WHITE
+                }
+              />
+            </button>
 
-          {/* button Hair */}
-
-          <button
-            className="customization-button-menu"
-            type="button"
-            onClick={() => showHair()}
-            style={{
-              borderBottomColor: showhair
-                ? buttonColors.VARIANT_WHITE_ACTIVE
-                : buttonColors.VARAINT_WHITE,
-            }}>
-            <IconHair
-              color={
-                showhair
+            {/* button Hair */}
+            <button
+              className="customization-button-menu"
+              type="button"
+              onClick={() => showHair()}
+              style={{
+                borderBottomColor: showhair
                   ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-            />
-          </button>
+                  : buttonColors.VARAINT_WHITE,
+              }}
+              disabled={currentStep !== 0}>
+              <IconHair
+                color={
+                  showhair
+                    ? buttonColors.VARIANT_WHITE_ACTIVE
+                    : buttonColors.VARAINT_WHITE
+                }
+              />
+            </button>
 
-          {/* button Shirt */}
-
-          <button
-            className="customization-button-menu"
-            type="button"
-            onClick={() => showShirt()}
-            style={{
-              borderBottomColor: showshirt
-                ? buttonColors.VARIANT_WHITE_ACTIVE
-                : buttonColors.VARAINT_WHITE,
-            }}>
-            <IconShirt
-              color={
-                showshirt
+            {/* button Shirt */}
+            <button
+              className="customization-button-menu"
+              type="button"
+              onClick={() => showShirt()}
+              style={{
+                borderBottomColor: showshirt
                   ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-            />
-          </button>
+                  : buttonColors.VARAINT_WHITE,
+              }}
+              disabled={currentStep !== 0}>
+              <IconShirt
+                color={
+                  showshirt
+                    ? buttonColors.VARIANT_WHITE_ACTIVE
+                    : buttonColors.VARAINT_WHITE
+                }
+              />
+            </button>
 
-          {/* button Pants */}
-
-          <button
-            className="customization-button-menu"
-            type="button"
-            onClick={() => showPants()}
-            style={{
-              borderBottomColor: showpants
-                ? buttonColors.VARIANT_WHITE_ACTIVE
-                : buttonColors.VARAINT_WHITE,
-            }}>
-            <IconPants
-              color={
-                showpants
+            {/* button Pants */}
+            <button
+              className="customization-button-menu"
+              type="button"
+              onClick={() => showPants()}
+              style={{
+                borderBottomColor: showpants
                   ? buttonColors.VARIANT_WHITE_ACTIVE
-                  : buttonColors.VARAINT_WHITE
-              }
-            />
-          </button>
-        </div>
+                  : buttonColors.VARAINT_WHITE,
+              }}
+              disabled={currentStep !== 0}>
+              <IconPants
+                color={
+                  showpants
+                    ? buttonColors.VARIANT_WHITE_ACTIVE
+                    : buttonColors.VARAINT_WHITE
+                }
+              />
+            </button>
+          </div>
 
-        <IonList className="customization-list-colors">
-          {CustomizationBody.map((item) => showColorsBody(item))}
-          {CustomizationEye.map((item) => showColorsEye(item))}
-          {CustomizationArrayHair.map((item) => showColorsHair(item))}
-          {CustomizationArrayShirt.map((item) => showColorShirt(item))}
-          {CustomizationArrayPants.map((item) => showColorPants(item))}
-        </IonList>
-        {/* <button onClick={() => resetColor()} type="button">
-          Reset Color
-        </button> */}
+          <IonList className="customization-list-colors">
+            { currentStep === CustomizationTutorialSteps.COLORS && (
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '60%',
+                  borderRadius: 50,
+                  border: '2px solid #3885F9',
+                  boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
+                  zIndex: 9999,
+                  left: '0',
+                }}>
+              </div>
+            )}
+            {CustomizationBody.map((item) => showColorsBody(item))}
+            {CustomizationEye.map((item) => showColorsEye(item))}
+            {CustomizationArrayHair.map((item) => showColorsHair(item))}
+            {CustomizationArrayShirt.map((item) => showColorShirt(item))}
+            {CustomizationArrayPants.map((item) => showColorPants(item))}
+          </IonList>
+          {/* <button onClick={() => resetColor()} type="button">
+            Reset Color
+          </button> */}
 
-        <div className="customization-all-save">
-          <button
-            className="customization-reset"
-            onClick={() => setshowAlert(true)}
-            type="button">
-            {Strings.BUTTON_RESET}
-            {/* <IonAlert
-              isOpen={showAlertCancel}
-              className="popup-box-signal-cap"
-              header={Strings.TITLE_POPUPCANCEL}
-              message={Strings.MESSAGE_POPUPCANCEL}
-              onDidDismiss={() => setshowAlertCancel(false)}
-              buttons={[
-                {
-                  text: Strings.BUTTON_NAME_YES,
-                  cssClass: 'popup-yes',
-                  handler: cancelAndReturnToHome,
-                },
-                {
-                  text: Strings.BUTTON_NAME_NO,
-                  cssClass: 'popup-no',
-                  role: 'cancel',
-                  // eslint-disable-next-line @typescript-eslint/no-empty-function
-                  handler: () => {},
-                },
-              ]}
-            /> */}
-            <IonAlert
-              isOpen={showAlert}
-              className="popup-box-signal-cap"
-              header={Strings.TITLE_POPUP_RESET}
-              message={Strings.MESSAGE_POPUPCANCEL}
-              onDidDismiss={() => setshowAlert(false)}
-              buttons={[
-                {
-                  text: Strings.BUTTON_NAME_YES,
-                  cssClass: 'popup-yes',
-                  handler: () => {
-                    resetColor();
+          <div className="customization-all-save">
+            { currentStep === CustomizationTutorialSteps.BUTTONS && (
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '60%',
+                  height: '7%',
+                  borderRadius: 50,
+                  border: '2px solid #3885F9',
+                  boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
+                  zIndex: 9999,
+                  left: '20%',
+                }}>
+              </div>
+            )}
+            <button
+              className="customization-reset"
+              onClick={() => setshowAlert(true)}
+              type="button"
+              disabled={currentStep !== 0}>
+              {Strings.BUTTON_RESET}
+              {/* <IonAlert
+                isOpen={showAlertCancel}
+                className="popup-box-signal-cap"
+                header={Strings.TITLE_POPUPCANCEL}
+                message={Strings.MESSAGE_POPUPCANCEL}
+                onDidDismiss={() => setshowAlertCancel(false)}
+                buttons={[
+                  {
+                    text: Strings.BUTTON_NAME_YES,
+                    cssClass: 'popup-yes',
+                    handler: cancelAndReturnToHome,
                   },
-                },
-                {
-                  text: Strings.BUTTON_NAME_NO,
-                  cssClass: 'popup-no',
-                  role: 'cancel',
-                  // eslint-disable-next-line @typescript-eslint/no-empty-function
-                  handler: () => {},
-                },
-              ]}
-            />
-          </button>
-          <button
-            className="customization-save"
-            onClick={() => SaveChanges()}
-            type="button">
-            {Strings.BUTTON_SALVAR}
-          </button>
+                  {
+                    text: Strings.BUTTON_NAME_NO,
+                    cssClass: 'popup-no',
+                    role: 'cancel',
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function
+                    handler: () => {},
+                  },
+                ]}
+              /> */}
+              <IonAlert
+                isOpen={showAlert}
+                className="popup-box-signal-cap"
+                header={Strings.TITLE_POPUP_RESET}
+                message={Strings.MESSAGE_POPUPCANCEL}
+                onDidDismiss={() => setshowAlert(false)}
+                buttons={[
+                  {
+                    text: Strings.BUTTON_NAME_YES,
+                    cssClass: 'popup-yes',
+                    handler: () => {
+                      resetColor();
+                    },
+                  },
+                  {
+                    text: Strings.BUTTON_NAME_NO,
+                    cssClass: 'popup-no',
+                    role: 'cancel',
+                    // eslint-disable-next-line @typescript-eslint/no-empty-function
+                    handler: () => {},
+                  },
+                ]}
+              />
+            </button>
+            <button
+              className="customization-save"
+              onClick={() => SaveChanges()}
+              type="button"
+              disabled={currentStep !== 0}>
+              {Strings.BUTTON_SALVAR}
+            </button>
+          </div>
         </div>
       </div>
     </IonPage>

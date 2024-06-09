@@ -116,7 +116,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
                 to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
                 onClick={onClearText}
                 className="menu-item-link">
-                <IconArrowLeft color="#315EB1" />
+                <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
               </Link>
             )}
           </IonButtons>

@@ -76,7 +76,7 @@
   border-bottom-width: 2px;
   border-bottom-style: solid;
   padding-bottom: 3px;
-  margin: 0 !important;
+  margin-top: 5px !important;
 }
 
 .player-container {
@@ -115,13 +115,22 @@
   margin-right: 16px;
 }
 
-.md button.alert-button.popup-yes {
+button.alert-button.popup-yes {
   background-color: #ffffff;
   color: rgb(0, 0, 0);
+  height: 44px;
+  width: 88px;
 }
 
-.md button.alert-button.popup-no {
+button.alert-button.popup-no {
   background-color: #1447A6;
   color: rgb(255, 255, 255);
+  height: 44px;
+  width: 88px;
 }
 
+.bodypart p {
+  position:'absolute';
+  color:'black';
+  right: '50%';
+}

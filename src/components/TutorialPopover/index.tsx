@@ -3,7 +3,8 @@ import React from 'react';
 
 import { IconClose } from 'assets';
 import './styles.css';
-import { TUTORIAL_QUEUE, useTutorial } from 'hooks/Tutorial';
+import { CUSTOMIZATION_TUTORIAL_QUEUE, useCustomizationTutorial } from 'hooks/CustomizationTutorial';
+import { HOME_TUTORIAL_QUEUE, useHomeTutorial  } from 'hooks/HomeTutorial';
 
 type ArrowPosition =
   | 'tl'
@@ -19,11 +20,14 @@ type ArrowPosition =
   | 'lc'
   | 'lb';
 
+type TutorialContext = 'home' | 'customization';
+
 interface TutorialPopoverProps {
   title: string;
   description: string;
   position: ArrowPosition;
   isEnabled?: boolean;
+  context: TutorialContext;
 }
 
 const TutorialPopover = ({
@@ -31,9 +35,12 @@ const TutorialPopover = ({
   description,
   position,
   isEnabled = false,
+  context,
 }: TutorialPopoverProps) => {
   const { currentStepIndex, goNextStep, goPreviousStep, onCancel } =
-    useTutorial();
+    context === 'home' ? useHomeTutorial() : useCustomizationTutorial();
+
+  const QUEUE = context === 'home' ? HOME_TUTORIAL_QUEUE : CUSTOMIZATION_TUTORIAL_QUEUE;
 
   return isEnabled ? (
     <div className="tutorial-popover-container">
@@ -47,9 +54,9 @@ const TutorialPopover = ({
       <div className={`container__arrow container__arrow--${position}`} />
       <hr />
       <div className="tutorial-row">
-        <span>{`${currentStepIndex + 1} de ${TUTORIAL_QUEUE.length}`}</span>
-        <div>
-          {currentStepIndex != 0 && (
+        <span>{`${currentStepIndex + 1} de ${QUEUE.length}`}</span>
+        <div style={{width:'fit-content', height:'fit-content'}}>
+          {currentStepIndex !== 0 && (
             <button
               className="button-outlined-tutorial"
               onClick={goPreviousStep}>
