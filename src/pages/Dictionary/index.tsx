@@ -29,7 +29,7 @@ import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
-import { Creators } from 'store/ducks/dictionary';
+import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
 import { Strings } from './strings';
 
@@ -53,8 +53,6 @@ function getChipClassName(
 function Dictionary() {
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('alphabetical');
-  const location = useLocation();
-
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -64,6 +62,7 @@ function Dictionary() {
     words: dictionary,
     regionalismWords,
     loading,
+    error,
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
@@ -129,7 +128,15 @@ function Dictionary() {
 
   const renderEmptyOrLoadingState = () => {
     if (dictionary.length === 0 && filter === 'alphabetical') {
-      if (loading) {
+      if (error) {
+        return (
+          <div className="dictionary-word-item centered">
+            {error === ErrorDictionaryRequest.INTERNET_CONNECTION
+              ? Strings.DICTIONARY_INTERNET_CONNECTION_ERROR
+              : Strings.DICTIONARY_REQUEST_ERROR}
+          </div>
+        );
+      } else if (loading) {
         return <LoadingSpinner loadingDescription="Carregando sinais..." />;
       } else {
         return (
@@ -197,9 +204,7 @@ function Dictionary() {
   }
 
   return (
-    <MenuLayout
-      title={Strings.TOOLBAR_TITLE}
-      mode={'back'}>
+    <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent>
         <div className="dictionary-container">
           <div className="dictionary-box">
@@ -209,6 +214,7 @@ function Dictionary() {
               onIonInput={debouncedSearch}
               inputmode="text"
               searchIcon="search-sharp"
+              onKeyDown={(e) => {(e.key === 'Enter') ? (e.target as HTMLInputElement).blur() : null;}}
             />
           </div>
           <div className="dictionary-container-ion-chips">
@@ -229,6 +235,12 @@ function Dictionary() {
                 {currentRegionalism.url.length > 0 && (
                   <IonImg src={currentRegionalism.url} />
                 )}
+              </IonChip>
+            )}
+            {(searchText && dictionary.length>0) && (
+              <IonChip
+                style={{ color: '#4b4b4b', background: '#FFFFFF'}}>
+                {dictionary.length+' sinais encontrados'}
               </IonChip>
             )}
           </div>

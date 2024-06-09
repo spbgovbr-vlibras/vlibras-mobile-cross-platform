@@ -22,6 +22,8 @@ import {
   IconArrowLeft,
   IconTutorial,
 } from 'assets';
+import ErrorModal from 'components/ErrorModal';
+import LoadingModal from 'components/LoadingModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
@@ -138,6 +140,10 @@ function Customization() {
   const [showAlert, setshowAlert] = useState(false);
   const [showAlertCancel, setshowAlertCancel] = useState(false);
 
+  // modals management
+  const [showloadingModal, setShowloadingModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -217,23 +223,25 @@ function Customization() {
   );
 
   function SaveChanges() {
-    dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
-    dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
-    dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
-    dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
-    dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
-
-    dispatch(
-      Creators.storeCustomization.request({
-        corpo: colorbody,
-        cabelo: colorhair,
-        camisa: colorshirt,
-        calca: colorpants,
-        iris: coloreye,
-      })
-    );
-
-    history.push(paths.HOME);
+    try {
+      dispatch(Creators.setCurrentCustomizationBody(colorbody)); // redux create
+      dispatch(Creators.setCurrentCustomizationEye(coloreye)); // redux create
+      dispatch(Creators.setCurrentCustomizationHair(colorhair)); // redux create
+      dispatch(Creators.setCurrentCustomizationPants(colorpants)); // redux create
+      dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
+      dispatch(
+        Creators.storeCustomization.request({
+          corpo: colorbody,
+          cabelo: colorhair,
+          camisa: colorshirt,
+          calca: colorpants,
+          iris: coloreye,
+        })
+      );
+      openLoadingModal();
+    } catch (error) {
+      openErrorModal();
+    }
   }
 
   const rollbackCustomization = useCallback(() => {
@@ -449,19 +457,82 @@ function Customization() {
     return null;
   };
 
+  const [showSelectedBodyPart, setShowSelectedBodyPart] = useState('');
+
+  useEffect(() => {
+    if (showbody) {
+      setShowSelectedBodyPart('Corpo');
+    } else if (showeye) {
+      setShowSelectedBodyPart('Olhos');
+    } else if (showhair) {
+      setShowSelectedBodyPart('Cabelo');
+    } else if (showshirt) {
+      setShowSelectedBodyPart('Camisa');
+    } else if (showpants) {
+      setShowSelectedBodyPart('Calça');
+    }
+    setTimeout(() => {
+      setShowSelectedBodyPart('');
+    }, 3000);
+  }, [showbody, showeye, showhair, showshirt, showpants]);
+
   const {
     currentStep,
     presentTutorial,
     onCancel,
   } = useCustomizationTutorial();
 
-  // criação da tela  ---------------------------------------------------------------
-  // --------------------------------------------------------------------------------
-  // --------------------------------------------------------------------------------
+  // modals management ---------------------------------------------------------
+  const closeLoadingModal = useCallback(() => {
+    setShowloadingModal(false);
+  }, [setShowloadingModal]);
 
+  const openLoadingModal = useCallback(() => {
+    setShowloadingModal(true);
+    setTimeout(() => {
+      closeLoadingModal();
+      history.goBack();
+    }, 2000);
+  }, [setShowloadingModal, closeLoadingModal, history]);
+
+  const closeErrorModal = useCallback(() => {
+    setShowErrorModal(false);
+  },[setShowErrorModal]);
+
+  const openErrorModal = useCallback(() => {
+    setShowErrorModal(true);
+    setTimeout(() => {
+      closeErrorModal();
+    }, 3000);
+  }, [setShowErrorModal, closeErrorModal]);
+  // ---------------------------------------------------------------------------
+
+  // criação da tela  ----------------------------------------------------------
   return (
     <IonPage>
-      <div style={{position:'relative'}}>
+      <ErrorModal
+        show={showErrorModal}
+        setShow={closeErrorModal}
+        errorMsg='Erro ao salvar alterações. Tente novamente.'
+      />
+      <LoadingModal
+        loading={showloadingModal}
+        setLoading={setShowloadingModal}
+        text="Salvando alterações..."
+        canDismiss={false}
+      />
+      <div style={{position:'relative', display:'flex', flexDirection:'row'}}>
+        <p
+          style={{
+            position:'absolute',
+            color:'black',
+            right: '40%',
+            top: '-2vh',
+            fontSize: '1.5rem',
+            zIndex: 3
+          }}>
+          {showSelectedBodyPart}
+        </p>
         <button
           className="player-button-tutorial-rounded-top"
           type="button"
@@ -470,21 +541,20 @@ function Customization() {
             position: 'absolute',
             top: '2vh',
             right: '2vh',
-            zIndex: 1
-          }}
-          >
-          <IconTutorial color="black" />
+            zIndex: 9999,
+          }}>
+          <IconTutorial color='black' size={44}/>
         </button>
       </div>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
+          <IonTitle className="menu-toolbar-title">
             Personalização
           </IonTitle>
 
           <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#1447a6" />
+              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
             </div>
           </IonButtons>
         </IonToolbar>
@@ -506,14 +576,16 @@ function Customization() {
           <div style={{position:'relative'}}>
             <div
               style={{
+                margin: 'auto',
                 position: 'absolute',
+                bottom: 0,
+                left: 25,
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'center',
-                zIndex: 9999,
                 alignItems: 'center',
-                left: '20vw',
-                bottom: '2vh',
+                width: '100vw',
+                zIndex: 9999,
               }}>
               <TutorialPopover
                 title="Corpo"
@@ -529,19 +601,21 @@ function Customization() {
           <div style={{position:'relative'}}>
             <div
               style={{
+                margin: 'auto',
                 position: 'absolute',
+                bottom: -60,
+                left: 25,
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'center',
-                zIndex: 9999,
                 alignItems: 'center',
-                left: '20vw',
-                bottom: '-5vh',
+                width: '100vw',
+                zIndex: 9999,
               }}>
               <TutorialPopover
                 title="Cores"
                 context='customization'
-                description="Selecione a cor que desejadar "
+                description="Selecione a cor que desejadar para a parte do corpo "
                 position="bc"
                 isEnabled={true}
               />
@@ -553,14 +627,16 @@ function Customization() {
           <div style={{position:'relative'}}>
             <div
               style={{
+                margin: 'auto',
                 position: 'absolute',
+                bottom: -120,
+                left: 25,
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'center',
-                zIndex: 9999,
                 alignItems: 'center',
-                left: '20vw',
-                bottom: '-15vh',
+                width: '100vw',
+                zIndex: 9999,
               }}>
               <TutorialPopover
                 title="Salvar ou redefinir"
@@ -572,11 +648,11 @@ function Customization() {
             </div>
           </div>
         )}
-
-        {/* Highlight */}
-        <div style={{position:'relative'}}>
-
-        </div>
+        <div className="container-menu">
+          {/* Simple solution to desable the menu during tutorial */}
+          {currentStep !== 0 ? (
+            <div style={{position:'absolute',background:'transparent',width:'100%', height:'100%',zIndex:3}}/>
+          ) : null}
           <div className="customization-menu">
             {currentStep === CustomizationTutorialSteps.BODY_PARTS && (
               <div
@@ -593,11 +669,13 @@ function Customization() {
               </div>
             )}
             {/* button Body */}
-
             <button
               type="button"
               className="customization-button-menu"
-              onClick={() => showBody()}
+              onClick={() =>{
+                showBody();
+
+              }}
               style={{
                 borderBottomColor: showbody
                   ? buttonColors.VARIANT_WHITE_ACTIVE
@@ -614,7 +692,6 @@ function Customization() {
             </button>
 
             {/* button Eye */}
-
             <button
               className="customization-button-menu"
               type="button"
@@ -635,7 +712,6 @@ function Customization() {
             </button>
 
             {/* button Hair */}
-
             <button
               className="customization-button-menu"
               type="button"
@@ -656,7 +732,6 @@ function Customization() {
             </button>
 
             {/* button Shirt */}
-
             <button
               className="customization-button-menu"
               type="button"
@@ -677,7 +752,6 @@ function Customization() {
             </button>
 
             {/* button Pants */}
-
             <button
               className="customization-button-menu"
               type="button"
@@ -728,13 +802,13 @@ function Customization() {
               <div
                 style={{
                   position: 'absolute',
-                  width: '70%',
-                  height: '6.5%',
+                  width: '60%',
+                  height: '7%',
                   borderRadius: 50,
                   border: '2px solid #3885F9',
                   boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
                   zIndex: 9999,
-                  left: '15%',
+                  left: '20%',
                 }}>
               </div>
             )}
@@ -797,8 +871,8 @@ function Customization() {
               {Strings.BUTTON_SALVAR}
             </button>
           </div>
-          <div style={{height:'2vh'}}></div>
         </div>
+      </div>
     </IonPage>
   );
 }

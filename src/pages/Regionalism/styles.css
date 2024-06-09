@@ -104,3 +104,8 @@ ion-radio {
   color: #4e4e4e;
   margin-right: 16px;
 }
+
+.custom-spinner {
+  height: 20px;
+  width: 20px;
+}

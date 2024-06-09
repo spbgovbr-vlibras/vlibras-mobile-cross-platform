@@ -6,8 +6,8 @@ import { SVGProps } from './types';
 const IconSubtitle = ({
   style = {},
   color = 'grey',
-  size = 24,
-  viewBox = '0 0 28 28',
+  size = 26,
+  viewBox = '0.5 5 27 27',
 }: SVGProps) => (
   <svg
     width={size}

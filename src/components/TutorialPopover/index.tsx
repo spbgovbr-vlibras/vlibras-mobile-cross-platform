@@ -55,7 +55,7 @@ const TutorialPopover = ({
       <hr />
       <div className="tutorial-row">
         <span>{`${currentStepIndex + 1} de ${QUEUE.length}`}</span>
-        <div>
+        <div style={{width:'fit-content', height:'fit-content'}}>
           {currentStepIndex !== 0 && (
             <button
               className="button-outlined-tutorial"

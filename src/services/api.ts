@@ -4,6 +4,7 @@ import { MetadataParams, ListResponseDictionary } from 'store/ducks/dictionary';
 
 const api = axios.create({
   baseURL: 'https://dicionario2.vlibras.gov.br',
+  timeout: 15000
 });
 
 export async function getDictionary(
