@@ -33,7 +33,10 @@ import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
 import CustomizationArrayPants from 'data/CustomizationArrayPants';
 import CustomizationArrayShirt from 'data/CustomizationArrayShirt';
-import { CustomizationTutorialSteps, useCustomizationTutorial } from 'hooks/CustomizationTutorial';
+import {
+  CustomizationTutorialSteps,
+  useCustomizationTutorial,
+} from 'hooks/CustomizationTutorial';
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import UnityService from 'services/unity';
 import { RootState } from 'store';
@@ -150,11 +153,16 @@ function Customization() {
   useEffect(() => {
     unityContent.on('progress', (progression: any) => {
       if (progression === 1) {
-        dispatch(Creators.loadCustomization.request({}));
         setVisiblePlayer(true);
       }
     });
   }, [dispatch]);
+
+  useEffect(() => {
+    if (visiblePlayer) {
+      dispatch(Creators.loadCustomization.request(currentAvatar));
+    }
+  }, [currentAvatar, visiblePlayer, dispatch]);
 
   //  funções para alterar States
 
@@ -231,11 +239,14 @@ function Customization() {
       dispatch(Creators.setCurrentCustomizationShirt(colorshirt)); // redux create
       dispatch(
         Creators.storeCustomization.request({
-          corpo: colorbody,
-          cabelo: colorhair,
-          camisa: colorshirt,
-          calca: colorpants,
-          iris: coloreye,
+          avatar: currentAvatar,
+          customizationColors: {
+            corpo: colorbody,
+            cabelo: colorhair,
+            camisa: colorshirt,
+            calca: colorpants,
+            iris: coloreye,
+          },
         })
       );
       openLoadingModal();
@@ -476,11 +487,7 @@ function Customization() {
     }, 3000);
   }, [showbody, showeye, showhair, showshirt, showpants]);
 
-  const {
-    currentStep,
-    presentTutorial,
-    onCancel,
-  } = useCustomizationTutorial();
+  const { currentStep, presentTutorial, onCancel } = useCustomizationTutorial();
 
   // modals management ---------------------------------------------------------
   const closeLoadingModal = useCallback(() => {
@@ -497,7 +504,7 @@ function Customization() {
 
   const closeErrorModal = useCallback(() => {
     setShowErrorModal(false);
-  },[setShowErrorModal]);
+  }, [setShowErrorModal]);
 
   const openErrorModal = useCallback(() => {
     setShowErrorModal(true);
@@ -513,7 +520,7 @@ function Customization() {
       <ErrorModal
         show={showErrorModal}
         setShow={closeErrorModal}
-        errorMsg='Erro ao salvar alterações. Tente novamente.'
+        errorMsg="Erro ao salvar alterações. Tente novamente."
       />
       <LoadingModal
         loading={showloadingModal}
@@ -521,15 +528,16 @@ function Customization() {
         text="Salvando alterações..."
         canDismiss={false}
       />
-      <div style={{position:'relative', display:'flex', flexDirection:'row'}}>
+      <div
+        style={{ position: 'relative', display: 'flex', flexDirection: 'row' }}>
         <p
           style={{
-            position:'absolute',
-            color:'black',
+            position: 'absolute',
+            color: 'black',
             right: '40%',
             top: '-2vh',
             fontSize: '1.5rem',
-            zIndex: 3
+            zIndex: 3,
           }}>
           {showSelectedBodyPart}
         </p>
@@ -543,14 +551,12 @@ function Customization() {
             right: '2vh',
             zIndex: 9999,
           }}>
-          <IconTutorial color='black' size={44}/>
+          <IconTutorial color="black" size={44} />
         </button>
       </div>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title">
-            Personalização
-          </IonTitle>
+          <IonTitle className="menu-toolbar-title">Personalização</IonTitle>
 
           <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">
@@ -573,7 +579,7 @@ function Customization() {
           <Unity unityContent={unityContent} className="player-content" />
         </div>
         {currentStep === CustomizationTutorialSteps.BODY_PARTS && (
-          <div style={{position:'relative'}}>
+          <div style={{ position: 'relative' }}>
             <div
               style={{
                 margin: 'auto',
@@ -589,7 +595,7 @@ function Customization() {
               }}>
               <TutorialPopover
                 title="Corpo"
-                context='customization'
+                context="customization"
                 description="Personalize o avatar de acordo com as características"
                 position="bc"
                 isEnabled={true}
@@ -598,7 +604,7 @@ function Customization() {
           </div>
         )}
         {currentStep === CustomizationTutorialSteps.COLORS && (
-          <div style={{position:'relative'}}>
+          <div style={{ position: 'relative' }}>
             <div
               style={{
                 margin: 'auto',
@@ -614,7 +620,7 @@ function Customization() {
               }}>
               <TutorialPopover
                 title="Cores"
-                context='customization'
+                context="customization"
                 description="Selecione a cor que desejadar para a parte do corpo "
                 position="bc"
                 isEnabled={true}
@@ -624,7 +630,7 @@ function Customization() {
         )}
 
         {currentStep === CustomizationTutorialSteps.BUTTONS && (
-          <div style={{position:'relative'}}>
+          <div style={{ position: 'relative' }}>
             <div
               style={{
                 margin: 'auto',
@@ -640,7 +646,7 @@ function Customization() {
               }}>
               <TutorialPopover
                 title="Salvar ou redefinir"
-                context='customization'
+                context="customization"
                 description="Redefina para as cores padrões ou Salve as alterações aplicadas"
                 position="bc"
                 isEnabled={true}
@@ -651,7 +657,15 @@ function Customization() {
         <div className="container-menu">
           {/* Simple solution to desable the menu during tutorial */}
           {currentStep !== 0 ? (
-            <div style={{position:'absolute',background:'transparent',width:'100%', height:'100%',zIndex:3}}/>
+            <div
+              style={{
+                position: 'absolute',
+                background: 'transparent',
+                width: '100%',
+                height: '100%',
+                zIndex: 3,
+              }}
+            />
           ) : null}
           <div className="customization-menu">
             {currentStep === CustomizationTutorialSteps.BODY_PARTS && (
@@ -665,16 +679,14 @@ function Customization() {
                   border: '2px solid #3885F9',
                   boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
                   zIndex: 9999,
-                }}>
-              </div>
+                }}></div>
             )}
             {/* button Body */}
             <button
               type="button"
               className="customization-button-menu"
-              onClick={() =>{
+              onClick={() => {
                 showBody();
-
               }}
               style={{
                 borderBottomColor: showbody
@@ -773,7 +785,7 @@ function Customization() {
           </div>
 
           <IonList className="customization-list-colors">
-            { currentStep === CustomizationTutorialSteps.COLORS && (
+            {currentStep === CustomizationTutorialSteps.COLORS && (
               <div
                 style={{
                   position: 'absolute',
@@ -784,8 +796,7 @@ function Customization() {
                   boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
                   zIndex: 9999,
                   left: '0',
-                }}>
-              </div>
+                }}></div>
             )}
             {CustomizationBody.map((item) => showColorsBody(item))}
             {CustomizationEye.map((item) => showColorsEye(item))}
@@ -798,7 +809,7 @@ function Customization() {
           </button> */}
 
           <div className="customization-all-save">
-            { currentStep === CustomizationTutorialSteps.BUTTONS && (
+            {currentStep === CustomizationTutorialSteps.BUTTONS && (
               <div
                 style={{
                   position: 'absolute',
@@ -809,8 +820,7 @@ function Customization() {
                   boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
                   zIndex: 9999,
                   left: '20%',
-                }}>
-              </div>
+                }}></div>
             )}
             <button
               className="customization-reset"

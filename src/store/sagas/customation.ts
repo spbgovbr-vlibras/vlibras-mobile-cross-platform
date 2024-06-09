@@ -3,25 +3,33 @@ import { all, takeLatest, put } from 'redux-saga/effects';
 
 import { PLAYER_AVATAR_KEY_STORE, PLAYER_CUSTOMIZATION_KEY_STORE } from 'constants/keys';
 import { Avatar } from 'constants/types';
-import { Creators, CustomizationColors } from 'store/ducks/customization';
+import { AvatarCustomization, Creators } from 'store/ducks/customization';
 
 function* storeCustomization(
   action: ReturnType<typeof Creators.storeCustomization.request>
 ): Generator<unknown, void, unknown> {
   try {
-    yield NativeStorage.setItem(PLAYER_CUSTOMIZATION_KEY_STORE, action.payload);
+    yield NativeStorage.setItem(
+      `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload.avatar}`,
+      action.payload
+    );
     yield put(Creators.storeCustomization.success({}));
   } catch (error) {
     yield put(Creators.storeCustomization.failure({}));
   }
 }
 
-function* loadCustomization(): Generator<unknown, void, CustomizationColors> {
+function* loadCustomization(
+  action: ReturnType<typeof Creators.loadCustomization.request>
+): Generator<unknown, void, AvatarCustomization> {
   try {
+    console.log(`[DEBUG] ${`${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`}`);
+
     const response = yield NativeStorage.getItem(
-      PLAYER_CUSTOMIZATION_KEY_STORE
+      `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`
     );
     yield put(Creators.loadCustomization.success(response));
+    console.log(`[DEBUG] ${response}`);
   } catch (error) {
     yield put(Creators.loadCustomization.failure({}));
   }

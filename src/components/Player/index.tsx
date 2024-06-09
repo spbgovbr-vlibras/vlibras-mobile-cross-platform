@@ -60,7 +60,6 @@ import { Strings } from './Strings';
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import IconHand from 'assets/icons/IconHand';
-import { current } from 'immer';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -319,12 +318,7 @@ function Player() {
     };
 
     // Add the app state change listener
-    const listener = App.addListener('appStateChange', handleAppStateChange);
-
-    // Clean up the event listener when component unmounts
-    return () => {
-    //  listener.remove();
-    };
+    App.addListener('appStateChange', handleAppStateChange);
   }, []);
 
   useEffect(() => {
@@ -348,12 +342,17 @@ function Player() {
     playerService.getUnity().on('progress', (progression: number) => {
       if (progression === 1) {
         dispatch(Creators.loadAvatar.request());
-        dispatch(Creators.loadCustomization.request({}));
         dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
         setVisiblePlayer(true);
       }
     });
   }, [dispatch]);
+
+  useEffect(() => {
+    if (visiblePlayer) {
+      dispatch(Creators.loadCustomization.request(currentAvatar));
+    }
+  }, [currentAvatar, visiblePlayer, dispatch]);
 
   function handlePlay(gloss: string) {
     if (progressContainerRef.current) {
@@ -608,8 +607,7 @@ function Player() {
                 borderRadius: '5px',
                 border: '2px solid #3885F9',
                 boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}>
-            </div>
+              }}></div>
           )}
           {currentStep === HomeTutorialSteps.TRANSLATION && (
             <div
@@ -627,8 +625,7 @@ function Player() {
                 borderRadius: '50%',
                 border: '2px solid white',
                 boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-              }}>
-            </div>
+              }}></div>
           )}
           {currentStep === HomeTutorialSteps.REPEAT && (
             <div
@@ -646,8 +643,7 @@ function Player() {
                 borderRadius: '50%',
                 border: '2px solid white',
                 boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-              }}>
-            </div>
+              }}></div>
           )}
           {currentStep >= HomeTutorialSteps.CLOSE &&
           currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
@@ -679,8 +675,7 @@ function Player() {
                 borderRadius: '5px',
                 border: '2px solid #3885F9',
                 boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}>
-            </div>
+              }}></div>
           )}
           {currentStep === HomeTutorialSteps.SUBTITLE && (
             <div
@@ -698,12 +693,11 @@ function Player() {
                 borderRadius: '5px',
                 border: '2px solid #3885F9',
                 boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}>
-            </div>
+              }}></div>
           )}
         </div>
 
-      <div>
+        <div>
           <div
             style={{
               margin: 'auto',
@@ -718,7 +712,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Dicionário"
-              context='home'
+              context="home"
               description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
               position="bl"
               isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
@@ -741,7 +735,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Tradução PT-BR"
-              context='home'
+              context="home"
               description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
               position="bc"
               isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
@@ -783,7 +777,7 @@ function Player() {
           }}>
           <TutorialPopover
             title="Repetir tradução"
-            context='home'
+            context="home"
             description="Repita a última tradução feita"
             position="bc"
             isEnabled={currentStep === HomeTutorialSteps.REPEAT}
@@ -804,7 +798,7 @@ function Player() {
           }}>
           <TutorialPopover
             title="Histórico"
-            context='home'
+            context="home"
             description="Acesse as traduções que foram realizadas nos últimos 30 dias."
             position="br"
             isEnabled={currentStep === HomeTutorialSteps.HISTORY}
@@ -841,7 +835,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Legenda"
-              context='home'
+              context="home"
               description="Habilite legenda para tradução"
               position="br"
               isEnabled={currentStep === HomeTutorialSteps.SUBTITLE}
@@ -864,7 +858,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Velocidade de reprodução"
-              context='home'
+              context="home"
               description="Altere a velocidade de reprodução"
               position="bl"
               isEnabled={currentStep === HomeTutorialSteps.PLAYBACK_SPEED}
@@ -900,14 +894,14 @@ function Player() {
           position: 'absolute',
           padding: '8px',
           display: 'flex',
-          right : 10,
+          right: 10,
           flexDirection: 'column',
           alignItems: 'flex-start',
           zIndex: 2,
         }}>
         <TutorialPopover
           title="Menu"
-          context='home'
+          context="home"
           description="Acesse outras funcionalidades do tradutor e configure sua experiência no VLibras."
           position="tl"
           isEnabled={currentStep === HomeTutorialSteps.MENU}
@@ -968,7 +962,7 @@ function Player() {
         {isPlaying ||
         hasFinished ||
         (currentStep >= HomeTutorialSteps.CLOSE &&
-        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) ? (
+          currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) ? (
           <div style={{ display: 'flex', flexDirection: 'row' }}>
             <div
               style={{
@@ -983,7 +977,7 @@ function Player() {
               }}>
               <TutorialPopover
                 title="Fechar"
-                context='home'
+                context="home"
                 description="Feche tradução e volte à tela anterior."
                 position="rt"
                 isEnabled={currentStep === HomeTutorialSteps.CLOSE}
@@ -991,8 +985,9 @@ function Player() {
             </div>
 
             <div>
-            {currentStep === HomeTutorialSteps.CLOSE && (
-                <div className='highligth'
+              {currentStep === HomeTutorialSteps.CLOSE && (
+                <div
+                  className="highligth"
                   style={{
                     position: 'absolute',
                     display: 'flex',
@@ -1002,10 +997,10 @@ function Player() {
                     border: '1px solid white',
                     boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
                     zIndex: 1,
-                  }}>
-                </div>
+                  }}></div>
               )}
-              <button style={{marginBottom: 0}}
+              <button
+                style={{ marginBottom: 0 }}
                 disabled={
                   currentStep >= HomeTutorialSteps.CLOSE &&
                   currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
@@ -1032,7 +1027,7 @@ function Player() {
               }}>
               <TutorialPopover
                 title="Trocar avatar"
-                context='home'
+                context="home"
                 description="Escolha qual avatar interpretará os sinais em LIBRAS."
                 position="rc"
                 isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
@@ -1051,27 +1046,31 @@ function Player() {
               }}>
               <TutorialPopover
                 title="Central de ajuda"
-                context='home'
+                context="home"
                 description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
                 position="rt"
                 isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
               />
             </div>
             {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    display: 'flex',
-                    bottom: '16px',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                  }}>
-                </div>
+              <div
+                style={{
+                  position: 'absolute',
+                  display: 'flex',
+                  bottom: '16px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  border: '1px solid white',
+                  boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+                }}></div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column',height:'fit-content' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: 'fit-content',
+              }}>
               {currentStep === HomeTutorialSteps.TUTORIAL && (
                 <div
                   style={{
@@ -1082,8 +1081,7 @@ function Player() {
                     borderRadius: '50%',
                     border: '1px solid white',
                     boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                  }}>
-                </div>
+                  }}></div>
               )}
               <>
                 <button
@@ -1091,7 +1089,7 @@ function Player() {
                   className="player-button-tutorial-rounded-top"
                   type="button"
                   onClick={goNextStep}>
-                  <IconTutorial color="black" size={44}/>
+                  <IconTutorial color="black" size={44} />
                 </button>
               </>
               <button
@@ -1138,8 +1136,7 @@ function Player() {
                 border: '1px solid white',
                 boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
                 zIndex: 1,
-              }}>
-            </div>
+              }}></div>
           )}
           <div
             style={{
@@ -1149,7 +1146,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Gostou da tradução?"
-              context='home'
+              context="home"
               description="Avalie e sugira melhorias."
               position="rb"
               isEnabled={currentStep === HomeTutorialSteps.LIKED_TRANSLATION}
@@ -1175,7 +1172,7 @@ function Player() {
             }}>
             <TutorialPopover
               title="Compartilhar"
-              context='home'
+              context="home"
               description="Vídeo com a tradução"
               position="rb"
               isEnabled={currentStep === HomeTutorialSteps.SHARE}
@@ -1193,10 +1190,10 @@ function Player() {
                 border: '1px solid white',
                 boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
                 zIndex: 1,
-              }}>
-            </div>
+              }}></div>
           )}
-          <button style={{marginBottom: 0}}
+          <button
+            style={{ marginBottom: 0 }}
             disabled={
               currentStep >= HomeTutorialSteps.CLOSE &&
               currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
