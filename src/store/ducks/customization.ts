@@ -43,7 +43,7 @@ export interface CustomizationState {
   currentavatar: Avatar;
 }
 const INITIAL_STATE: CustomizationState = {
-  currentbody: '#f3a78f',
+  currentbody: '#b87d6c',
   currenteye: '#000000',
   currenthair: '#000000',
   currentpants: '#121420',
@@ -58,6 +58,11 @@ export type CustomizationColors = {
   calca: string;
   iris: string;
 };
+
+export type AvatarCustomization = {
+  customizationColors: CustomizationColors;
+  avatar: Avatar;
+}
 
 export const Creators = {
   setCurrentCustomizationBody: createAction(
@@ -79,12 +84,12 @@ export const Creators = {
     Types.STORE_CUSTOMIZATION_REQUEST,
     Types.STORE_CUSTOMIZATION_SUCCESS,
     Types.STORE_CUSTOMIZATION_FAILURE
-  )<CustomizationColors, unknown, unknown>(),
+  )<AvatarCustomization, unknown, unknown>(),
   loadCustomization: createAsyncAction(
     Types.LOAD_CUSTOMIZATION_REQUEST,
     Types.LOAD_CUSTOMIZATION_SUCCESS,
     Types.LOAD_CUSTOMIZATION_FAILURE
-  )<unknown, CustomizationColors, unknown>(),
+  )<Avatar, AvatarCustomization, unknown>(),
   storeAvatar: createAsyncAction(
     AvatarType.STORE_CURRENT_AVATAR_REQUEST,
     AvatarType.STORE_CURRENT_AVATAR_SUCCESS,
@@ -128,12 +133,19 @@ const reducer: Reducer<CustomizationState, ActionTypes> = (
       draft.currentavatar = payload;
       break;
     case Types.LOAD_CUSTOMIZATION_SUCCESS:
-      const colors = payload as CustomizationColors;
-      draft.currentbody = colors.corpo;
-      draft.currenteye = colors.iris;
-      draft.currenthair = colors.cabelo;
-      draft.currentpants = colors.calca;
-      draft.currentshirt = colors.camisa;
+      const customization = payload as AvatarCustomization;
+      draft.currentbody = customization.customizationColors.corpo;
+      draft.currenteye = customization.customizationColors.iris;
+      draft.currenthair = customization.customizationColors.cabelo;
+      draft.currentpants = customization.customizationColors.calca;
+      draft.currentshirt = customization.customizationColors.camisa;
+      break;
+    case Types.LOAD_CUSTOMIZATION_FAILURE:
+      draft.currentbody = INITIAL_STATE.currentbody;
+      draft.currenteye = INITIAL_STATE.currenteye;
+      draft.currenthair = INITIAL_STATE.currenthair;
+      draft.currentpants = INITIAL_STATE.currentpants;
+      draft.currentshirt = INITIAL_STATE.currentshirt;
       break;
     default:
       break;
