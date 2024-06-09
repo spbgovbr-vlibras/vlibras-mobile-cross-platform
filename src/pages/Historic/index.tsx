@@ -14,7 +14,12 @@ import dateFormat from 'utils/dateFormat';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
-import { logoTranslator1, logoTranslator2 } from '../../assets';
+import {
+  IconArrowUp,
+  IconArrowDown,
+  logoTranslator1,
+  logoTranslator2,
+} from '../../assets';
 import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
@@ -218,10 +223,10 @@ function Historic() {
         {hasItemsToRender() && (
           <div className="scroll-buttons">
             <IonButton shape="round" className="arrowBtn" onClick={scrollUp}>
-              ↑
+              <IconArrowUp />
             </IonButton>
             <IonButton shape="round" className="arrowBtn" onClick={scrollDown}>
-              ↓
+              <IconArrowDown />
             </IonButton>
           </div>
         )}

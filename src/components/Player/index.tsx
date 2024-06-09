@@ -203,7 +203,7 @@ function Player() {
       : 'video/mp4';
 
     const canvas = document.querySelector('canvas');
-    const stream = canvas?.captureStream(25);
+    const stream = canvas?.captureStream(60);
     if (stream) {
       mediaRecorder = new MediaRecorder(stream, {
         mimeType,
@@ -590,8 +590,7 @@ function Player() {
                 borderRadius: '5px',
                 border: '2px solid #3885F9',
                 boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}>
-          </div>
+              }}></div>
           )}
           {currentStep === HomeTutorialSteps.PLAYBACK_SPEED && (
             <div
@@ -655,7 +654,7 @@ function Player() {
             <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
           ) : (
             <button
-              className='player-action-button-transparent'
+              className="player-action-button-transparent"
               type="button"
               onClick={() => {
                 history.push(paths.DICTIONARY_PLAYER);
@@ -753,14 +752,14 @@ function Player() {
         currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
           <button
             className="player-action-button player-action-button-insert"
-            id='refresh-button'
+            id="refresh-button"
             type="button">
             <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
           </button>
         ) : (
           <button
             className="player-action-button player-action-button-insert"
-            id='translation-button'
+            id="translation-button"
             type="button"
             onClick={() => {
               dispatch(TranslatorCreators.setTranslatorText(''));
@@ -818,7 +817,7 @@ function Player() {
         ) : (
           <button
             className="player-action-button-transparent"
-            id='history-button'
+            id="history-button"
             type="button"
             onClick={() => {
               history.push(paths.HISTORY);
@@ -1251,10 +1250,11 @@ function Player() {
       {HomeTutorialSteps.INITIAL === currentStep && tryShowTutorial && (
         <div className="tutorial-box-shadow">
           <div className="upper-side">
-            <IconHand/>
+            <IconHand />
             <h1>Seja bem-vindo ao VLibras</h1>
             <h2>
-            Quer saber mais sobre os recursos do nosso aplicativo para dispositivos móveis?
+              Quer saber mais sobre os recursos do nosso aplicativo para
+              dispositivos móveis?
             </h2>
           </div>
           <hr />
@@ -1266,7 +1266,7 @@ function Player() {
               Pular
             </button>
           </div>
-      </div>
+        </div>
       )}
     </div>
   );

@@ -4,22 +4,20 @@ import {
   IonList,
   IonRadioGroup,
   IonListHeader,
-  IonItem,
-  IonRadio,
   IonText,
-  IonImg,
   IonFooter,
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonButtons,
+  IonSpinner,
 } from '@ionic/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { LoadingModal } from 'components';
+import { ErrorModal, LoadingModal } from 'components';
 import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
 import RadioItem from 'components/RadioItem'; // TODO
 import regionalismData from 'data/regionalism';
@@ -45,21 +43,23 @@ function Regionalism() {
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
+  const [isLoading, setIsLoading] = useState(false);
   const [currentRegion, setCurrentRegion] = useState(currentRegionalism);
   const [showModal, setShowModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalOpen, setOpenModal] = useState(false);
 
-  const closeLoadingModal = useCallback(() => {
+  const closeLoadedModal = useCallback(() => {
     setOpenModal(false);
   }, [setOpenModal]);
 
-  const openLoadingModal = useCallback(() => {
+  const openLoadedModal = useCallback(() => {
     setOpenModal(true);
     setTimeout(() => {
-      closeLoadingModal();
+      closeLoadedModal();
       history.goBack();
     }, 2000);
-  }, [setOpenModal, closeLoadingModal, history]);
+  }, [setOpenModal, closeLoadedModal, history]);
 
   useEffect(() => {
     if (isEmpty > 0) {
@@ -71,17 +71,13 @@ function Regionalism() {
     setShowModal(true);
   };
 
+  const handleOpenErrorRegionalismModal = () => {
+    setShowErrorModal(true);
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
   };
-
-  const renderItem = (item: RegionalismItem) => (
-    <IonItem className="regionalism-item">
-      <IonImg src={item.url} />
-      <IonText className="regionalism-text">{item.name}</IonText>
-      <IonRadio slot="end" value={item.name} />
-    </IonItem>
-  );
 
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
     const current = regionalismData.find(
@@ -91,7 +87,7 @@ function Regionalism() {
       setCurrentRegion({
         name: current.name,
         abbreviation: current.abbreviation,
-        url: current.url
+        url: current.url,
       });
     }
   }
@@ -102,7 +98,7 @@ function Regionalism() {
       setCurrentRegion({
         name: current.name,
         abbreviation: current.abbreviation,
-        url: current.url
+        url: current.url,
       });
     }
   };
@@ -120,29 +116,35 @@ function Regionalism() {
   }
 
   async function SaveRegionalism() {
+    setIsLoading(true);
     try {
       const bundles = await fetchBundles(currentRegion.abbreviation);
       if (bundles.length > 0) {
         UnityService.getPlayerInstance().setPlayerRegion(
           currentRegion.abbreviation
         );
-        openLoadingModal();
+        openLoadedModal();
         dispatch(Creators.setCurrentRegionalism(currentRegion));
-      }
-      else {
+      } else {
         defaultRegion();
         handleOpenEmptyRegionalismModal();
       }
       isEmpty = bundles.length;
     } catch (error: unknown) {
-      closeLoadingModal();
-      handleOpenEmptyRegionalismModal();
+      closeLoadedModal();
+      handleOpenErrorRegionalismModal();
     }
+    setIsLoading(false);
   }
 
   return (
     <IonPage>
       <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
+      <ErrorModal
+        show={showErrorModal}
+        setShow={setShowErrorModal}
+        errorMsg={Strings.REGIONALISM_ERROR}
+      />
       <LoadingModal
         loading={modalOpen}
         setLoading={setOpenModal}
@@ -188,16 +190,23 @@ function Regionalism() {
       <IonFooter style={{ background: 'white' }}>
         <div className="regionalism-icon-save">
           <button
+            style={{ width: 100 }}
             className="regionalism-cancel"
             onClick={() => history.goBack()}
             type="button">
             {Strings.BUTTON_CANCEL}
           </button>
           <button
+            style={{ width: 100 }}
             type="button"
+            disabled={isLoading}
             className="regionalism-save"
             onClick={() => SaveRegionalism()}>
-            {Strings.BUTTON_SAVE}
+            {isLoading ? (
+              <IonSpinner className="custom-spinner" name="circles" />
+            ) : (
+              Strings.BUTTON_SAVE
+            )}
           </button>
         </div>
       </IonFooter>
