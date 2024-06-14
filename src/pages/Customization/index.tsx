@@ -621,7 +621,7 @@ function Customization() {
               <TutorialPopover
                 title="Cores"
                 context="customization"
-                description="Selecione a cor que desejadar para a parte do corpo "
+                description="Selecione a cor que desejar para a parte do corpo"
                 position="bc"
                 isEnabled={true}
               />
