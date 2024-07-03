@@ -104,11 +104,10 @@
   text-align: right;
   text-transform: uppercase;
 
-  font-size: .7rem;
+  font-size: 0.7rem;
   font-weight: normal;
   white-space: nowrap;
 }
-
 
 .about-container-realizadores-footer {
   display: flex;

@@ -1,5 +1,3 @@
-import React, { useMemo } from 'react';
-
 import { menuController } from '@ionic/core';
 import {
   IonButtons,
@@ -10,6 +8,7 @@ import {
   IonMenuButton,
   IonLabel,
 } from '@ionic/react';
+import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
@@ -17,6 +16,7 @@ import { IconTranslate, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
 import { env } from 'environment/env';
 import { RootState } from 'store';
+import { Creators as CreatorText } from 'store/ducks/translator';
 import { Creators } from 'store/ducks/video';
 
 import { Strings } from './strings';
@@ -28,6 +28,7 @@ type MODE = 'menu' | 'back';
 interface MenuLayoutProps {
   title: string;
   mode?: MODE;
+  onClearArea?: () => void;
 }
 
 const MenuLayout: React.FC<MenuLayoutProps> = ({
@@ -96,6 +97,8 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
     }
   }, [location, history, dispatch]);
 
+  const onClearText = () => dispatch(CreatorText.setTranslatorText(''));
+
   return (
     <IonPage className="menu-layout-container">
       <IonHeader className="ion-no-border">
@@ -111,8 +114,9 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
             ) : (
               <Link
                 to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
+                onClick={onClearText}
                 className="menu-item-link">
-                <IconArrowLeft color="#315EB1" />
+                <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
               </Link>
             )}
           </IonButtons>

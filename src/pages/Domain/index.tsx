@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 import {
   IonButton,
   IonList,
@@ -15,6 +13,7 @@ import {
   IonButtons,
   IonContent,
 } from '@ionic/react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
@@ -50,7 +49,7 @@ const Domain = () => {
       Strings.THIRD_OPT_DOMAIN,
     ];
 
-    return domains.map(item => (
+    return domains.map((item) => (
       <IonItem key={item} style={domain === item ? styles.activeBg : {}}>
         <IonLabel
           className="item-domain"
@@ -87,7 +86,7 @@ const Domain = () => {
           <IonRadioGroup
             className="ion-radio"
             value={domain}
-            onIonChange={e => setDomain(e.detail.value)}>
+            onIonChange={(e) => setDomain(e.detail.value)}>
             <IonListHeader>
               <IonLabel className="title-domain">
                 Escolha o domínio para as traduções

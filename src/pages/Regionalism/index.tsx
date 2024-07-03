@@ -1,31 +1,33 @@
-import React, { useState } from 'react';
-
-import { RadioGroupChangeEventDetail } from '@ionic/core';
+import { RadioGroupChangeEventDetail } from '@ionic/core/components';
 import {
   IonContent,
   IonList,
   IonRadioGroup,
   IonListHeader,
-  IonItem,
-  IonRadio,
   IonText,
-  IonImg,
   IonFooter,
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonButtons,
+  IonSpinner,
 } from '@ionic/react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
+import { ErrorModal, LoadingModal } from 'components';
+import EmptyRegionalismModal from 'components/EmptyRegionalismModal';
+import RadioItem from 'components/RadioItem'; // TODO
 import regionalismData from 'data/regionalism';
+import { fetchBundles } from 'services/regionalism';
+import UnityService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/regionalism';
 
-import { IconArrowLeft } from '../../assets';
 import { Strings } from './strings';
+import { IconArrowLeft } from '../../assets';
 import './styles.css';
 
 export interface RegionalismItem {
@@ -35,41 +37,129 @@ export interface RegionalismItem {
 
 function Regionalism() {
   const dispatch = useDispatch();
-  const location = useLocation();
   const history = useHistory();
+  let isEmpty = 0;
 
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
-  const [regionalism, setregionalism] = useState(currentRegionalism);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentRegion, setCurrentRegion] = useState(currentRegionalism);
+  const [showModal, setShowModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [modalOpen, setOpenModal] = useState(false);
 
-  const renderItem = (item: RegionalismItem) => (
-    <IonItem class="regionalism-item">
-      <IonImg src={item.url} />
-      <IonText class="regionalism-text">{item.name}</IonText>
-      <IonRadio slot="end" value={item.name} />
-    </IonItem>
-  );
+  const closeLoadedModal = useCallback(() => {
+    setOpenModal(false);
+  }, [setOpenModal]);
+
+  const openLoadedModal = useCallback(() => {
+    setOpenModal(true);
+    setTimeout(() => {
+      closeLoadedModal();
+      history.goBack();
+    }, 2000);
+  }, [setOpenModal, closeLoadedModal, history]);
+
+  useEffect(() => {
+    if (isEmpty > 0) {
+      history.goBack();
+    }
+  }, [isEmpty, history]);
+
+  const handleOpenEmptyRegionalismModal = () => {
+    setShowModal(true);
+  };
+
+  const handleOpenErrorRegionalismModal = () => {
+    setShowErrorModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   function handleOnChange(evt: CustomEvent<RadioGroupChangeEventDetail>) {
-    setregionalism(evt.detail.value);
+    const current = regionalismData.find(
+      (item) => item.name === evt.detail.value
+    );
+    if (current) {
+      setCurrentRegion({
+        name: current.name,
+        abbreviation: current.abbreviation,
+        url: current.url,
+      });
+    }
   }
 
-  function SaveRegionalism() {
-    dispatch(Creators.setCurrentRegionalism(regionalism));
-    history.goBack();
+  const handleCustomRadioChange = (value: string) => {
+    const current = regionalismData.find((item) => item.name === value);
+    if (current) {
+      setCurrentRegion({
+        name: current.name,
+        abbreviation: current.abbreviation,
+        url: current.url,
+      });
+    }
+  };
+
+  const regionalismDataDefault = {
+    name: 'BR - Padrão Nacional',
+    abbreviation: 'BR',
+    url: regionalismData[0].url,
+  };
+
+  function defaultRegion() {
+    setCurrentRegion(regionalismDataDefault);
+    UnityService.getPlayerInstance().setPlayerRegion('BR');
+    dispatch(Creators.setCurrentRegionalism(regionalismDataDefault));
+  }
+
+  async function SaveRegionalism() {
+    setIsLoading(true);
+    try {
+      const bundles = await fetchBundles(currentRegion.abbreviation);
+      if (bundles.length > 0) {
+        UnityService.getPlayerInstance().setPlayerRegion(
+          currentRegion.abbreviation
+        );
+        openLoadedModal();
+        dispatch(Creators.setCurrentRegionalism(currentRegion));
+      } else {
+        defaultRegion();
+        handleOpenEmptyRegionalismModal();
+      }
+      isEmpty = bundles.length;
+    } catch (error: unknown) {
+      closeLoadedModal();
+      handleOpenErrorRegionalismModal();
+    }
+    setIsLoading(false);
   }
 
   return (
     <IonPage>
+      <EmptyRegionalismModal isOpen={showModal} onClose={handleCloseModal} />
+      <ErrorModal
+        show={showErrorModal}
+        setShow={setShowErrorModal}
+        errorMsg={Strings.REGIONALISM_ERROR}
+      />
+      <LoadingModal
+        loading={modalOpen}
+        setLoading={setOpenModal}
+        text=""
+        canDismiss={false}
+      />
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
+          <IonTitle className="menu-toolbar-title">
             {Strings.REGIONALISM_TITLE}
           </IonTitle>
 
           <IonButtons slot="start" onClick={() => history.goBack()}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#1447a6" />
+              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
             </div>
           </IonButtons>
         </IonToolbar>
@@ -78,12 +168,21 @@ function Regionalism() {
         <div className="regionalism-list">
           <IonList lines="none">
             <IonListHeader>
-              <IonText class="regionalism-infobasic">
+              <IonText className="regionalism-infobasic">
                 {Strings.INFO_BASIC}
               </IonText>
             </IonListHeader>
-            <IonRadioGroup value={regionalism} onIonChange={handleOnChange}>
-              {regionalismData.map(item => renderItem(item))}
+            <IonRadioGroup
+              value={currentRegion.name}
+              onIonChange={handleOnChange}>
+              {regionalismData.map((item) => (
+                <RadioItem
+                  key={item.name}
+                  item={item}
+                  isSelected={currentRegion.name === item.name}
+                  onRadioChange={handleCustomRadioChange}
+                />
+              ))}
             </IonRadioGroup>
           </IonList>
         </div>
@@ -91,16 +190,23 @@ function Regionalism() {
       <IonFooter style={{ background: 'white' }}>
         <div className="regionalism-icon-save">
           <button
+            style={{ width: 100 }}
             className="regionalism-cancel"
             onClick={() => history.goBack()}
             type="button">
             {Strings.BUTTON_CANCEL}
           </button>
           <button
+            style={{ width: 100 }}
             type="button"
+            disabled={isLoading}
             className="regionalism-save"
             onClick={() => SaveRegionalism()}>
-            {Strings.BUTTON_SAVE}
+            {isLoading ? (
+              <IonSpinner className="custom-spinner" name="circles" />
+            ) : (
+              Strings.BUTTON_SAVE
+            )}
           </button>
         </div>
       </IonFooter>

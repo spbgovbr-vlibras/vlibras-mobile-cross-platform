@@ -1,12 +1,4 @@
-import React, { useState } from 'react';
-
-import { Capacitor } from '@capacitor/core';
-import { File, DirectoryEntry } from '@ionic-native/file';
-import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
-import {
-  CreateThumbnailOptions,
-  VideoEditor,
-} from '@ionic-native/video-editor';
+// import { Capacitor } from '@capacitor/core';
 import {
   IonItem,
   IonHeader,
@@ -17,6 +9,13 @@ import {
   IonContent,
   IonAlert,
 } from '@ionic/react';
+// import { File, DirectoryEntry } from '@ionic-native/file';
+// import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
+// import {
+//   CreateThumbnailOptions,
+//   VideoEditor,
+// } from '@ionic-native/video-editor';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,9 +30,9 @@ import {
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
+import { Strings } from './strings';
 import { ErrorModal, LoadingModal } from '../../components';
 import paths from '../../constants/paths';
-import { Strings } from './strings';
 
 import './styles.css';
 
@@ -76,114 +75,106 @@ const SignalCapture = () => {
     }
   };
 
+  // TODO: Add updated dependency that enables capturing video.
   const takeVideo = async () => {
-    if (currentVideoArray.length < 5) {
-      try {
-        const options = { limit: 1, duration: 30, highquality: true };
-        // BackgroundMode.enable();
-        const mediafile = await VideoCapturePlus.captureVideo(options);
-        // BackgroundMode.disable();
-
-        setLoadingDescription('Processando...');
-        setLoading(true);
-
-        const media = mediafile[0] as MediaFile;
-        const path = media.fullPath.substring(
-          0,
-          media.fullPath.lastIndexOf('/')
-        );
-        let resolvedPath: DirectoryEntry;
-
-        if (Capacitor.getPlatform() === 'ios') {
-          resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
-        } else {
-          resolvedPath = await File.resolveDirectoryUrl(path);
-        }
-
-        File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
-          (buffer: ArrayBuffer) => {
-            const imgBlob = new Blob([buffer], {
-              type: media.type,
-            });
-
-            const fname = `thumb-${currentVideoArray.length}`;
-
-            const thumbnailoption: CreateThumbnailOptions = {
-              fileUri: resolvedPath.nativeURL + media.name,
-              quality: 100,
-              atTime: 1,
-              outputFileName: fname,
-            };
-
-            VideoEditor.createThumbnail(thumbnailoption)
-              .then(async (thumbnailPath: string) => {
-                const pathThumbs = thumbnailPath.substring(
-                  0,
-                  thumbnailPath.lastIndexOf('/')
-                );
-                const resolvedPathThumb: DirectoryEntry =
-                  await File.resolveDirectoryUrl(`file://${pathThumbs}`);
-
-                File.readAsDataURL(
-                  resolvedPathThumb.nativeURL,
-                  `${fname}.jpg`
-                ).then(
-                  (thumbPath: string) => {
-                    VideoEditor.getVideoInfo({
-                      fileUri: resolvedPath.nativeURL + media.name,
-                    }).then(
-                      info => {
-                        setLoading(false);
-                        dispatch(
-                          Creators.setCurrentArrayVideo([
-                            ...currentVideoArray,
-                            [
-                              ...mediafile,
-                              imgBlob,
-                              { thumbBlob: thumbPath },
-                              { duration: Math.trunc(info.duration) },
-                            ],
-                          ])
-                        );
-                        history.push(paths.SIGNALCAPTURE);
-                      },
-                      err => {
-                        setLoading(false);
-                        setShowErrorModal([
-                          true,
-                          'Não foi possível obter informações do vídeo',
-                        ]);
-                      }
-                    );
-                  },
-                  error => {
-                    setLoading(false);
-                    setShowErrorModal([
-                      true,
-                      'Não foi possível carregar a prévia do vídeo',
-                    ]);
-                  }
-                );
-              })
-              .catch((err: Error) => {
-                setLoading(false);
-                setShowErrorModal([
-                  true,
-                  'Não foi possível criar a prévia do vídeo',
-                ]);
-              });
-          },
-          (error: Error) => {
-            setLoading(false);
-            setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
-          }
-        );
-      } catch (error: any) {
-        setLoading(false);
-        if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
-      }
-    }
+    // if (currentVideoArray.length < 5) {
+    //   try {
+    //     const options = { limit: 1, duration: 30, highquality: true };
+    //     const mediafile = await VideoCapturePlus.captureVideo(options);
+    //     setLoadingDescription('Processando...');
+    //     setLoading(true);
+    //     const media = mediafile[0] as MediaFile;
+    //     const path = media.fullPath.substring(
+    //       0,
+    //       media.fullPath.lastIndexOf('/')
+    //     );
+    //     let resolvedPath: DirectoryEntry;
+    //     if (Capacitor.getPlatform() === 'ios') {
+    //       resolvedPath = await File.resolveDirectoryUrl(`file://${path}`);
+    //     } else {
+    //       resolvedPath = await File.resolveDirectoryUrl(path);
+    //     }
+    //     File.readAsArrayBuffer(resolvedPath.nativeURL, media.name).then(
+    //       (buffer: ArrayBuffer) => {
+    //         const imgBlob = new Blob([buffer], {
+    //           type: media.type,
+    //         });
+    //         const fname = `thumb-${currentVideoArray.length}`;
+    //         const thumbnailoption: CreateThumbnailOptions = {
+    //           fileUri: resolvedPath.nativeURL + media.name,
+    //           quality: 100,
+    //           atTime: 1,
+    //           outputFileName: fname,
+    //         };
+    //         VideoEditor.createThumbnail(thumbnailoption)
+    //           .then(async (thumbnailPath: string) => {
+    //             const pathThumbs = thumbnailPath.substring(
+    //               0,
+    //               thumbnailPath.lastIndexOf('/')
+    //             );
+    //             const resolvedPathThumb: DirectoryEntry =
+    //               await File.resolveDirectoryUrl(`file://${pathThumbs}`);
+    //             File.readAsDataURL(
+    //               resolvedPathThumb.nativeURL,
+    //               `${fname}.jpg`
+    //             ).then(
+    //               (thumbPath: string) => {
+    //                 VideoEditor.getVideoInfo({
+    //                   fileUri: resolvedPath.nativeURL + media.name,
+    //                 }).then(
+    //                   (info) => {
+    //                     setLoading(false);
+    //                     dispatch(
+    //                       Creators.setCurrentArrayVideo([
+    //                         ...currentVideoArray,
+    //                         [
+    //                           ...mediafile,
+    //                           imgBlob,
+    //                           { thumbBlob: thumbPath },
+    //                           { duration: Math.trunc(info.duration) },
+    //                         ],
+    //                       ])
+    //                     );
+    //                     history.push(paths.SIGNALCAPTURE);
+    //                   },
+    //                   (err) => {
+    //                     setLoading(false);
+    //                     setShowErrorModal([
+    //                       true,
+    //                       'Não foi possível obter informações do vídeo',
+    //                     ]);
+    //                   }
+    //                 );
+    //               },
+    //               (error) => {
+    //                 setLoading(false);
+    //                 setShowErrorModal([
+    //                   true,
+    //                   'Não foi possível carregar a prévia do vídeo',
+    //                 ]);
+    //               }
+    //             );
+    //           })
+    //           .catch((err: Error) => {
+    //             setLoading(false);
+    //             setShowErrorModal([
+    //               true,
+    //               'Não foi possível criar a prévia do vídeo',
+    //             ]);
+    //           });
+    //       },
+    //       (error: Error) => {
+    //         setLoading(false);
+    //         setShowErrorModal([true, 'Erro ao ler arquivo de vídeo']);
+    //       }
+    //     );
+    //   } catch (error: any) {
+    //     setLoading(false);
+    //     if (error.code !== 3) setShowErrorModal([true, 'Erro ao abrir câmera']);
+    //   }
+    // }
   };
+
   function popupCancel() {
     setShowAlertPage(true);
   }
@@ -317,7 +308,7 @@ const SignalCapture = () => {
         />
         <IonAlert
           isOpen={showAlert}
-          cssClass="popup-box-signal-cap"
+          className="popup-box-signal-cap"
           header={Strings.TITLE_POPUPCANCEL}
           message={Strings.MESSAGE_POPUPCANCEL}
           buttons={[
@@ -326,7 +317,6 @@ const SignalCapture = () => {
               cssClass: 'popup-yes',
               handler: () => {
                 removeRecord(toDelete);
-                console.log('Confirm Yes');
                 setShowAlert(false);
               },
             },
@@ -336,14 +326,13 @@ const SignalCapture = () => {
               role: 'cancel',
               handler: () => {
                 setShowAlert(false);
-                console.log('Confirm No');
               },
             },
           ]}
         />
         <IonAlert
           isOpen={showAlertpage}
-          cssClass="popup-box-signal-cap"
+          className="popup-box-signal-cap"
           header={Strings.TITLE_POPUP_REMOVE}
           message={Strings.MESSAGE_POPUP_REMOVE}
           buttons={[
@@ -351,7 +340,6 @@ const SignalCapture = () => {
               text: Strings.BUTTON_NAME_YES,
               cssClass: 'popup-yes',
               handler: () => {
-                console.log('Confirm Yes');
                 dispatch(Creators.setCurrentArrayVideo([]));
                 setShowAlertPage(false);
                 history.goBack();
@@ -362,7 +350,6 @@ const SignalCapture = () => {
               cssClass: 'popup-no',
               role: 'cancel',
               handler: () => {
-                console.log('Confirm No');
                 setShowAlertPage(false);
               },
             },

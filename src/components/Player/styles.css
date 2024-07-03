@@ -2,21 +2,18 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  background-color: #E5E5E5;
+  background-color: #e5e5e5;
 }
 
 .player-content {
   display: flex;
   flex: 1;
   flex-shrink: inherit;
-
 }
-
 
 .player-action-container {
   position: absolute;
   bottom: 0;
-  height: 78px;
   min-height: 78px;
   width: 100%;
   display: flex;
@@ -25,18 +22,33 @@
   z-index: 1;
 }
 
-.play-action-content {   
+.play-action-content {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  min-height: 72px;
+  min-height: calc(72px + var(--ion-safe-area-bottom) * 0.3);
+  padding-bottom: calc(var(--ion-safe-area-bottom) * 0.5);
   background: white;
 }
 
 .player-action-button {
   border: none;
   background: #1447a6;
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.player-action-button-hihglighted {
+  box-shadow: 0px 0px 15px 0px rgba(86, 154, 255, 0.75);
+  border: 2px solid var(--VLibras---Light-White-1, #FDFDFD);;
+  background: #2470E0;
   height: 48px;
   width: 48px;
   border-radius: 50%;
@@ -72,8 +84,8 @@
 .player-action-button-transparent {
   background: transparent;
   border: none;
-  height: 48px;
-  width: 48px;
+  height: 40px;
+  width: 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -81,8 +93,9 @@
 }
 
 .player-action-button-transparent img {
-  width: 32px;
-  height: 32px;
+  width: 50%;
+  height: auto;
+  object-fit: contain; /* This line ensures the aspect ratio is maintained */
 }
 
 .player-container-buttons {
@@ -91,6 +104,7 @@
   bottom: 64px;
   width: 100%;
   display: flex;
+  margin-bottom: 15px;
   flex-direction: column;
   align-items: flex-end;
   z-index: 1;
@@ -99,8 +113,8 @@
 .player-button-rounded {
   position: relative;
   bottom: 0;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(27, 27, 27, 0.75);
   margin-bottom: 16px;
@@ -130,11 +144,23 @@
   align-items: center;
 }
 
-.player-button-avatar-rounded-top {
-  width: 36px;
-  height: 36px;
+.player-button-tutorial-rounded-top {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #1B1B1B;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.player-button-avatar-rounded-top {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #1b1b1b;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -174,7 +200,7 @@
 }
 
 .player-popover-content-item-none {
-  background:none;
+  background: none;
   border: 0;
   margin: 4px;
   border-radius: 4px;
@@ -186,7 +212,7 @@
   font-style: normal;
   font-weight: bold;
   font-size: 18px;
-  color: #1447A6;
+  color: #1447a6;
 }
 
 .player-popover-content-divider {

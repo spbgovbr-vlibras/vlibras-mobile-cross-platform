@@ -1,5 +1,7 @@
 import React, { useRef } from 'react';
 
+import { useOnCounterGloss } from 'hooks/unityHooks';
+
 interface loadingBarProps {
   className: any;
   progressBarRef: any;
@@ -17,15 +19,13 @@ const LoadingBar = ({
   let glossLen = UNDEFINED_GLOSS;
   let cache = UNDEFINED_GLOSS;
 
-  window.CounterGloss = (counter: number, glossLength: number) => {
+  useOnCounterGloss((counter: number, _glossLength: number) => {
     if (counter === cache - 1) {
       glossLen = counter;
     }
     cache = counter;
 
     const progress = (1 / glossLen) * 100;
-
-    console.log(progressBarRef.current, className);
 
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
@@ -34,7 +34,7 @@ const LoadingBar = ({
         progress > MAX_PROGRESS ? MAX_PROGRESS : progress
       }%`;
     }
-  };
+  }, []);
 
   return (
     <div ref={progressContainerRef} className={className.container}>

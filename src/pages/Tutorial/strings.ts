@@ -6,5 +6,4 @@ export const Strings = {
   SEND_MESSAGE_3: 'através do nosso',
   SEND_MESSAGE_4: '  formulário de contato.',
   FOLLOW_STEPS: 'Acompanhe nossos tutoriais',
-  ALWAYS_SEE_TUTORIAL: 'Ver sempre o tutorial',
 };

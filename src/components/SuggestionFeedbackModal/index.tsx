@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal, IonText, IonChip } from '@ionic/react';
+import React from 'react';
 
 import { IconArrowUpRight } from 'assets';
 import './styles.css';
@@ -30,14 +29,14 @@ const SuggestionFeedbackModal = ({
   return (
     <IonModal
       isOpen={showSuggestionFeedbackModal}
-      cssClass="suggestion-feedback-modal"
-      onDidDismiss={handleCloseModal}
-      swipeToClose>
+      className="suggestion-feedback-modal"
+      onIonModalDidDismiss={handleCloseModal}
+      canDismiss>
       <div className="text-container">
-        <IonText class="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
+        <IonText className="modal-title">{Strings.TITLE_MENU_MODAL}</IonText>
         <p className="subtitle">{Strings.SUBTITLE_MENU_MODAL}</p>
       </div>
-      <IonChip class="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
+      <IonChip className="wikilibras-chip" onClick={handleOpenWikilibrasSite}>
         <span className="chip-text-space">{Strings.CHIP_TEXT}</span>
         <IconArrowUpRight />
       </IonChip>

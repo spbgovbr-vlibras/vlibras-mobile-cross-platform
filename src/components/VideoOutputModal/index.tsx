@@ -1,3 +1,4 @@
+import { IonModal, IonButton } from '@ionic/react';
 import React, {
   useRef,
   Dispatch,
@@ -5,8 +6,6 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-
-import { IonModal, IonButton } from '@ionic/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
@@ -120,25 +119,6 @@ const VideoOutputModal = ({
     }
   }, [outputs, showModal]);
 
-  // window.CounterGloss = (counter: number, glossLength: number) => {
-  //   if (counter === cache - 1) {
-  //     glossLen = counter;
-  //   }
-  //   cache = counter;
-
-  //   console.log(window);
-
-  //   const progress = (1 / glossLen) * 100;
-  //   console.log(progress);
-  //   if (progressBarOutputRef.current && progressContainerOutputRef.current) {
-  //     progressContainerOutputRef.current.style.visibility = 'visible';
-  //     progressBarOutputRef.current.style.visibility = 'visible';
-  //     progressBarOutputRef.current.style.width = `${
-  //       progress > MAX_PROGRESS ? MAX_PROGRESS : progress
-  //     }%`;
-  //   }
-  // };
-
   useEffect(() => {
     if (progressBarOutputRef.current && progressContainerOutputRef.current) {
       progressContainerOutputRef.current.style.visibility = 'visible';
@@ -153,11 +133,11 @@ const VideoOutputModal = ({
     <>
       <IonModal
         isOpen={showModal}
-        cssClass={`videooutput-modal${openPlayer ? ' player' : ''}${
+        className={`videooutput-modal${openPlayer ? ' player' : ''}${
           !showButtons ? ' buttons-off' : ''
         }`}
-        swipeToClose
-        onDidDismiss={closeModal}>
+        canDismiss
+        onIonModalDidDismiss={closeModal}>
         <div className="modal-title">
           <span> Resultado tradução </span>
           {!openPlayer ? (

@@ -1,6 +1,5 @@
-import React from 'react';
-
 import { IonModal, IonChip } from '@ionic/react';
+import React from 'react';
 
 import { IconCloseCircle, IconThumbDown } from 'assets';
 import './styles.css';
@@ -16,6 +15,7 @@ interface EvaluationNoModalProps {
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
   isPlaying: boolean;
+  onSubmittedRevision?: () => void;
 }
 
 const EvaluationNoModal = ({
@@ -26,20 +26,19 @@ const EvaluationNoModal = ({
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
   isPlaying,
+  onSubmittedRevision,
 }: EvaluationNoModalProps) => {
   return (
     <div>
       <IonModal
         isOpen={showNo}
-        cssClass="evaluation-no-modal"
-        onDidDismiss={() => setShowNo(false)}
-        swipeToClose>
+        className="evaluation-no-modal"
+        onDidDismiss={() => setShowNo(false)}>
         <div className="evaluation-modal-container-close-button-container">
           <button
             type="button"
             onClick={() => {
               setShowNo(false);
-              console.log(`NO MODAL:${showNo}`);
             }}>
             <IconCloseCircle color="#4e4e4e" />
           </button>
@@ -51,7 +50,7 @@ const EvaluationNoModal = ({
         </div>
         <div>
           <IonChip
-            class="evaluation-modal-container-chip-suggestion"
+            className="evaluation-modal-container-chip-suggestion"
             onClick={() => {
               setShowSuggestionModal(true);
               setShowNo(false);
@@ -66,6 +65,7 @@ const EvaluationNoModal = ({
         showSuggestionFeedbackModal={showSuggestionFeedbackModal}
         setSuggestionFeedbackModal={setSuggestionFeedbackModal}
         isPlaying={isPlaying}
+        onSubmittedRevision={onSubmittedRevision}
       />
     </div>
   );

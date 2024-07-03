@@ -1,0 +1,112 @@
+.regionalism-modal {
+  background: var(--ion-color-grey-65);
+  font-family: Rawline;
+}
+
+.regionalism-modal::part(content) {
+  border-radius: 8px;
+  height: 250px;
+  width: 300px;
+  margin: 15px;
+}
+
+.regionalism-modal .ion-delegate-host {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.regionalism-modal h1 {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 100%;
+  color: #1b1b1b;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.regionalism-modal p {
+  font-family: Rawline;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 150%;
+  margin: 15px 10px 10px 10px !important;
+  padding: 0 !important;
+  text-align: center;
+  color: #1b1b1b;
+}
+
+.regionalism-modal .button {
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  flex-wrap: nowrap;
+  width: 160px;
+  height: 39px;
+
+  background: #ffffff;
+  border: 1px solid #ebebeb;
+  box-sizing: border-box;
+  border-radius: 24px;
+
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 15px;
+  line-height: 145%;
+
+  color: #fff;
+  background-color: #1447a6;
+}
+
+.regionalism-modal .wikilibras-chip {
+  height: 34px;
+
+  margin-top: 10px;
+  padding: 8px 16px;
+
+  border: 1px solid #8e8e8e;
+  box-sizing: border-box;
+  border-radius: 25px;
+  background-color: #fff;
+
+  font-family: Helvetica Neue;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+}
+
+.regionalism-modal .chip-text-space {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 100%;
+  /* identical to box height, or 12px */
+
+  display: flex;
+  align-items: center;
+  text-align: center;
+
+  color: #3e4049;
+  margin-right: 4px;
+}
+
+.regionalism-modal .regionalism-modal-container-close-button-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: -20px;
+  padding-right: 8px;
+}
+
+.regionalism-modal .regionalism-modal-container-close-button-container button {
+  border: none;
+  background: none;
+}

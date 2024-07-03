@@ -1,13 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-
 import { IonModal, IonText, IonChip, IonTextarea } from '@ionic/react';
-import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IconCloseCircle } from 'assets';
 import SuggestionFeedbackModal from 'components/SuggestionFeedbackModal';
 import { FIRST_PAGE_INDEX } from 'constants/pagination';
 import { PlayerKeys } from 'constants/player';
+import { regex } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { Words } from 'models/dictionary';
 import { sendReview } from 'services/suggestionGloss';
@@ -25,10 +24,10 @@ interface RevisionModalProps {
   showSuggestionFeedbackModal: boolean;
   setSuggestionFeedbackModal: any;
   isPlaying: boolean;
+  onSubmittedRevision?: () => void;
 }
 
-const playerService = PlayerService.getService();
-const TIME_DEBOUNCE_MS = 1000;
+const playerService = PlayerService.getPlayerInstance();
 
 const RevisionModal = ({
   show,
@@ -36,10 +35,12 @@ const RevisionModal = ({
   showSuggestionFeedbackModal,
   setSuggestionFeedbackModal,
   isPlaying,
+  onSubmittedRevision,
 }: RevisionModalProps) => {
-  const { textPtBr, textGloss, setTextGloss } = useTranslation();
+  const { textPtBr, textGloss } = useTranslation();
   // Aux var for the TextArea value
   const [auxValueText, setAuxValueText] = useState(textGloss);
+  const [firstEntry, setFirstEntry] = useState(true);
   const [isPreview, setIsPreview] = useState(false);
   const dispatch = useDispatch();
 
@@ -47,11 +48,11 @@ const RevisionModal = ({
     setShow(false);
     setIsPreview(false);
     setAuxValueText('');
+    setFirstEntry(true);
   };
 
   const handlePlaySuggestionGlosa = () => {
     setShow(false);
-    // setTextGloss(auxValueText, false);
     playerService.send(
       PlayerKeys.PLAYER_MANAGER,
       PlayerKeys.PLAY_NOW,
@@ -60,15 +61,20 @@ const RevisionModal = ({
     setIsPreview(true);
   };
 
-  const handleOpenSuggestionFeedbackModal = () => {
-    setShow(false);
+  const handleOpenSuggestionFeedbackModal = async () => {
+    handleCloseModal();
     setSuggestionFeedbackModal(true);
-    sendReview({
+    if (onSubmittedRevision) {
+      onSubmittedRevision();
+    }
+
+    await sendReview({
       text: textPtBr,
       translation: textGloss,
       review: auxValueText,
       rating: 'bad',
     });
+
     setAuxValueText('');
   };
 
@@ -91,7 +97,7 @@ const RevisionModal = ({
   const renderWord = (item: Words) => (
     <div className="revision-modal-word-item">
       <IonChip
-        class="suggestion-chips"
+        className="suggestion-chips"
         onClick={() => handleWordSuggestion(item.name)}
         key={item.name}>
         {item.name}
@@ -100,13 +106,14 @@ const RevisionModal = ({
   );
 
   useEffect(() => {
-    if (show && !auxValueText) {
+    if (show && firstEntry) {
       // Setting TextArea value with the current translator
       setAuxValueText(textGloss);
-      const searchText = textGloss.split(' ').pop();
+      setFirstEntry(false);
+      const searchText = textGloss.toString().split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
-          page: 1,
+          page: FIRST_PAGE_INDEX,
           limit: 10,
           name: `${searchText}%`,
         })
@@ -122,8 +129,9 @@ const RevisionModal = ({
   }, [isPlaying, isPreview, setShow]);
 
   const onSearch = useCallback(
-    event => {
+    (event) => {
       setAuxValueText(event.target.value || '');
+
       const searchText = (event.target.value || '').split(' ').pop();
       dispatch(
         CreatorsDictionary.fetchWords.request({
@@ -133,18 +141,16 @@ const RevisionModal = ({
         })
       );
     },
-    [dispatch]
+    [dispatch, setAuxValueText]
   );
-
-  const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
 
   return (
     <div>
       <IonModal
         isOpen={show}
-        cssClass="revision-modal"
-        onDidDismiss={() => setShow(false)}
-        swipeToClose>
+        className="revision-modal"
+        onIonModalDidDismiss={() => setShow(false)}
+        canDismiss>
         <div className="revision-modal-header">
           <div style={{ width: 10 }} />
           <div>
@@ -158,15 +164,17 @@ const RevisionModal = ({
           </button>
         </div>
         <div className="text-area-container">
-          <IonText class="text-area-title">{Strings.TEXT_AREA_TITLE}</IonText>
+          <IonText className="text-area-title">
+            {Strings.TEXT_AREA_TITLE}
+          </IonText>
           <IonTextarea
-            class="text-area"
+            className="text-area"
             placeholder="Digite aqui..."
             rows={5}
             cols={5}
             wrap="soft"
             required
-            onIonChange={debouncedSearch}
+            onIonInput={onSearch}
             value={auxValueText}
           />
           <div className="suggestion-container">
@@ -176,16 +184,25 @@ const RevisionModal = ({
           </div>
           <div className="suggestion-chips-box">
             <div className="revision-modal-suggestion-words-list">
-              {dictionary.map(item => renderWord(item))}
+              {dictionary.map((item) => renderWord(item))}
             </div>
           </div>
           <div className="chip-area">
-            <IonChip class="chip-1" onClick={handlePlaySuggestionGlosa}>
+            <IonChip
+              className="chip-1"
+              disabled={
+                auxValueText.toString().trim().length === 0 ||
+                !regex.test(auxValueText)
+              }
+              onClick={handlePlaySuggestionGlosa}>
               {Strings.CHIP_TEXT_1}
             </IonChip>
             <IonChip
-              class="chip-2"
-              disabled={auxValueText.trim().length === 0}
+              className="chip-2"
+              disabled={
+                auxValueText.toString().trim().length === 0 ||
+                !regex.test(auxValueText)
+              }
               onClick={handleOpenSuggestionFeedbackModal}>
               {Strings.CHIP_TEXT_2}
             </IonChip>

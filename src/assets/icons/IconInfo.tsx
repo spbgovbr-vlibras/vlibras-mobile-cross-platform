@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react';
 
 import { SVGProps } from './types';
@@ -5,7 +6,7 @@ import { SVGProps } from './types';
 const IconInfo = ({
   style = {},
   color = 'black',
-  size = 24,
+  size = 38,
   viewBox = '0 0 24 24',
 }: SVGProps) => (
   <svg

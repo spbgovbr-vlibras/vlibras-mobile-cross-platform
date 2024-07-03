@@ -3,13 +3,13 @@
   align-items: flex-end;
 }
 
-.revision-modal .modal-wrapper {
+.revision-modal::part(content) {
   border-radius: 16px 16px 0px 0px;
   height: 505px;
   bottom: 0;
 }
 
-.revision-modal .ion-page {
+.revision-modal .ion-delegate-host {
   padding: 16px 20px;
 }
 
@@ -84,7 +84,7 @@
   line-height: 125%;
 
   border: 2px solid #bababa;
-  width: 100%;
+  width: 100% !important;
   box-sizing: border-box;
   border-radius: 4px;
   font-family: Rawline;
@@ -217,5 +217,4 @@
 .revision-modal .suggestion-chips {
   background: #ededed;
   border-radius: 47px;
-
 }

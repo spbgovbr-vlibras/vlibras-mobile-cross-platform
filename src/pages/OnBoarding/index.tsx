@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-
 import { IonContent } from '@ionic/react';
+import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import paths from '../../constants/paths';
-import { MenuLayout } from '../../layouts';
 import Presentation from './Steps/Presentation';
 import StepFour from './Steps/StepFour';
 import StepOne from './Steps/StepOne';
 import StepThree from './Steps/StepThree';
 import StepTwo from './Steps/StepTwo';
 import { Strings } from './strings';
+import paths from '../../constants/paths';
+import { MenuLayout } from '../../layouts';
 
 import './styles.css';
 
@@ -33,50 +32,50 @@ const OnBoarding = () => {
 
   useEffect(() => {
     switch (currentStep) {
-      case 0:
-        setChooseRender(
-          <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />
-        );
-        break;
-      case 1:
-        setChooseRender(
-          <StepOne
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 2:
-        setChooseRender(
-          <StepTwo
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 3:
-        setChooseRender(
-          <StepThree
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      case 4:
-        setChooseRender(
-          <StepFour
-            setCurrentStep={setCurrentStep}
-            active={currentStep}
-            jump={closeModal}
-          />
-        );
-        break;
-      default:
-        setChooseRender(<> </>);
-        break;
+    case 0:
+      setChooseRender(
+        <Presentation setCurrentStep={setCurrentStep} jump={closeModal} />
+      );
+      break;
+    case 1:
+      setChooseRender(
+        <StepOne
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 2:
+      setChooseRender(
+        <StepTwo
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 3:
+      setChooseRender(
+        <StepThree
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    case 4:
+      setChooseRender(
+        <StepFour
+          setCurrentStep={setCurrentStep}
+          active={currentStep}
+          jump={closeModal}
+        />
+      );
+      break;
+    default:
+      setChooseRender(<> </>);
+      break;
     }
   }, [currentStep]);
 

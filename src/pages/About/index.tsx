@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   IonContent,
   IonImg,
@@ -10,6 +8,7 @@ import {
   IonTitle,
   IonButtons,
 } from '@ionic/react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
@@ -22,6 +21,7 @@ import {
   logoUfpb,
   logoYoutube,
   IconArrowLeft,
+  logoMinGestInov,
 } from 'assets';
 
 import { Strings } from './strings';
@@ -35,13 +35,13 @@ function About() {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle className="menu-toolbar-title-signalcap">
+          <IonTitle className="menu-toolbar-title">
             {Strings.TOOLBAR_TITLE}
           </IonTitle>
 
           <IonButtons slot="start" onClick={() => history.goBack()}>
             <div className="arrow-left-container-start">
-              <IconArrowLeft color="#1447a6" />
+              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
             </div>
           </IonButtons>
         </IonToolbar>
@@ -55,7 +55,7 @@ function About() {
               {Strings.CHARACTERS_TEXT_VLIBRAS}
             </span>
           </h1>
-          <IonImg class="about-container-characters" src={logoAvatares} />
+          <IonImg className="about-container-characters" src={logoAvatares} />
         </div>
         <div className="about-content">
           <div className="about-content-text-vlibras">
@@ -65,8 +65,7 @@ function About() {
             <IonText>{Strings.TEXT_REALIZADORES}</IonText>
             <div className="ministries-container">
               <div className="ministry">
-                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[0]}</span>
-                <span>{Strings.MINISTRIES_TEXT.GESTAO_INOVACAO[1]}</span>
+                <IonImg src={logoMinGestInov}></IonImg>
               </div>
               <div className="ministry">
                 <span>{Strings.MINISTRIES_TEXT.DIREITOS_HUMANOS[0]}</span>

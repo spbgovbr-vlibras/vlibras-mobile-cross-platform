@@ -9,21 +9,17 @@
 .dictionary-box {
   display: flex;
   flex-direction: column;
-  
+
   width: 100%;
   padding: 16px;
   padding-top: 0px;
   padding-bottom: 0px;
-
 }
 
 .dictionary-input-box {
   position: relative;
 }
-.dictionary-textarea:hover {
-  --background: #FFF5CC;
-  border: 1px solid #1447a6;
-}
+
 .dictionary-textarea {
   /*border: 1px solid #B9B9B9;*/
   box-sizing: border-box;
@@ -31,8 +27,9 @@
   font-family: Rawline;
   z-index: 0;
   color: #000;
-  
-  --placeholder-color: #B9B9B9;
+
+  --placeholder-color: #000;
+  --placeholder-font-weight: bold;
 
   margin-top: 8px;
   /*height: 100%;*/
@@ -51,10 +48,17 @@
   border-top-width: 0px;
 
   /*SearchBar Icon*/
-  background-image: none!important;
+  background-image: none !important;
+
+  /* Removes search icon */
+  .searchbar-search-icon {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
-.sc-ion-searchbar-md-h{
-  border: 1px solid #B9B9B9;
+.sc-ion-searchbar-md-h {
+  border: 1px solid #b9b9b9;
   box-sizing: border-box;
   border-radius: 4px;
   --box-shadow: none;
@@ -62,16 +66,15 @@
 .searchbar-input {
   padding-left: 9px !important;
 }
-.searchbar-clear-button .sc-ion-searchbar-md{
-  color:#1447a6;
+.searchbar-clear-button .sc-ion-searchbar-md {
+  color: #1447a6;
   width: 16px;
   height: 24px;
 }
 .dictionary-container-ion-chips {
   display: flex;
   flex-direction: row;
-  margin-left: 16px;
-  margin-top: 12px;
+  margin: 12px 16px 0 16px;
 
   width: 100%;
 }
@@ -82,19 +85,37 @@
   font-size: 12px;
   line-height: 100%;
 }
+.dictionary-container-ion-chips-abbreviation {
+  font-family: Rawline;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 100%;
+  color: #1447a6;
+  background: #d6e5f9;
+  font-weight: bold;
+}
 
+.disabled-chip-abbreviation {
+  pointer-events: none;
+}
 
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #1447a6;
+  margin-left: 30px;
+}
 
-.dictionary-words-style{
+.dictionary-words-style {
   font-family: Rawline;
   font-style: normal;
   font-weight: normal;
   font-size: 16.8px;
   line-height: 130%;
-  
-  color: #1447A6;
+
+  color: #1447a6;
 }
-.dictionary-words-list{
+.dictionary-words-list {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -103,19 +124,22 @@
   margin-top: 35px;
 
   font-family: Rawline;
-  color: #1447A6;
-
+  color: #1447a6;
 }
-.dictionary-word-item{
+.dictionary-word-item {
   --padding-start: 0px;
   --min-height: 0px;
 
   margin-left: 31px;
 }
+.dictionary-word-item.centered {
+  margin-right: 31px;
+  text-align: center;
+}
 .dictionary-container-box-ion-text {
   display: flex;
   align-items: center;
-  
+
   margin-top: 8px;
   margin-right: 16px;
   margin-left: 16px;
@@ -145,6 +169,6 @@
 
   color: #747474;
 }
-.dictionary-container-box-ion-mic-icon{
-  color:#B9B9B9;
+.dictionary-container-box-ion-mic-icon {
+  color: #b9b9b9;
 }

@@ -1,18 +1,34 @@
 .tutorial-popover-container {
-  background: #1b1b1b;
+  background: #0D459D;
   box-shadow: 0px 15px 24px rgba(0, 0, 0, 0.3);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
   padding: 12px;
-  width: fit-content;
+  width: auto;
+  max-width: 340px;
+  min-width: 290px;
+  height: max-content;
   position: relative;
+  margin-right: 50px;
 }
 
 .tutorial-row {
   display: flex;
+  margin-bottom: 5px;
   flex-direction: row;
-  justify-content: center;
+  height: 100%;
+  width: 100%;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.tutorial-left-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 16px;
   flex: 1;
 }
 
@@ -33,45 +49,89 @@
 .tutorial-popover-container h1 {
   font-family: Rawline;
   font-style: normal;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 14px;
-  line-height: 120%;
+  line-height: normal;
   /* identical to box height, or 17px */
 
   display: flex;
   align-items: center;
-
-  color: #ffffff;
+  text-align: center;
+  color: var(--VLibras---Light-White-1, #FDFDFD);
   margin: 0;
 }
 
-.tutorial-popover-container h2 {
+.tutorial-popover-container  h2 {
   font-family: Rawline;
   font-style: normal;
   font-weight: 500;
   font-size: 12px;
-  line-height: 150%;
+  line-height: normal;
+  text-align: justify;
+  margin-top: 10px;
   /* identical to box height, or 18px */
 
   display: flex;
   align-items: center;
   margin: 0;
-  color: #ffffff;
-  padding-top: 4px;
+  color: var(--VLibras---Light-White-1, #FDFDFD);
 }
 
 .tutorial-popover-container span {
   font-family: Rawline;
   font-style: normal;
-  font-weight: normal;
+  font-weight: 500;
   font-size: 12px;
-  line-height: 100%;
+  line-height: normal;
   /* identical to box height, or 12px */
 
   display: flex;
   align-items: center;
 
-  color: #888888;
+  color: #ffffff;
+}
+
+.tutorial-popover-container hr{
+  border-top: 1px solid #8f8f8f;
+  width: 100% ; /* Leva em consideração o padding de 12px do pai */
+}
+
+.tutorial-popover-container .button-outlined-tutorial {
+
+  padding: 7.5px 20px 9.5px 20px;
+  border-radius: 25px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  height: 44px;
+  width: max-content;
+  color: var(--VLibras---Light-Blue-1, #ffffff);
+  border: 1px solid var(--VLibras---Light-White-3, #F7F9FB);
+  text-align: center;
+  font-family: Rawline;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-left: 10px;
+}
+
+.tutorial-popover-container .button-solid-tutorial {
+  padding: 7.5px 20px 9.5px 20px;
+  border-radius: 25px;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  height: 44px;
+  width: max-content;
+  color: var(--VLibras---Light-Blue-1, #0D459D);
+  text-align: center;
+  font-family: Rawline;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-left: 10px;
 }
 
 .container__arrow {
@@ -79,7 +139,7 @@
   height: 8px;
   width: 8px;
 
-  background-color: #1b1b1b;
+  background-color: #0D459D;
   position: absolute;
 }
 

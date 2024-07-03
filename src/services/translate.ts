@@ -59,9 +59,18 @@ export async function fetchVideoStatus(
   return response.data;
 }
 
+/**
+ * This function may throw an error if the value is not a string
+ * @param value The value to be cast to string
+ * @throws {Error} Throws an error if the received value cant be parsed to string.
+ */
 export async function translate(data: TranslateData): Promise<string> {
   const response = await api.post('/translate', data);
-  return response.data;
+  try {
+    return String(response.data);
+  } catch(error: unknown) {
+    throw Error('Could parse received gloss data to string.');
+  }
 }
 
 export async function generateVideoTranslate(

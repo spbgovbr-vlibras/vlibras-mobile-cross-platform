@@ -1,8 +1,9 @@
+/* eslint-disable no-constant-condition */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable import/order */
 import React, { useEffect, useState, useRef } from 'react';
 
-import { menuController } from '@ionic/core';
+import { menuController } from '@ionic/core/components';
 import {
   IonMenu,
   IonHeader,
@@ -30,11 +31,11 @@ import {
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
-import RegionalismArray from 'data/regionalism';
 
 import { Strings } from './strings';
 
 import './styles.css';
+import IconDictionary2 from 'assets/icons/IconDictionary2';
 
 interface DrawerMenuProps {
   contentId: string;
@@ -69,6 +70,10 @@ function getColor(value: string, expected: string): string {
 }
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
+  const isLoadingAction = useSelector(
+    ({ loading }: RootState) => loading.isLoading
+  );
+
   const isVideoScreen = useSelector(
     ({ video }: RootState) => video.isVideoScreen
   );
@@ -147,7 +152,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
       }
       detail={false}
-      onClick={e => navLink(e, tab)}>
+      onClick={(e) => navLink(e, tab)}>
       <IconComponent
         color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
       />
@@ -172,9 +177,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
       )}
       {title === Strings.TITLE_MENU_REGIONALISM && (
         <>
-          <p className="drawer-menu-sub-item">
-            {RegionalismArray.find(item => item.name === current)?.abbreviation}
-          </p>
+          <p className="drawer-menu-sub-item">{current.abbreviation}</p>
           <div className="arrow-down"> </div>
         </>
       )}
@@ -232,7 +235,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           {renderItemTab(
             paths.DICTIONARY,
             Strings.TITLE_MENU_DICTIONARY,
-            IconDictionary,
+            IconDictionary2,
             true
           )}
         </IonList>
@@ -258,11 +261,15 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 IconRegionalism,
                 true
               )}
-          {renderItemTab(
-            paths.CUSTOMIZATION,
-            Strings.TITLE_MENU_CUSTOMIZATION,
-            IconCustomization,
-            true
+          {!isLoadingAction ? (
+            renderItemTab(
+              paths.CUSTOMIZATION,
+              Strings.TITLE_MENU_CUSTOMIZATION,
+              IconCustomization,
+              true
+            )
+          ) : (
+            <></>
           )}
         </IonList>
         <IonList lines="none">

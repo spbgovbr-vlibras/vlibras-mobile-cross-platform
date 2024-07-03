@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { useState } from 'react';
-
 import produce, { Draft } from 'immer';
+import { useState } from 'react';
 import { Reducer } from 'redux';
 import { createAction, ActionType } from 'typesafe-actions';
 
@@ -32,12 +31,12 @@ const reducer: Reducer<TranslatorTextState, ActionTypes> = (
   const { payload, type } = action;
   return produce(state, (draft: Draft<TranslatorTextState>) => {
     switch (type) {
-      case Types.SET_TRANSLATOR_TEXT:
-        draft.translatorText = payload;
-        break;
+    case Types.SET_TRANSLATOR_TEXT:
+      draft.translatorText = payload;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
   });
 };

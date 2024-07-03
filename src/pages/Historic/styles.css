@@ -99,7 +99,11 @@
   border-radius: 4px;
   font-family: Rawline;
   color: #747474;
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  justify-content: left;
+  align-items: left;
 }
 
 .historic-container-ion-chips-box {
@@ -158,10 +162,11 @@
 }
 
 .date-desc {
-  font-size: 12px;
+  font-size: 16px;
   color: #1b1b1b;
   font-family: Rawline;
   text-align: center;
+  font-weight: bold;
 }
 
 .container-render-historic {
@@ -171,7 +176,21 @@
 .empty-historic {
   font-family: Rawline;
   color: #565656;
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: bold;
   text-align: center;
   margin-top: 70px;
+}
+
+.scroll-buttons {
+  position: fixed; /* Takes it out of the document flow and positions it relative to its nearest positioned ancestor */
+  bottom: 20px; /* Adjusts the position vertically to the middle of the parent */
+  right: 20px; /* Aligns the buttons to the right side of the nearest positioned ancestor */
+  display: flex;
+  flex-direction: column; /* Stacks the buttons vertically */
+  gap: 10px; /* Adds some space between the buttons */
+}
+
+.arrowBtn {
+  --background: #1447a6;
 }

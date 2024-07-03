@@ -14,6 +14,8 @@ import IconCloseCircle from './icons/IconCloseCircle';
 import IconShare from './icons/IconShare';
 import IconDomain from './icons/IconDomain';
 import IconArrowLeft from './icons/IconArrowLeft';
+import IconArrowUp from './icons/IconArrowUp';
+import IconArrowDown from './icons/IconArrowDown';
 import IconThumbUp from './icons/IconThumbUp';
 import IconThumbDown from './icons/IconThumbDown';
 import IconArrowUpRight from './icons/IconArrowUpRight';
@@ -113,6 +115,7 @@ import logoCalca from './images/calça.png';
 import logoSubtitleOn from './images/subtitle-on.png';
 import logoSubtitleOff from './images/subtitle-off.png';
 import Vlibraslogo from './images/vlibraslogo.png';
+import logoMinGestInov from './images/ministerioGestao.svg';
 
 export { ReactComponent as IcaroAvatar } from './images/icaro.svg';
 export { ReactComponent as GugaAvatar } from './images/guga.svg';
@@ -120,6 +123,7 @@ export { ReactComponent as HozanaAvatar } from './images/hozana.svg';
 export { ReactComponent as ArrowLeft } from './images/arrow-left.svg';
 
 export {
+  logoMinGestInov,
   logoSubtitleOff,
   logoSubtitleOn,
   LogoIcaro,
@@ -211,6 +215,8 @@ export {
   IconThumbDown,
   IconIcaro,
   IconArrowUpRight,
+  IconArrowUp,
+  IconArrowDown,
   cameraBlue,
   logoOlho,
   logoCabelo,

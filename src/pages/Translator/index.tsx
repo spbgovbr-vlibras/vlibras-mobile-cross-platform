@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-
 import { IonText, IonTextarea, IonContent } from '@ionic/react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
+import { regex } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import PlayerService from 'services/unity';
+import { RootState } from 'store';
 import { Creators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
 
@@ -17,22 +18,25 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-const playerService = PlayerService.getService();
+const playerService = PlayerService.getPlayerInstance();
 
 const Translator = () => {
-  const [text, setText] = useState('');
+  const translatorText = useSelector(
+    ({ translator }: RootState) => translator.translatorText
+  );
+
   const history = useHistory();
   const dispatch = useDispatch();
 
   const { setTextPtBr } = useTranslation();
 
   async function translate() {
-    const formatted = text.trim();
+    const formatted = translatorText.trim();
 
     const today = new Date().toLocaleDateString('pt-BR');
 
     reloadHistory(today, formatted, 'text');
-    const gloss = await setTextPtBr(formatted, false);
+    const gloss = (await setTextPtBr(formatted, false)).toString();
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
@@ -44,19 +48,31 @@ const Translator = () => {
       <IonContent>
         <div className="scroll-content">
           <div className="translator-box">
-            <IonText class="translator-header">
+            <IonText className="translator-header">
               {Strings.TRANSLATOR_HEADER}
             </IonText>
             <div className="translator-input-box">
               <IonTextarea
-                class="translator-textarea"
+                className="translator-textarea"
                 //  placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 rows={5}
                 cols={5}
                 wrap="soft"
+                value={translatorText}
                 required
-                onIonChange={e => setText(e.detail.value || '')}
+                onIonInput={(e) =>
+                  dispatch(Creators.setTranslatorText(e.detail.value || ''))
+                }
               />
+              {translatorText.length > 0 && !regex.test(translatorText) && (
+                <IonText color="danger">
+                  <p className="ion-padding-start">
+                    {
+                      'Entrada inválida. Insira pelo menos um caractere alfanumérico (letra ou número).'
+                    }
+                  </p>
+                </IonText>
+              )}
             </div>
           </div>
           <div className="translator-item-button-save">
@@ -64,7 +80,10 @@ const Translator = () => {
               className="translator-button-save"
               onClick={translate}
               type="button"
-              disabled={text.trim().length === 0}>
+              disabled={
+                translatorText.trim().length === 0 ||
+                !regex.test(translatorText)
+              }>
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

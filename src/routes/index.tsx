@@ -1,8 +1,7 @@
-import React from 'react';
-
 import { App } from '@capacitor/app';
 import { IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
+import React from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
 
 import { DrawerMenu } from 'components';

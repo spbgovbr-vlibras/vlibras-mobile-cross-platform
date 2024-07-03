@@ -1,7 +1,6 @@
-import React, { useEffect, useCallback, useState } from 'react';
-
+import { IonButton, IonChip, IonContent, IonText } from '@ionic/react';
 import { NativeStorage } from '@ionic-native/native-storage';
-import { IonChip, IonContent, IonText } from '@ionic/react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,11 +13,16 @@ import { Creators } from 'store/ducks/translator';
 import dateFormat from 'utils/dateFormat';
 import { reloadHistory } from 'utils/setHistory';
 
-import { logoTranslator1, logoTranslator2 } from '../../assets';
+import { Strings } from './strings';
+import {
+  IconArrowUp,
+  IconArrowDown,
+  logoTranslator1,
+  logoTranslator2,
+} from '../../assets';
 import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
-import { Strings } from './strings';
 
 import './styles.css';
 // import { Creators } from 'store/ducks/customization';
@@ -28,10 +32,10 @@ type GenericObject = { [key: string]: any };
 function Historic() {
   const [showModal, setShowModal] = useState(false);
   const [results, setResults] = useState([]);
-  const [log, setLog] = useState([]);
   const history = useHistory();
   const location = useLocation();
   const dispatch = useDispatch();
+  const contentRef = useRef<HTMLIonContentElement>(null);
 
   const [historyStorage, setHistoryStorage] = useState<GenericObject>({});
 
@@ -43,17 +47,7 @@ function Historic() {
   const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const { setTextPtBr } = useTranslation();
-  const playerService = PlayerService.getService();
-
-  const promiseHistory = NativeStorage.getItem('history').then(
-    data => {
-      return data;
-    },
-    error => {
-      setLog(error);
-      return {};
-    }
-  );
+  const playerService = PlayerService.getPlayerInstance();
 
   const openModalOutput = (actualItem: any) => {
     setShowModal(true);
@@ -61,8 +55,16 @@ function Historic() {
   };
 
   const loadHistory = useCallback(async () => {
-    setHistoryStorage(await promiseHistory);
-  }, [promiseHistory]);
+    try {
+      const result = await NativeStorage.getItem('history');
+      setHistoryStorage(result);
+      // eslint-disable-next-line no-empty
+    } catch {}
+  }, []);
+
+  const hasItemsToRender = (): boolean => {
+    return Object.keys(historyStorage).length > 0;
+  };
 
   useEffect(() => {
     if (location.pathname === paths.HISTORY) loadHistory();
@@ -73,7 +75,7 @@ function Historic() {
     const dates = Object.keys(arrayState);
     const formattedObjDate: any = {};
 
-    dates.forEach(element => {
+    dates.forEach((element) => {
       const formattedDate = dateFormat(element);
       if (formattedObjDate[formattedDate]) {
         if (formattedObjDate[formattedDate].video) {
@@ -111,19 +113,31 @@ function Historic() {
     dispatch(Creators.setTranslatorText(formatted));
   }
 
+  const scrollUp = () => {
+    scrollBy(-100);
+  };
+
+  const scrollDown = () => {
+    scrollBy(100);
+  };
+
+  const scrollBy = (offset: number) => {
+    contentRef.current?.scrollByPoint(0, offset, 500);
+  };
+
   const renderAllItems = () => {
     const formattedHistoric = formatArrayDate();
     const datesMapped = Object.keys(formattedHistoric).reverse();
     let doesntHaveKey: number;
 
-    return datesMapped.map(column => {
+    return datesMapped.map((column) => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
         if (formattedHistoric[column][key].length !== 0) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
-                <div>
+                <div key={elementKey}>
                   {elementKey === 0 &&
                     (keyOfKeys === 0 || doesntHaveKey === 1) && (
                       <p className="date-desc"> {column} </p>
@@ -205,12 +219,22 @@ function Historic() {
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode="back">
-      <IonContent>
+      <IonContent ref={contentRef}>
+        {hasItemsToRender() && (
+          <div className="scroll-buttons">
+            <IonButton shape="round" className="arrowBtn" onClick={scrollUp}>
+              <IconArrowUp />
+            </IonButton>
+            <IonButton shape="round" className="arrowBtn" onClick={scrollDown}>
+              <IconArrowDown />
+            </IonButton>
+          </div>
+        )}
         <div className="historic-container">
           <div className="historic-container-ion-chips">
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(0)}
                 style={activeKey === 0 ? style : {}}>
                 {Strings.CHIP_TEXT_1}
@@ -218,7 +242,7 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(1)}
                 style={activeKey === 1 ? style : {}}>
                 {Strings.CHIP_TEXT_2}
@@ -226,14 +250,20 @@ function Historic() {
             )}
             {env.videoTranslator && (
               <IonChip
-                class="historic-container-ion-chip"
+                className="historic-container-ion-chip"
                 onClick={() => setScreenKey(2)}
                 style={activeKey === 2 ? style : {}}>
                 {Strings.CHIP_TEXT_3}
               </IonChip>
             )}
           </div>
-          <div className="container-render-historic">{renderAllItems()}</div>
+          <div className="container-render-historic">
+            {!hasItemsToRender() ? (
+              <p className="empty-historic">Histórico vazio</p>
+            ) : (
+              renderAllItems()
+            )}
+          </div>
           <VideoOutputModal
             outputs={results}
             showButtons={false}
