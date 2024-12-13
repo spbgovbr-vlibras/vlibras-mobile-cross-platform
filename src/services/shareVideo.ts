@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://transcodificador-dth.vlibras.gov.br/api/v1/',
+  baseURL: 'https://transcodificador.vlibras.gov.br/api/v1/',
 });
 
 export interface VideoData {
