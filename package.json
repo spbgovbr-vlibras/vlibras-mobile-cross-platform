@@ -1,6 +1,6 @@
 {
   "name": "VLibrasMobile",
-  "version": "0.0.1",
+  "version": "4.0.9",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^6.0.0",

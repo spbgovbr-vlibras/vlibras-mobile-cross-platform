@@ -13,9 +13,10 @@
 
 VLibras Mobile Cross-Platform.
 
-![Version](https://img.shields.io/badge/version-v1.1.0-blue.svg)
-![License](https://img.shields.io/badge/license-LGPLv3-blue.svg)
-![VLibras](https://img.shields.io/badge/vlibras%20suite-2019-green.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAUCAYAAAC9BQwsAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4wIHCiw3NwjjIgAAAQ9JREFUOMuNkjErhWEYhq/nOBmkDNLJaFGyyyYsZzIZKJwfcH6AhcFqtCvFDzD5CQaTFINSlJJBZHI6J5flU5/P937fube357m63+d+nqBEagNYA9pAExgABxHxktU3882hjqtd9d7/+lCPsvpDZNA+MAXsABNU6xHYQ912ON2qC2qQ/X+J4XQXEVe/jwawCzwNAZp/NCLiDVgHejXgKIkVdGpm/FKXU/BJDfytbpWBLfWzAjxVx1Kuxwno5k84Jex0IpyzdN46qfYSjq18bzMHzQHXudifgQtgBuhHxGvKbaPg0Klaan7GdqE2W39LOq8OCo6X6kgdeJ4IZKUKWq1Y+GHVjF3gveTIe8BiCvwBEZmRAXuH6mYAAAAASUVORK5CYII=)
+![Version](https://img.shields.io/badge/Adroid%20version-v4.0.9-blue.svg)
+![Version](https://img.shields.io/badge/iOS%20version-v4.0.7-blue.svg)
+![License](https://img.shields.io/badge/License-LGPLv3-blue.svg)
+![VLibras](https://img.shields.io/badge/Suite%20VLibras-2024-green.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAUCAYAAAC9BQwsAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4wIHCiw3NwjjIgAAAQ9JREFUOMuNkjErhWEYhq/nOBmkDNLJaFGyyyYsZzIZKJwfcH6AhcFqtCvFDzD5CQaTFINSlJJBZHI6J5flU5/P937fube357m63+d+nqBEagNYA9pAExgABxHxktU3882hjqtd9d7/+lCPsvpDZNA+MAXsABNU6xHYQ912ON2qC2qQ/X+J4XQXEVe/jwawCzwNAZp/NCLiDVgHejXgKIkVdGpm/FKXU/BJDfytbpWBLfWzAjxVx1Kuxwno5k84Jex0IpyzdN46qfYSjq18bzMHzQHXudifgQtgBuhHxGvKbaPg0Klaan7GdqE2W39LOq8OCo6X6kgdeJ4IZKUKWq1Y+GHVjF3gveTIe8BiCvwBEZmRAXuH6mYAAAAASUVORK5CYII=)
 
 ## Table of Contents
 
@@ -27,17 +28,14 @@ VLibras Mobile Cross-Platform.
 - [Contributors](#contributors)
 - [License](#license)
 
-
 ## Getting Started
-
 
 ### System Requirements
 
-
 ### Prerequisites
 
-
 ### Installing
+
 <ul>
   <li>
     Primeiro, é necessário instalar o NodeJS. As últimas versões podem gerar erros no projeto, portanto uma versão de referência para se utilizar é a
@@ -58,14 +56,9 @@ VLibras Mobile Cross-Platform.
   </li>
 </ul>
 
-
- 
-
 ## Deployment
 
-
 ## Contributors
-
 
 ## License
 
