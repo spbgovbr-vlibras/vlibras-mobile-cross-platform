@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { Avatar } from 'constants/types';
+import { removeAccents } from 'utils/normalize';
 
 export enum VideoTranslationStatus {
   QUEUED = 'queued',
@@ -65,7 +66,8 @@ export async function fetchVideoStatus(
  * @throws {Error} Throws an error if the received value cant be parsed to string.
  */
 export async function translate(data: TranslateData): Promise<string> {
-  const response = await api.post('/translate', data);
+  const normalizedText = removeAccents(data.text);
+  const response = await api.post('/translate', { text: normalizedText });
   try {
     return String(response.data);
   } catch(error: unknown) {
