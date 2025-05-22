@@ -365,9 +365,7 @@ function Player() {
   );
 
   function handleStop() {
-    translatorText !== ''
-      ? history.push(paths.TRANSLATOR)
-      : history.replace(paths.HOME);
+    history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
   }

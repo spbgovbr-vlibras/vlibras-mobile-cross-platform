@@ -1188,6 +1188,11 @@
   "resolved" "https://registry.npmjs.org/@capacitor/app/-/app-6.0.2.tgz"
   "version" "6.0.2"
 
+"@capacitor/browser@^7.0.1":
+  "integrity" "sha512-N6KEVLw2enTnourQzYJLvAkSds2Ed21zqsvHnSImrVDenzX8fUj032kMt4EdewmxfxiEwRa911BT1VOPBi0fEA=="
+  "resolved" "https://registry.npmjs.org/@capacitor/browser/-/browser-7.0.1.tgz"
+  "version" "7.0.1"
+
 "@capacitor/cli@^6.0.0":
   "integrity" "sha512-JKl0FpFge8PgQNInw12kcKieQ4BmOyazQ4JGJOfEpVXlgrX1yPhSZTPjngupzTCiK3I7q7iGG5kjun0fDqgSCA=="
   "resolved" "https://registry.npmjs.org/@capacitor/cli/-/cli-6.2.1.tgz"

@@ -1,3 +1,4 @@
+/* eslint-disable no-trailing-spaces */
 import {
   IonContent,
   IonImg,
@@ -30,6 +31,11 @@ import './styles.css';
 
 function About() {
   const history = useHistory();
+
+  // // Função para abrir o link no navegador usando InAppBrowser
+  // const openInAppBrowser = (url: string) => {
+  //   InAppBrowser.open(url, '_system');
+  // };
 
   return (
     <IonPage>
