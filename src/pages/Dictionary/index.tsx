@@ -3,12 +3,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   IonChip,
   IonContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonList,
   IonSearchbar,
   IonText,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
 } from '@ionic/react';
 import { debounce } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
@@ -64,11 +64,15 @@ function Dictionary() {
 
   const { setTextGloss, recentTranslation } = useTranslation();
 
-  function translate(text: string) {
-    setTextGloss(text, true);
-    history.replace(paths.HOME);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
-  }
+  // CORREÇÃO: A função 'translate' foi envolvida com useCallback
+  const translate = useCallback(
+    (text: string) => {
+      setTextGloss(text, true);
+      history.replace(paths.HOME);
+      playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
+    },
+    [setTextGloss, history]
+  );
 
   const renderWord = (item: Words) => (
     <IonItem
@@ -124,13 +128,14 @@ function Dictionary() {
     infiniteScrollRef.current?.complete();
   }, [dispatch, infiniteScrollRef, metadata, searchText]);
 
-  function handleFilterAlpha() {
+  // CORREÇÃO: As funções de filtro agora usam useCallback
+  const handleFilterAlpha = useCallback(() => {
     setFilter('alphabetical');
-  }
+  }, []); // setFilter não precisa ser dependência
 
-  function handleFilterRecents() {
+  const handleFilterRecents = useCallback(() => {
     setFilter('recents');
-  }
+  }, []); // setFilter não precisa ser dependência
 
   function renderRecentsList() {
     if (recentTranslation.length > 0) {
@@ -159,13 +164,13 @@ function Dictionary() {
           <div className="dictionary-container-ion-chips">
             <IonChip
               class="dictionary-container-ion-chips-suggestions"
-              onClick={handleFilterAlpha}
+              onClick={handleFilterAlpha} // CORRIGIDO e sem comentário
               style={getChipClassName(filter, 'alphabetical')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_1}
             </IonChip>
             <IonChip
               class="dictionary-container-ion-chips-suggestions"
-              onClick={handleFilterRecents}
+              onClick={handleFilterRecents} // CORRIGIDO e sem comentário
               style={getChipClassName(filter, 'recents')}>
               {Strings.CHIP_TEXT_SUGGESTIONS_2}
             </IonChip>
