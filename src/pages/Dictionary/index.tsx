@@ -85,6 +85,7 @@ function Dictionary() {
   function translate(text: string) {
     setTextGloss(text, true);
     history.replace(paths.HOME);
+    if (text === '%') text = '%25';
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
