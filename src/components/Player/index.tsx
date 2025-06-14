@@ -69,9 +69,13 @@ const buttonColors = {
   VARIANT_WHITE_ACTIVE: '#003F86',
 };
 
+const X0_5 = 0.5;
 const X1 = 1;
+const X1_5 = 1.5;
 const X2 = 2;
+const X2_5 = 2.5;
 const X3 = 3;
+
 const UNDEFINED_GLOSS = -1;
 const MAX_PROGRESS = 100;
 
@@ -932,7 +936,18 @@ function Player() {
             }
             type="button"
             onClick={() => handleSpeed(X3)}>
-            <span>X3</span>
+            <span>X3.0</span>
+          </button>
+          <div className="player-popover-content-divider" />
+          <button
+            className={
+              speedValue === X2_5
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X2_5)}>
+            <span>X2.5</span>
           </button>
           <div className="player-popover-content-divider" />
           <button
@@ -943,7 +958,18 @@ function Player() {
             }
             type="button"
             onClick={() => handleSpeed(X2)}>
-            <span>X2</span>
+            <span>X2.0</span>
+          </button>
+          <div className="player-popover-content-divider" />
+          <button
+            className={
+              speedValue === X1_5
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X1_5)}>
+            <span>X1.5</span>
           </button>
           <div className="player-popover-content-divider" />
           <button
@@ -954,7 +980,18 @@ function Player() {
             }
             type="button"
             onClick={() => handleSpeed(X1)}>
-            <span>X1</span>
+            <span>X1.0</span>
+          </button>
+          <div className="player-popover-content-divider" />
+          <button
+            className={
+              speedValue === X0_5
+                ? 'player-popover-content-item-active'
+                : 'player-popover-content-item-none'
+            }
+            type="button"
+            onClick={() => handleSpeed(X0_5)}>
+            <span>X0.5</span>
           </button>
         </div>
       </IonPopover>
