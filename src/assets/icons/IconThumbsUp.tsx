@@ -14,8 +14,7 @@ const IconThumbsUp = ({
     viewBox={viewBox}
     fill="none"
     style={style}
-    xmlns="http://www.w3.org/2000/svg"
-  >
+    xmlns="http://www.w3.org/2000/svg">
     <circle cx="18" cy="18" r="18" fill="#1B1B1B" fillOpacity="0.75" />
     <g clipPath="url(#clip0)">
       <path
