@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 
 import { menuController } from '@ionic/core';
 import {
@@ -11,7 +11,7 @@ import {
   IonLabel,
 } from '@ionic/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconArrowLeft } from 'assets';
 import paths from 'constants/paths';
@@ -39,34 +39,56 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const onboardingFirstAccess = useSelector(
-    ({ video }: RootState) => video.onboardingFirstAccess
+  const { onboardingFirstAccess, isVideoScreen } = useSelector(
+    ({ video }: RootState) => ({
+      onboardingFirstAccess: video.onboardingFirstAccess,
+      isVideoScreen: video.isVideoScreen,
+    })
   );
 
-  const isVideoScreen = useSelector(
-    ({ video }: RootState) => video.isVideoScreen
-  );
-
-  function openMenu() {
-    menuController.open();
-  }
-
-  const ToolbarAction = useMemo(() => {
+  // Efeitos colaterais (dispatch) devem ficar em um useEffect
+  useEffect(() => {
     switch (location.pathname) {
       case paths.HOME:
         dispatch(Creators.setIsVideoScreen(false));
+        break;
+      case paths.RECORDERAREA:
+      case paths.ONBOARDING:
+        dispatch(Creators.setIsVideoScreen(true));
+        dispatch(Creators.setFirstAccess(false));
+        break;
+      default:
+        break;
+    }
+  }, [location.pathname, dispatch]);
+
+  // Use useCallback para memoizar funções de clique
+  const handleNavigateToRecorder = useCallback(() => {
+    const destination = onboardingFirstAccess
+      ? paths.ONBOARDING
+      : paths.RECORDERAREA;
+    history.push(destination);
+  }, [history, onboardingFirstAccess]);
+
+  const handleNavigateToHome = useCallback(() => {
+    history.push(paths.HOME);
+  }, [history]);
+
+  // A função openMenu é estável, não precisa de useCallback
+  const openMenu = useCallback(() => {
+    menuController.open();
+  }, []);
+
+  // useMemo é ótimo para computar um valor (JSX, neste caso)
+  const ToolbarAction = useMemo(() => {
+    switch (location.pathname) {
+      case paths.HOME:
         if (env.videoTranslator) {
           return (
             <>
               <button
                 className="menu-item-text"
-                onClick={() =>
-                  history.push(
-                    onboardingFirstAccess
-                      ? paths.ONBOARDING
-                      : paths.RECORDERAREA
-                  )
-                }
+                onClick={handleNavigateToRecorder}
                 type="button">
                 {Strings.MENU_PT_BR}
               </button>
@@ -74,17 +96,16 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
             </>
           );
         }
-        return <></>;
+        return null;
 
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
-        dispatch(Creators.setIsVideoScreen(true));
-        dispatch(Creators.setFirstAccess(false));
         return (
           <>
             <IonLabel
+              slot="start"
               className="menu-item-text"
-              onClick={() => history.push(paths.HOME)}>
+              onClick={handleNavigateToHome}>
               LIBRAS
             </IonLabel>
             <IconTranslate color="#315EB1" />
@@ -94,7 +115,8 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
       default:
         return null;
     }
-  }, [location, history, dispatch]);
+    // Adicionamos as novas funções como dependência
+  }, [location.pathname, handleNavigateToRecorder, handleNavigateToHome]);
 
   return (
     <IonPage className="menu-layout-container">
@@ -109,11 +131,11 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
                 className="menu-icon-drawer"
               />
             ) : (
-              <Link
+              <RouterLink
                 to={isVideoScreen ? paths.RECORDERAREA : paths.HOME}
                 className="menu-item-link">
                 <IconArrowLeft color="#315EB1" />
-              </Link>
+              </RouterLink>
             )}
           </IonButtons>
           <IonButtons slot="end">

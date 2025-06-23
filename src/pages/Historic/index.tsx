@@ -1,11 +1,16 @@
-import React, { useEffect, useCallback, useState } from 'react';
+// --- Bloco de Imports Corrigido ---
 
-import { NativeStorage } from '@ionic-native/native-storage';
+// 1. Imports do React
+import React, { useCallback, useEffect, useState } from 'react';
+
+// 2. Imports de bibliotecas externas
 import { IonChip, IonContent, IonText } from '@ionic/react';
+import { NativeStorage } from '@ionic-native/native-storage';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+// 3. Imports de módulos internos do seu projeto (por caminho)
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
@@ -14,13 +19,18 @@ import { Creators } from 'store/ducks/translator';
 import dateFormat from 'utils/dateFormat';
 import { reloadHistory } from 'utils/setHistory';
 
+// 4. Imports relativos (seguindo a regra do seu projeto)
+import { Strings } from './strings';
 import { logoTranslator1, logoTranslator2 } from '../../assets';
 import { VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
-import { Strings } from './strings';
 
+// 5. Imports de Estilos
 import './styles.css';
+
+// Comentários que você tinha (podem ser removidos ou mantidos)
+// import { Creators } from 'store/ducks/customization';
 // import { Creators } from 'store/ducks/customization';
 
 type GenericObject = { [key: string]: any };

@@ -1,7 +1,12 @@
+// --- Bloco de Imports FINAL e Corrigido ---
+
+// 1. Imports do React
 import React, { useState, useEffect } from 'react';
 
+// 2. Imports de bibliotecas externas
 import { Capacitor } from '@capacitor/core';
-import { BackgroundMode } from '@ionic-native/background-mode';
+import { IonContent } from '@ionic/react'; // <-- Posição corrigida
+// import { BackgroundMode } from '@ionic-native/background-mode'; // <-- Removido por não estar em uso
 import { File, DirectoryEntry } from '@ionic-native/file';
 import { NativeStorage } from '@ionic-native/native-storage';
 import { VideoCapturePlus, MediaFile } from '@ionic-native/video-capture-plus';
@@ -9,12 +14,12 @@ import {
   CreateThumbnailOptions,
   VideoEditor,
 } from '@ionic-native/video-editor';
-import { IonContent } from '@ionic/react';
 import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
+// 3. Imports de módulos internos do projeto
 import { logoCapture, logoHistory, logoTranslate, logoMaos } from 'assets';
 import { ErrorModal, VideoOutputModal, LoadingModal } from 'components';
 import paths from 'constants/paths';
@@ -22,8 +27,10 @@ import { MenuLayout } from 'layouts';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/video';
 
+// 4. Imports relativos ao diretório atual
 import { Strings } from './strings';
 
+// 5. Imports de Estilos
 import './styles.css';
 
 const RecorderArea = () => {
