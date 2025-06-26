@@ -12,4 +12,5 @@ export default {
   ONBOARDING: '/onboarding',
   SIGNALCAPTURE: '/signal-capture',
   CUSTOMIZATION: '/customization',
+  EMOTIONS: '/emotions',
 };

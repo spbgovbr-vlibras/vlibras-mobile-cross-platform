@@ -36,6 +36,9 @@ import { Strings } from './strings';
 
 import './styles.css';
 import IconDictionary2 from 'assets/icons/IconDictionary2';
+import IconEmotions from 'assets/icons/IconEmotions';
+import { PlayerKeys } from 'constants/player';
+import UnityService from 'services/unity';
 
 interface DrawerMenuProps {
   contentId: string;
@@ -70,21 +73,21 @@ function getColor(value: string, expected: string): string {
 }
 
 function DrawerMenu({ contentId }: DrawerMenuProps) {
-  const isLoadingAction = useSelector(
-    ({ loading }: RootState) => loading.isLoading
-  );
+  const isLoadingAction = useSelector(({ loading }: RootState) => loading.isLoading);
+  const isVideoScreen = useSelector(({ video }: RootState) => video.isVideoScreen);
+  const onboardingFirstAccess = useSelector(({ video }: RootState) => video.onboardingFirstAccess);
+  const domain = useSelector(({ video }: RootState) => video.domain);
+  const current = useSelector((state: RootState) => state.regionalism.current);
 
-  const isVideoScreen = useSelector(
-    ({ video }: RootState) => video.isVideoScreen
-  );
-
-  const onboardingFirstAccess = useSelector(
-    ({ video }: RootState) => video.onboardingFirstAccess
-  );
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
 
+  const [selectedEmotion, setSelectedEmotion] = useState<string>('Neutra');
+  const [openEmotionDropdown, setOpenEmotionDropdown] = useState<boolean>(false);
+
   const buttonMenu = useRef<any>(null);
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     if (isVideoScreen) {
@@ -94,30 +97,22 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     }
   }, [isVideoScreen]);
 
-  const location = useLocation();
-  const history = useHistory();
-
   function navLink(e: any, path: string) {
     if (e.target.className === 'drawer-menu-sub-item translator') {
       setOpenSelect(!openSelect);
     } else {
-      // eslint-disable-next-line no-lonely-if
       if (path === paths.HOME) {
         if (valueSelected === 'PT-BR') {
           history.push(paths.RECORDERAREA);
         } else {
           history.push(path);
         }
-        if (buttonMenu.current) {
-          buttonMenu.current.click();
-        }
+        if (buttonMenu.current) buttonMenu.current.click();
         menuController.close(Strings.MENU_ID);
         setOpenSelect(false);
       } else {
         history.push(path);
-        if (buttonMenu.current) {
-          buttonMenu.current.click();
-        }
+        if (buttonMenu.current) buttonMenu.current.click();
         menuController.close(Strings.MENU_ID);
       }
     }
@@ -132,14 +127,17 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     } else {
       history.push(paths.HOME);
     }
-    if (buttonMenu.current) {
-      buttonMenu.current.click();
-    }
+    if (buttonMenu.current) buttonMenu.current.click();
     menuController.close(Strings.MENU_ID);
   }
 
-  const domain = useSelector(({ video }: RootState) => video.domain);
-  const current = useSelector((state: RootState) => state.regionalism.current);
+  function applyEmotion(emotionKey: PlayerKeys) {
+    UnityService.getPlayerInstance().send(
+      PlayerKeys.EMOTION_BRIDGE,
+      emotionKey
+    );
+  }
+  
 
   const renderItemTab = (
     tab: string,
@@ -148,14 +146,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     selectable: boolean
   ) => (
     <IonItem
-      className={
-        selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU
-      }
+      className={selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU}
       detail={false}
-      onClick={(e) => navLink(e, tab)}>
-      <IconComponent
-        color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR}
-      />
+      onClick={(e) => {
+        if (title !== Strings.TITLE_MENU_EMOTIONS) navLink(e, tab);
+      }}>
+      <IconComponent color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR} />
       <span className="drawer-menu-item-label">{title}</span>
 
       {title === Strings.TITLE_MENU_TRANSLATOR && env.videoTranslator && (
@@ -166,26 +162,39 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             type="button">
             {valueSelected || 'Libras'}
           </button>
-          <div className="arrow-down"> </div>
+          <div className="arrow-down" />
         </>
       )}
       {title === Strings.TITLE_MENU_DOMAIN && (
         <>
-          <p className="drawer-menu-sub-item"> {domain} </p>
-          <div className="arrow-down"> </div>
+          <p className="drawer-menu-sub-item">{domain}</p>
+          <div className="arrow-down" />
         </>
       )}
       {title === Strings.TITLE_MENU_REGIONALISM && (
         <>
           <p className="drawer-menu-sub-item">{current.abbreviation}</p>
-          <div className="arrow-down"> </div>
+          <div className="arrow-down" />
+        </>
+      )}
+      {title === Strings.TITLE_MENU_EMOTIONS && (
+        <>
+          <p
+            className="drawer-menu-sub-item emotion-picker"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenEmotionDropdown(!openEmotionDropdown);
+            }}
+          >
+            {selectedEmotion}
+          </p>
+          <div className="arrow-down" />
         </>
       )}
     </IonItem>
   );
 
   return (
-    // <IonMenuToggle>
     <IonMenu side="start" menuId={Strings.MENU_ID} contentId={contentId}>
       <IonHeader className="drawer-menu-container" mode="ios">
         <div className="drawer-menu-header-logo">
@@ -198,21 +207,13 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         {openSelect && (
           <div className="dropdown-trans-picker">
             <button
-              className={
-                valueSelected === 'Libras' || valueSelected === ''
-                  ? 'option-trans selected'
-                  : 'option-trans'
-              }
+              className={valueSelected === 'Libras' || valueSelected === '' ? 'option-trans selected' : 'option-trans'}
               onClick={() => setValue('Libras')}
               type="button">
               Libras
             </button>
             <button
-              className={
-                valueSelected === 'PT-BR'
-                  ? 'option-trans selected'
-                  : 'option-trans'
-              }
+              className={valueSelected === 'PT-BR' ? 'option-trans selected' : 'option-trans'}
               onClick={() => setValue('PT-BR')}
               type="button">
               PT-BR
@@ -225,19 +226,8 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
               {Strings.HEADER_TITLE_SERVICES}
             </IonLabel>
           </IonListHeader>
-
-          {renderItemTab(
-            paths.HOME,
-            Strings.TITLE_MENU_TRANSLATOR,
-            IconTranslate,
-            true
-          )}
-          {renderItemTab(
-            paths.DICTIONARY,
-            Strings.TITLE_MENU_DICTIONARY,
-            IconDictionary2,
-            true
-          )}
+          {renderItemTab(paths.HOME, Strings.TITLE_MENU_TRANSLATOR, IconTranslate, true)}
+          {renderItemTab(paths.DICTIONARY, Strings.TITLE_MENU_DICTIONARY, IconDictionary2, true)}
         </IonList>
       </IonHeader>
       <div className="drawer-menu-divider" />
@@ -249,46 +239,63 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             </IonLabel>
           </IonListHeader>
           {isVideoScreen
-            ? renderItemTab(
-                paths.DOMAIN,
-                Strings.TITLE_MENU_DOMAIN,
-                IconDomain,
-                true
-              )
-            : renderItemTab(
-                paths.REGIONALISM,
-                Strings.TITLE_MENU_REGIONALISM,
-                IconRegionalism,
-                true
-              )}
-          {!isLoadingAction ? (
-            renderItemTab(
-              paths.CUSTOMIZATION,
-              Strings.TITLE_MENU_CUSTOMIZATION,
-              IconCustomization,
-              true
-            )
-          ) : (
-            <></>
-          )}
+            ? renderItemTab(paths.DOMAIN, Strings.TITLE_MENU_DOMAIN, IconDomain, true)
+            : renderItemTab(paths.REGIONALISM, Strings.TITLE_MENU_REGIONALISM, IconRegionalism, true)}
+          {!isLoadingAction &&
+            renderItemTab(paths.CUSTOMIZATION, Strings.TITLE_MENU_CUSTOMIZATION, IconCustomization, true)}
+          {renderItemTab(paths.EMOTIONS, Strings.TITLE_MENU_EMOTIONS, IconEmotions, true)}
         </IonList>
         <IonList lines="none">
-          {renderItemTab(
-            paths.TUTORIAL,
-            Strings.TITLE_MENU_TUTORIAL,
-            IconTutorial,
-            false
-          )}
-          {renderItemTab(
-            paths.ABOUT,
-            Strings.TITLE_MENU_ABOUT,
-            IconInfo,
-            false
-          )}
+          {renderItemTab(paths.TUTORIAL, Strings.TITLE_MENU_TUTORIAL, IconTutorial, false)}
+          {renderItemTab(paths.ABOUT, Strings.TITLE_MENU_ABOUT, IconInfo, false)}
         </IonList>
+        {openEmotionDropdown && (
+  <div className="dropdown-emotion-picker floating-emotion">
+    {['Neutra', 'Feliz', 'Triste'].map((emotion) => {
+      const icons: Record<string, string> = {
+        Neutra: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#0F449C"><path d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520Zm50 180h180q13 0 21.5-8.5T600-370q0-13-8.5-21.5T570-400H390q-13 0-21.5 8.5T360-370q0 13 8.5 21.5T390-340Zm90 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z"/></svg>`,
+        Feliz: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#0F449C"><path d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-100q58 0 107-28t79-76q6-12-1-24t-21-12H316q-14 0-21 12t-1 24q30 48 79.5 76T480-260Z"/></svg>`,
+        Triste: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#0f449c"><path d="M480-420q-54 0-101.5 23.5T302-328q-11 16-3 32t26 16q8 0 14.5-3.5T351-294q23-31 57-48.5t72-17.5q38 0 72 17.5t57 48.5q4 7 10.5 10.5T634-280q18 0 26-16.5t-3-33.5q-29-44-76.5-67T480-420Zm140-100q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z"/></svg>`
+      };
+
+      return (
+        <button
+          key={emotion}
+          className={`emotion-option ${selectedEmotion === emotion ? 'selected' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedEmotion(emotion);
+            setOpenEmotionDropdown(false);
+
+            switch (emotion) {
+              case 'Neutra':
+                applyEmotion(PlayerKeys.APPLY_DEFAULT_EMOTION);
+                break;
+              case 'Feliz':
+                applyEmotion(PlayerKeys.APPLY_HAPPY_EMOTION);
+                break;
+              case 'Triste':
+                applyEmotion(PlayerKeys.APPLY_SAD_EMOTION);
+                break;
+            }
+          }}
+        >
+          {icons[emotion] && (
+            <span
+              dangerouslySetInnerHTML={{ __html: icons[emotion] }}
+              style={{ marginRight: 8 }}
+            />
+          )}
+          {emotion}
+        </button>
+      );
+    })}
+  </div>
+)}
+
+
       </div>
     </IonMenu>
-    // </IonMenuToggle>
   );
 }
 
