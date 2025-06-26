@@ -83,9 +83,9 @@ function Dictionary() {
   }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
+    if (text === '%') text = '%25';
     setTextGloss(text, true);
     history.replace(paths.HOME);
-    if (text === '%') text = '%25';
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
