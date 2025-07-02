@@ -1,9 +1,9 @@
 {
 "companyName": "Vlibras",
 "productName": "Vlibras",
-"dataUrl": "10-06-2025 [SEM TRANSPARÊNCIA].data.unityweb",
-"wasmCodeUrl": "10-06-2025 [SEM TRANSPARÊNCIA].wasm.code.unityweb",
-"wasmFrameworkUrl": "10-06-2025 [SEM TRANSPARÊNCIA].wasm.framework.unityweb",
+"dataUrl": "29-06-2025 [SEM TRANSPARÊNCIA].data.unityweb",
+"wasmCodeUrl": "29-06-2025 [SEM TRANSPARÊNCIA].wasm.code.unityweb",
+"wasmFrameworkUrl": "29-06-2025 [SEM TRANSPARÊNCIA].wasm.framework.unityweb",
 "TOTAL_MEMORY": 268435456,
 "graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
 "webglContextAttributes": {"preserveDrawingBuffer": false},
