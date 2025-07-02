@@ -14,4 +14,9 @@ export enum PlayerKeys {
   CUSTOMIZATION_BRIDGE = 'CustomizationBridge',
   APPLY_JSON = 'ApplyJSON',
   PLAY_WELCOME = 'playWellcome',
+  EMOTION_BRIDGE = 'EmotionBridge',
+  APPLY_DEFAULT_EMOTION = 'ApplyDefaultEmotion',
+  APPLY_HAPPY_EMOTION = 'ApplyHappyEmotion',
+  APPLY_SAD_EMOTION = 'ApplySadEmotion',
+  APPLY_DOUBT_EMOTION = 'ApplyDoubtEmotion',
 }

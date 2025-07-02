@@ -1,9 +1,12 @@
+/* eslint-disable no-trailing-spaces */
+/* eslint-disable import/order */
 import { IonText, IonTextarea, IonContent } from '@ionic/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
+import ErrorModal from 'components/ErrorModal';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { regex } from 'constants/types';
@@ -15,7 +18,6 @@ import { Creators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
-
 import './styles.css';
 
 const playerService = PlayerService.getPlayerInstance();
@@ -30,12 +32,19 @@ const Translator = () => {
 
   const { setTextPtBr } = useTranslation();
 
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
   async function translate() {
     const formatted = translatorText.trim();
 
-    const today = new Date().toLocaleDateString('pt-BR');
+    if (formatted === '') {
+      setShowErrorModal(true);
+      return;
+    }
 
+    const today = new Date().toLocaleDateString('pt-BR');
     reloadHistory(today, formatted, 'text');
+
     const gloss = (await setTextPtBr(formatted, false)).toString();
 
     history.replace(paths.HOME);
@@ -54,7 +63,6 @@ const Translator = () => {
             <div className="translator-input-box">
               <IonTextarea
                 className="translator-textarea"
-                //  placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 rows={5}
                 cols={5}
                 wrap="soft"
@@ -67,9 +75,7 @@ const Translator = () => {
               {translatorText.length > 0 && !regex.test(translatorText) && (
                 <IonText color="danger">
                   <p className="ion-padding-start">
-                    {
-                      'Entrada inválida. Insira pelo menos um caractere alfanumérico (letra ou número).'
-                    }
+                    Entrada inválida. Insira pelo menos um caractere alfanumérico (letra ou número).
                   </p>
                 </IonText>
               )}
@@ -79,16 +85,18 @@ const Translator = () => {
             <button
               className="translator-button-save"
               onClick={translate}
-              type="button"
-              disabled={
-                translatorText.trim().length === 0 ||
-                !regex.test(translatorText)
-              }>
+              type="button">
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
           </div>
         </div>
+
+        <ErrorModal
+          show={showErrorModal}
+          errorMsg="Erro ao tentar traduzir: caixa de texto vazia."
+          setShow={setShowErrorModal}
+        />
       </IonContent>
     </MenuLayout>
   );
