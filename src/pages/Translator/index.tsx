@@ -33,6 +33,7 @@ const Translator = () => {
   const { setTextPtBr } = useTranslation();
 
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   async function translate() {
     const formatted = translatorText.trim();
@@ -51,6 +52,10 @@ const Translator = () => {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
     dispatch(Creators.setTranslatorText(formatted));
   }
+
+  const handleMicClick = () => {
+    history.push(paths.HOME + '?live=1');
+  };
 
   return (
     <MenuLayout title={Strings.TRANSLATOR_TITLE} mode="back">
@@ -81,13 +86,24 @@ const Translator = () => {
               )}
             </div>
           </div>
-          <div className="translator-item-button-save">
+          <div className="translator-item-button-save" style={{ display: 'flex', gap: 8 }}>
             <button
               className="translator-button-save"
               onClick={translate}
-              type="button">
+              type="button"
+              style={{ height: 48, minWidth: 120 }}
+            >
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
+            </button>
+            <button
+              className="translator-button-save"
+              onClick={handleMicClick}
+              type="button"
+              aria-label="Falar para traduzir"
+              style={{ height: 48, minWidth: 48, fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              🎤
             </button>
           </div>
         </div>

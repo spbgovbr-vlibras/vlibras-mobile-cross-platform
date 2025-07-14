@@ -60,6 +60,7 @@ import { Strings } from './Strings';
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import IconHand from 'assets/icons/IconHand';
+import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -375,9 +376,9 @@ function Player() {
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
-  const [submittedRevision, setSubmittedRevision] = useState(false);
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
+  const [submittedRevision, setSubmittedRevision] = useState(false);
 
   useOnPlayingStateChangeHandler(
     (
@@ -498,7 +499,116 @@ function Player() {
     setIsShowSubtitle(!isShowSubtitle);
   }
 
+  const [isLiveListening, setIsLiveListening] = useState(false);
+
+  // Refs para controlar o estado da gravação de forma segura
+  const recognitionRef = useRef<any>(null);
+  const speechBufferRef = useRef<string>('');
+  const isLiveActiveRef = useRef<boolean>(false);
+
+  // Inicia o modo live quando o parâmetro 'live=1' está na URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('live') === '1') {
+      // Remove o parâmetro da URL para não reativar ao recarregar
+      history.replace(paths.HOME);
+      startLiveRecognition();
+    }
+  }, [location.search]);
+
+  // Função para iniciar o reconhecimento de voz
+  function startLiveRecognition() {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Reconhecimento de voz não suportado neste navegador.');
+      return;
+    }
+
+    // Previne múltiplas instâncias
+    if (recognitionRef.current) {
+      return;
+    }
+
+    isLiveActiveRef.current = true;
+    speechBufferRef.current = ''; // Limpa o buffer ao iniciar
+    setIsLiveListening(true);
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = true; // Continua escutando mesmo com pausas
+    recognition.interimResults = true; // Pega resultados parciais
+
+    recognitionRef.current = recognition;
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+
+      if (finalTranscript && isLiveActiveRef.current) {
+        speechBufferRef.current += finalTranscript;
+        playerService.send(
+          PlayerKeys.PLAYER_MANAGER,
+          PlayerKeys.PLAY_NOW,
+          speechBufferRef.current.trim(),
+        );
+      }
+    };
+
+    recognition.onend = () => {
+      // Se o modo live ainda deve estar ativo, reinicia a gravação
+      if (isLiveActiveRef.current) {
+        recognitionRef.current?.start();
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Erro no reconhecimento de voz:', event.error);
+      stopLiveRecognition();
+    };
+
+    recognition.start();
+  }
+
+  // Função para parar o reconhecimento de voz
+  function stopLiveRecognition() {
+    isLiveActiveRef.current = false;
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = null; // Desabilita o reinício automático
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    speechBufferRef.current = ''; // Limpa o buffer
+    setIsLiveListening(false);
+    handleStop(); // Reseta o estado do player e volta para a home
+  }
+
+  function handleTranslateLive(text: string) {
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
+  }
+
   const renderPlayerButtons = () => {
+    // Se estiver no modo live, o botão central para a gravação
+    if (isLiveListening) {
+      return (
+        <>
+          <div /> {/* Placeholder para manter o espaçamento */}
+          <button
+            className="player-button-center-live"
+            onClick={stopLiveRecognition}>
+            <LiveWaveIcon />
+          </button>
+          <div /> {/* Placeholder para manter o espaçamento */}
+        </>
+      );
+    }
+
+    // Lógica padrão dos botões
     if (isPlaying) {
       return (
         <>
@@ -867,6 +977,163 @@ function Player() {
     );
   };
 
+  const renderPlayerButtonsContainer = () => {
+    // Durante o modo live, não renderiza nenhum botão no canto superior
+    if (isLiveListening) {
+      return null;
+    }
+
+    if (
+      isPlaying ||
+      hasFinished ||
+      (currentStep >= HomeTutorialSteps.CLOSE &&
+        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED)
+    ) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <div
+            style={{
+              position: 'absolute',
+              padding: '8px',
+              display: 'flex',
+              right: 10,
+              top: 0,
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              zIndex: 2,
+            }}>
+            <TutorialPopover
+              title="Fechar"
+              context="home"
+              description="Feche tradução e volte à tela anterior."
+              position="rt"
+              isEnabled={currentStep === HomeTutorialSteps.CLOSE}
+            />
+          </div>
+
+          <div>
+            {currentStep === HomeTutorialSteps.CLOSE && (
+              <div
+                className="highligth"
+                style={{
+                  position: 'absolute',
+                  display: 'flex',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  border: '1px solid white',
+                  boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+                  zIndex: 1,
+                }}></div>
+            )}
+            <button
+              style={{ marginBottom: 0 }}
+              disabled={
+                currentStep >= HomeTutorialSteps.CLOSE &&
+                currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
+              }
+              className="player-button-rounded"
+              type="button"
+              onClick={handleStop}>
+              <IconClose color="#FFF" size={24} />
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <div
+          style={{
+            position: 'absolute',
+            padding: '8px',
+            right: 15,
+            top: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            zIndex: 2,
+          }}>
+          <TutorialPopover
+            title="Trocar avatar"
+            context="home"
+            description="Escolha qual avatar interpretará os sinais em LIBRAS."
+            position="rc"
+            isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            padding: '8px',
+            right: 15,
+            top: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            zIndex: 2,
+          }}>
+          <TutorialPopover
+            title="Central de ajuda"
+            context="home"
+            description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+            position="rt"
+            isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
+          />
+        </div>
+        {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              bottom: '16px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              border: '1px solid white',
+              boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+            }}></div>
+        )}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'fit-content',
+          }}>
+          {currentStep === HomeTutorialSteps.TUTORIAL && (
+            <div
+              style={{
+                marginTop: 'auto',
+                position: 'absolute',
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                border: '1px solid white',
+                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+              }}></div>
+          )}
+          <>
+            <button
+              disabled={currentStep !== HomeTutorialSteps.IDLE}
+              className="player-button-tutorial-rounded-top"
+              type="button"
+              onClick={goNextStep}>
+              <IconTutorial color="black" size={44} />
+            </button>
+          </>
+          <button
+            className="player-button-avatar-rounded-top"
+            type="button"
+            onClick={handleChangeAvatar}>
+            {currentAvatar === 'icaro' && <HozanaAvatar />}
+            {currentAvatar === 'hozana' && <GugaAvatar />}
+            {currentAvatar === 'guga' && <IcaroAvatar />}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const customizedAvatar = updateAvatarCustomizationProperties({
       avatar: currentAvatar,
@@ -957,150 +1224,7 @@ function Player() {
         </div>
       </IonPopover>
       <div className="player-container-button">
-        {isPlaying ||
-        hasFinished ||
-        (currentStep >= HomeTutorialSteps.CLOSE &&
-          currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) ? (
-          <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                display: 'flex',
-                right: 10,
-                top: 0,
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Fechar"
-                context="home"
-                description="Feche tradução e volte à tela anterior."
-                position="rt"
-                isEnabled={currentStep === HomeTutorialSteps.CLOSE}
-              />
-            </div>
-
-            <div>
-              {currentStep === HomeTutorialSteps.CLOSE && (
-                <div
-                  className="highligth"
-                  style={{
-                    position: 'absolute',
-                    display: 'flex',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                    zIndex: 1,
-                  }}></div>
-              )}
-              <button
-                style={{ marginBottom: 0 }}
-                disabled={
-                  currentStep >= HomeTutorialSteps.CLOSE &&
-                  currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
-                }
-                className="player-button-rounded"
-                type="button"
-                onClick={handleStop}>
-                <IconClose color="#FFF" size={24} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                right: 15,
-                top: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Trocar avatar"
-                context="home"
-                description="Escolha qual avatar interpretará os sinais em LIBRAS."
-                position="rc"
-                isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
-              />
-            </div>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                right: 15,
-                top: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Central de ajuda"
-                context="home"
-                description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
-                position="rt"
-                isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
-              />
-            </div>
-            {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
-              <div
-                style={{
-                  position: 'absolute',
-                  display: 'flex',
-                  bottom: '16px',
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  border: '1px solid white',
-                  boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                }}></div>
-            )}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: 'fit-content',
-              }}>
-              {currentStep === HomeTutorialSteps.TUTORIAL && (
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    position: 'absolute',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                  }}></div>
-              )}
-              <>
-                <button
-                  disabled={currentStep !== HomeTutorialSteps.IDLE}
-                  className="player-button-tutorial-rounded-top"
-                  type="button"
-                  onClick={goNextStep}>
-                  <IconTutorial color="black" size={44} />
-                </button>
-              </>
-              <button
-                className="player-button-avatar-rounded-top"
-                type="button"
-                onClick={handleChangeAvatar}>
-                {currentAvatar === 'icaro' && <HozanaAvatar />}
-                {currentAvatar === 'hozana' && <GugaAvatar />}
-                {currentAvatar === 'guga' && <IcaroAvatar />}
-              </button>
-            </div>
-          </div>
-        )}
+        {renderPlayerButtonsContainer()}
       </div>
       <div
         style={{
@@ -1123,19 +1247,6 @@ function Player() {
         currentStep !== HomeTutorialSteps.INITIAL) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
-          {currentStep === HomeTutorialSteps.LIKED_TRANSLATION && (
-            <div
-              style={{
-                position: 'absolute',
-                display: 'flex',
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                border: '1px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                zIndex: 1,
-              }}></div>
-          )}
           <div
             style={{
               top: -54,
@@ -1176,20 +1287,6 @@ function Player() {
               isEnabled={currentStep === HomeTutorialSteps.SHARE}
             />
           </div>
-          {currentStep === HomeTutorialSteps.SHARE && (
-            <div
-              style={{
-                position: 'absolute',
-                display: 'flex',
-                bottom: '16px',
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                border: '1px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                zIndex: 1,
-              }}></div>
-          )}
           <button
             style={{ marginBottom: 0 }}
             disabled={
@@ -1262,6 +1359,15 @@ function Player() {
             </button>
           </div>
         </div>
+      )}
+      {isLiveListening && (
+        <button
+          onClick={stopLiveRecognition}
+          style={{position: 'fixed', top: 20, right: 20, zIndex: 10000, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
+          aria-label="Fechar modo live"
+        >
+          ×
+        </button>
       )}
     </div>
   );
