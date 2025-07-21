@@ -543,15 +543,18 @@ function Player() {
     recognitionRef.current = recognition;
 
     recognition.onresult = (event: any) => {
+      let interimTranscript = '';
       let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
+          finalTranscript = event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
 
       if (finalTranscript && isLiveActiveRef.current) {
-        speechBufferRef.current += finalTranscript;
+        speechBufferRef.current = finalTranscript;
         playerService.send(
           PlayerKeys.PLAYER_MANAGER,
           PlayerKeys.PLAY_NOW,
