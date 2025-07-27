@@ -113,6 +113,18 @@ function Player() {
   const [isInBackground, setIsInBackground] = useState(false);
   const [shouldUnPauseOnForeground, setShouldUnPauseOnForeground] =
     useState(false);
+  const [isLiveListening, setIsLiveListening] = useState(false);
+
+  // --- Start of Live Translation Refs ---
+  const recognitionRef = useRef<any>(null);
+  const isLiveActiveRef = useRef<boolean>(false);
+  const translationQueueRef = useRef<string[]>([]);
+  const speechBufferRef = useRef<string>(''); // Buffer Contínuo
+  const lastSentIndexRef = useRef<number>(0); // O Marcador de Progresso
+  const chunkingIntervalRef = useRef<NodeJS.Timeout | null>(null); // Para o ciclo de 3s
+  const isPlayerBusyRef = useRef<boolean>(false);
+  const lastPlayedTextRef = useRef<string>(''); // Trava Anti-Repetição
+  // --- End of Live Translation Refs ---
 
   const history = useHistory();
   history.listen(() => {
@@ -128,7 +140,6 @@ function Player() {
   const { textGloss } = useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
-  // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
@@ -195,7 +206,6 @@ function Player() {
     };
   };
 
-  // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   const initRecorder = async () => {
     const platform = (await info).platform;
     const mimeType = ['android', 'web'].includes(platform)
@@ -218,8 +228,6 @@ function Player() {
     }
   };
 
-  // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
-  // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
   const checkBlob = (count: number, id: string) => {
     setTimeout(async () => {
       if (count === 0 || !isLoading) {
@@ -257,8 +265,6 @@ function Player() {
     }, 1000);
   };
 
-  // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
-  // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
   const initVideoSharing = async () => {
     isLoading = true;
     if ((await info).platform === 'android') {
@@ -314,11 +320,8 @@ function Player() {
 
   useEffect(() => {
     const handleAppStateChange: StateChangeListener = ({ isActive }) => {
-      // isActive is true if the app is in the foreground, and false if in background
       setIsInBackground(!isActive);
     };
-
-    // Add the app state change listener
     App.addListener('appStateChange', handleAppStateChange);
   }, []);
 
@@ -349,6 +352,16 @@ function Player() {
     });
   }, [dispatch]);
 
+  // Adicionando de volta o "porteiro" que inicia o modo ao vivo
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('live') === '1') {
+      // Remove o parâmetro da URL para não reativar ao recarregar
+      history.replace(paths.HOME);
+      startLiveRecognition();
+    }
+  }, [location.search, history]); // Adicionei history como dependência
+
   useEffect(() => {
     if (visiblePlayer) {
       dispatch(Creators.loadCustomization.request(currentAvatar));
@@ -371,7 +384,6 @@ function Player() {
     setHasFinished(false);
   }
 
-  // Evaluation modal
   const [showModal, setShowModal] = useState(false);
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
@@ -380,32 +392,178 @@ function Player() {
     useState(false);
   const [submittedRevision, setSubmittedRevision] = useState(false);
 
+  // --- Start of Live Translation Logic ---
+
+  // O Gerente da Fila, agora usando o Semáforo
+  const processTranslationQueue = useCallback(() => {
+    // 1. Verifica o semáforo e a fila.
+    if (isPlayerBusyRef.current || translationQueueRef.current.length === 0) {
+      return;
+    }
+
+    // 2. Imediatamente fecha o semáforo para vermelho.
+    isPlayerBusyRef.current = true;
+
+    // 3. Envia o próximo item para tradução.
+    const textToPlay = translationQueueRef.current.shift();
+
+    // Trava Anti-Repetição: Não executa se o texto for nulo ou igual ao último.
+    if (!textToPlay || textToPlay === lastPlayedTextRef.current) {
+      // Se ignorarmos, temos que garantir que o próximo item seja processado.
+      isPlayerBusyRef.current = false;
+      processTranslationQueue(); // Tenta o próximo da fila.
+      return;
+    }
+
+    isPlayerBusyRef.current = true;
+    lastPlayedTextRef.current = textToPlay; // Armazena o texto que será executado.
+    if (textToPlay) {
+      playerService.send(
+        PlayerKeys.PLAYER_MANAGER,
+        PlayerKeys.PLAY_NOW,
+        textToPlay
+      );
+    } else {
+      // Se por acaso o item for inválido, abre o semáforo novamente.
+      isPlayerBusyRef.current = false;
+    }
+  }, []); // Não depende mais de 'isPlaying', é uma função estável.
+
+  // Hook que ouve o avatar e controla o semáforo
   useOnPlayingStateChangeHandler(
     (
-      isPlaying: boolean,
+      newIsPlaying: boolean,
       isPaused: boolean,
       _isPlayingIntervalAnimation: boolean,
       _isLoading: boolean,
       _isRepeatable: boolean
     ) => {
-      if (isPlaying && recording === false) {
+      // Atualiza o estado visual do player
+      setIsPlaying(newIsPlaying);
+      setIsPaused(isPaused);
+
+      isPlayerBusyRef.current = newIsPlaying; // O estado do semáforo espelha o do player
+
+      if (wasPlaying.current && !newIsPlaying) {
+        setHasFinished(true);
+        // O Avatar terminou! Abre o semáforo e chama o gerente.
+        isPlayerBusyRef.current = false;
+        // Adiciona um "respiro" de 100ms para o Avatar antes de processar o próximo.
+        setTimeout(() => {
+          processTranslationQueue();
+        }, 100);
+      }
+      
+      wasPlaying.current = newIsPlaying;
+
+      // Código de gravação de vídeo (não relacionado à fila)
+      if (newIsPlaying && recording === false) {
         initRecorder();
         recording = true;
       }
-
-      if (wasPlaying.current && !isPlaying) {
-        setHasFinished(true);
-      }
-      if (!isPlaying && recording === true) {
+      if (!newIsPlaying && recording === true) {
         mediaRecorder.stop();
         recording = false;
       }
-      setIsPlaying(isPlaying);
-      setIsPaused(isPaused);
-      wasPlaying.current = isPlaying;
     },
-    [setIsPlaying, setIsPaused, currentAvatar]
+    [processTranslationQueue]
   );
+
+  function startLiveRecognition() {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Reconhecimento de voz não suportado neste navegador.');
+      return;
+    }
+
+    if (recognitionRef.current) {
+      return;
+    }
+
+    isLiveActiveRef.current = true;
+    translationQueueRef.current = [];
+    speechBufferRef.current = ''; // Zera o buffer
+    lastSentIndexRef.current = 0; // Zera o marcador
+    isPlayerBusyRef.current = false;
+    lastPlayedTextRef.current = '';
+    setIsLiveListening(true);
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognitionRef.current = recognition;
+
+    // A única tarefa do onresult é atualizar o buffer com a fala completa.
+    recognition.onresult = (event: any) => {
+      let currentTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        currentTranscript += event.results[i][0].transcript;
+      }
+      speechBufferRef.current = currentTranscript;
+    };
+
+    recognition.onend = () => {
+      if (isLiveActiveRef.current) {
+        recognitionRef.current?.start();
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Erro no reconhecimento de voz:', event.error);
+      stopLiveRecognition();
+    };
+
+    // Limpa qualquer ciclo anterior e inicia o novo.
+    if (chunkingIntervalRef.current) {
+      clearInterval(chunkingIntervalRef.current);
+    }
+    chunkingIntervalRef.current = setInterval(() => {
+      if (!isLiveActiveRef.current) return;
+
+      const fullText = speechBufferRef.current;
+      const lastIndex = lastSentIndexRef.current;
+
+      // Se houver texto novo DEPOIS do marcador...
+      if (fullText.length > lastIndex) {
+        // ...pega apenas o trecho novo.
+        const newChunk = fullText.substring(lastIndex).trim();
+        if (newChunk) {
+          translationQueueRef.current.push(newChunk);
+          // E avança o marcador para a posição atual.
+          lastSentIndexRef.current = fullText.length;
+          processTranslationQueue();
+        }
+      }
+    }, 4000);
+
+    recognition.start();
+  }
+
+  function stopLiveRecognition() {
+    isLiveActiveRef.current = false;
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = null;
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+
+    if (chunkingIntervalRef.current) {
+      clearInterval(chunkingIntervalRef.current);
+    }
+    
+    translationQueueRef.current = [];
+    speechBufferRef.current = '';
+    lastSentIndexRef.current = 0; // Reseta o marcador
+    isPlayerBusyRef.current = false;
+    lastPlayedTextRef.current = '';
+    setIsLiveListening(false);
+    handleStop();
+  }
+  // --- End of Live Translation Logic ---
 
   function resetTranslation() {
     setHasFinished(false);
@@ -497,98 +655,6 @@ function Player() {
       toInteger(!isShowSubtitle)
     );
     setIsShowSubtitle(!isShowSubtitle);
-  }
-
-  const [isLiveListening, setIsLiveListening] = useState(false);
-
-  // Refs para controlar o estado da gravação de forma segura
-  const recognitionRef = useRef<any>(null);
-  const speechBufferRef = useRef<string>('');
-  const isLiveActiveRef = useRef<boolean>(false);
-
-  // Inicia o modo live quando o parâmetro 'live=1' está na URL
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('live') === '1') {
-      // Remove o parâmetro da URL para não reativar ao recarregar
-      history.replace(paths.HOME);
-      startLiveRecognition();
-    }
-  }, [location.search]);
-
-  // Função para iniciar o reconhecimento de voz
-  function startLiveRecognition() {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Reconhecimento de voz não suportado neste navegador.');
-      return;
-    }
-
-    // Previne múltiplas instâncias
-    if (recognitionRef.current) {
-      return;
-    }
-
-    isLiveActiveRef.current = true;
-    speechBufferRef.current = ''; // Limpa o buffer ao iniciar
-    setIsLiveListening(true);
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'pt-BR';
-    recognition.continuous = true; // Continua escutando mesmo com pausas
-    recognition.interimResults = true; // Pega resultados parciais
-
-    recognitionRef.current = recognition;
-
-    recognition.onresult = (event: any) => {
-      let interimTranscript = '';
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript = event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-
-      if (finalTranscript && isLiveActiveRef.current) {
-        speechBufferRef.current = finalTranscript;
-        playerService.send(
-          PlayerKeys.PLAYER_MANAGER,
-          PlayerKeys.PLAY_NOW,
-          speechBufferRef.current.trim(),
-        );
-      }
-    };
-
-    recognition.onend = () => {
-      // Se o modo live ainda deve estar ativo, reinicia a gravação
-      if (isLiveActiveRef.current) {
-        recognitionRef.current?.start();
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error('Erro no reconhecimento de voz:', event.error);
-      stopLiveRecognition();
-    };
-
-    recognition.start();
-  }
-
-  // Função para parar o reconhecimento de voz
-  function stopLiveRecognition() {
-    isLiveActiveRef.current = false;
-    if (recognitionRef.current) {
-      recognitionRef.current.onend = null; // Desabilita o reinício automático
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
-    }
-    speechBufferRef.current = ''; // Limpa o buffer
-    setIsLiveListening(false);
-    handleStop(); // Reseta o estado do player e volta para a home
   }
 
   function handleTranslateLive(text: string) {
