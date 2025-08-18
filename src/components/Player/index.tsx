@@ -137,7 +137,7 @@ function Player() {
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
   } = useHomeTutorial();
-  const { textGloss } = useTranslation();
+  const { textGloss, setTextPtBr } = useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -395,39 +395,44 @@ function Player() {
   // --- Start of Live Translation Logic ---
 
   // O Gerente da Fila, agora usando o Semáforo
-  const processTranslationQueue = useCallback(() => {
-    // 1. Verifica o semáforo e a fila.
-    if (isPlayerBusyRef.current || translationQueueRef.current.length === 0) {
-      return;
-    }
+  const processTranslationQueue = useCallback(
+    async () => {
+      // 1. Verifica o semáforo e a fila.
+      if (isPlayerBusyRef.current || translationQueueRef.current.length === 0) {
+        return;
+      }
 
-    // 2. Imediatamente fecha o semáforo para vermelho.
-    isPlayerBusyRef.current = true;
+      // 2. Imediatamente fecha o semáforo para vermelho.
+      isPlayerBusyRef.current = true;
 
-    // 3. Envia o próximo item para tradução.
-    const textToPlay = translationQueueRef.current.shift();
+      // 3. Envia o próximo item para tradução.
+      const textToPlay = translationQueueRef.current.shift();
 
-    // Trava Anti-Repetição: Não executa se o texto for nulo ou igual ao último.
-    if (!textToPlay || textToPlay === lastPlayedTextRef.current) {
-      // Se ignorarmos, temos que garantir que o próximo item seja processado.
-      isPlayerBusyRef.current = false;
-      processTranslationQueue(); // Tenta o próximo da fila.
-      return;
-    }
+      // Trava Anti-Repetição: Não executa se o texto for nulo ou igual ao último.
+      if (!textToPlay || textToPlay === lastPlayedTextRef.current) {
+        // Se ignorarmos, temos que garantir que o próximo item seja processado.
+        isPlayerBusyRef.current = false;
+        processTranslationQueue(); // Tenta o próximo da fila.
+        return;
+      }
 
-    isPlayerBusyRef.current = true;
-    lastPlayedTextRef.current = textToPlay; // Armazena o texto que será executado.
-    if (textToPlay) {
-      playerService.send(
-        PlayerKeys.PLAYER_MANAGER,
-        PlayerKeys.PLAY_NOW,
-        textToPlay
-      );
-    } else {
-      // Se por acaso o item for inválido, abre o semáforo novamente.
-      isPlayerBusyRef.current = false;
-    }
-  }, []); // Não depende mais de 'isPlaying', é uma função estável.
+      isPlayerBusyRef.current = true;
+      lastPlayedTextRef.current = textToPlay; // Armazena o texto que será executado.
+      if (textToPlay) {
+        const gloss = (await setTextPtBr(textToPlay, false, false)).toString();
+
+        playerService.send(
+          PlayerKeys.PLAYER_MANAGER,
+          PlayerKeys.PLAY_NOW,
+          gloss
+        );
+      } else {
+        // Se por acaso o item for inválido, abre o semáforo novamente.
+        isPlayerBusyRef.current = false;
+      }
+    },
+    [setTextPtBr]
+  ); // Não depende mais de 'isPlaying', é uma função estável.
 
   // Hook que ouve o avatar e controla o semáforo
   useOnPlayingStateChangeHandler(
@@ -508,11 +513,24 @@ function Player() {
 
     recognition.onend = () => {
       if (isLiveActiveRef.current) {
-        recognitionRef.current?.start();
+        // Adiciona um pequeno delay para evitar reinicializações muito rápidas
+        // que podem ser bloqueadas pelo navegador ou causar um loop de erros.
+        setTimeout(() => {
+          // Garante que a referência ainda existe caso o usuário tenha parado manualmente.
+          if (isLiveActiveRef.current && recognitionRef.current) {
+            recognitionRef.current.start();
+          }
+        }, 250);
       }
     };
 
     recognition.onerror = (event: any) => {
+      // O erro 'no-speech' é comum e esperado quando o usuário faz uma pausa.
+      // Apenas o ignoramos e deixamos o 'onend' reiniciar o reconhecimento.
+      if (event.error === 'no-speech') {
+        return;
+      }
+      // Para outros erros, logamos e paramos.
       console.error('Erro no reconhecimento de voz:', event.error);
       stopLiveRecognition();
     };
@@ -538,7 +556,7 @@ function Player() {
           processTranslationQueue();
         }
       }
-    }, 4000);
+    }, 1500);
 
     recognition.start();
   }
