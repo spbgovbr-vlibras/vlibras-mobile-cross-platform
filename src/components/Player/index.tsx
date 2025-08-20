@@ -1450,7 +1450,7 @@ function Player() {
       {isLiveListening && (
         <button
           onClick={stopLiveRecognition}
-          style={{position: 'fixed', top: 20, right: 20, zIndex: 10000, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
+          style={{position: 'fixed', top: 60, right: 20, zIndex: 10000, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
           aria-label="Fechar modo live"
         >
           ×
