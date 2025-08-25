@@ -60,6 +60,7 @@ import { Strings } from './Strings';
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import IconHand from 'assets/icons/IconHand';
+import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -115,6 +116,18 @@ function Player() {
   const [isInBackground, setIsInBackground] = useState(false);
   const [shouldUnPauseOnForeground, setShouldUnPauseOnForeground] =
     useState(false);
+  const [isLiveListening, setIsLiveListening] = useState(false);
+
+  // --- Start of Live Translation Refs ---
+  const recognitionRef = useRef<any>(null);
+  const isLiveActiveRef = useRef<boolean>(false);
+  const translationQueueRef = useRef<string[]>([]);
+  const speechBufferRef = useRef<string>(''); // Buffer Contínuo
+  const lastSentIndexRef = useRef<number>(0); // O Marcador de Progresso
+  const chunkingIntervalRef = useRef<NodeJS.Timeout | null>(null); // Para o ciclo de 3s
+  const isPlayerBusyRef = useRef<boolean>(false);
+  const lastPlayedTextRef = useRef<string>(''); // Trava Anti-Repetição
+  // --- End of Live Translation Refs ---
 
   const history = useHistory();
   history.listen(() => {
@@ -127,10 +140,9 @@ function Player() {
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
   } = useHomeTutorial();
-  const { textGloss } = useTranslation();
+  const { textGloss, setTextPtBr } = useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
-  // Reference to handle the progress bar [MA]
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
 
@@ -197,7 +209,6 @@ function Player() {
     };
   };
 
-  // INCIA A GRAVAÇÃO DO VIDEO E SALVA EM FORMATO "WEBM".
   const initRecorder = async () => {
     const platform = (await info).platform;
     const mimeType = ['android', 'web'].includes(platform)
@@ -220,8 +231,6 @@ function Player() {
     }
   };
 
-  // FUNÇÃO RECURSIRVA QUE VERIFICA SE O BLOB ESTÁ CONVERTIDO PARA "MP4"
-  // E FAZ CHAMADA NO SERVIDOR PARA PEGAR O VIDEO E COMPARTILHAR.
   const checkBlob = (count: number, id: string) => {
     setTimeout(async () => {
       if (count === 0 || !isLoading) {
@@ -259,8 +268,6 @@ function Player() {
     }, 1000);
   };
 
-  // STOPA/PARA A GRAVAÇÃO DO VIDEO E VERIFICA QUAL É O SISTEMA OPERACIONAL,
-  // SE FOR ANDROID, ENVIA O ARQUVIO "WEBM" PARA O SERVIDOR PARA SER CONVERTIDO.
   const initVideoSharing = async () => {
     isLoading = true;
     if ((await info).platform === 'android') {
@@ -316,11 +323,8 @@ function Player() {
 
   useEffect(() => {
     const handleAppStateChange: StateChangeListener = ({ isActive }) => {
-      // isActive is true if the app is in the foreground, and false if in background
       setIsInBackground(!isActive);
     };
-
-    // Add the app state change listener
     App.addListener('appStateChange', handleAppStateChange);
   }, []);
 
@@ -351,6 +355,16 @@ function Player() {
     });
   }, [dispatch]);
 
+  // Adicionando de volta o "porteiro" que inicia o modo ao vivo
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('live') === '1') {
+      // Remove o parâmetro da URL para não reativar ao recarregar
+      history.replace(paths.HOME);
+      startLiveRecognition();
+    }
+  }, [location.search, history]); // Adicionei history como dependência
+
   useEffect(() => {
     if (visiblePlayer) {
       dispatch(Creators.loadCustomization.request(currentAvatar));
@@ -373,41 +387,204 @@ function Player() {
     setHasFinished(false);
   }
 
-  // Evaluation modal
   const [showModal, setShowModal] = useState(false);
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
-  const [submittedRevision, setSubmittedRevision] = useState(false);
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
+  const [submittedRevision, setSubmittedRevision] = useState(false);
 
+  // --- Start of Live Translation Logic ---
+
+  // O Gerente da Fila, agora usando o Semáforo
+  const processTranslationQueue = useCallback(
+    async () => {
+      // 1. Verifica o semáforo e a fila.
+      if (isPlayerBusyRef.current || translationQueueRef.current.length === 0) {
+        return;
+      }
+
+      // 2. Imediatamente fecha o semáforo para vermelho.
+      isPlayerBusyRef.current = true;
+
+      // 3. Envia o próximo item para tradução.
+      const textToPlay = translationQueueRef.current.shift();
+
+      // Trava Anti-Repetição: Não executa se o texto for nulo ou igual ao último.
+      if (!textToPlay || textToPlay === lastPlayedTextRef.current) {
+        // Se ignorarmos, temos que garantir que o próximo item seja processado.
+        isPlayerBusyRef.current = false;
+        processTranslationQueue(); // Tenta o próximo da fila.
+        return;
+      }
+
+      isPlayerBusyRef.current = true;
+      lastPlayedTextRef.current = textToPlay; // Armazena o texto que será executado.
+      if (textToPlay) {
+        const gloss = (await setTextPtBr(textToPlay, false, false)).toString();
+
+        playerService.send(
+          PlayerKeys.PLAYER_MANAGER,
+          PlayerKeys.PLAY_NOW,
+          gloss
+        );
+      } else {
+        // Se por acaso o item for inválido, abre o semáforo novamente.
+        isPlayerBusyRef.current = false;
+      }
+    },
+    [setTextPtBr]
+  ); // Não depende mais de 'isPlaying', é uma função estável.
+
+  // Hook que ouve o avatar e controla o semáforo
   useOnPlayingStateChangeHandler(
     (
-      isPlaying: boolean,
+      newIsPlaying: boolean,
       isPaused: boolean,
       _isPlayingIntervalAnimation: boolean,
       _isLoading: boolean,
       _isRepeatable: boolean
     ) => {
-      if (isPlaying && recording === false) {
+      // Atualiza o estado visual do player
+      setIsPlaying(newIsPlaying);
+      setIsPaused(isPaused);
+
+      isPlayerBusyRef.current = newIsPlaying; // O estado do semáforo espelha o do player
+
+      if (wasPlaying.current && !newIsPlaying) {
+        setHasFinished(true);
+        // O Avatar terminou! Abre o semáforo e chama o gerente.
+        isPlayerBusyRef.current = false;
+        // Adiciona um "respiro" de 100ms para o Avatar antes de processar o próximo.
+        setTimeout(() => {
+          processTranslationQueue();
+        }, 100);
+      }
+      
+      wasPlaying.current = newIsPlaying;
+
+      // Código de gravação de vídeo (não relacionado à fila)
+      if (newIsPlaying && recording === false) {
         initRecorder();
         recording = true;
       }
-
-      if (wasPlaying.current && !isPlaying) {
-        setHasFinished(true);
-      }
-      if (!isPlaying && recording === true) {
+      if (!newIsPlaying && recording === true) {
         mediaRecorder.stop();
         recording = false;
       }
-      setIsPlaying(isPlaying);
-      setIsPaused(isPaused);
-      wasPlaying.current = isPlaying;
     },
-    [setIsPlaying, setIsPaused, currentAvatar]
+    [processTranslationQueue]
   );
+
+  function startLiveRecognition() {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Reconhecimento de voz não suportado neste navegador.');
+      return;
+    }
+
+    if (recognitionRef.current) {
+      return;
+    }
+
+    isLiveActiveRef.current = true;
+    translationQueueRef.current = [];
+    speechBufferRef.current = ''; // Zera o buffer
+    lastSentIndexRef.current = 0; // Zera o marcador
+    isPlayerBusyRef.current = false;
+    lastPlayedTextRef.current = '';
+    setIsLiveListening(true);
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognitionRef.current = recognition;
+
+    // A única tarefa do onresult é atualizar o buffer com a fala completa.
+    recognition.onresult = (event: any) => {
+      let currentTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        currentTranscript += event.results[i][0].transcript;
+      }
+      speechBufferRef.current = currentTranscript;
+    };
+
+    recognition.onend = () => {
+      if (isLiveActiveRef.current) {
+        // Adiciona um pequeno delay para evitar reinicializações muito rápidas
+        // que podem ser bloqueadas pelo navegador ou causar um loop de erros.
+        setTimeout(() => {
+          // Garante que a referência ainda existe caso o usuário tenha parado manualmente.
+          if (isLiveActiveRef.current && recognitionRef.current) {
+            recognitionRef.current.start();
+          }
+        }, 250);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      // O erro 'no-speech' é comum e esperado quando o usuário faz uma pausa.
+      // Apenas o ignoramos e deixamos o 'onend' reiniciar o reconhecimento.
+      if (event.error === 'no-speech') {
+        return;
+      }
+      // Para outros erros, logamos e paramos.
+      console.error('Erro no reconhecimento de voz:', event.error);
+      stopLiveRecognition();
+    };
+
+    // Limpa qualquer ciclo anterior e inicia o novo.
+    if (chunkingIntervalRef.current) {
+      clearInterval(chunkingIntervalRef.current);
+    }
+    chunkingIntervalRef.current = setInterval(() => {
+      if (!isLiveActiveRef.current) return;
+
+      const fullText = speechBufferRef.current;
+      const lastIndex = lastSentIndexRef.current;
+
+      // Se houver texto novo DEPOIS do marcador...
+      if (fullText.length > lastIndex) {
+        // ...pega apenas o trecho novo.
+        const newChunk = fullText.substring(lastIndex).trim();
+        if (newChunk) {
+          translationQueueRef.current.push(newChunk);
+          // E avança o marcador para a posição atual.
+          lastSentIndexRef.current = fullText.length;
+          processTranslationQueue();
+        }
+      }
+    }, 1500);
+
+    recognition.start();
+  }
+
+  function stopLiveRecognition() {
+    isLiveActiveRef.current = false;
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = null;
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+
+    if (chunkingIntervalRef.current) {
+      clearInterval(chunkingIntervalRef.current);
+    }
+    
+    translationQueueRef.current = [];
+    speechBufferRef.current = '';
+    lastSentIndexRef.current = 0; // Reseta o marcador
+    isPlayerBusyRef.current = false;
+    lastPlayedTextRef.current = '';
+    setIsLiveListening(false);
+    handleStop();
+  }
+  // --- End of Live Translation Logic ---
 
   function resetTranslation() {
     setHasFinished(false);
@@ -501,7 +678,27 @@ function Player() {
     setIsShowSubtitle(!isShowSubtitle);
   }
 
+  function handleTranslateLive(text: string) {
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
+  }
+
   const renderPlayerButtons = () => {
+    // Se estiver no modo live, o botão central para a gravação
+    if (isLiveListening) {
+      return (
+        <>
+          <div /> {/* Placeholder para manter o espaçamento */}
+          <button
+            className="player-button-center-live"
+            onClick={stopLiveRecognition}>
+            <LiveWaveIcon />
+          </button>
+          <div /> {/* Placeholder para manter o espaçamento */}
+        </>
+      );
+    }
+
+    // Lógica padrão dos botões
     if (isPlaying) {
       return (
         <>
@@ -870,6 +1067,163 @@ function Player() {
     );
   };
 
+  const renderPlayerButtonsContainer = () => {
+    // Durante o modo live, não renderiza nenhum botão no canto superior
+    if (isLiveListening) {
+      return null;
+    }
+
+    if (
+      isPlaying ||
+      hasFinished ||
+      (currentStep >= HomeTutorialSteps.CLOSE &&
+        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED)
+    ) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <div
+            style={{
+              position: 'absolute',
+              padding: '8px',
+              display: 'flex',
+              right: 10,
+              top: 0,
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              zIndex: 2,
+            }}>
+            <TutorialPopover
+              title="Fechar"
+              context="home"
+              description="Feche tradução e volte à tela anterior."
+              position="rt"
+              isEnabled={currentStep === HomeTutorialSteps.CLOSE}
+            />
+          </div>
+
+          <div>
+            {currentStep === HomeTutorialSteps.CLOSE && (
+              <div
+                className="highligth"
+                style={{
+                  position: 'absolute',
+                  display: 'flex',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  border: '1px solid white',
+                  boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+                  zIndex: 1,
+                }}></div>
+            )}
+            <button
+              style={{ marginBottom: 0 }}
+              disabled={
+                currentStep >= HomeTutorialSteps.CLOSE &&
+                currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
+              }
+              className="player-button-rounded"
+              type="button"
+              onClick={handleStop}>
+              <IconClose color="#FFF" size={24} />
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <div
+          style={{
+            position: 'absolute',
+            padding: '8px',
+            right: 15,
+            top: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            zIndex: 2,
+          }}>
+          <TutorialPopover
+            title="Trocar avatar"
+            context="home"
+            description="Escolha qual avatar interpretará os sinais em LIBRAS."
+            position="rc"
+            isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            padding: '8px',
+            right: 15,
+            top: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            zIndex: 2,
+          }}>
+          <TutorialPopover
+            title="Central de ajuda"
+            context="home"
+            description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+            position="rt"
+            isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
+          />
+        </div>
+        {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              bottom: '16px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              border: '1px solid white',
+              boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+            }}></div>
+        )}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'fit-content',
+          }}>
+          {currentStep === HomeTutorialSteps.TUTORIAL && (
+            <div
+              style={{
+                marginTop: 'auto',
+                position: 'absolute',
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                border: '1px solid white',
+                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
+              }}></div>
+          )}
+          <>
+            <button
+              disabled={currentStep !== HomeTutorialSteps.IDLE}
+              className="player-button-tutorial-rounded-top"
+              type="button"
+              onClick={goNextStep}>
+              <IconTutorial color="black" size={44} />
+            </button>
+          </>
+          <button
+            className="player-button-avatar-rounded-top"
+            type="button"
+            onClick={handleChangeAvatar}>
+            {currentAvatar === 'icaro' && <HozanaAvatar />}
+            {currentAvatar === 'hozana' && <GugaAvatar />}
+            {currentAvatar === 'guga' && <IcaroAvatar />}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const customizedAvatar = updateAvatarCustomizationProperties({
       avatar: currentAvatar,
@@ -982,150 +1336,7 @@ function Player() {
         </div>
       </IonPopover>
       <div className="player-container-button">
-        {isPlaying ||
-        hasFinished ||
-        (currentStep >= HomeTutorialSteps.CLOSE &&
-          currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) ? (
-          <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                display: 'flex',
-                right: 10,
-                top: 0,
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Fechar"
-                context="home"
-                description="Feche tradução e volte à tela anterior."
-                position="rt"
-                isEnabled={currentStep === HomeTutorialSteps.CLOSE}
-              />
-            </div>
-
-            <div>
-              {currentStep === HomeTutorialSteps.CLOSE && (
-                <div
-                  className="highligth"
-                  style={{
-                    position: 'absolute',
-                    display: 'flex',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                    zIndex: 1,
-                  }}></div>
-              )}
-              <button
-                style={{ marginBottom: 0 }}
-                disabled={
-                  currentStep >= HomeTutorialSteps.CLOSE &&
-                  currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
-                }
-                className="player-button-rounded"
-                type="button"
-                onClick={handleStop}>
-                <IconClose color="#FFF" size={24} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                right: 15,
-                top: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Trocar avatar"
-                context="home"
-                description="Escolha qual avatar interpretará os sinais em LIBRAS."
-                position="rc"
-                isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
-              />
-            </div>
-            <div
-              style={{
-                position: 'absolute',
-                padding: '8px',
-                right: 15,
-                top: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                zIndex: 2,
-              }}>
-              <TutorialPopover
-                title="Central de ajuda"
-                context="home"
-                description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
-                position="rt"
-                isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
-              />
-            </div>
-            {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
-              <div
-                style={{
-                  position: 'absolute',
-                  display: 'flex',
-                  bottom: '16px',
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '50%',
-                  border: '1px solid white',
-                  boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                }}></div>
-            )}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: 'fit-content',
-              }}>
-              {currentStep === HomeTutorialSteps.TUTORIAL && (
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    position: 'absolute',
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                  }}></div>
-              )}
-              <>
-                <button
-                  disabled={currentStep !== HomeTutorialSteps.IDLE}
-                  className="player-button-tutorial-rounded-top"
-                  type="button"
-                  onClick={goNextStep}>
-                  <IconTutorial color="black" size={44} />
-                </button>
-              </>
-              <button
-                className="player-button-avatar-rounded-top"
-                type="button"
-                onClick={handleChangeAvatar}>
-                {currentAvatar === 'icaro' && <HozanaAvatar />}
-                {currentAvatar === 'hozana' && <GugaAvatar />}
-                {currentAvatar === 'guga' && <IcaroAvatar />}
-              </button>
-            </div>
-          </div>
-        )}
+        {renderPlayerButtonsContainer()}
       </div>
       <div
         style={{
@@ -1148,19 +1359,6 @@ function Player() {
         currentStep !== HomeTutorialSteps.INITIAL) ||
         (hasFinished && !isPlaying)) && (
         <div className="player-container-buttons">
-          {currentStep === HomeTutorialSteps.LIKED_TRANSLATION && (
-            <div
-              style={{
-                position: 'absolute',
-                display: 'flex',
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                border: '1px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                zIndex: 1,
-              }}></div>
-          )}
           <div
             style={{
               top: -54,
@@ -1201,20 +1399,6 @@ function Player() {
               isEnabled={currentStep === HomeTutorialSteps.SHARE}
             />
           </div>
-          {currentStep === HomeTutorialSteps.SHARE && (
-            <div
-              style={{
-                position: 'absolute',
-                display: 'flex',
-                bottom: '16px',
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                border: '1px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-                zIndex: 1,
-              }}></div>
-          )}
           <button
             style={{ marginBottom: 0 }}
             disabled={
@@ -1287,6 +1471,15 @@ function Player() {
             </button>
           </div>
         </div>
+      )}
+      {isLiveListening && (
+        <button
+          onClick={stopLiveRecognition}
+          style={{position: 'fixed', top: 60, right: 20, zIndex: 10000, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
+          aria-label="Fechar modo live"
+        >
+          ×
+        </button>
       )}
     </div>
   );

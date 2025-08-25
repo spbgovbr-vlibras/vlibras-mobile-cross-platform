@@ -29,6 +29,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>permita o acesso a camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Permita o app usar o microfone</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Permita o app usar o speech </string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -33,6 +33,7 @@ const Translator = () => {
   const { setTextPtBr } = useTranslation();
 
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   async function translate() {
     const formatted = translatorText.trim();
@@ -45,12 +46,21 @@ const Translator = () => {
     const today = new Date().toLocaleDateString('pt-BR');
     reloadHistory(today, formatted, 'text');
 
+    if (formatted.toLocaleLowerCase() === "ativar modo live") {
+      history.push(paths.HOME + '?live=1');
+      return
+    }
+
     const gloss = (await setTextPtBr(formatted, false)).toString();
 
     history.replace(paths.HOME);
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
     dispatch(Creators.setTranslatorText(formatted));
   }
+
+  const handleMicClick = () => {
+    history.push(paths.HOME + '?live=1');
+  };
 
   return (
     <MenuLayout title={Strings.TRANSLATOR_TITLE} mode="back">
@@ -81,11 +91,13 @@ const Translator = () => {
               )}
             </div>
           </div>
-          <div className="translator-item-button-save">
+          <div className="translator-item-button-save" style={{ display: 'flex', gap: 8 }}>
             <button
               className="translator-button-save"
               onClick={translate}
-              type="button">
+              type="button"
+              style={{ height: 48, minWidth: 120 }}
+            >
               <IconHandsTranslate color="white" />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>

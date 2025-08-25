@@ -43,7 +43,11 @@ interface videoOptions {
 
 interface TranslationContextData {
   textPtBr: string;
-  setTextPtBr: (text: string, fromDictionary: boolean) => Promise<string>;
+  setTextPtBr: (
+    text: string,
+    fromDictionary: boolean,
+    showLoading?: boolean
+  ) => Promise<string>;
   textGloss: string;
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
@@ -145,10 +149,12 @@ const TranslationProvider: React.FC = ({ children }) => {
   }
 
   const handleTextPtBr = useCallback(
-    async (text: string, fromDictionary: boolean) => {
+    async (text: string, fromDictionary: boolean, showLoading = true) => {
       let translation: string = text;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
-      setModalVisible(true);
+      if (showLoading) {
+        setModalVisible(true);
+      }
       setTranslationGlossError(false);
       if (fromDictionary) {
         const recents =
@@ -169,11 +175,15 @@ const TranslationProvider: React.FC = ({ children }) => {
         const gloss = await translate({ text });
         setTextGloss(gloss);
         translation = gloss;
-        setModalVisible(false);
+        if (showLoading) {
+          setModalVisible(false);
+        }
       } catch {
         setTextGloss(text);
         await delay(500);
-        setIsLoading(false);
+        if (showLoading) {
+          setIsLoading(false);
+        }
         setTranslationGlossError(true);
         await delay(1500);
         translation = text;
