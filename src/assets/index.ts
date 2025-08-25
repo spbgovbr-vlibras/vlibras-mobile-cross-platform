@@ -31,6 +31,26 @@ import IconYoutube from './icons/IconYoutube';
 import IconCamera from './icons/IconCamera';
 import IconPlay from './icons/IconPlay';
 
+import IconVerbs from './images/verbos.svg';
+import IconAnimals from './images/animais.svg';
+import IconFoods from './images/comidas.svg';
+import IconSports from './images/esporte.svg';
+import IconFruits from './images/frutas.svg';
+import IconAll from './images/tudo.svg';
+import IconAlphabet from './images/alfabeto.svg';
+import IconNumbers from './images/numeros.svg';
+import IconBody2 from './images/corpo.svg';
+import IconFamily from './images/familia.svg';
+import IconUndefined from './images/indefinidos.svg';
+import IconLocations from './images/lugares.svg';
+import IconMeasures from './images/medidas.svg';
+import IconNature from './images/natureza.svg';
+import IconCountries from './images/pais.svg';
+import IconHealth from './images/saude.svg';
+import IconFeelings from './images/sentimentos.svg';
+import IconJobs from './images/trabalho.svg';
+import IconMachines from './images/maquinas.svg';
+
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
 import gifStepOne from './gifs/passo1.gif';
@@ -233,4 +253,23 @@ export {
   IconYoutube,
   IconCamera,
   IconPlay,
+  IconAll,
+  IconAlphabet,
+  IconNumbers,
+  IconVerbs,
+  IconAnimals,
+  IconFoods,
+  IconSports,
+  IconFruits,
+  IconBody2,
+  IconFamily,
+  IconUndefined,
+  IconLocations,
+  IconMeasures,
+  IconNature,
+  IconCountries,
+  IconHealth,
+  IconFeelings,
+  IconJobs,
+  IconMachines,
 };
