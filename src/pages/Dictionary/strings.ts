@@ -12,4 +12,5 @@ export const Strings = {
   TEXT_PLACEHOLDER: 'Digite um sinal para pesquisar',
   CHIP_TEXT_SUGGESTIONS_1: 'A-Z',
   CHIP_TEXT_SUGGESTIONS_2: 'Recentes',
+  CHIP_TEXT_SUGGESTIONS_3: 'Categorias',
 };
