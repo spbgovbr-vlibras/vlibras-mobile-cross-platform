@@ -230,6 +230,37 @@
   color: #1447a6;
 }
 
+.word-meaning-container {
+  padding: 0 16px 8px;
+  background-color: rgba(20, 71, 166, 0.05);
+}
+
+.meaning-content {
+  padding: 8px 16px;
+}
+
+.meaning-content ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.meaning-content.not-found {
+  color: #888;
+  font-style: italic;
+}
+
+.meaning-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.meaning-actions ion-button {
+  --border-radius: 8px;
+  font-weight: bold;
+  margin-top: 8px;
+  height: 36px;
+}
+
 .conjugation-list .conjugation-item {
   padding-left: 20px;
 }

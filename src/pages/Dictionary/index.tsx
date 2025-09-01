@@ -33,6 +33,8 @@ import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
+import { DictionaryData } from 'services/types';
+import { getDictionaryData } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
@@ -59,6 +61,9 @@ function Dictionary() {
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('categories');
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
+  const [expandedWord, setExpandedWord] = useState<string | null>(null);
+  const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
+  const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -95,6 +100,25 @@ function Dictionary() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
+  async function toggleWordMeaning(word: Words) {
+    const wordName = word.name;
+    if (expandedWord === wordName) {
+      setExpandedWord(null);
+      return;
+    }
+
+    setExpandedWord(wordName);
+
+    if (wordMeanings[wordName]) {
+      return; // Already fetched
+    }
+
+    setLoadingMeaning(wordName);
+    const meaning = await getDictionaryData(wordName);
+    setWordMeanings(prev => ({ ...prev, [wordName]: meaning }));
+    setLoadingMeaning(null);
+  }
+
   const formattedGloss = (gloss: string) => {
     return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
   };
@@ -105,19 +129,61 @@ function Dictionary() {
   history.replace({ search: params.toString() });
 }
 
-  const renderWord = (item: Words) => (
-    <>
-      <IonItem
-        key={item.id}
-        className="dictionary-word-item"
-        onClick={() => translate(item.name)}>
-        <IonText className="dictionary-words-style">
-          {formattedGloss(item.name)}
-        </IonText>
-      </IonItem>
-      <div className="words-popover-content-divider" />
-    </>
-  );
+  const renderWord = (item: Words) => {
+    const isExpanded = expandedWord === item.name;
+    const meaning = wordMeanings[item.name];
+    const isLoading = loadingMeaning === item.name;
+
+    return (
+      <div key={item.id}>
+        <IonItem
+          className="dictionary-word-item"
+          onClick={() => translate(item.name)}
+        >
+          <IonText className="dictionary-words-style">
+            {formattedGloss(item.name)}
+          </IonText>
+          <IonIcon
+            icon={isExpanded ? chevronUp : chevronDown}
+            slot="end"
+            className="verb-dropdown-icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleWordMeaning(item);
+            }}
+          />
+        </IonItem>
+        {isExpanded && (
+          <div className="word-meaning-container">
+            {isLoading && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+            {meaning && meaning.definitions && meaning.definitions.length > 0 && (
+              <div className="meaning-content">
+                <ol>
+                  {meaning.definitions.slice(0, 3).map((def, i) => <li key={i}>{def.split('§')[0]}</li>)}
+                </ol>
+              </div>
+            )}
+            {!isLoading && (!meaning || !meaning.definitions || meaning.definitions.length === 0) && (
+              <div className="meaning-content not-found">Significado não encontrado.</div>
+            )}
+            <div className="meaning-actions">
+              <IonButton
+                fill="outline"
+                onClick={() => {
+                  const firstDef = meaning?.definitions?.[0];
+                  if (firstDef) {
+                    translate(firstDef.split('§')[0]);
+                  }
+                }}
+              >
+                Traduzir em LIBRAS
+              </IonButton>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderRecents = (item: string) => (
     <IonItem
