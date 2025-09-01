@@ -125,10 +125,9 @@
   color: #1447a6;
 }
 .dictionary-word-item {
-  --padding-start: 0px;
+  --padding-start: 31px;
   --min-height: 0px;
   margin-bottom: 15px;
-  margin-left: 31px;
 }
 .dictionary-word-item.centered {
   margin-right: 31px;
@@ -202,4 +201,39 @@
   top: 0;
   z-index: 20;
   background: var(--ion-background-color, #fff);
+}
+
+.conjugation-list {
+  background-color: rgba(20, 71, 166, 0.05);
+  padding: 10px 0;
+  margin-top: 0;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.conjugation-item.dictionary-word-item {
+  --background: transparent;
+  --padding-start: 3rem;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.conjugation-item svg {
+  margin-right: 16px;
+}
+
+.verb-header {
+  --background: #fff;
+}
+
+.verb-dropdown-icon {
+  color: #1447a6;
+}
+
+.conjugation-list .conjugation-item {
+  padding-left: 20px;
+}
+
+.conjugation-list .words-popover-content-divider {
+  display: none;
 }

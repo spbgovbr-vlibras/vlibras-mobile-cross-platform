@@ -13,7 +13,7 @@ import {
   IonButton,
   IonIcon
 } from '@ionic/react';
-import { chevronBack } from 'ionicons/icons';
+import { chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -58,6 +58,7 @@ function getChipClassName(
 function Dictionary() {
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('categories');
+  const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -187,26 +188,51 @@ function Dictionary() {
     </>
   );
 
+  function handleVerbClick(verb: string) {
+    if (expandedVerb === verb) {
+      setExpandedVerb(null);
+    } else {
+      setExpandedVerb(verb);
+    }
+  }
+
   const renderVerbs = () => {
     const grouped = groupVerbs(dicTest);
-    return Object.entries(grouped).map(([verb, words], index) => (
-      <IonList key={verb} lines="none" className="dictionary-words-list">
-      {/* Cabeçalho do verbo */}
-      {renderWord({ name: verb, id: index })}
-
-      {/* Variações do verbo */}
-      {words.map((w, i) => (
-        <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item" onClick={() => translate(w)}>
-          <IonText className="dictionary-words-style">{w}</IonText>
-        </IonItem>
-      ))}
-    </IonList>
-    ));
+    return Object.entries(grouped).map(([verb, words]) => {
+      const isExpanded = expandedVerb === verb;
+      return (
+        <div key={verb} className="verb-group">
+          <IonItem
+            lines="none"
+            className="dictionary-word-item verb-header"
+            onClick={() => handleVerbClick(verb)}>
+            <IonText className="dictionary-words-style">{verb}</IonText>
+            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"/>
+          </IonItem>
+          {isExpanded && (
+            <IonList lines="none" className="dictionary-words-list conjugation-list">
+              {words.map((w, i) => {
+                return (
+                  <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                    <IonText className="dictionary-words-style">{w.transformed}</IonText>
+                  </IonItem>
+                );
+              })}
+            </IonList>
+          )}
+          <div className="words-popover-content-divider" />
+        </div>
+      );
+    });
   };
 
-  type VerbGroups = Record<string, string[]>;
+  type VerbConjugation = {
+    original: string;
+    transformed: string;
+  };
+  type VerbGroups = Record<string, VerbConjugation[]>;
   function groupVerbs(words: Words[]): VerbGroups {
-    return words.reduce<VerbGroups>((acc, word) => {
+    const verbGroups = words.reduce<VerbGroups>((acc, word) => {
       const prefixMap: Record<string, string> = {
         '1S_': 'EU',
         '2S_': 'VOCÊ',
@@ -230,16 +256,36 @@ function Dictionary() {
         const verb = match[2];
         const suffix = match[3] || '';
 
-        const prefixText = prefixMap[prefix] ? prefixMap[prefix] + ' ' : '';
-        const suffixText = suffixMap[suffix] ? ' ' + suffixMap[suffix] : '';
+        const prefixText = prefixMap[prefix] || '';
+        const suffixText = suffixMap[suffix] || '';
 
-        const transformed = prefix ? `${prefixText} PARA ${suffixText}` : '';
-        if (!acc[verb]) acc[verb] = [];
-        acc[verb].push(transformed);
+        if (prefixText && suffixText) {
+          const transformed = `${prefixText} PARA ${suffixText}`;
+          if (!acc[verb]) acc[verb] = [];
+          acc[verb].push({ original: word.name, transformed });
+        }
       }
 
       return acc;
     }, {});
+
+    const conjugationOrder = [
+      'EU PARA VOCÊ',
+      'EU PARA ELE(A)',
+      'EU PARA ELES(A)',
+      'VOCÊ PARA MIM',
+      'VOCÊ PARA NÓS',
+      'VOCÊ PARA ELES(AS)',
+      'ELES(AS) PARA MIM'
+    ];
+    
+    for (const verb in verbGroups) {
+      verbGroups[verb].sort((a, b) => {
+        return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
+      });
+    }
+
+    return verbGroups;
   }
 
   const renderEmptyOrLoadingState = () => {
