@@ -103,6 +103,7 @@ function Dictionary() {
   const params = new URLSearchParams(location.search);
   params.delete('category');
   history.replace({ search: params.toString() });
+  setVisibleVerbCount(VERB_COUNT);
 }
 
   const renderWord = (item: Words) => (
@@ -197,23 +198,26 @@ function Dictionary() {
   }
 
   const renderVerbs = () => {
-    const grouped = groupVerbs(dicTest);
-    return Object.entries(grouped).map(([verb, words]) => {
+    return verbList.slice(0, visibleVerbCount).map(([verb, words]) => {
       const isExpanded = expandedVerb === verb;
       return (
         <div key={verb} className="verb-group">
           <IonItem
             lines="none"
             className="dictionary-word-item verb-header"
-            onClick={() => handleVerbClick(verb)}>
-            <IonText className="dictionary-words-style">{verb}</IonText>
-            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"/>
+            // onClick={() => handleVerbClick(verb)}
+            >
+            <IonText className="dictionary-words-style" onClick={() => translate(verb)}>{verb}</IonText>
+            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"
+                     onClick={() => handleVerbClick(verb)}/>
           </IonItem>
           {isExpanded && (
             <IonList lines="none" className="dictionary-words-list conjugation-list">
               {words.map((w, i) => {
                 return (
-                  <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                  <IonItem key={`${verb}-form-${i}`}
+                           className="dictionary-word-item conjugation-item"
+                           onClick={() => translate(w.original)}>
                     <IonText className="dictionary-words-style">{w.transformed}</IonText>
                   </IonItem>
                 );
@@ -225,31 +229,48 @@ function Dictionary() {
       );
     });
   };
+  const handleLoadMoreVerbs = (event: CustomEvent<void>) => {
+    setVisibleVerbCount(prev => {
+      const newCount = prev + 20;
+      return Math.min(newCount, verbList.length);
+    });
+    (event.target as HTMLIonInfiniteScrollElement).complete();
+  };
 
   type VerbConjugation = {
     original: string;
     transformed: string;
   };
   type VerbGroups = Record<string, VerbConjugation[]>;
+  const prefixMap: Record<string, string> = {
+    '1S_': 'EU',
+    '2S_': 'VOCÊ',
+    '3S_': 'ELE(A)',
+    '1P_': 'NÓS',
+    '2P_': 'VOCÊS',
+    '3P_': 'ELES(AS)',
+  };
+  const suffixMap: Record<string, string> = {
+    '_1S': 'MIM',
+    '_2S': 'VOCÊ',
+    '_3S': 'ELE(A)',
+    '_1P': 'NÓS',
+    '_2P': 'VOCÊS',
+    '_3P': 'ELES(AS)',
+  };
+  const verbRegex = /^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/;
+
+  const transformedCache: Record<string, string> = {};
+  for (const p in prefixMap) {
+    for (const s in suffixMap) {
+      transformedCache[`${p}|${s}`] = `${prefixMap[p]} PARA ${suffixMap[s]}`;
+    }
+  }
+
   function groupVerbs(words: Words[]): VerbGroups {
-    const verbGroups = words.reduce<VerbGroups>((acc, word) => {
-      const prefixMap: Record<string, string> = {
-        '1S_': 'EU',
-        '2S_': 'VOCÊ',
-        '3S_': 'ELE(A)',
-        '1P_': 'NÓS',
-        '2P_': 'VOCÊS',
-        '3P_': 'ELES(AS)',
-      };
-      const suffixMap: Record<string, string> = {
-        '_1S': 'MIM',
-        '_2S': 'VOCÊ',
-        '_3S': 'ELE(A)',
-        '_1P': 'NÓS',
-        '_2P': 'VOCÊS',
-        '_3P': 'ELES(AS)',
-      };
-      const match = word.name.match(/^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/);
+    const acc: VerbGroups = {};
+    for (const word of words) {
+      const match = word.name.match(verbRegex);
 
       if (match) {
         const prefix = match[1] || '';
@@ -259,26 +280,53 @@ function Dictionary() {
         const prefixText = prefixMap[prefix] || '';
         const suffixText = suffixMap[suffix] || '';
 
-        if (prefixText && suffixText) {
-          const transformed = `${prefixText} PARA ${suffixText}`;
-          if (!acc[verb]) acc[verb] = [];
-          acc[verb].push({ original: word.name, transformed });
-        }
+        const transformed = (prefixText && suffixText) ? transformedCache[`${prefix}|${suffix}`] : '';
+        if (!acc[verb]) acc[verb] = [];
+        acc[verb].push({ original: word.name, transformed });
       }
 
-      return acc;
-    }, {});
+    }
+    const verbGroups = acc;
 
     const conjugationOrder = [
+      'EU PARA MIM',
       'EU PARA VOCÊ',
       'EU PARA ELE(A)',
-      'EU PARA ELES(A)',
+      'EU PARA NÓS',
+      'EU PARA VOCÊS',
+      'EU PARA ELES(AS)',
       'VOCÊ PARA MIM',
+      'VOCÊ PARA VOCÊ',
+      'VOCÊ PARA ELE(A)',
       'VOCÊ PARA NÓS',
+      'VOCÊ PARA VOCÊS',
       'VOCÊ PARA ELES(AS)',
-      'ELES(AS) PARA MIM'
+      'ELE(A) PARA MIM',
+      'ELE(A) PARA VOCÊ',
+      'ELE(A) PARA ELE(A)',
+      'ELE(A) PARA NÓS',
+      'ELE(A) PARA VOCÊS',
+      'ELE(A) PARA ELES(AS)',
+      'NÓS PARA MIM',
+      'NÓS PARA VOCÊ',
+      'NÓS PARA ELE(A)',
+      'NÓS PARA NÓS',
+      'NÓS PARA VOCÊS',
+      'NÓS PARA ELES(AS)',
+      'VOCÊS PARA MIM',
+      'VOCÊS PARA VOCÊ',
+      'VOCÊS PARA ELE(A)',
+      'VOCÊS PARA NÓS',
+      'VOCÊS PARA VOCÊS',
+      'VOCÊS PARA ELES(AS)',
+      'ELES(AS) PARA MIM',
+      'ELES(AS) PARA VOCÊ',
+      'ELES(AS) PARA ELE(A)',
+      'ELES(AS) PARA NÓS',
+      'ELES(AS) PARA VOCÊS',
+      'ELES(AS) PARA ELES(AS)',
     ];
-    
+
     for (const verb in verbGroups) {
       verbGroups[verb].sort((a, b) => {
         return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
@@ -374,22 +422,43 @@ function Dictionary() {
 
   const location = useLocation();
   const [dicTest, setDicTest] = useState<Words[]>([]);
+  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
+
+  const VERB_COUNT = 20;
+  const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
+  const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const queryParams = new URLSearchParams(location.search);
   const category = queryParams.get('category');
 
   useEffect(() => {
-    if (category) {
-      const index = parseInt(category, 10);
-      const categoryName = CategoriesList[index].name;
-      setDicTest(wordsJson
-      .filter(item => item.categorias.includes(categoryName))
-      .map((item, index) => {
-        return {
-          id: index,
-          name: item.palavra
-        };
-      }));
+  if (category && CategoriesList[Number(category)].name === 'Verbos') {
+    const verbs = wordsJson
+      .filter(item => item.categorias.includes('Verbos'))
+      .map((item, index) => ({ id: index, name: item.palavra }));
+    setDicTest(verbs);
+    setVerbGroupsState(groupVerbs(verbs));
+  }
+}, [category]);
+
+  useEffect(() => {
+    if (category === 'Verbos') {
+      const verbs = wordsJson
+        .filter(item => item.categorias.includes('Verbos'))
+        .map((item, index) => ({ id: index, name: item.palavra }));
+        setDicTest(verbs);
+        setVerbGroupsState(groupVerbs(verbs));
+    } else {
+        const index = Number(category);
+        const categoryName = CategoriesList[index].name;
+        setDicTest(wordsJson
+        .filter(item => item.categorias.includes(categoryName))
+        .map((item, index) => {
+          return {
+            id: index,
+            name: item.palavra
+          };
+        }));
     }
   }, [location.search]);
 
@@ -481,6 +550,17 @@ function Dictionary() {
               loadingSpinner={loading ? 'bubbles' : undefined}
               color="dark"
               loadingText={loading ? 'Carregando sinais...' : ''}
+            />
+          </IonInfiniteScroll>
+        )}
+        {(filter === 'categories') && CategoriesList[Number(category)].name === 'Verbos'  && (
+          <IonInfiniteScroll
+            threshold="100px"
+            onIonInfinite={handleLoadMoreVerbs}
+          >
+            <IonInfiniteScrollContent
+              loadingSpinner="bubbles"
+              loadingText="Carregando mais verbos..."
             />
           </IonInfiniteScroll>
         )}
