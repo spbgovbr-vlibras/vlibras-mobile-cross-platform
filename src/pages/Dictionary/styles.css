@@ -242,11 +242,41 @@
 .meaning-content ol {
   padding-left: 20px;
   margin: 0;
+  list-style-position: outside;
+}
+
+.meaning-content li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.meaning-content li span {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.translate-def-button {
+  background: transparent;
+  border: 1px solid #1447a6;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
 }
 
 .meaning-content.not-found {
   color: #888;
   font-style: italic;
+  padding: 16px;
 }
 
 .meaning-actions {

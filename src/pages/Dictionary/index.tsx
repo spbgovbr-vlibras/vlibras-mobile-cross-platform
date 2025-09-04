@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
+import { IconHandsTranslate } from 'assets';
 import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
@@ -96,7 +97,7 @@ function Dictionary() {
   function translate(text: string) {
     if (text === '%') text = '%25';
     setTextGloss(text, true);
-    history.replace(paths.HOME);
+    history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
@@ -129,10 +130,36 @@ function Dictionary() {
   history.replace({ search: params.toString() });
 }
 
+  const renderMeaningContent = (item: Words) => {
+    const isLoading = loadingMeaning === item.name;
+    const meaning = wordMeanings[item.name];
+    if (isLoading) {
+      return <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>;
+    }
+    if (meaning && meaning.definitions && meaning.definitions.length > 0) {
+      return (
+        <div className="meaning-content">
+          <ol>
+            {meaning.definitions.slice(0, 3).map((def: string, i: number) => {
+              const definitionText = def.split('§')[0];
+              return (
+                <li key={i}>
+                  <span>{`${i + 1}. ${definitionText}`}</span>
+                  <button className='translate-def-button' onClick={() => translate(definitionText)}>
+                    <IconHandsTranslate size={20} color={'#1447a6'} />
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      );
+    }
+    return <div className="meaning-content not-found">Significado não encontrado.</div>;
+  };
+
   const renderWord = (item: Words) => {
     const isExpanded = expandedWord === item.name;
-    const meaning = wordMeanings[item.name];
-    const isLoading = loadingMeaning === item.name;
 
     return (
       <div key={item.id}>
@@ -155,30 +182,7 @@ function Dictionary() {
         </IonItem>
         {isExpanded && (
           <div className="word-meaning-container">
-            {isLoading && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
-            {meaning && meaning.definitions && meaning.definitions.length > 0 && (
-              <div className="meaning-content">
-                <ol>
-                  {meaning.definitions.slice(0, 3).map((def, i) => <li key={i}>{def.split('§')[0]}</li>)}
-                </ol>
-              </div>
-            )}
-            {!isLoading && (!meaning || !meaning.definitions || meaning.definitions.length === 0) && (
-              <div className="meaning-content not-found">Significado não encontrado.</div>
-            )}
-            <div className="meaning-actions">
-              <IonButton
-                fill="outline"
-                onClick={() => {
-                  const firstDef = meaning?.definitions?.[0];
-                  if (firstDef) {
-                    translate(firstDef.split('§')[0]);
-                  }
-                }}
-              >
-                Traduzir em LIBRAS
-              </IonButton>
-            </div>
+            {renderMeaningContent(item)}
           </div>
         )}
       </div>
