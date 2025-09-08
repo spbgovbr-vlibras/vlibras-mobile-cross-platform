@@ -13,7 +13,7 @@ import {
   IonButton,
   IonIcon
 } from '@ionic/react';
-import { chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
+import { arrowForward, chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -123,6 +123,24 @@ function Dictionary() {
   const formattedGloss = (gloss: string) => {
     return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
   };
+
+  async function toggleVerbMeaning(verbName: string) {
+    if (expandedVerb === verbName) {
+      setExpandedVerb(null);
+      return;
+    }
+
+    setExpandedVerb(verbName);
+
+    if (wordMeanings[verbName]) {
+      return; // Already fetched
+    }
+
+    setLoadingMeaning(verbName);
+    const meaning = await getDictionaryData(verbName);
+    setWordMeanings(prev => ({ ...prev, [verbName]: meaning }));
+    setLoadingMeaning(null);
+  }
 
   function clearCategoryParam() {
   const params = new URLSearchParams(location.search);
@@ -270,27 +288,54 @@ function Dictionary() {
     const grouped = groupVerbs(dicTest);
     return Object.entries(grouped).map(([verb, words]) => {
       const isExpanded = expandedVerb === verb;
+      const meaning = wordMeanings[verb];
+      const isLoadingMeaning = loadingMeaning === verb;
       return (
         <div key={verb} className="verb-group">
           <IonItem
             lines="none"
             className="dictionary-word-item verb-header"
-            onClick={() => handleVerbClick(verb)}>
+            onClick={() => toggleVerbMeaning(verb)}>
             <IonText className="dictionary-words-style">{verb}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"/>
           </IonItem>
           {isExpanded && (
-            <IonList lines="none" className="dictionary-words-list conjugation-list">
-              {words.map((w, i) => {
-                return (
-                  <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
-                    <IonText className="dictionary-words-style">{w.transformed}</IonText>
-                  </IonItem>
-                );
-              })}
-            </IonList>
+            <div className="verb-details-container">
+              {isLoadingMeaning && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+              {meaning?.definitions && meaning.definitions.length > 0 && (
+                <>
+                  <div className="verb-section-header">SIGNIFICADO</div>
+                  <ol className="verb-meaning-list">
+                    {meaning.definitions.slice(0, 2).map((def, i) => {
+                      const definitionText = def.split('§')[0];
+                      return (
+                        <li key={i}>
+                          <span>{`${i + 1}. ${definitionText}`}</span>
+                          <button className='translate-def-button' onClick={() => translate(definitionText)}>
+                            <IconHandsTranslate size={18} color={'#1447a6'} />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
+              )}
+              <div className="verb-section-header">SINAIS DIRECIONAIS</div>
+              <IonList lines="none" className="dictionary-words-list conjugation-list">
+                {words.map((w, i) => {
+                  return (
+                    <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                      <div className="conjugation-text-wrapper">
+                        <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
+                        <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                        <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                      </div>
+                    </IonItem>
+                  );
+                })}
+              </IonList>
+            </div>
           )}
-          <div className="words-popover-content-divider" />
         </div>
       );
     });
@@ -298,6 +343,8 @@ function Dictionary() {
 
   type VerbConjugation = {
     original: string;
+    prefix: string;
+    suffix: string;
     transformed: string;
   };
   type VerbGroups = Record<string, VerbConjugation[]>;
@@ -332,7 +379,7 @@ function Dictionary() {
         if (prefixText && suffixText) {
           const transformed = `${prefixText} PARA ${suffixText}`;
           if (!acc[verb]) acc[verb] = [];
-          acc[verb].push({ original: word.name, transformed });
+          acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
         }
       }
 
