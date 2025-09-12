@@ -32,8 +32,8 @@ import wordsJson from 'data/classified_words_reduced.json';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
-import PlayerService from 'services/unity';
 import { DictionaryData } from 'services/types';
+import PlayerService from 'services/unity';
 import { getDictionaryData } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
@@ -42,24 +42,28 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
+export type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
 
 const playerService = PlayerService.getPlayerInstance();
 
 const TIME_DEBOUNCE_MS = 200;
+
 
 function getChipClassName(
   filter: DictionaryFilter,
   expected: DictionaryFilter
 ) {
   return filter === expected
-    ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
-    : { color: '#4b4b4b', background: '#ededed' };
+  ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
+  : { color: '#4b4b4b', background: '#ededed' };
 }
 
 function Dictionary() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
   const [searchText, setSearchText] = useState('');
-  const [filter, setFilter] = useState<DictionaryFilter>('categories');
+  const initialFilter = (queryParams.get('filter') as DictionaryFilter) || 'categories';
+  const [filter, setFilter] = useState<DictionaryFilter>(initialFilter);
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
@@ -94,6 +98,15 @@ function Dictionary() {
   }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
+    const dictionaryState = {
+      filter,
+      searchText,
+      expandedWord,
+      expandedVerb,
+      visibleVerbCount,
+      category,
+    };
+    sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
     if (text === '%') text = '%25';
     setTextGloss(text, true);
     history.replace(paths.HOME);
@@ -123,12 +136,13 @@ function Dictionary() {
     return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
   };
 
-  function clearCategoryParam() {
-  const params = new URLSearchParams(location.search);
-  params.delete('category');
-  history.replace({ search: params.toString() });
-  setVisibleVerbCount(VERB_COUNT);
-}
+  function clearUrlParams() {
+    const params = new URLSearchParams(location.search);
+    params.delete('filter');
+    params.delete('category');
+    history.replace({ search: params.toString() });
+    setVisibleVerbCount(VERB_COUNT);
+  }
 
   const renderWord = (item: Words) => {
     const isExpanded = expandedWord === item.name;
@@ -156,7 +170,8 @@ function Dictionary() {
         </IonItem>
         {isExpanded && (
           <div className="word-meaning-container">
-            {isLoading && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+            {isLoading &&
+            <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
             {meaning && meaning.definitions && meaning.definitions.length > 0 && (
               <div className="meaning-content">
                 <ol>
@@ -182,6 +197,7 @@ function Dictionary() {
             </div>
           </div>
         )}
+        <div className="words-list-popover-content-divider" />
       </div>
     );
   };
@@ -255,6 +271,15 @@ function Dictionary() {
     </>
   );
 
+  const renderAllWords = () => (
+    <>
+      {wordsJson
+        .filter((item) => !item.categorias.includes('Verbos'))
+        .map((item, index) => renderWord({id: index, name: item.palavra}))}
+      {renderVerbs()}
+    </>
+  );
+
   function handleVerbClick(verb: string) {
     if (expandedVerb === verb) {
       setExpandedVerb(null);
@@ -274,8 +299,9 @@ function Dictionary() {
             // onClick={() => handleVerbClick(verb)}
             >
             <IonText className="dictionary-words-style" onClick={() => translate(verb)}>{verb}</IonText>
-            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"
-                     onClick={() => handleVerbClick(verb)}/>
+            {words.length > 0 &&
+              <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"
+                     onClick={() => handleVerbClick(verb)}/>}
           </IonItem>
           {isExpanded && (
             <IonList lines="none" className="dictionary-words-list conjugation-list">
@@ -290,7 +316,7 @@ function Dictionary() {
               })}
             </IonList>
           )}
-          <div className="words-popover-content-divider" />
+          <div className="words-list-popover-content-divider" />
         </div>
       );
     });
@@ -346,9 +372,11 @@ function Dictionary() {
         const prefixText = prefixMap[prefix] || '';
         const suffixText = suffixMap[suffix] || '';
 
-        const transformed = (prefixText && suffixText) ? transformedCache[`${prefix}|${suffix}`] : '';
         if (!acc[verb]) acc[verb] = [];
-        acc[verb].push({ original: word.name, transformed });
+        if(prefixText && suffixText) {
+          const transformed = (prefixText && suffixText) ? transformedCache[`${prefix}|${suffix}`] : '';
+          acc[verb].push({ original: word.name, transformed });
+        }
       }
 
     }
@@ -472,21 +500,19 @@ function Dictionary() {
   }, [dispatch, infiniteScrollRef, metadata, searchText]);
 
   function handleFilterAlpha() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('alphabetical');
   }
 
   function handleFilterRecents() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('recents');
   }
 
   function handleFilterCategories() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('categories');
   }
-
-  const location = useLocation();
   const [dicTest, setDicTest] = useState<Words[]>([]);
   const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
@@ -494,18 +520,24 @@ function Dictionary() {
   const VERB_COUNT = 20;
   const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
   const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
-  const queryParams = new URLSearchParams(location.search);
   const category = queryParams.get('category');
 
   useEffect(() => {
-  if (category && CategoriesList[Number(category)].name === 'Verbos') {
     const verbs = wordsJson
       .filter(item => item.categorias.includes('Verbos'))
       .map((item, index) => ({ id: index, name: item.palavra }));
-    setDicTest(verbs);
     setVerbGroupsState(groupVerbs(verbs));
-  }
-}, [category]);
+  }, []);
+
+//   useEffect(() => {
+//   if (category && CategoriesList[Number(category)].name === 'Verbos') {
+//     const verbs = wordsJson
+//       .filter(item => item.categorias.includes('Verbos'))
+//       .map((item, index) => ({ id: index, name: item.palavra }));
+//     setDicTest(verbs);
+//     setVerbGroupsState(groupVerbs(verbs));
+//   }
+// }, [category]);
 
   useEffect(() => {
     if (category === 'Verbos') {
@@ -587,7 +619,8 @@ function Dictionary() {
                 : null}
 
               {filter === 'alphabetical'
-                ? dictionary.map((item) => renderWord(item))
+                ? renderAllWords()
+                // ? dictionary.map((item) => renderWord(item))
                 : filter === 'recents'
                 ? recentTranslation
                     .filter((item) => item.includes(searchText.toUpperCase()))
@@ -611,7 +644,7 @@ function Dictionary() {
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
-            onIonInfinite={fetchWords}>
+            onIonInfinite={handleLoadMoreVerbs}>
             <IonInfiniteScrollContent
               loadingSpinner={loading ? 'bubbles' : undefined}
               color="dark"

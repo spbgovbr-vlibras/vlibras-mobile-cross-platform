@@ -61,6 +61,7 @@ import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
 import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 import IconHand from 'assets/icons/IconHand';
 import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
+import { DictionaryFilter } from 'pages/Dictionary';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -382,7 +383,22 @@ function Player() {
   );
 
   function handleStop() {
-    history.replace(paths.HOME);
+    const savedState = sessionStorage.getItem('dictionaryState');
+    if(savedState) {
+      const parsed = JSON.parse(savedState);
+      const params = new URLSearchParams();
+      if(parsed.filter) {
+        params.set('filter', parsed.filter);
+        if(parsed.category) {
+          params.set('category', parsed.category);
+        }
+        history.push(`${paths.DICTIONARY_PLAYER}?${params.toString()}`);
+      } else {
+
+        history.replace(paths.HOME);
+      }
+    }
+    sessionStorage.removeItem('dictionaryState');
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
   }
@@ -461,7 +477,7 @@ function Player() {
           processTranslationQueue();
         }, 100);
       }
-      
+
       wasPlaying.current = newIsPlaying;
 
       // Código de gravação de vídeo (não relacionado à fila)
@@ -575,7 +591,7 @@ function Player() {
     if (chunkingIntervalRef.current) {
       clearInterval(chunkingIntervalRef.current);
     }
-    
+
     translationQueueRef.current = [];
     speechBufferRef.current = '';
     lastSentIndexRef.current = 0; // Reseta o marcador
@@ -1475,7 +1491,9 @@ function Player() {
       {isLiveListening && (
         <button
           onClick={stopLiveRecognition}
-          style={{position: 'fixed', top: 60, right: 20, zIndex: 10000, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
+          style={{position: 'fixed', top: 60, right: 20, zIndex: 10000,
+                  background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none',
+                  borderRadius: '50%', width: 40, height: 40, fontSize: 24, cursor: 'pointer'}}
           aria-label="Fechar modo live"
         >
           ×
