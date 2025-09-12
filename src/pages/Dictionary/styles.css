@@ -204,18 +204,22 @@
 }
 
 .conjugation-list {
-  background-color: rgba(20, 71, 166, 0.05);
+  background-color: transparent;
   padding: 10px 0;
-  margin-top: 0;
+  margin: 0;
   gap: 0;
-  margin-bottom: 20px;
 }
 
 .conjugation-item.dictionary-word-item {
   --background: transparent;
-  --padding-start: 3rem;
+  --padding-start: 1.5rem;
   margin: 0;
   padding: 8px 0;
+}
+
+.conjugation-text-wrapper {
+  display: flex;
+  align-items: center;
 }
 
 .conjugation-item svg {
@@ -242,11 +246,97 @@
 .meaning-content ol {
   padding-left: 20px;
   margin: 0;
+  list-style-position: outside;
+}
+
+.meaning-content li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.meaning-content li span {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.translate-def-button {
+  background: transparent;
+  border: 1px solid #1447a6;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
 }
 
 .meaning-content.not-found {
   color: #888;
   font-style: italic;
+  padding: 16px;
+}
+
+.verb-details-container {
+  padding: 0 16px 8px;
+  background-color: rgba(20, 71, 166, 0.05);
+}
+
+.verb-section-header {
+  font-size: 10px;
+  font-weight: bold;
+  color: #888;
+  padding: 16px 0 8px 16px;
+  text-transform: uppercase;
+}
+
+.verb-meaning-list {
+  padding-left: 35px;
+  margin: 0;
+  list-style-position: outside;
+  color: #1447a6
+}
+
+.verb-meaning-list li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: justify;
+}
+
+.verb-meaning-list li span {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.conjugation-item .conjugation-part {
+  font-size: 15px;
+}
+
+.conjugation-item .conjugation-part:first-of-type {
+  flex: 0 1 auto;
+  text-align: left;
+  padding-right: 16px;
+}
+
+.conjugation-item .conjugation-part:last-of-type {
+  flex: 0 1 auto;
+  text-align: left;
+  padding-left: 16px;
+}
+
+.conjugation-item .conjugation-arrow {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #1447a6;
+  font-size: 20px;
 }
 
 .meaning-actions {
