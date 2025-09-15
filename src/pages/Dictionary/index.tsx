@@ -325,7 +325,8 @@ function Dictionary() {
           </IonItem>
           {isExpanded && (
             <div className="verb-details-container">
-              {isLoadingMeaning && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+              {isLoadingMeaning &&
+                <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
               {meaning?.definitions && meaning.definitions.length > 0 && (
                 <>
                   <div className="verb-section-header">SIGNIFICADO</div>
@@ -348,7 +349,9 @@ function Dictionary() {
               <IonList lines="none" className="dictionary-words-list conjugation-list">
                 {words.map((w, i) => {
                   return (
-                    <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                    <IonItem key={`${verb}-form-${i}`}
+                             className="dictionary-word-item conjugation-item"
+                             onClick={() => translate(w.original)}>
                       <div className="conjugation-text-wrapper">
                         <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
                         <IonIcon icon={arrowForward} className="conjugation-arrow" />
@@ -417,9 +420,9 @@ function Dictionary() {
         const prefixText = prefixMap[prefix] || '';
         const suffixText = suffixMap[suffix] || '';
 
+        if (!acc[verb]) acc[verb] = [];
         if (prefixText && suffixText) {
           const transformed = `${prefixText} PARA ${suffixText}`;
-          if (!acc[verb]) acc[verb] = [];
           acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
         }
       }
