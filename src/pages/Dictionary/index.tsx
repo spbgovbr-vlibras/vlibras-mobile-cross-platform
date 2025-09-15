@@ -234,7 +234,7 @@ function Dictionary() {
             {renderMeaningContent(item)}
           </div>
         )}
-        <div className="words-list-popover-content-divider" />
+        {/* <div className="words-list-popover-content-divider" /> */}
       </div>
     );
   };
