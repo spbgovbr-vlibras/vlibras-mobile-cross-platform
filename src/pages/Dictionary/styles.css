@@ -119,16 +119,26 @@
   flex-direction: column;
   flex: 1;
   padding: 0 0 0 0;
-  gap: 22px;
   margin-top: 20px;
   font-family: Rawline;
   color: #1447a6;
 }
+
+.dictionary-words-list.has-category-header {
+  margin-top: 0;
+}
+
 .dictionary-word-item {
-  --padding-start: 0px;
+  --padding-start: 31px;
   --min-height: 0px;
-  margin-bottom: 15px;
-  margin-left: 31px;
+  margin-bottom: 4px;
+  --inner-padding-top: 8px;
+  --inner-padding-bottom: 8px;
+  --border-color: rgba(0, 0, 0, 0.15);
+}
+.dictionary-word-item.category-item {
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
 }
 .dictionary-word-item.centered {
   margin-right: 31px;
@@ -175,7 +185,7 @@
   border: 1px solid rgba(191, 191, 191, 0.2);
   max-height: 0;
   margin: 0;
-  margin-top: -20px;
+  margin-top: -4px;
 }
 
 .words-list-popover-content-divider {
@@ -183,18 +193,24 @@
   margin-top: 0px;
 }
 
+.dictionary-words-list.has-category-header > div:first-child > .item-divider {
+  display: none;
+}
+
 .category-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  padding-top: 20px;
-  padding-bottom: 1px;
+  padding-top: 0;
+  padding-bottom: 0;
   margin-top: 15px;
   background-color: rgba(20, 71, 166, 0.2);
 }
 
 .category-header ion-item {
   --background: rgba(20, 71, 166, 0.0);
+  --inner-padding-top: 18px;
+  --inner-padding-bottom: 18px;
 }
 
 .sticky-container {
@@ -202,4 +218,158 @@
   top: 0;
   z-index: 20;
   background: var(--ion-background-color, #fff);
+}
+
+.conjugation-list {
+  background-color: transparent;
+  padding: 10px 0;
+  margin: 0;
+  gap: 0;
+}
+
+.conjugation-item.dictionary-word-item {
+  --background: transparent;
+  --padding-start: 1.5rem;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.conjugation-text-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.conjugation-item svg {
+  margin-right: 16px;
+}
+
+.verb-header {
+  --background: #fff;
+}
+
+.verb-dropdown-icon {
+  color: #1447a6;
+}
+
+.word-meaning-container {
+  padding: 0 16px 8px;
+  background-color: rgba(20, 71, 166, 0.05);
+}
+
+.meaning-content-list {
+  padding-left: 35px;
+  margin: 0;
+  list-style-position: outside;
+  color: #000;
+  padding-right: 16px;
+}
+
+.meaning-content-list li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: justify;
+}
+
+.meaning-content-list li span {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.translate-def-button {
+  background: transparent;
+  border: 1px solid #1447a6;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.meaning-content.not-found {
+  color: #888;
+  font-style: italic;
+  padding: 16px;
+}
+
+.verb-details-container {
+  padding: 0 16px 8px;
+  background-color: rgba(20, 71, 166, 0.05);
+}
+
+.verb-section-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #888;
+  padding: 16px 0 8px 16px;
+  text-transform: uppercase;
+}
+
+.verb-meaning-list {
+  padding-left: 35px;
+  margin: 0;
+  list-style-position: outside;
+  color: #000;
+}
+
+.verb-meaning-list li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: justify;
+}
+
+.verb-meaning-list li span {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.conjugation-item .conjugation-part {
+  font-size: 15px;
+}
+
+.conjugation-item .conjugation-part:first-of-type {
+  flex: 0 1 auto;
+  text-align: left;
+  padding-right: 16px;
+}
+
+.conjugation-item .conjugation-part:last-of-type {
+  flex: 0 1 auto;
+  text-align: left;
+  padding-left: 16px;
+}
+
+.conjugation-item .conjugation-arrow {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #1447a6;
+  font-size: 20px;
+}
+
+.meaning-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.meaning-actions ion-button {
+  --border-radius: 8px;
+  font-weight: bold;
+  margin-top: 8px;
+  height: 36px;
+}
+
+.conjugation-list .conjugation-item {
+  padding-left: 20px;
+}
+
+.conjugation-list .words-popover-content-divider {
+  display: none;
 }

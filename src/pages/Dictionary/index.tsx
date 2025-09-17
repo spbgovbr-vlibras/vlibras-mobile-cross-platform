@@ -13,12 +13,13 @@ import {
   IonButton,
   IonIcon
 } from '@ionic/react';
-import { chevronBack } from 'ionicons/icons';
+import { arrowForward, chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
+import { IconHandsTranslate } from 'assets';
 import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
@@ -33,6 +34,8 @@ import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
 import PlayerService from 'services/unity';
+import { DictionaryData } from 'services/types';
+import { getDictionaryData } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
@@ -58,6 +61,10 @@ function getChipClassName(
 function Dictionary() {
   const [searchText, setSearchText] = useState('');
   const [filter, setFilter] = useState<DictionaryFilter>('categories');
+  const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
+  const [expandedWord, setExpandedWord] = useState<string | null>(null);
+  const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
+  const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -75,7 +82,7 @@ function Dictionary() {
 
   const history = useHistory();
 
-  const { setTextGloss, recentTranslation } = useTranslation();
+  const { setTextGloss, setTextPtBr, recentTranslation } = useTranslation();
 
   useIonViewWillEnter(() => {
     dispatch(
@@ -90,13 +97,56 @@ function Dictionary() {
   function translate(text: string) {
     if (text === '%') text = '%25';
     setTextGloss(text, true);
-    history.replace(paths.HOME);
+    history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
+  }
+
+  async function translatePtBr(text: string) {
+    const gloss = await setTextPtBr(text, true, false);
+    history.push(paths.HOME, { from: 'dictionary' });
+    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+  }
+
+  async function toggleWordMeaning(word: Words) {
+    const wordName = word.name;
+    if (expandedWord === wordName) {
+      setExpandedWord(null);
+      return;
+    }
+
+    setExpandedWord(wordName);
+
+    if (wordMeanings[wordName]) {
+      return; // Already fetched
+    }
+
+    setLoadingMeaning(wordName);
+    const meaning = await getDictionaryData(wordName);
+    setWordMeanings(prev => ({ ...prev, [wordName]: meaning }));
+    setLoadingMeaning(null);
   }
 
   const formattedGloss = (gloss: string) => {
     return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
   };
+
+  async function toggleVerbMeaning(verbName: string) {
+    if (expandedVerb === verbName) {
+      setExpandedVerb(null);
+      return;
+    }
+
+    setExpandedVerb(verbName);
+
+    if (wordMeanings[verbName]) {
+      return; // Already fetched
+    }
+
+    setLoadingMeaning(verbName);
+    const meaning = await getDictionaryData(verbName);
+    setWordMeanings(prev => ({ ...prev, [verbName]: meaning }));
+    setLoadingMeaning(null);
+  }
 
   function clearCategoryParam() {
   const params = new URLSearchParams(location.search);
@@ -104,19 +154,64 @@ function Dictionary() {
   history.replace({ search: params.toString() });
 }
 
-  const renderWord = (item: Words) => (
-    <>
-      <IonItem
-        key={item.id}
-        className="dictionary-word-item"
-        onClick={() => translate(item.name)}>
-        <IonText className="dictionary-words-style">
-          {formattedGloss(item.name)}
-        </IonText>
-      </IonItem>
-      <div className="words-popover-content-divider" />
-    </>
-  );
+  const renderMeaningContent = (item: Words) => {
+    const isLoading = loadingMeaning === item.name;
+    const meaning = wordMeanings[item.name];
+    if (isLoading) {
+      return <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>;
+    }
+    if (meaning && meaning.definitions && meaning.definitions.length > 0) {
+      return (
+        <>
+          <div className="verb-section-header">SIGNIFICADO</div>
+          <ol className="meaning-content-list">
+            {meaning.definitions.slice(0, 3).map((def: string, i: number) => {
+              const definitionText = def.split('§')[0];
+              return (
+                <li key={i}>
+                  <span>{`${i + 1}. ${definitionText}`}</span>
+                  <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                    <IconHandsTranslate size={20} color={'#1447a6'} />
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </>
+      );
+    }
+    return <div className="meaning-content not-found">Significado não encontrado.</div>;
+  };
+
+  const renderWord = (item: Words, isLast: boolean) => {
+    const isExpanded = expandedWord === item.name;
+
+    return (
+      <div key={item.id}>
+        <IonItem
+          className="dictionary-word-item"
+          button
+          detail={false}
+          onClick={() => toggleWordMeaning(item)}
+          lines={isExpanded || isLast ? 'none' : 'full'}
+        >
+          <IonText className="dictionary-words-style">
+            {formattedGloss(item.name)}
+          </IonText>
+          <IonIcon
+            icon={isExpanded ? chevronUp : chevronDown}
+            slot="end"
+            className="verb-dropdown-icon"
+          />
+        </IonItem>
+        {isExpanded && (
+          <div className="word-meaning-container">
+            {renderMeaningContent(item)}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderRecents = (item: string) => (
     <IonItem
@@ -137,7 +232,6 @@ function Dictionary() {
         onClick={() => translate(item)}>
         <IonText className="dictionary-words-style">{item}</IonText>
       </IonItem>
-      {item !== '' ? <div className="divider"></div> : null}
     </>
   );
 
@@ -160,11 +254,12 @@ function Dictionary() {
     </>
   );
 
-  const renderCategories = (item: {name: string; logoUrl: string; index: number}) => (
+  const renderCategories = (item: {name: string; logoUrl: string; index: number}, isLast: boolean) => (
     <>
       <IonItem
-        className="dictionary-word-item"
+        className="dictionary-word-item category-item"
         button
+        lines={isLast ? 'none' : 'full'}
         onClick={() => {
           history.push(`?category=${item.index}`);
         }}
@@ -177,36 +272,92 @@ function Dictionary() {
         )}
         <IonText className="dictionary-words-style">{item.name}</IonText>
       </IonItem>
-      <div className="words-popover-content-divider" />
     </>
   );
 
   const renderCategoryWords = (index: number) => (
     <>
-      {CategoriesList[index].name === 'Verbos' ? renderVerbs() : dicTest.map((item) => renderWord(item))}
+      {CategoriesList[index].name === 'Verbos' ? renderVerbs() : dicTest.map((item, i) => renderWord(item, i === dicTest.length - 1))}
     </>
   );
 
+  function handleVerbClick(verb: string) {
+    if (expandedVerb === verb) {
+      setExpandedVerb(null);
+    } else {
+      setExpandedVerb(verb);
+    }
+  }
+
   const renderVerbs = () => {
     const grouped = groupVerbs(dicTest);
-    return Object.entries(grouped).map(([verb, words], index) => (
-      <IonList key={verb} lines="none" className="dictionary-words-list">
-      {/* Cabeçalho do verbo */}
-      {renderWord({ name: verb, id: index })}
-
-      {/* Variações do verbo */}
-      {words.map((w, i) => (
-        <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item" onClick={() => translate(w)}>
-          <IonText className="dictionary-words-style">{w}</IonText>
-        </IonItem>
-      ))}
-    </IonList>
-    ));
+    const verbs = Object.entries(grouped);
+    return verbs.map(([verb, words], i) => {
+      const isExpanded = expandedVerb === verb;
+      const meaning = wordMeanings[verb];
+      const isLoadingMeaning = loadingMeaning === verb;
+      return (
+        <div key={verb} className="verb-group">
+          <IonItem
+            lines={isExpanded || i === verbs.length - 1 ? 'none' : 'full'}
+            className="dictionary-word-item verb-header"
+            button
+            detail={false}
+            onClick={() => toggleVerbMeaning(verb)}>
+            <IonText className="dictionary-words-style">{verb}</IonText>
+            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"/>
+          </IonItem>
+          {isExpanded && (
+            <div className="verb-details-container">
+              {isLoadingMeaning && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+              {meaning?.definitions && meaning.definitions.length > 0 && (
+                <>
+                  <div className="verb-section-header">SIGNIFICADO</div>
+                  <ol className="verb-meaning-list">
+                    {meaning.definitions.slice(0, 2).map((def, i) => {
+                      const definitionText = def.split('§')[0];
+                      return (
+                        <li key={i}>
+                          <span>{`${i + 1}. ${definitionText}`}</span>
+                          <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                            <IconHandsTranslate size={18} color={'#1447a6'} />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
+              )}
+              <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+              <IonList lines="none" className="dictionary-words-list conjugation-list">
+                {words.map((w, i) => {
+                  return (
+                    <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                      <div className="conjugation-text-wrapper">
+                        <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
+                        <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                        <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                      </div>
+                    </IonItem>
+                  );
+                })}
+              </IonList>
+            </div>
+          )}
+        </div>
+      );
+    });
   };
 
-  type VerbGroups = Record<string, string[]>;
+  type VerbConjugation = {
+    original: string;
+    prefix: string;
+    suffix: string;
+    transformed: string;
+  };
+  type VerbGroups = Record<string, VerbConjugation[]>;
   function groupVerbs(words: Words[]): VerbGroups {
-    return words.reduce<VerbGroups>((acc, word) => {
+    const verbGroups = words.reduce<VerbGroups>((acc, word) => {
       const prefixMap: Record<string, string> = {
         '1S_': 'EU',
         '2S_': 'VOCÊ',
@@ -230,16 +381,36 @@ function Dictionary() {
         const verb = match[2];
         const suffix = match[3] || '';
 
-        const prefixText = prefixMap[prefix] ? prefixMap[prefix] + ' ' : '';
-        const suffixText = suffixMap[suffix] ? ' ' + suffixMap[suffix] : '';
+        const prefixText = prefixMap[prefix] || '';
+        const suffixText = suffixMap[suffix] || '';
 
-        const transformed = prefix ? `${prefixText} PARA ${suffixText}` : '';
-        if (!acc[verb]) acc[verb] = [];
-        acc[verb].push(transformed);
+        if (prefixText && suffixText) {
+          const transformed = `${prefixText} PARA ${suffixText}`;
+          if (!acc[verb]) acc[verb] = [];
+          acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
+        }
       }
 
       return acc;
     }, {});
+
+    const conjugationOrder = [
+      'EU PARA VOCÊ',
+      'EU PARA ELE(A)',
+      'EU PARA ELES(A)',
+      'VOCÊ PARA MIM',
+      'VOCÊ PARA NÓS',
+      'VOCÊ PARA ELES(AS)',
+      'ELES(AS) PARA MIM'
+    ];
+    
+    for (const verb in verbGroups) {
+      verbGroups[verb].sort((a, b) => {
+        return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
+      });
+    }
+
+    return verbGroups;
   }
 
   const renderEmptyOrLoadingState = () => {
@@ -399,21 +570,20 @@ function Dictionary() {
           </div>
 
           <div className="dictionary-words-container">
-            <div className="words-list-popover-content-divider" />
-            <IonList lines="none" className="dictionary-words-list">
+            <IonList lines="none" className={`dictionary-words-list ${category ? 'has-category-header' : ''}`}>
               {regionalismWords.length > 0 && filter === 'alphabetical'
                 ? regionalismWords.map((item) => renderOnRegionalism(item))
                 : null}
 
               {filter === 'alphabetical'
-                ? dictionary.map((item) => renderWord(item))
+                ? dictionary.map((item, i) => renderWord(item, i === dictionary.length - 1))
                 : filter === 'recents'
                 ? recentTranslation
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))
                 : category
                   ? renderCategoryWords(Number(category))
-                  : CategoriesList.map((item, index) => renderCategories({...item, index}))
+                  : CategoriesList.map((item, index) => renderCategories({...item, index}, index === CategoriesList.length - 1))
               }
 
               {renderEmptyOrLoadingState()}
