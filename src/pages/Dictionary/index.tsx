@@ -33,8 +33,8 @@ import wordsJson from 'data/classified_words_reduced.json';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words } from 'models/dictionary';
-import PlayerService from 'services/unity';
 import { DictionaryData } from 'services/types';
+import PlayerService from 'services/unity';
 import { getDictionaryData } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
@@ -43,24 +43,28 @@ import { Strings } from './strings';
 
 import './styles.css';
 
-type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
+export type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
 
 const playerService = PlayerService.getPlayerInstance();
 
 const TIME_DEBOUNCE_MS = 200;
+
 
 function getChipClassName(
   filter: DictionaryFilter,
   expected: DictionaryFilter
 ) {
   return filter === expected
-    ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
-    : { color: '#4b4b4b', background: '#ededed' };
+  ? { color: '#1447a6', background: '#D6E5F9', fontWeight: 'bold' }
+  : { color: '#4b4b4b', background: '#ededed' };
 }
 
 function Dictionary() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
   const [searchText, setSearchText] = useState('');
-  const [filter, setFilter] = useState<DictionaryFilter>('categories');
+  const initialFilter = (queryParams.get('filter') as DictionaryFilter) || 'categories';
+  const [filter, setFilter] = useState<DictionaryFilter>(initialFilter);
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
@@ -95,6 +99,15 @@ function Dictionary() {
   }, [dispatch, currentRegionalism.abbreviation]);
 
   function translate(text: string) {
+    const dictionaryState = {
+      filter,
+      searchText,
+      expandedWord,
+      expandedVerb,
+      visibleVerbCount,
+      category,
+    };
+    sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
     if (text === '%') text = '%25';
     setTextGloss(text, true);
     history.push(paths.HOME, { from: 'dictionary' });
@@ -102,6 +115,15 @@ function Dictionary() {
   }
 
   async function translatePtBr(text: string) {
+    const dictionaryState = {
+      filter,
+      searchText,
+      expandedWord,
+      expandedVerb,
+      visibleVerbCount,
+      category,
+    };
+    sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
     const gloss = await setTextPtBr(text, true, false);
     history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
@@ -148,11 +170,13 @@ function Dictionary() {
     setLoadingMeaning(null);
   }
 
-  function clearCategoryParam() {
-  const params = new URLSearchParams(location.search);
-  params.delete('category');
-  history.replace({ search: params.toString() });
-}
+  function clearUrlParams() {
+    const params = new URLSearchParams(location.search);
+    params.delete('filter');
+    params.delete('category');
+    history.replace({ search: params.toString() });
+    setVisibleVerbCount(VERB_COUNT);
+  }
 
   const renderMeaningContent = (item: Words) => {
     const isLoading = loadingMeaning === item.name;
@@ -192,16 +216,17 @@ function Dictionary() {
           className="dictionary-word-item"
           button
           detail={false}
-          onClick={() => toggleWordMeaning(item)}
           lines={isExpanded || isLast ? 'none' : 'full'}
         >
-          <IonText className="dictionary-words-style">
+          <IonText className="dictionary-words-style"
+                   onClick={() => translate(item.name)}>
             {formattedGloss(item.name)}
           </IonText>
           <IonIcon
             icon={isExpanded ? chevronUp : chevronDown}
             slot="end"
             className="verb-dropdown-icon"
+            onClick={() => toggleWordMeaning(item)}
           />
         </IonItem>
         {isExpanded && (
@@ -209,6 +234,7 @@ function Dictionary() {
             {renderMeaningContent(item)}
           </div>
         )}
+        {/* <div className="words-list-popover-content-divider" /> */}
       </div>
     );
   };
@@ -277,7 +303,17 @@ function Dictionary() {
 
   const renderCategoryWords = (index: number) => (
     <>
-      {CategoriesList[index].name === 'Verbos' ? renderVerbs() : dicTest.map((item, i) => renderWord(item, i === dicTest.length - 1))}
+      {CategoriesList[index].name === 'Verbos' ?
+        renderVerbs() : dicTest.map((item, i) => renderWord(item, i === dicTest.length - 1))}
+    </>
+  );
+
+  const renderAllWords = () => (
+    <>
+      {wordsJson
+        .filter((item) => !item.categorias.includes('Verbos'))
+        .map((item, index) => renderWord({id: index, name: item.palavra}, index === wordsJson.length - 1))}
+      {renderVerbs()}
     </>
   );
 
@@ -290,26 +326,28 @@ function Dictionary() {
   }
 
   const renderVerbs = () => {
-    const grouped = groupVerbs(dicTest);
-    const verbs = Object.entries(grouped);
-    return verbs.map(([verb, words], i) => {
+    return verbList.slice(0, visibleVerbCount).map(([verb, words], i) => {
       const isExpanded = expandedVerb === verb;
       const meaning = wordMeanings[verb];
       const isLoadingMeaning = loadingMeaning === verb;
       return (
         <div key={verb} className="verb-group">
           <IonItem
-            lines={isExpanded || i === verbs.length - 1 ? 'none' : 'full'}
+            lines={isExpanded || i === verbList.length - 1 ? 'none' : 'full'}
             className="dictionary-word-item verb-header"
             button
-            detail={false}
-            onClick={() => toggleVerbMeaning(verb)}>
-            <IonText className="dictionary-words-style">{verb}</IonText>
-            <IonIcon icon={isExpanded ? chevronUp : chevronDown} slot="end" className="verb-dropdown-icon"/>
+            detail={false}>
+            <IonText className="dictionary-words-style"
+                    onClick={() => translate(verb)}>{verb}</IonText>
+            <IonIcon icon={isExpanded ? chevronUp : chevronDown}
+                     slot="end"
+                     className="verb-dropdown-icon"
+                     onClick={() => toggleVerbMeaning(verb)}/>
           </IonItem>
           {isExpanded && (
             <div className="verb-details-container">
-              {isLoadingMeaning && <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+              {isLoadingMeaning &&
+                <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
               {meaning?.definitions && meaning.definitions.length > 0 && (
                 <>
                   <div className="verb-section-header">SIGNIFICADO</div>
@@ -332,7 +370,9 @@ function Dictionary() {
               <IonList lines="none" className="dictionary-words-list conjugation-list">
                 {words.map((w, i) => {
                   return (
-                    <IonItem key={`${verb}-form-${i}`} className="dictionary-word-item conjugation-item" onClick={() => translate(w.original)}>
+                    <IonItem key={`${verb}-form-${i}`}
+                             className="dictionary-word-item conjugation-item"
+                             onClick={() => translate(w.original)}>
                       <div className="conjugation-text-wrapper">
                         <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
                         <IonIcon icon={arrowForward} className="conjugation-arrow" />
@@ -348,6 +388,13 @@ function Dictionary() {
       );
     });
   };
+  const handleLoadMoreVerbs = (event: CustomEvent<void>) => {
+    setVisibleVerbCount(prev => {
+      const newCount = prev + 20;
+      return Math.min(newCount, verbList.length);
+    });
+    (event.target as HTMLIonInfiniteScrollElement).complete();
+  };
 
   type VerbConjugation = {
     original: string;
@@ -356,25 +403,35 @@ function Dictionary() {
     transformed: string;
   };
   type VerbGroups = Record<string, VerbConjugation[]>;
+  const prefixMap: Record<string, string> = {
+    '1S_': 'EU',
+    '2S_': 'VOCÊ',
+    '3S_': 'ELE(A)',
+    '1P_': 'NÓS',
+    '2P_': 'VOCÊS',
+    '3P_': 'ELES(AS)',
+  };
+  const suffixMap: Record<string, string> = {
+    '_1S': 'MIM',
+    '_2S': 'VOCÊ',
+    '_3S': 'ELE(A)',
+    '_1P': 'NÓS',
+    '_2P': 'VOCÊS',
+    '_3P': 'ELES(AS)',
+  };
+  const verbRegex = /^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/;
+
+  const transformedCache: Record<string, string> = {};
+  for (const p in prefixMap) {
+    for (const s in suffixMap) {
+      transformedCache[`${p}|${s}`] = `${prefixMap[p]} PARA ${suffixMap[s]}`;
+    }
+  }
+
   function groupVerbs(words: Words[]): VerbGroups {
-    const verbGroups = words.reduce<VerbGroups>((acc, word) => {
-      const prefixMap: Record<string, string> = {
-        '1S_': 'EU',
-        '2S_': 'VOCÊ',
-        '3S_': 'ELE(A)',
-        '1P_': 'NÓS',
-        '2P_': 'VOCÊS',
-        '3P_': 'ELES(AS)',
-      };
-      const suffixMap: Record<string, string> = {
-        '_1S': 'MIM',
-        '_2S': 'VOCÊ',
-        '_3S': 'ELE(A)',
-        '_1P': 'NÓS',
-        '_2P': 'VOCÊS',
-        '_3P': 'ELES(AS)',
-      };
-      const match = word.name.match(/^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/);
+    const acc: VerbGroups = {};
+    for (const word of words) {
+      const match = word.name.match(verbRegex);
 
       if (match) {
         const prefix = match[1] || '';
@@ -384,26 +441,55 @@ function Dictionary() {
         const prefixText = prefixMap[prefix] || '';
         const suffixText = suffixMap[suffix] || '';
 
+        if (!acc[verb]) acc[verb] = [];
         if (prefixText && suffixText) {
           const transformed = `${prefixText} PARA ${suffixText}`;
-          if (!acc[verb]) acc[verb] = [];
           acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
         }
       }
 
-      return acc;
-    }, {});
+    }
+    const verbGroups = acc;
 
     const conjugationOrder = [
+      'EU PARA MIM',
       'EU PARA VOCÊ',
       'EU PARA ELE(A)',
-      'EU PARA ELES(A)',
+      'EU PARA NÓS',
+      'EU PARA VOCÊS',
+      'EU PARA ELES(AS)',
       'VOCÊ PARA MIM',
+      'VOCÊ PARA VOCÊ',
+      'VOCÊ PARA ELE(A)',
       'VOCÊ PARA NÓS',
+      'VOCÊ PARA VOCÊS',
       'VOCÊ PARA ELES(AS)',
-      'ELES(AS) PARA MIM'
+      'ELE(A) PARA MIM',
+      'ELE(A) PARA VOCÊ',
+      'ELE(A) PARA ELE(A)',
+      'ELE(A) PARA NÓS',
+      'ELE(A) PARA VOCÊS',
+      'ELE(A) PARA ELES(AS)',
+      'NÓS PARA MIM',
+      'NÓS PARA VOCÊ',
+      'NÓS PARA ELE(A)',
+      'NÓS PARA NÓS',
+      'NÓS PARA VOCÊS',
+      'NÓS PARA ELES(AS)',
+      'VOCÊS PARA MIM',
+      'VOCÊS PARA VOCÊ',
+      'VOCÊS PARA ELE(A)',
+      'VOCÊS PARA NÓS',
+      'VOCÊS PARA VOCÊS',
+      'VOCÊS PARA ELES(AS)',
+      'ELES(AS) PARA MIM',
+      'ELES(AS) PARA VOCÊ',
+      'ELES(AS) PARA ELE(A)',
+      'ELES(AS) PARA NÓS',
+      'ELES(AS) PARA VOCÊS',
+      'ELES(AS) PARA ELES(AS)',
     ];
-    
+
     for (const verb in verbGroups) {
       verbGroups[verb].sort((a, b) => {
         return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
@@ -483,38 +569,63 @@ function Dictionary() {
   }, [dispatch, infiniteScrollRef, metadata, searchText]);
 
   function handleFilterAlpha() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('alphabetical');
   }
 
   function handleFilterRecents() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('recents');
   }
 
   function handleFilterCategories() {
-    clearCategoryParam();
+    clearUrlParams();
     setFilter('categories');
   }
-
-  const location = useLocation();
   const [dicTest, setDicTest] = useState<Words[]>([]);
+  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
-  const queryParams = new URLSearchParams(location.search);
+
+  const VERB_COUNT = 20;
+  const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
+  const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const category = queryParams.get('category');
 
   useEffect(() => {
-    if (category) {
-      const index = parseInt(category, 10);
-      const categoryName = CategoriesList[index].name;
-      setDicTest(wordsJson
-      .filter(item => item.categorias.includes(categoryName))
-      .map((item, index) => {
-        return {
-          id: index,
-          name: item.palavra
-        };
-      }));
+    const verbs = wordsJson
+      .filter(item => item.categorias.includes('Verbos'))
+      .map((item, index) => ({ id: index, name: item.palavra }));
+    setVerbGroupsState(groupVerbs(verbs));
+  }, []);
+
+//   useEffect(() => {
+//   if (category && CategoriesList[Number(category)].name === 'Verbos') {
+//     const verbs = wordsJson
+//       .filter(item => item.categorias.includes('Verbos'))
+//       .map((item, index) => ({ id: index, name: item.palavra }));
+//     setDicTest(verbs);
+//     setVerbGroupsState(groupVerbs(verbs));
+//   }
+// }, [category]);
+
+  useEffect(() => {
+    if (category === 'Verbos') {
+      const verbs = wordsJson
+        .filter(item => item.categorias.includes('Verbos'))
+        .map((item, index) => ({ id: index, name: item.palavra }));
+        setDicTest(verbs);
+        setVerbGroupsState(groupVerbs(verbs));
+    } else {
+        const index = Number(category);
+        const categoryName = CategoriesList[index].name;
+        setDicTest(wordsJson
+        .filter(item => item.categorias.includes(categoryName))
+        .map((item, index) => {
+          return {
+            id: index,
+            name: item.palavra
+          };
+        }));
     }
   }, [location.search]);
 
@@ -576,14 +687,16 @@ function Dictionary() {
                 : null}
 
               {filter === 'alphabetical'
-                ? dictionary.map((item, i) => renderWord(item, i === dictionary.length - 1))
+                ? renderAllWords()
+                // ? dictionary.map((item) => renderWord(item))
                 : filter === 'recents'
                 ? recentTranslation
                     .filter((item) => item.includes(searchText.toUpperCase()))
                     .map((item) => renderRecents(item))
                 : category
                   ? renderCategoryWords(Number(category))
-                  : CategoriesList.map((item, index) => renderCategories({...item, index}, index === CategoriesList.length - 1))
+                  : CategoriesList.map((item, index) =>
+                        renderCategories({...item, index}, index === CategoriesList.length - 1))
               }
 
               {renderEmptyOrLoadingState()}
@@ -600,11 +713,22 @@ function Dictionary() {
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
-            onIonInfinite={fetchWords}>
+            onIonInfinite={handleLoadMoreVerbs}>
             <IonInfiniteScrollContent
               loadingSpinner={loading ? 'bubbles' : undefined}
               color="dark"
               loadingText={loading ? 'Carregando sinais...' : ''}
+            />
+          </IonInfiniteScroll>
+        )}
+        {(filter === 'categories') && CategoriesList[Number(category)].name === 'Verbos'  && (
+          <IonInfiniteScroll
+            threshold="100px"
+            onIonInfinite={handleLoadMoreVerbs}
+          >
+            <IonInfiniteScrollContent
+              loadingSpinner="bubbles"
+              loadingText="Carregando mais verbos..."
             />
           </IonInfiniteScroll>
         )}
