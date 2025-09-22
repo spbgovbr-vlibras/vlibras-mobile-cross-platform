@@ -124,7 +124,7 @@ function Dictionary() {
       category,
     };
     sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
-    const gloss = await setTextPtBr(text, true, false);
+    const gloss = await setTextPtBr(text, false, false);
     history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
@@ -216,7 +216,7 @@ function Dictionary() {
           className="dictionary-word-item"
           button
           detail={false}
-          lines={isExpanded || isLast ? 'none' : 'full'}
+          lines={'none'}
         >
           <IonText className="dictionary-words-style"
                    onClick={() => translate(item.name)}>
@@ -234,7 +234,7 @@ function Dictionary() {
             {renderMeaningContent(item)}
           </div>
         )}
-        {/* <div className="words-list-popover-content-divider" /> */}
+        {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
       </div>
     );
   };
@@ -285,7 +285,7 @@ function Dictionary() {
       <IonItem
         className="dictionary-word-item category-item"
         button
-        lines={isLast ? 'none' : 'full'}
+        lines={'none'}
         onClick={() => {
           history.push(`?category=${item.index}`);
         }}
@@ -298,6 +298,7 @@ function Dictionary() {
         )}
         <IonText className="dictionary-words-style">{item.name}</IonText>
       </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
     </>
   );
 
@@ -330,10 +331,11 @@ function Dictionary() {
       const isExpanded = expandedVerb === verb;
       const meaning = wordMeanings[verb];
       const isLoadingMeaning = loadingMeaning === verb;
+      const isLast = i === verbList.slice(0, visibleVerbCount).length - 1;
       return (
         <div key={verb} className="verb-group">
           <IonItem
-            lines={isExpanded || i === verbList.length - 1 ? 'none' : 'full'}
+            lines={'none'}
             className="dictionary-word-item verb-header"
             button
             detail={false}>
@@ -384,6 +386,7 @@ function Dictionary() {
               </IonList>
             </div>
           )}
+          {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
         </div>
       );
     });
@@ -677,6 +680,7 @@ function Dictionary() {
               </IonChip>
             )}
           </div>
+          <div className="dictionary-words-container-divider" />
           {category && renderCategoryHeader(Number(category))}
           </div>
 

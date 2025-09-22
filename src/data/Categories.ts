@@ -68,10 +68,10 @@ const CategoriesList = [
     name: 'Medidas',
     logoUrl: IconMeasures
   },
-  {
-    name: 'Indefinidos',
-    logoUrl: IconUndefined
-  },
+  // {
+  //   name: 'Indefinidos',
+  //   logoUrl: IconUndefined
+  // },
 ];
 
 export default CategoriesList;
