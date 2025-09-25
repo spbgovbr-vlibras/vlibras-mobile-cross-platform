@@ -332,6 +332,7 @@ function Dictionary() {
       const meaning = wordMeanings[verb];
       const isLoadingMeaning = loadingMeaning === verb;
       const isLast = i === verbList.slice(0, visibleVerbCount).length - 1;
+      const slicedWords = words.slice(verb === words[0]?.original ? 1 : 0);
       return (
         <div key={verb} className="verb-group">
           <IonItem
@@ -340,7 +341,7 @@ function Dictionary() {
             button
             detail={false}>
             <IonText className="dictionary-words-style"
-                    onClick={() => translate(verb)}>{verb}</IonText>
+                    onClick={() => translate(words[0].original)}>{verb}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
                      slot="end"
                      className="verb-dropdown-icon"
@@ -368,22 +369,26 @@ function Dictionary() {
                   </ol>
                 </>
               )}
-              <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
-              <IonList lines="none" className="dictionary-words-list conjugation-list">
-                {words.map((w, i) => {
-                  return (
-                    <IonItem key={`${verb}-form-${i}`}
-                             className="dictionary-word-item conjugation-item"
-                             onClick={() => translate(w.original)}>
-                      <div className="conjugation-text-wrapper">
-                        <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
-                        <IonIcon icon={arrowForward} className="conjugation-arrow" />
-                        <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
-                      </div>
-                    </IonItem>
-                  );
-                })}
-              </IonList>
+              {slicedWords.length > 0 && (
+              <>
+                <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+                <IonList lines="none" className="dictionary-words-list conjugation-list">
+                  {slicedWords.map((w, i) => {
+                    return (
+                      <IonItem key={`${verb}-form-${i}`}
+                              className="dictionary-word-item conjugation-item"
+                              onClick={() => translate(w.original)}>
+                        <div className="conjugation-text-wrapper">
+                          <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
+                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                          <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                        </div>
+                      </IonItem>
+                    );
+                  })}
+                </IonList>
+              </>
+              )}
             </div>
           )}
           {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
@@ -448,6 +453,8 @@ function Dictionary() {
         if (prefixText && suffixText) {
           const transformed = `${prefixText} PARA ${suffixText}`;
           acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
+        } else {
+          acc[verb].unshift({ original: word.name, transformed: word.name, prefix: prefixText, suffix: suffixText });
         }
       }
 

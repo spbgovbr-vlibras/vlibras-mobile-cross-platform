@@ -1,28 +1,28 @@
-import type { DictionaryData } from "./types";
+import type { DictionaryData } from './types';
 
-const genders = ["masculino", "feminino", "neutro"];
+const genders = ['masculino', 'feminino', 'neutro'];
 
-function extractDefinitionData(html: string, word: string): Omit<DictionaryData, "title"> {
+function extractDefinitionData(html: string, word: string): Omit<DictionaryData, 'title'> {
 	const parser = new DOMParser();
-	const doc = parser.parseFromString(html, "text/html");
+	const doc = parser.parseFromString(html, 'text/html');
 
-	const gender = doc.querySelector("tbody")?.innerHTML.match(new RegExp(`title="(?<gender>${genders.join("|")})"`))
+	const gender = doc.querySelector('tbody')?.innerHTML.match(new RegExp(`title='(?<gender>${genders.join('|')})'`))
 		?.groups?.gender;
-	const definitions = Array.from(doc.querySelectorAll("ol > li"))
+	const definitions = Array.from(doc.querySelectorAll('ol > li'))
 		.map((el) => {
-			const spans = el?.querySelectorAll("span.mw-cite-backlink");
+			const spans = el?.querySelectorAll('span.mw-cite-backlink');
 			spans?.forEach((span) => span.remove());
 
-			let definitionText = el?.textContent?.trim() || "";
+			let definitionText = el?.textContent?.trim() || '';
 
-			const subdefinitions = el?.querySelectorAll("ul > li") || el?.querySelectorAll("ol > li");
+			const subdefinitions = el?.querySelectorAll('ul > li') || el?.querySelectorAll('ol > li');
 			if (subdefinitions?.length) {
 				const subdefTexts = Array.from(subdefinitions)
 					.map((subdef) => subdef.textContent?.trim())
 					.filter(Boolean);
 
 				if (subdefTexts.length) {
-					definitionText = `${definitionText} §${subdefTexts.join("§")}`;
+					definitionText = `${definitionText} §${subdefTexts.join('§')}`;
 				}
 			}
 
@@ -32,22 +32,22 @@ function extractDefinitionData(html: string, word: string): Omit<DictionaryData,
 		.filter((d, i, list) => list.indexOf(d) === i)
 		.filter(Boolean) as string[];
 
-	const wordClass = doc.querySelector("h2")?.textContent?.trim();
+	const wordClass = doc.querySelector('h2')?.textContent?.trim();
 
-	const pronunciationEl = Array.from(doc.querySelectorAll("b")).find(
-		(el) => el.innerHTML.includes("<u>") || el.innerHTML.includes("."),
+	const pronunciationEl = Array.from(doc.querySelectorAll('b')).find(
+		(el) => el.innerHTML.includes('<u>') || el.innerHTML.includes('.'),
 	);
 	const pronunciation = pronunciationEl?.textContent?.trim();
 
 	const etymology = extractEtymology(doc);
 
 	const translations: Record<string, string[]> = {};
-	const translationsTable = doc.querySelector("table.traduções");
+	const translationsTable = doc.querySelector('table.traduções');
 	if (translationsTable) {
-		const rows = translationsTable.querySelectorAll("tr");
+		const rows = translationsTable.querySelectorAll('tr');
 		rows.forEach((row) => {
-			const langCell = row.querySelector("td");
-			const words = row.querySelectorAll("td ~ td a");
+			const langCell = row.querySelector('td');
+			const words = row.querySelectorAll('td ~ td a');
 			if (langCell && words.length > 0) {
 				const lang = langCell.textContent?.trim().toLowerCase();
 				const terms = Array.from(words)
@@ -60,7 +60,7 @@ function extractDefinitionData(html: string, word: string): Omit<DictionaryData,
 		});
 	}
 
-	const imgUrl = doc.querySelector("img")?.getAttribute("src") || undefined;
+	const imgUrl = doc.querySelector('img')?.getAttribute('src') || undefined;
 	const formattedTranslations = Object.keys(translations).length > 0 ? translations : undefined;
 
 	return {
@@ -77,8 +77,8 @@ function extractDefinitionData(html: string, word: string): Omit<DictionaryData,
 function extractEtymology(doc: Document): string | undefined {
 	let etymology: string | undefined;
 
-	const etymologyHeader = Array.from(doc.querySelectorAll("h2, h3")).find((el) =>
-		el.textContent?.toLowerCase().includes("etimologia"),
+	const etymologyHeader = Array.from(doc.querySelectorAll('h2, h3')).find((el) =>
+		el.textContent?.toLowerCase().includes('etimologia'),
 	);
 
 	if (etymologyHeader) {
@@ -91,7 +91,8 @@ function extractEtymology(doc: Document): string | undefined {
 
 async function fetchWiktionaryPageHTML(word: string): Promise<string | null> {
 	const processedWord = word.toLowerCase().replace(/_/g, ' ');
-	const url = `https://pt.wiktionary.org/w/api.php?action=parse&redirects=1&format=json&origin=*&page=${encodeURIComponent(processedWord)}&prop=text&formatversion=2`;
+	const url = `https://pt.wiktionary.org/w/api.php?action=parse&redirects=1&
+				 format=json&origin=*&page=${encodeURIComponent(processedWord)}&prop=text&formatversion=2`;
 	try {
         const res = await fetch(url);
         if (!res.ok) return null;
@@ -104,7 +105,8 @@ async function fetchWiktionaryPageHTML(word: string): Promise<string | null> {
 
 async function fetchSuggestedWord(word: string): Promise<string | null> {
 	const processedWord = word.toLowerCase().replace(/_/g, ' ');
-	const searchUrl = `https://pt.wiktionary.org/w/rest.php/v1/search/title?q=${encodeURIComponent(processedWord)}&limit=1`;
+	const searchUrl = `https://pt.wiktionary.org/w/rest.php/v1/search/title?
+					   q=${encodeURIComponent(processedWord)}&limit=1`;
 	try {
         const res = await fetch(searchUrl);
         if (!res.ok) return null;
