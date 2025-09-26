@@ -217,7 +217,7 @@ function Dictionary() {
   };
 
   const filteredDicTest = dicTest.filter(item =>
-    item.name.toLowerCase().startsWith(searchText.toLowerCase())
+    item.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const renderWord = (item: Words, isLast: boolean) => {
@@ -331,6 +331,7 @@ function Dictionary() {
     <>
       {wordsJson
         .filter((item) => !item.categorias.includes('Verbos'))
+        .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
         .map((item, index) => renderWord({id: index, name: item.palavra}, index === wordsJson.length - 1))}
       {renderVerbs()}
     </>
@@ -450,7 +451,7 @@ function Dictionary() {
   }
 
   const filteredVerbList = verbList.filter(([verb]) =>
-    verb.toLowerCase().startsWith(searchText.toLowerCase())
+    verb.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const renderVerbs = () => {
@@ -619,6 +620,14 @@ function Dictionary() {
   }
 
   useEffect(() => {
+    const verbs = wordsJson
+      .filter(item => item.categorias.includes('Verbos'))
+      .map((item, index) => ({ id: index, name: item.palavra }));
+    setVerbGroupsState(groupVerbs(verbs));
+  }, []);
+
+
+  useEffect(() => {
     if (category === 'Verbos') {
       const verbs = wordsJson
         .filter(item => item.categorias.includes('Verbos'))
@@ -647,7 +656,7 @@ function Dictionary() {
         return metadata.total;
       case 'recents':
         return recentTranslation.filter((item) =>
-          item.toUpperCase().startsWith(searchText.toUpperCase())
+          item.toUpperCase().includes(searchText.toUpperCase())
         ).length;
       case 'categories':
         if (category) {
@@ -657,7 +666,7 @@ function Dictionary() {
           return filteredDicTest.length;
         }
         return CategoriesList.filter((item) =>
-          item.name.toLowerCase().startsWith(searchText.toLowerCase())
+          item.name.toLowerCase().includes(searchText.toLowerCase())
         ).length;
       default:
         return 0;
@@ -749,15 +758,15 @@ function Dictionary() {
                 : null}
 
               {filter === 'alphabetical'
-                ? dictionary.map((item, i) => renderWord(item, i === dictionary.length - 1))
+                ? renderAllWords()
                 : filter === 'recents'
                 ? recentTranslation
-                    .filter((item) => item.toUpperCase().startsWith(searchText.toUpperCase()))
+                    .filter((item) => item.toUpperCase().includes(searchText.toUpperCase()))
                     .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
                   ? renderCategoryWords(Number(category))
                   : CategoriesList.filter(item =>
-                      item.name.toLowerCase().startsWith(searchText.toLowerCase())
+                      item.name.toLowerCase().includes(searchText.toLowerCase())
                     ).map((item, index, arr) => {
                       const originalIndex = CategoriesList.findIndex(c => c.name === item.name);
                       return renderCategories(
