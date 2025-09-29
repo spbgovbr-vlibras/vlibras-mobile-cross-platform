@@ -244,6 +244,22 @@
   align-items: center;
 }
 
+.desambiguation-section-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #888;
+  padding: 0px 0px 0px 16px;
+  text-transform: uppercase;
+}
+  
+.desambiguation-text {
+  --background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  --padding-start: 20px;
+}
+
 .conjugation-item svg {
   margin-right: 16px;
 }
