@@ -136,8 +136,8 @@
   --padding-start: 31px;
   --min-height: 0px;
   margin-bottom: 4px;
-  --inner-padding-top: 8px;
-  --inner-padding-bottom: 8px;
+  --inner-padding-top: 2px;
+  --inner-padding-bottom: 2px;
   --border-color: transparent;
 }
 .dictionary-word-item.category-item {
