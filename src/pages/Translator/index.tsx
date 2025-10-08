@@ -46,9 +46,9 @@ const Translator = () => {
     const today = new Date().toLocaleDateString('pt-BR');
     reloadHistory(today, formatted, 'text');
 
-    if (formatted.toLocaleLowerCase() === "ativar modo live") {
+    if (formatted.toLocaleLowerCase() === 'ativar modo live') {
       history.push(paths.HOME + '?live=1');
-      return
+      return;
     }
 
     const gloss = (await setTextPtBr(formatted, false)).toString();

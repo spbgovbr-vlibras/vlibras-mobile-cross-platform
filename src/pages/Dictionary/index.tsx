@@ -69,6 +69,7 @@ function Dictionary() {
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
+  const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -87,6 +88,15 @@ function Dictionary() {
   const history = useHistory();
 
   const { setTextGloss, setTextPtBr, recentTranslation } = useTranslation();
+
+  const [dicTest, setDicTest] = useState<Words[]>([]);
+  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
+
+
+  const VERB_COUNT = 20;
+  const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
+  const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
+  const category = queryParams.get('category');
 
   useIonViewWillEnter(() => {
     dispatch(
@@ -124,7 +134,7 @@ function Dictionary() {
       category,
     };
     sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
-    const gloss = await setTextPtBr(text, true, false);
+    const gloss = await setTextPtBr(text, false, false);
     history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
@@ -207,6 +217,62 @@ function Dictionary() {
     return <div className="meaning-content not-found">Significado não encontrado.</div>;
   };
 
+  const filteredDicTest = dicTest.filter(item =>
+    item.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const renderDesambiguateWord = (item: Words[], isLast: boolean) => {
+    const name = item[0].name.split('&', 1)[0];
+    const id = item[0].id;
+    const isExpanded = expandedWord === name;
+
+    return (
+      <div key={id}>
+        <IonItem
+          className="dictionary-word-item"
+          button
+          detail={false}
+          lines={'none'}
+        >
+          <IonText className="dictionary-words-style"
+                   onClick={() => translate(name)}>
+            {formattedGloss(name)}
+          </IonText>
+          <IonIcon
+            icon={isExpanded ? chevronUp : chevronDown}
+            slot="end"
+            className="verb-dropdown-icon"
+            onClick={() => toggleWordMeaning({name: name, id: id})}
+          />
+        </IonItem>
+        {isExpanded && (
+          <div className="word-meaning-container">
+            {renderMeaningContent(item[0])}
+
+            <IonList lines="none" className="dictionary-words-list conjugation-list">
+            <div className="verb-section-header">DESAMBIGUAÇÃO</div>
+            {item.slice(item[0].name.includes('&') ? 0 : 1).map((word, index) => {
+              const suffix = word.name.split('&', 2)[1];
+              return (
+                <div key={`desambiguation-${word.id}`} className="desambiguation-section-header">
+                  <IonItem key={`${suffix}-form-${index}`}
+                          className="dictionary-word-item desambiguation-text"
+                          onClick={() => translate(word.name)}>
+                    <div className="desambiguation-text">
+                      <IonText className="dictionary-words-style">{suffix}</IonText>
+                    </div>
+                  </IonItem>
+                </div>
+              );
+            })}
+            </IonList>
+          </div>
+        )}
+        {!isExpanded && !isLast && <div  key={`divider-${item}`} className="words-list-popover-content-divider" />}
+      </div>
+    );
+  };
+
   const renderWord = (item: Words, isLast: boolean) => {
     const isExpanded = expandedWord === item.name;
 
@@ -216,7 +282,7 @@ function Dictionary() {
           className="dictionary-word-item"
           button
           detail={false}
-          lines={isExpanded || isLast ? 'none' : 'full'}
+          lines={'none'}
         >
           <IonText className="dictionary-words-style"
                    onClick={() => translate(item.name)}>
@@ -234,20 +300,25 @@ function Dictionary() {
             {renderMeaningContent(item)}
           </div>
         )}
-        {/* <div className="words-list-popover-content-divider" /> */}
+        {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
       </div>
     );
   };
 
-  const renderRecents = (item: string) => (
-    <IonItem
-      key={item}
-      className="dictionary-word-item"
-      onClick={() => translate(item)}>
-      <IonText className="dictionary-words-style">
-        {formattedGloss(item)}
-      </IonText>
-    </IonItem>
+  const renderRecents = (item: string, isLast: boolean) => (
+    <>
+      <IonItem
+        key={item}
+        className="dictionary-word-item"
+        onClick={() => translate(item)}
+        lines="none"
+      >
+        <IonText className="dictionary-words-style">
+          {formattedGloss(item)}
+        </IonText>
+      </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
+    </>
   );
 
   const renderOnRegionalism = (item: string) => (
@@ -285,7 +356,7 @@ function Dictionary() {
       <IonItem
         className="dictionary-word-item category-item"
         button
-        lines={isLast ? 'none' : 'full'}
+        lines={'none'}
         onClick={() => {
           history.push(`?category=${item.index}`);
         }}
@@ -298,21 +369,27 @@ function Dictionary() {
         )}
         <IonText className="dictionary-words-style">{item.name}</IonText>
       </IonItem>
+      {!isLast && <div key={`divider-category-${item.index}`} className="words-list-popover-content-divider" />}
     </>
   );
 
   const renderCategoryWords = (index: number) => (
     <>
       {CategoriesList[index].name === 'Verbos' ?
-        renderVerbs() : dicTest.map((item, i) => renderWord(item, i === dicTest.length - 1))}
+        renderVerbs() : renderNoVerbsWords(filteredDicTest)}
     </>
   );
 
   const renderAllWords = () => (
     <>
-      {wordsJson
+      {renderNoVerbsWords(sortedJson
         .filter((item) => !item.categorias.includes('Verbos'))
-        .map((item, index) => renderWord({id: index, name: item.palavra}, index === wordsJson.length - 1))}
+        .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
+        .map((item, index) => ({id: index, name: item.palavra})))}
+      {/* {wordsJson
+        .filter((item) => !item.categorias.includes('Verbos'))
+        .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
+        .map((item, index) => renderWord({id: index, name: item.palavra}, index === wordsJson.length - 1))} */}
       {renderVerbs()}
     </>
   );
@@ -325,84 +402,13 @@ function Dictionary() {
     }
   }
 
-  const renderVerbs = () => {
-    return verbList.slice(0, visibleVerbCount).map(([verb, words], i) => {
-      const isExpanded = expandedVerb === verb;
-      const meaning = wordMeanings[verb];
-      const isLoadingMeaning = loadingMeaning === verb;
-      return (
-        <div key={verb} className="verb-group">
-          <IonItem
-            lines={isExpanded || i === verbList.length - 1 ? 'none' : 'full'}
-            className="dictionary-word-item verb-header"
-            button
-            detail={false}>
-            <IonText className="dictionary-words-style"
-                    onClick={() => translate(verb)}>{verb}</IonText>
-            <IonIcon icon={isExpanded ? chevronUp : chevronDown}
-                     slot="end"
-                     className="verb-dropdown-icon"
-                     onClick={() => toggleVerbMeaning(verb)}/>
-          </IonItem>
-          {isExpanded && (
-            <div className="verb-details-container">
-              {isLoadingMeaning &&
-                <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
-              {meaning?.definitions && meaning.definitions.length > 0 && (
-                <>
-                  <div className="verb-section-header">SIGNIFICADO</div>
-                  <ol className="verb-meaning-list">
-                    {meaning.definitions.slice(0, 2).map((def, i) => {
-                      const definitionText = def.split('§')[0];
-                      return (
-                        <li key={i}>
-                          <span>{`${i + 1}. ${definitionText}`}</span>
-                          <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
-                            <IconHandsTranslate size={18} color={'#1447a6'} />
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </>
-              )}
-              <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
-              <IonList lines="none" className="dictionary-words-list conjugation-list">
-                {words.map((w, i) => {
-                  return (
-                    <IonItem key={`${verb}-form-${i}`}
-                             className="dictionary-word-item conjugation-item"
-                             onClick={() => translate(w.original)}>
-                      <div className="conjugation-text-wrapper">
-                        <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
-                        <IonIcon icon={arrowForward} className="conjugation-arrow" />
-                        <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
-                      </div>
-                    </IonItem>
-                  );
-                })}
-              </IonList>
-            </div>
-          )}
-        </div>
-      );
-    });
-  };
-  const handleLoadMoreVerbs = (event: CustomEvent<void>) => {
-    setVisibleVerbCount(prev => {
-      const newCount = prev + 20;
-      return Math.min(newCount, verbList.length);
-    });
-    (event.target as HTMLIonInfiniteScrollElement).complete();
-  };
-
   type VerbConjugation = {
     original: string;
     prefix: string;
     suffix: string;
     transformed: string;
   };
-  type VerbGroups = Record<string, VerbConjugation[]>;
+  type VerbGroups = Record<string, {conjugation: VerbConjugation[], desambiguation: Words[]}>;
   const prefixMap: Record<string, string> = {
     '1S_': 'EU',
     '2S_': 'VOCÊ',
@@ -430,23 +436,40 @@ function Dictionary() {
 
   function groupVerbs(words: Words[]): VerbGroups {
     const acc: VerbGroups = {};
+
     for (const word of words) {
-      const match = word.name.match(verbRegex);
+      const baseVerb = word.name.includes('&') ?
+        word.name.split('&', 1)[0] : word.name.match(verbRegex)?.[2] || word.name;
 
-      if (match) {
-        const prefix = match[1] || '';
-        const verb = match[2];
-        const suffix = match[3] || '';
+      if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
 
-        const prefixText = prefixMap[prefix] || '';
-        const suffixText = suffixMap[suffix] || '';
+      if(word.name.includes('&')) {
+        acc[baseVerb].desambiguation.push(word);
+      } else {
+        const match = word.name.match(verbRegex);
+        if (match) {
+          const prefix = match[1] || '';
+          const verb = match[2];
+          const suffix = match[3] || '';
 
-        if (!acc[verb]) acc[verb] = [];
-        if (prefixText && suffixText) {
-          const transformed = `${prefixText} PARA ${suffixText}`;
-          acc[verb].push({ original: word.name, transformed, prefix: prefixText, suffix: suffixText });
+          const prefixText = prefixMap[prefix] || '';
+          const suffixText = suffixMap[suffix] || '';
+
+          if (prefixText && suffixText) {
+            const transformed = `${prefixText} PARA ${suffixText}`;
+            acc[verb].conjugation.push({ original: word.name,
+                                         transformed,
+                                         prefix: prefixText,
+                                         suffix: suffixText });
+          } else {
+            acc[verb].conjugation.unshift({ original: word.name,
+                                            transformed: word.name,
+                                            prefix: prefixText,
+                                            suffix: suffixText });
+          }
         }
       }
+
 
     }
     const verbGroups = acc;
@@ -491,7 +514,7 @@ function Dictionary() {
     ];
 
     for (const verb in verbGroups) {
-      verbGroups[verb].sort((a, b) => {
+      verbGroups[verb].conjugation.sort((a, b) => {
         return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
       });
     }
@@ -499,8 +522,151 @@ function Dictionary() {
     return verbGroups;
   }
 
+  const filteredVerbList = verbList.filter(([verb]) =>
+    verb.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const renderNoVerbsWords = (words: Words[]) => {
+    const elements: JSX.Element[] = [];
+    let i = 0;
+    while(i < words.length) {
+      const word = words[i];
+      if(word.name.includes('&')) {
+        const prefix = word.name.split('&', 1)[0];
+        const group: Words[] = [];
+
+        while(i < words.length && words[i].name.startsWith(prefix + '&')) {
+          group.push(words[i]);
+          i++;
+        }
+        i--;
+        elements.push(renderDesambiguateWord(group, i === filteredDicTest.length-1));
+
+      } else if(i < words.length-1 && words[i+1].name.includes('&')) {
+        const prefix = words[i+1].name.split('&', 1)[0];
+        if(prefix === word.name) {
+          const group: Words[] = [];
+          group.push(word);
+          i++;
+          while(i < words.length && words[i].name.startsWith(prefix + '&')) {
+            group.push(words[i]);
+            i++;
+          }
+          i--;
+          elements.push(renderDesambiguateWord(group, i === filteredDicTest.length-1));
+        } else {
+          elements.push(renderWord(word, i === filteredDicTest.length-1));
+        }
+
+      } else {
+        elements.push(renderWord(word, i === filteredDicTest.length-1));
+      }
+      i++;
+    }
+    return elements;
+  };
+
+  const renderVerbs = () => {
+    return filteredVerbList.slice(0, visibleVerbCount).map(([verb, groups], i) => {
+      const conjugationWords = groups.conjugation;
+      const desambiguationWords = groups.desambiguation;
+      const isExpanded = expandedVerb === verb;
+      const meaning = wordMeanings[verb];
+      const isLoadingMeaning = loadingMeaning === verb;
+      const isLast = i === filteredVerbList.slice(0, visibleVerbCount).length - 1;
+      const slicedWords = conjugationWords.slice(verb === conjugationWords[0]?.original ? 1 : 0);
+      return (
+        <div key={verb} className="verb-group">
+          <IonItem
+            lines={'none'}
+            className="dictionary-word-item verb-header"
+            button
+            detail={false}>
+            <IonText className="dictionary-words-style"
+                    onClick={() => translate(conjugationWords[0].original)}>{verb}</IonText>
+            <IonIcon icon={isExpanded ? chevronUp : chevronDown}
+                     slot="end"
+                     className="verb-dropdown-icon"
+                     onClick={() => toggleVerbMeaning(verb)}/>
+          </IonItem>
+          {isExpanded && (
+            <div className="verb-details-container">
+              {isLoadingMeaning &&
+                <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+              {meaning?.definitions && meaning.definitions.length > 0 && (
+                <>
+                  <div className="verb-section-header">SIGNIFICADO</div>
+                  <ol className="verb-meaning-list">
+                    {meaning.definitions.slice(0, 2).map((def, i) => {
+                      const definitionText = def.split('§')[0];
+                      return (
+                        <li key={i}>
+                          <span>{`${i + 1}. ${definitionText}`}</span>
+                          <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                            <IconHandsTranslate size={18} color={'#1447a6'} />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
+              )}
+              {slicedWords.length > 0 && (
+              <>
+                <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+                <IonList lines="none" className="dictionary-words-list conjugation-list">
+                  {slicedWords.map((w, i) => {
+                    return (
+                      <IonItem key={`${verb}-form-${i}`}
+                              className="dictionary-word-item conjugation-item"
+                              onClick={() => translate(w.original)}>
+                        <div className="conjugation-text-wrapper">
+                          <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
+                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                          <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                        </div>
+                      </IonItem>
+                    );
+                  })}
+                </IonList>
+              </>
+              )}
+              {desambiguationWords.length > 0 && (
+                <IonList lines="none" className="dictionary-words-list conjugation-list">
+                <div className="verb-section-header">DESAMBIGUAÇÃO</div>
+                {desambiguationWords.map((word, index) => {
+                  const suffix = word.name.split('&', 2)[1];
+                  return (
+                    <div key={`teste-${index}`} className="desambiguation-section-header">
+                      <IonItem key={`${suffix}-form-${index}`}
+                              className="dictionary-word-item desambiguation-text"
+                              onClick={() => translate(word.name)}>
+                        <div className="desambiguation-text">
+                          <IonText className="dictionary-words-style">{suffix}</IonText>
+                        </div>
+                      </IonItem>
+                    </div>
+                  );
+                })}
+                </IonList>
+              )}
+            </div>
+          )}
+          {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
+        </div>
+      );
+    });
+  };
+  const handleLoadMoreVerbs = (event: CustomEvent<void>) => {
+    setVisibleVerbCount(prev => {
+      const newCount = prev + 20;
+      return Math.min(newCount, verbList.length);
+    });
+    (event.target as HTMLIonInfiniteScrollElement).complete();
+  };
+
   const renderEmptyOrLoadingState = () => {
-    if (dictionary.length === 0 && filter === 'alphabetical') {
+    if (dictionary.length === 0 && filter === 'alphabetical' && searchText) {
       if (error) {
         return (
           <div className="dictionary-word-item centered">
@@ -522,24 +688,27 @@ function Dictionary() {
     return null;
   };
 
-  const onSearch = useCallback(
-    (event) => {
-      const searchedWord: string | undefined = event.target.value;
-      setSearchText(searchedWord || '');
-      dispatch(
-        Creators.fetchWords.request({
-          page: FIRST_PAGE_INDEX,
-          limit: MAX_PER_PAGE,
-          ...((searchedWord?.length || 0) > 0 && {
-            name: `%${searchedWord}%`,
-          }),
-        })
-      );
-    },
-    [dispatch]
-  );
+  useEffect(() => {
+    const debouncedSearch = debounce(() => {
+      if (filter === 'alphabetical') {
+        dispatch(
+          Creators.fetchWords.request({
+            page: FIRST_PAGE_INDEX,
+            limit: MAX_PER_PAGE,
+            ...((searchText?.length || 0) > 0 && {
+              name: `${searchText}%`,
+            }),
+          })
+        );
+      }
+    }, TIME_DEBOUNCE_MS);
 
-  const debouncedSearch = debounce(onSearch, TIME_DEBOUNCE_MS);
+    debouncedSearch();
+
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchText, filter, dispatch]);
 
   useEffect(() => {
     if (!loading) {
@@ -582,35 +751,37 @@ function Dictionary() {
     clearUrlParams();
     setFilter('categories');
   }
-  const [dicTest, setDicTest] = useState<Words[]>([]);
-  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
+  function sortWordsWithAndFirst(words: { palavra: string; categorias: string[] }[]) {
+  return [...words].sort((a, b) => {
+    const baseA = a.palavra.split(/[^a-zA-ZÀ-ú0-9]/)[0];
+    const baseB = b.palavra.split(/[^a-zA-ZÀ-ú0-9]/)[0];
 
-  const VERB_COUNT = 20;
-  const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
-  const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
-  const category = queryParams.get('category');
+    if (baseA !== baseB) return baseA.localeCompare(baseB);
+
+    if (a.palavra === baseA) return -1;
+    if (b.palavra === baseB) return 1;
+
+    if (a.palavra.includes('&') && !b.palavra.includes('&')) return -1;
+    if (!a.palavra.includes('&') && b.palavra.includes('&')) return 1;
+
+    return a.palavra.localeCompare(b.palavra);
+  });
+}
 
   useEffect(() => {
-    const verbs = wordsJson
+    const sorted = sortWordsWithAndFirst(wordsJson);
+    setSortedJson(sorted);
+    const verbs = sorted
       .filter(item => item.categorias.includes('Verbos'))
       .map((item, index) => ({ id: index, name: item.palavra }));
     setVerbGroupsState(groupVerbs(verbs));
   }, []);
 
-//   useEffect(() => {
-//   if (category && CategoriesList[Number(category)].name === 'Verbos') {
-//     const verbs = wordsJson
-//       .filter(item => item.categorias.includes('Verbos'))
-//       .map((item, index) => ({ id: index, name: item.palavra }));
-//     setDicTest(verbs);
-//     setVerbGroupsState(groupVerbs(verbs));
-//   }
-// }, [category]);
 
   useEffect(() => {
     if (category === 'Verbos') {
-      const verbs = wordsJson
+      const verbs = sortedJson
         .filter(item => item.categorias.includes('Verbos'))
         .map((item, index) => ({ id: index, name: item.palavra }));
         setDicTest(verbs);
@@ -618,7 +789,7 @@ function Dictionary() {
     } else {
         const index = Number(category);
         const categoryName = CategoriesList[index].name;
-        setDicTest(wordsJson
+        setDicTest(sortedJson
         .filter(item => item.categorias.includes(categoryName))
         .map((item, index) => {
           return {
@@ -629,6 +800,56 @@ function Dictionary() {
     }
   }, [location.search]);
 
+  const getResultsCount = () => {
+    if (!searchText) return 0;
+
+    switch (filter) {
+      case 'alphabetical':
+        return metadata.total;
+      case 'recents':
+        return recentTranslation.filter((item) =>
+          item.toUpperCase().includes(searchText.toUpperCase())
+        ).length;
+      case 'categories':
+        if (category) {
+          if (CategoriesList[Number(category)].name === 'Verbos') {
+            return filteredVerbList.length;
+          }
+          return filteredDicTest.length;
+        }
+        return CategoriesList.filter((item) =>
+          item.name.toLowerCase().includes(searchText.toLowerCase())
+        ).length;
+      default:
+        return 0;
+    }
+  };
+
+  const resultsCount = getResultsCount();
+
+  const getResultsLabel = () => {
+    const count = resultsCount;
+    if (count === 0) return '';
+
+    let label = '';
+    switch (filter) {
+      case 'alphabetical':
+      case 'recents':
+        label = count === 1 ? 'sinal' : 'sinais';
+        break;
+      case 'categories':
+        if (category) {
+          label = count === 1 ? 'sinal' : 'sinais';
+        } else {
+          label = count === 1 ? 'categoria' : 'categorias';
+        }
+        break;
+      default:
+        label = count === 1 ? 'resultado' : 'resultados';
+    }
+    return `${count} ${label}`;
+  };
+
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent>
@@ -638,7 +859,8 @@ function Dictionary() {
             <IonSearchbar
               className="dictionary-textarea"
               placeholder={Strings.TEXT_PLACEHOLDER}
-              onIonInput={debouncedSearch}
+              onIonInput={e => setSearchText(e.detail.value!)}
+              value={searchText}
               inputmode="text"
               searchIcon="search-sharp"
               onKeyDown={(e) => {(e.key === 'Enter') ? (e.target as HTMLInputElement).blur() : null;}}
@@ -670,13 +892,14 @@ function Dictionary() {
                 )}
               </IonChip>
             )}
-            {(searchText && dictionary.length>0) && (
+            {(searchText && resultsCount > 0) && (
               <IonChip
                 style={{ color: '#4b4b4b', background: '#FFFFFF'}}>
-                {dictionary.length+' sinais encontrados'}
+                {getResultsLabel()}
               </IonChip>
             )}
           </div>
+          <div className="dictionary-words-container-divider" />
           {category && renderCategoryHeader(Number(category))}
           </div>
 
@@ -688,21 +911,27 @@ function Dictionary() {
 
               {filter === 'alphabetical'
                 ? renderAllWords()
-                // ? dictionary.map((item) => renderWord(item))
                 : filter === 'recents'
                 ? recentTranslation
-                    .filter((item) => item.includes(searchText.toUpperCase()))
-                    .map((item) => renderRecents(item))
+                    .filter((item) => item.toUpperCase().includes(searchText.toUpperCase()))
+                    .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
                   ? renderCategoryWords(Number(category))
-                  : CategoriesList.map((item, index) =>
-                        renderCategories({...item, index}, index === CategoriesList.length - 1))
+                  : CategoriesList.filter(item =>
+                      item.name.toLowerCase().includes(searchText.toLowerCase())
+                    ).map((item, index, arr) => {
+                      const originalIndex = CategoriesList.findIndex(c => c.name === item.name);
+                      return renderCategories(
+                        { ...item, index: originalIndex },
+                        index === arr.length - 1
+                      );
+                    })
               }
 
               {renderEmptyOrLoadingState()}
 
               {recentTranslation.length === 0 && filter === 'recents' ? (
-                <div className="dictionary-word-item">
+                <div key="no-recent" className="dictionary-word-item">
                   Nenhuma pesquisa recente
                 </div>
               ) : null}
