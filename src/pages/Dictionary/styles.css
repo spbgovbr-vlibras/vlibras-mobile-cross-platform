@@ -116,7 +116,6 @@
   font-weight: normal;
   font-size: 16.8px;
   line-height: 130%;
-
   color: #1447a6;
 }
 .dictionary-words-list {
@@ -264,8 +263,9 @@
   margin-right: 16px;
 }
 
-.verb-header {
-  --background: #fff;
+.word-expanded-header {
+  --background: #f0f0f0;
+  margin: 0;
 }
 
 .verb-dropdown-icon {
@@ -274,7 +274,7 @@
 
 .word-meaning-container {
   padding: 0 16px 8px;
-  background-color: rgba(20, 71, 166, 0.05);
+  background-color: #f0f0f0;
 }
 
 .meaning-content-list {
@@ -290,7 +290,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  text-align: justify;
+  text-align: left;
 }
 
 .meaning-content-list li span {
@@ -321,7 +321,7 @@
 
 .verb-details-container {
   padding: 0 16px 8px;
-  background-color: rgba(20, 71, 166, 0.05);
+  background-color: rgba(239, 239, 239, 1);
 }
 
 .verb-section-header {
