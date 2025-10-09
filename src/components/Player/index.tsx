@@ -392,6 +392,9 @@ function Player() {
         if(parsed.category) {
           params.set('category', parsed.category);
         }
+        if(parsed.scrollTop) {
+          params.set('scroll', parsed.scrollTop);
+        }
         history.push(`${paths.DICTIONARY_PLAYER}?${params.toString()}`);
       } else {
 
