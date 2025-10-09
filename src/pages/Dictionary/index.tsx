@@ -9,12 +9,13 @@ import {
   IonInfiniteScroll,
   IonInfiniteScrollContent,
   useIonViewWillEnter,
+  useIonViewDidEnter,
   IonImg,
   IonButton,
   IonIcon
 } from '@ionic/react';
 import { arrowForward, chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
-import { debounce } from 'lodash';
+import { debounce, toNumber } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
@@ -70,12 +71,11 @@ function Dictionary() {
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
+  const [scrollTopValue, setscrollTopValue] = useState<number>();
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
-  const listRef = useRef<HTMLIonListElement>(null);
-  const itemRef = useRef<HTMLIonItemElement>(null);
 
   const {
     metadata,
@@ -101,21 +101,18 @@ function Dictionary() {
   const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const category = queryParams.get('category');
 
-  useIonViewWillEnter(() => {
-  const queryParams = new URLSearchParams(location.search);
-
-  const scrollParam = queryParams.get('scroll');
-  if (scrollParam) {
-    try {
-      const scrollObj = JSON.parse(decodeURIComponent(scrollParam));
-      contentRef.current?.getScrollElement().then(scrollEl => {
-        scrollEl.scrollTop = scrollObj.scrollTop || 0;
-      });
-    } catch (e) {
-      console.warn('Erro ao restaurar scroll:', e);
-    }
-  }
-}, []);
+useIonViewDidEnter(() => {
+  contentRef.current?.getScrollElement().then((el) => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const scrollParam = queryParams.get('scroll');
+    el.scrollTop = toNumber(scrollParam);
+    const handler = () => {
+      setscrollTopValue(el.scrollTop);
+    };
+    el.addEventListener('scroll', handler);
+    return () => el.removeEventListener('scroll', handler);
+  });
+});
 
   useIonViewWillEnter(() => {
     dispatch(
@@ -128,8 +125,7 @@ function Dictionary() {
   }, [dispatch, currentRegionalism.abbreviation]);
 
   async function saveDictionaryState() {
-    const scrollEl = await contentRef.current?.getScrollElement();
-    let scrollTop = scrollEl?.scrollTop ?? 0;
+    const scrollTop = scrollTopValue;
     const dictionaryState = {
       filter,
       searchText,
@@ -141,6 +137,7 @@ function Dictionary() {
     };
     sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
   };
+
 
   function translate(text: string) {
     saveDictionaryState();
@@ -604,7 +601,6 @@ function Dictionary() {
       return (
         <div key={verb} className="verb-group">
           <IonItem
-            ref={itemRef}
             lines={'none'}
             className={`dictionary-word-item ${isExpanded ? 'word-expanded-header' : ''}`}
             button
@@ -928,7 +924,7 @@ function Dictionary() {
           </div>
 
           <div className="dictionary-words-container">
-            <IonList ref={listRef}
+            <IonList
             lines="none" className={`dictionary-words-list ${category ? 'has-category-header' : ''}`}>
               {regionalismWords.length > 0 && filter === 'alphabetical'
                 ? regionalismWords.map((item) => renderOnRegionalism(item))
