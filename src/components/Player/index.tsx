@@ -530,6 +530,7 @@ function Player() {
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
+      console.log('[MODO LIVE] Texto bruto capturado:', currentTranscript);
       speechBufferRef.current = currentTranscript;
     };
 
@@ -572,6 +573,7 @@ function Player() {
         // ...pega apenas o trecho novo.
         const newChunk = fullText.substring(lastIndex).trim();
         if (newChunk) {
+          console.log('[MODO LIVE] Enviando para tradução:', newChunk);
           translationQueueRef.current.push(newChunk);
           // E avança o marcador para a posição atual.
           lastSentIndexRef.current = fullText.length;
