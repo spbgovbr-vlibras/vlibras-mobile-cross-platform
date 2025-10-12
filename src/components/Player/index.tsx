@@ -527,9 +527,11 @@ function Player() {
     // A única tarefa do onresult é atualizar o buffer com a fala completa.
     recognition.onresult = (event: any) => {
       let currentTranscript = '';
+      // Itera sobre todos os resultados do evento.
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
+      console.log('[MODO LIVE] Texto bruto capturado:', currentTranscript);
       speechBufferRef.current = currentTranscript;
     };
 
@@ -572,6 +574,7 @@ function Player() {
         // ...pega apenas o trecho novo.
         const newChunk = fullText.substring(lastIndex).trim();
         if (newChunk) {
+          console.log('[MODO LIVE] Enviando para tradução:', newChunk);
           translationQueueRef.current.push(newChunk);
           // E avança o marcador para a posição atual.
           lastSentIndexRef.current = fullText.length;
