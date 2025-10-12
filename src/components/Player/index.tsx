@@ -121,6 +121,7 @@ function Player() {
 
   // --- Start of Live Translation Refs ---
   const recognitionRef = useRef<any>(null);
+  const finalTranscriptRef = useRef<string>('');
   const isLiveActiveRef = useRef<boolean>(false);
   const translationQueueRef = useRef<string[]>([]);
   const speechBufferRef = useRef<string>(''); // Buffer Contínuo
@@ -494,6 +495,16 @@ function Player() {
   );
 
   function startLiveRecognition() {
+    // Reseta o estado para uma nova sessão de tradução.
+    finalTranscriptRef.current = '';
+    speechBufferRef.current = '';
+    lastSentIndexRef.current = 0;
+    translationQueueRef.current = [];
+    isPlayerBusyRef.current = false;
+    lastPlayedTextRef.current = '';
+    isLiveActiveRef.current = true;
+    setIsLiveListening(true);
+
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -506,14 +517,6 @@ function Player() {
       return;
     }
 
-    isLiveActiveRef.current = true;
-    translationQueueRef.current = [];
-    speechBufferRef.current = ''; // Zera o buffer
-    lastSentIndexRef.current = 0; // Zera o marcador
-    isPlayerBusyRef.current = false;
-    lastPlayedTextRef.current = '';
-    setIsLiveListening(true);
-
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
     recognition.continuous = true;
@@ -523,13 +526,23 @@ function Player() {
 
     // A única tarefa do onresult é atualizar o buffer com a fala completa.
     recognition.onresult = (event: any) => {
-      let currentTranscript = '';
-      // Itera sobre todos os resultados do evento.
-      for (let i = 0; i < event.results.length; i++) {
-        currentTranscript += event.results[i][0].transcript;
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const result = event.results[i];
+        if (result[0].confidence > 0.1) {
+          if (result.isFinal) {
+            finalTranscriptRef.current += result[0].transcript;
+          } else {
+            interimTranscript += result[0].transcript;
+          }
+        }
       }
-      console.log('[MODO LIVE] Texto bruto capturado:', currentTranscript);
-      speechBufferRef.current = currentTranscript;
+
+      speechBufferRef.current = finalTranscriptRef.current + interimTranscript;
+      
+      console.log('[MODO LIVE] Final:', finalTranscriptRef.current);
+      console.log('[MODO LIVE] Interino:', interimTranscript);
     };
 
     recognition.onend = () => {
@@ -578,7 +591,7 @@ function Player() {
           processTranslationQueue();
         }
       }
-    }, 1500);
+    }, 750);
 
     recognition.start();
   }
@@ -590,16 +603,11 @@ function Player() {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
-
     if (chunkingIntervalRef.current) {
       clearInterval(chunkingIntervalRef.current);
+      chunkingIntervalRef.current = null;
     }
-
-    translationQueueRef.current = [];
-    speechBufferRef.current = '';
-    lastSentIndexRef.current = 0; // Reseta o marcador
-    isPlayerBusyRef.current = false;
-    lastPlayedTextRef.current = '';
+    finalTranscriptRef.current = '';
     setIsLiveListening(false);
     handleStop();
   }

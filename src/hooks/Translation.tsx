@@ -184,7 +184,9 @@ const TranslationProvider: React.FC = ({ children }) => {
         if (showLoading) {
           setIsLoading(false);
         }
-        setTranslationGlossError(true);
+        if (showLoading) {
+          setTranslationGlossError(true);
+        }
         await delay(1500);
         translation = text;
       }
