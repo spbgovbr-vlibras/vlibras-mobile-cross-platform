@@ -527,6 +527,7 @@ function Player() {
     // A única tarefa do onresult é atualizar o buffer com a fala completa.
     recognition.onresult = (event: any) => {
       let currentTranscript = '';
+      // Itera sobre todos os resultados do evento.
       for (let i = 0; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
       }
