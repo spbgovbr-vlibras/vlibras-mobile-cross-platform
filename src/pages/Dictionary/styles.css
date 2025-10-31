@@ -300,7 +300,7 @@
 
 .translate-def-button {
   background: transparent;
-  border: 1px solid #1447a6;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
   padding: 5px;

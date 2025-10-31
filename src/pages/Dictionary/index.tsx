@@ -68,6 +68,7 @@ function Dictionary() {
   const [filter, setFilter] = useState<DictionaryFilter>(initialFilter);
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
+  const [expandedLetter, setExpandedLetter] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
@@ -272,13 +273,16 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning({name: name, id: id})}
         >
-          <IonText className="dictionary-words-style"
-                   onClick={(e) => {
-                    e.stopPropagation();
-                    translate(name)
-                   }}>
-            {formattedGloss(name)}
-          </IonText>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IonText className="dictionary-words-style">
+              {formattedGloss(name)}
+            </IonText>
+            {isExpanded && (
+              <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(name)}}>
+                <IconHandsTranslate size={20} color={'#1447a6'} />
+              </button>
+            )}
+          </div>
           <IonIcon
             icon={isExpanded ? chevronUp : chevronDown}
             slot="end"
@@ -308,13 +312,16 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning(item)}
         >
-          <IonText className="dictionary-words-style"
-                   onClick={(e) => {
-                    e.stopPropagation();
-                    translate(item.name)
-                   }}>
-            {formattedGloss(item.name)}
-          </IonText>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IonText className="dictionary-words-style">
+              {formattedGloss(item.name)}
+            </IonText>
+            {isExpanded && (
+              <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(item.name)}}>
+                <IconHandsTranslate size={20} color={'#1447a6'} />
+              </button>
+            )}
+          </div>
           <IonIcon
             icon={isExpanded ? chevronUp : chevronDown}
             slot="end"
@@ -406,15 +413,203 @@ useIonViewDidEnter(() => {
     </>
   );
 
-  const renderAllWords = () => (
-    <>
-      {renderNoVerbsWords(sortedJson
-        .filter((item) => !item.categorias.includes('Verbos'))
-        .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
-        .map((item, index) => ({id: index, name: item.palavra})))}
-      {renderVerbs()}
-    </>
-  );
+  const renderAllWords = () => {
+    // Helper function to group non-verb words, similar to the logic in renderNoVerbsWords
+    function groupNonVerbs(words: Words[]) {
+      const groups: (Words | Words[])[] = [];
+      let i = 0;
+      while(i < words.length) {
+        const word = words[i];
+        if(word.name.includes('&')) {
+          const prefix = word.name.split('&', 1)[0];
+          const group: Words[] = [];
+          while(i < words.length && words[i].name.startsWith(prefix + '&')) {
+            group.push(words[i]);
+            i++;
+          }
+          i--;
+          groups.push(group);
+        } else if(i < words.length-1 && words[i+1].name.includes('&')) {
+          const prefix = words[i+1].name.split('&', 1)[0];
+          if(prefix === word.name) {
+            const group: Words[] = [];
+            group.push(word);
+            i++;
+            while(i < words.length && words[i].name.startsWith(prefix + '&')) {
+              group.push(words[i]);
+              i++;
+            }
+            i--;
+            groups.push(group);
+          } else {
+            groups.push(word);
+          }
+        } else {
+          groups.push(word);
+        }
+        i++;
+      }
+      return groups;
+    }
+
+    const nonVerbWords = sortedJson
+      .filter((item) => !item.categorias.includes('Verbos'))
+      .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
+      .map((item, index) => ({id: index, name: item.palavra}));
+
+    const groupedNonVerbs = groupNonVerbs(nonVerbWords);
+
+    const allItems: { name: string, type: 'verb' | 'word' | 'desambiguation', data: any }[] = [];
+
+    groupedNonVerbs.forEach(item => {
+        if (Array.isArray(item)) {
+            allItems.push({ name: item[0].name.split('&', 1)[0], type: 'desambiguation', data: item });
+        } else {
+            allItems.push({ name: item.name, type: 'word', data: item });
+        }
+    });
+
+    filteredVerbList.forEach(([verb, groups]) => {
+        allItems.push({ name: verb, type: 'verb', data: { verb, groups } });
+    });
+
+    const groupedByLetter: { [key: string]: typeof allItems } = {};
+
+    allItems.forEach(item => {
+        let firstChar = item.name.charAt(0).toUpperCase();
+        if (/[0-9]/.test(firstChar)) {
+            firstChar = '#';
+        }
+        if (!groupedByLetter[firstChar]) {
+            groupedByLetter[firstChar] = [];
+        }
+        groupedByLetter[firstChar].push(item);
+    });
+
+    const alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    return alphabet.map(letter => {
+        const itemsForLetter = groupedByLetter[letter];
+        if (!itemsForLetter || itemsForLetter.length === 0) {
+            return null;
+        }
+
+        itemsForLetter.sort((a, b) => a.name.localeCompare(b.name));
+
+        const isExpanded = expandedLetter === letter;
+
+        return (
+            <div key={letter}>
+                <IonItem
+                    button
+                    detail={false}
+                    lines="none"
+                    onClick={() => setExpandedLetter(isExpanded ? null : letter)}
+                    className="dictionary-word-item"
+                >
+                    <IonText className="dictionary-words-style">{letter === '#' ? '0..9' : letter}</IonText>
+                    <IonIcon
+                        icon={isExpanded ? chevronUp : chevronDown}
+                        slot="end"
+                        className="verb-dropdown-icon"
+                    />
+                </IonItem>
+                {isExpanded && (
+                    <div style={{ paddingLeft: '16px' }}>
+                        {itemsForLetter.map((item, index) => {
+                            const isLast = index === itemsForLetter.length - 1;
+                            if (item.type === 'word') {
+                                return renderWord(item.data, isLast);
+                            }
+                            if (item.type === 'desambiguation') {
+                                return renderDesambiguateWord(item.data, isLast);
+                            }
+                            if (item.type === 'verb') {
+                                const { verb, groups } = item.data;
+                                // Replicating renderVerbs logic for a single item
+                                const conjugationWords = groups.conjugation;
+                                const desambiguationWords = groups.desambiguation;
+                                const isVerbExpanded = expandedVerb === verb;
+                                const meaning = wordMeanings[verb];
+                                const isLoadingMeaning = loadingMeaning === verb;
+                                const slicedWords = conjugationWords.slice(verb === conjugationWords[0]?.original ? 1 : 0);
+                                return (
+                                  <div key={verb} className="verb-group">
+                                    <IonItem
+                                      lines={'none'}
+                                      className={`dictionary-word-item ${isVerbExpanded ? 'word-expanded-header' : ''}`}
+                                      button
+                                      detail={false}
+                                      onClick={() => toggleVerbMeaning(verb)}
+                                      >
+                                      <IonText className="dictionary-words-style"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                translate(conjugationWords[0].original)
+                                              }}>{verb}</IonText>
+                                      <IonIcon icon={isVerbExpanded ? chevronUp : chevronDown}
+                                              slot="end"
+                                              className="verb-dropdown-icon"
+                                              />
+                                    </IonItem>
+                                    {isVerbExpanded && (
+                                      <div className="verb-details-container">
+                                        {isLoadingMeaning &&
+                                          <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
+                                        {meaning?.definitions && meaning.definitions.length > 0 && (
+                                          <>
+                                            <div className="verb-section-header">SIGNIFICADO</div>
+                                            <ol className="verb-meaning-list">
+                                              {meaning.definitions.slice(0, 2).map((def, i) => {
+                                                const definitionText = def.split('§')[0];
+                                                return (
+                                                  <li key={i}>
+                                                    <span>{`${i + 1}. ${definitionText}`}</span>
+                                                    <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                                                      <IconHandsTranslate size={18} color={'#1447a6'} />
+                                                    </button>
+                                                  </li>
+                                                );
+                                              })}
+                                            </ol>
+                                          </>
+                                        )}
+                                        {slicedWords.length > 0 && (
+                                        <>
+                                          <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+                                          <IonList lines="none" className="dictionary-words-list conjugation-list">
+                                            {slicedWords.map((w: VerbConjugation, i: number) => {
+                                              return (
+                                                <IonItem key={`${verb}-form-${i}`}
+                                                        className="dictionary-word-item conjugation-item"
+                                                        onClick={() => translate(w.original)}>
+                                                  <div className="conjugation-text-wrapper">
+                                                    <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
+                                                    <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                                                    <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                                                  </div>
+                                                </IonItem>
+                                              );
+                                            })}
+                                          </IonList>
+                                        </>
+                                        )}
+                                        {desambiguationWords.length > 0 && renderContext(desambiguationWords)}
+                                      </div>
+                                    )}
+                                    {!isVerbExpanded && !isLast && <div className="words-list-popover-content-divider" />}
+                                  </div>
+                                );
+                            }
+                            return null;
+                        })}
+                    </div>
+                )}
+                {!isExpanded && <div className="words-list-popover-content-divider" />}
+            </div>
+        );
+    });
+  };
 
   function handleVerbClick(verb: string) {
     if (expandedVerb === verb) {
