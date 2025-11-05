@@ -213,8 +213,8 @@
 
 .category-header ion-item {
   --background: rgba(20, 71, 166, 0.0);
-  --inner-padding-top: 18px;
-  --inner-padding-bottom: 18px;
+  --inner-padding-top: 10px;
+  --inner-padding-bottom: 10px;
 }
 
 .sticky-container {
@@ -266,6 +266,14 @@
 .word-expanded-header {
   --background: #f0f0f0;
   margin: 0;
+}
+
+.letter-expanded-header {
+  --background: rgba(20, 71, 166, 0.2);
+}
+
+.letter-expanded-header .dictionary-words-style {
+  font-weight: bold;
 }
 
 .verb-dropdown-icon {
