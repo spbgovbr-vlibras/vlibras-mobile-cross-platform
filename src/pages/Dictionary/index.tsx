@@ -77,6 +77,7 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
+  const stickyContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     metadata,
@@ -497,10 +498,11 @@ useIonViewDidEnter(() => {
                         const targetElement = e.currentTarget;
                         setTimeout(() => {
                           contentRef.current?.getScrollElement().then(scrollElement => {
-                            if (scrollElement) {
+                            if (scrollElement && stickyContainerRef.current) {
                               const itemRect = targetElement.getBoundingClientRect();
                               const scrollRect = scrollElement.getBoundingClientRect();
-                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top;
+                              const stickyHeaderHeight = stickyContainerRef.current.offsetHeight;
+                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top - stickyHeaderHeight;
                               contentRef.current?.scrollToPoint(0, scrollTop, 300);
                             }
                           });
@@ -1074,7 +1076,7 @@ useIonViewDidEnter(() => {
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent ref={contentRef}>
         <div className="dictionary-container">
-          <div className="sticky-container">
+          <div className="sticky-container" ref={stickyContainerRef}>
           <div className="dictionary-box">
             <IonSearchbar
               className="dictionary-textarea"
