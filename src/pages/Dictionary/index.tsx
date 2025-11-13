@@ -220,7 +220,7 @@ useIonViewDidEnter(() => {
               return (
                 <li key={i}>
                   <span>{`${i + 1}. ${definitionText}`}</span>
-                  <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                  <button className='translate-def-button' onClick={(e) => { e.stopPropagation(); translatePtBr(definitionText); }}>
                     <IconHandsTranslate size={20} color={'#1447a6'} />
                   </button>
                 </li>
@@ -247,7 +247,7 @@ useIonViewDidEnter(() => {
           <div key={`teste-${index}`} className="desambiguation-section-header">
             <IonItem key={`${suffix}-form-${index}`}
                     className="dictionary-word-item desambiguation-text"
-                    onClick={() => translate(word.name)}>
+                    onClick={(e) => { e.stopPropagation(); translate(word.name); }}>
               <div className="desambiguation-text">
                 <IonText className="dictionary-words-style">{mainWord} ({suffix})</IonText>
               </div>
@@ -273,16 +273,9 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning({name: name, id: id})}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <IonText className="dictionary-words-style">
-              {formattedGloss(name)}
-            </IonText>
-            {isExpanded && (
-              <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(name)}}>
-                <IconHandsTranslate size={20} color={'#1447a6'} />
-              </button>
-            )}
-          </div>
+          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(name); }}>
+            {formattedGloss(name)}
+          </IonText>
           <IonIcon
             icon={isExpanded ? chevronUp : chevronDown}
             slot="end"
@@ -312,16 +305,9 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning(item)}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <IonText className="dictionary-words-style">
-              {formattedGloss(item.name)}
-            </IonText>
-            {isExpanded && (
-              <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(item.name)}}>
-                <IconHandsTranslate size={20} color={'#1447a6'} />
-              </button>
-            )}
-          </div>
+          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(item.name); }}>
+            {formattedGloss(item.name)}
+          </IonText>
           <IonIcon
             icon={isExpanded ? chevronUp : chevronDown}
             slot="end"
@@ -557,15 +543,8 @@ useIonViewDidEnter(() => {
                                       button
                                       detail={false}
                                       onClick={() => toggleVerbMeaning(verb)}
-                                      >
-                                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <IonText className="dictionary-words-style">{verb}</IonText>
-                                        {isVerbExpanded && (
-                                          <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original)}}>
-                                            <IconHandsTranslate size={20} color={'#1447a6'} />
-                                          </button>
-                                        )}
-                                      </div>
+                                    >
+                                      <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{verb}</IonText>
                                       <IonIcon icon={isVerbExpanded ? chevronUp : chevronDown}
                                               slot="end"
                                               className="verb-dropdown-icon"
@@ -584,7 +563,7 @@ useIonViewDidEnter(() => {
                                                 return (
                                                   <li key={i}>
                                                     <span>{`${i + 1}. ${definitionText}`}</span>
-                                                    <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                                                    <button className='translate-def-button' onClick={(e) => { e.stopPropagation(); translatePtBr(definitionText); }}>
                                                       <IconHandsTranslate size={18} color={'#1447a6'} />
                                                     </button>
                                                   </li>
@@ -601,7 +580,7 @@ useIonViewDidEnter(() => {
                                               return (
                                                 <IonItem key={`${verb}-form-${i}`}
                                                         className="dictionary-word-item conjugation-item"
-                                                        onClick={() => translate(w.original)}>
+                                                        onClick={(e) => { e.stopPropagation(); translate(w.original); }}>
                                                   <div className="conjugation-text-wrapper">
                                                     <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
                                                     <IonIcon icon={arrowForward} className="conjugation-arrow" />
@@ -826,19 +805,12 @@ useIonViewDidEnter(() => {
             button
             detail={false}
             onClick={() => toggleVerbMeaning(verb)}
-            >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <IonText className="dictionary-words-style">{verb}</IonText>
-              {isExpanded && (
-                <button className='translate-def-button' style={{ marginLeft: '10px' }} onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original)}}>
-                  <IconHandsTranslate size={20} color={'#1447a6'} />
-                </button>
-              )}
-            </div>
+          >
+            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{verb}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
-                     slot="end"
-                     className="verb-dropdown-icon"
-                     />
+                    slot="end"
+                    className="verb-dropdown-icon"
+                    />
           </IonItem>
           {isExpanded && (
             <div className="verb-details-container">
@@ -853,7 +825,7 @@ useIonViewDidEnter(() => {
                       return (
                         <li key={i}>
                           <span>{`${i + 1}. ${definitionText}`}</span>
-                          <button className='translate-def-button' onClick={() => translatePtBr(definitionText)}>
+                          <button className='translate-def-button' onClick={(e) => { e.stopPropagation(); translatePtBr(definitionText); }}>
                             <IconHandsTranslate size={18} color={'#1447a6'} />
                           </button>
                         </li>
@@ -870,7 +842,7 @@ useIonViewDidEnter(() => {
                     return (
                       <IonItem key={`${verb}-form-${i}`}
                               className="dictionary-word-item conjugation-item"
-                              onClick={() => translate(w.original)}>
+                              onClick={(e) => { e.stopPropagation(); translate(w.original); }}>
                         <div className="conjugation-text-wrapper">
                           <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
                           <IonIcon icon={arrowForward} className="conjugation-arrow" />
