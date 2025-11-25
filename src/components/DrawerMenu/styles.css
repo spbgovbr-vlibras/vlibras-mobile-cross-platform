@@ -168,8 +168,13 @@
 }
 
 .emotion-option.selected {
-  background-color: #e6f0ff;
+  background-color: #0F449C;
   font-weight: 600;
+  color: white;
+}
+
+.emotion-option.selected svg {
+  fill: white;
 }
 
 .arrow-down {
