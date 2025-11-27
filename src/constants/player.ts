@@ -22,4 +22,5 @@ export enum PlayerKeys {
   APPLY_DISGUST_EMOTION = 'ApplyDisgustEmotion',
   APPLY_FEAR_EMOTION = 'ApplyFearEmotion',
   APPLY_SURPRISE_EMOTION = 'ApplySurpriseEmotion',
+  SET_SENTIMENT_ANALYSIS = 'SetSentimentAnalysis',
 }
