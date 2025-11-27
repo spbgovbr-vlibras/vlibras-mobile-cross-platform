@@ -1,15 +1,62 @@
-import { all, takeLatest, put } from 'redux-saga/effects';
+import { all, takeLatest, put, call, select } from 'redux-saga/effects';
 
-import { getDictionary } from 'services/api';
+import { getTags, getSignsByTag } from 'services/api';
 import { fetchBundles } from 'services/regionalism';
-import { Creators, ListResponseDictionary } from 'store/ducks/dictionary';
+import { Creators, DictionaryState, Metadata } from 'store/ducks/dictionary';
+import { TagSignsResponse, Tag, Words } from 'models/dictionary';
 
 function* fetchWords(
   action: ReturnType<typeof Creators.fetchWords.request>
-): Generator<unknown, void, ListResponseDictionary> {
+): Generator<unknown, void, any> {
+  const { page, limit, name, tag } = action.payload;
+  let allWords: string[] = [];
+
   try {
-    const response = yield getDictionary(action.payload);
-    yield put(Creators.fetchWords.success(response));
+    if (page === 1) {
+      // Fetch from API
+      const response: TagSignsResponse = yield call(getSignsByTag, tag || '');
+      allWords = response.signs || [];
+      yield put(Creators.setAllWords(allWords));
+    } else {
+      // Get from state
+      const dictionaryState: DictionaryState = yield select((state: any) => state.dictionary);
+      allWords = dictionaryState.allCurrentWords;
+    }
+
+    // Filter
+    let filteredWords = allWords;
+    if (name) {
+      const lowerName = name.toLowerCase();
+      filteredWords = allWords.filter(w => w.toLowerCase().includes(lowerName));
+    }
+
+    // Pagination
+    const total = filteredWords.length;
+    const totalPages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const slicedWords = filteredWords.slice(start, end);
+
+    // Map to Words[]
+    const data: Words[] = slicedWords.map((w, index) => ({
+      id: start + index,
+      name: w
+    }));
+
+    const meta: Metadata = {
+      current_page: page,
+      first_page: 1,
+      last_page: totalPages || 1,
+      total: total,
+      per_page: limit,
+      hasNextPage: page < (totalPages || 1),
+      first_page_url: '',
+      last_page_url: '',
+      next_page_url: '',
+      previous_page_url: ''
+    };
+
+    yield put(Creators.fetchWords.success({ meta, data }));
   } catch (error) {
     yield put(Creators.fetchWords.failure(error));
   }
@@ -28,7 +75,19 @@ function* fetchRegionalistWords(
   }
 }
 
+function* fetchTags(): Generator<unknown, void, Tag[]> {
+  try {
+    const tags = yield call(getTags);
+    yield put(Creators.fetchTags.success(tags));
+  } catch (error) {
+    yield put(Creators.fetchTags.failure(error));
+  }
+}
+
 export default all(
-  [takeLatest(Creators.fetchWords.request, fetchWords),
-    takeLatest(Creators.fetchRegionalismWords.request, fetchRegionalistWords)]
+  [
+    takeLatest(Creators.fetchWords.request, fetchWords),
+    takeLatest(Creators.fetchRegionalismWords.request, fetchRegionalistWords),
+    takeLatest(Creators.fetchTags.request, fetchTags)
+  ]
 );

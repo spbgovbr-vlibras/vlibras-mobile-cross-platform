@@ -1,16 +1,21 @@
 import axios from 'axios';
 
-import { MetadataParams, ListResponseDictionary } from 'store/ducks/dictionary';
+import { Tag, TagSignsResponse } from 'models/dictionary';
 
 const api = axios.create({
-  baseURL: 'https://dicionario2.vlibras.gov.br',
+  baseURL: 'https://repositorio-dth.vlibras.lavid.ufpb.br/api',
   timeout: 15000
 });
 
-export async function getDictionary(
-  params: MetadataParams
-): Promise<ListResponseDictionary> {
-  const response = await api.get('/list', { params });
+export async function getTags(): Promise<Tag[]> {
+  const response = await api.get<Tag[]>('/tags');
+  return response.data;
+}
+
+export async function getSignsByTag(tag: string): Promise<TagSignsResponse> {
+  const response = await api.get<TagSignsResponse>('/tagsigns', {
+    params: { tag }
+  });
   return response.data;
 }
 
