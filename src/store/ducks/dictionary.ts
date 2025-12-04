@@ -71,6 +71,7 @@ export const Types = {
   GET_TAGS_FAILURE: '@dictionary/GET_TAGS_FAILURE',
   SET_ALL_WORDS: '@dictionary/SET_ALL_WORDS',
   CLEAR_WORDS: '@dictionary/CLEAR_WORDS',
+  SET_ALL_WORDS_CACHE: '@dictionary/SET_ALL_WORDS_CACHE',
 };
 
 export interface DictionaryState {
@@ -85,6 +86,7 @@ export interface DictionaryState {
   loadingTags: boolean;
   allCurrentWords: string[]; // Cache for client-side pagination
   currentTag: string | null;
+  allWordsCache: string[]; // Persistent cache for A-Z list
 }
 
 const INITIAL_STATE: DictionaryState = {
@@ -99,6 +101,7 @@ const INITIAL_STATE: DictionaryState = {
   loadingTags: false,
   allCurrentWords: [],
   currentTag: null,
+  allWordsCache: [],
 };
 
 export const Creators = {
@@ -121,6 +124,7 @@ export const Creators = {
   )<void, Tag[], unknown>(),
   setAllWords: createAction(Types.SET_ALL_WORDS)<string[]>(),
   clearWords: createAction(Types.CLEAR_WORDS)<void>(),
+  setAllWordsCache: createAction(Types.SET_ALL_WORDS_CACHE)<string[]>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -219,6 +223,10 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
     }
     case Types.SET_ALL_WORDS: {
       draft.allCurrentWords = payload as string[];
+      break;
+    }
+    case Types.SET_ALL_WORDS_CACHE: {
+      draft.allWordsCache = payload as string[];
       break;
     }
     case Types.CLEAR_WORDS: {

@@ -13,9 +13,23 @@ function* fetchWords(
 
   try {
     if (page === 1) {
-      // Fetch from API
-      const response: TagSignsResponse = yield call(getSignsByTag, tag || '');
-      allWords = response.signs || [];
+      if (!tag) {
+        // A-Z: Check cache first
+        const dictionaryState: DictionaryState = yield select((state: any) => state.dictionaryReducer);
+        const cachedWords = dictionaryState.allWordsCache;
+
+        if (cachedWords && cachedWords.length > 0) {
+          allWords = cachedWords;
+        } else {
+          const response: TagSignsResponse = yield call(getSignsByTag, '');
+          allWords = response.signs || [];
+          yield put(Creators.setAllWordsCache(allWords));
+        }
+      } else {
+        // Category: Fetch from API
+        const response: TagSignsResponse = yield call(getSignsByTag, tag);
+        allWords = response.signs || [];
+      }
       yield put(Creators.setAllWords(allWords));
     } else {
       // Get from state
