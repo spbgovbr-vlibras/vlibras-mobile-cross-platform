@@ -19,7 +19,7 @@ function* fetchWords(
       yield put(Creators.setAllWords(allWords));
     } else {
       // Get from state
-      const dictionaryState: DictionaryState = yield select((state: any) => state.dictionary);
+      const dictionaryState: DictionaryState = yield select((state: any) => state.dictionaryReducer);
       allWords = dictionaryState.allCurrentWords;
     }
 

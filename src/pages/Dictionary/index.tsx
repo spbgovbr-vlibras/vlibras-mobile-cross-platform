@@ -86,7 +86,8 @@ function Dictionary() {
     loading,
     error,
     loadingTags,
-    allCurrentWords
+    allCurrentWords,
+    currentTag
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
 
   const allWordsList: Words[] = React.useMemo(() =>
@@ -165,7 +166,7 @@ useIonViewDidEnter(() => {
 
   async function translatePtBr(text: string) {
     saveDictionaryState();
-    const gloss = await setTextPtBr(text, false, false);
+    const gloss = await setTextPtBr(text, false, true);
     history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
@@ -885,6 +886,10 @@ useIonViewDidEnter(() => {
   useEffect(() => {
     const debouncedSearch = debounce(() => {
       if (filter === 'alphabetical' || (filter === 'categories' && category)) {
+        if (filter === 'categories' && category && category === currentTag && allWordsList.length > 0) {
+          // Data already loaded for this category
+          return;
+        }
         dispatch(
           Creators.fetchWords.request({
             page: FIRST_PAGE_INDEX,
@@ -903,7 +908,7 @@ useIonViewDidEnter(() => {
     return () => {
       debouncedSearch.cancel();
     };
-  }, [searchText, filter, category, dispatch]); // Add category dependency
+  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length]); // Add category dependency
 
   useEffect(() => {
     if (!loading) {
@@ -914,6 +919,10 @@ useIonViewDidEnter(() => {
   // This effect handles initial load when category changes via URL
   useEffect(() => {
     if (category) {
+      if (category === currentTag && allWordsList.length > 0) {
+        // Don't clear words if we are returning to the same category
+        return;
+      }
       // Clear previous words to improve fluidity
       dispatch(Creators.clearWords());
       // Scroll to top when entering a new category
@@ -921,6 +930,7 @@ useIonViewDidEnter(() => {
     } else {
       // If no category, we show tags. No fetch needed (fetchTags is in ViewWillEnter)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, dispatch]);
 
   // Update verbGroupsState when dictionary changes and category is verbs

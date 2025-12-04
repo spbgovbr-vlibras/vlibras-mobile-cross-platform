@@ -84,6 +84,7 @@ export interface DictionaryState {
   tags: Tag[];
   loadingTags: boolean;
   allCurrentWords: string[]; // Cache for client-side pagination
+  currentTag: string | null;
 }
 
 const INITIAL_STATE: DictionaryState = {
@@ -97,6 +98,7 @@ const INITIAL_STATE: DictionaryState = {
   tags: [],
   loadingTags: false,
   allCurrentWords: [],
+  currentTag: null,
 };
 
 export const Creators = {
@@ -150,6 +152,9 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
         draft.words = [];
         // Don't clear allCurrentWords here because we might need them if we are just filtering?
         // Actually, if page is 1, we probably want to refresh or we rely on saga to set it.
+      }
+      if (payload.tag) {
+        draft.currentTag = payload.tag;
       }
       draft.error = null;
       draft.loading = true;
@@ -220,6 +225,7 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       draft.words = [];
       draft.allCurrentWords = [];
       draft.metadata = METADATA_INITIAL_STATE;
+      draft.currentTag = null;
       break;
     }
     default:
