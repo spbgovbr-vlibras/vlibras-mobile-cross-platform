@@ -142,11 +142,17 @@ function Player() {
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
   } = useHomeTutorial();
-  const { textGloss, setTextPtBr } = useTranslation();
+  const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion } =
+    useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+
+  const [emotionMap, setEmotionMap] = useState<
+    { emotion: PlayerKeys; startIndex: number; endIndex: number }[]
+  >([]);
+  const lastPlayedEmotionIndex = useRef(-1);
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -372,6 +378,36 @@ function Player() {
       dispatch(Creators.loadCustomization.request(currentAvatar));
     }
   }, [currentAvatar, visiblePlayer, dispatch]);
+
+  useEffect(() => {
+    if (selectedEmotion !== 'Automático' || sentimentAnalysis.length === 0) {
+      setEmotionMap([]);
+      return;
+    }
+
+    const sentimentsMap: Record<string, PlayerKeys> = {
+      Feliz: PlayerKeys.APPLY_HAPPY_EMOTION,
+      Tristeza: PlayerKeys.APPLY_SAD_EMOTION,
+      Neutro: PlayerKeys.APPLY_DEFAULT_EMOTION,
+      Medo: PlayerKeys.APPLY_FEAR_EMOTION,
+      Surpresa: PlayerKeys.APPLY_SURPRISE_EMOTION,
+      Raiva: PlayerKeys.APPLY_ANGRY_EMOTION,
+    };
+
+    let wordCounter = 0;
+    const newEmotionMap = sentimentAnalysis.map((sentence) => {
+      const wordCount = sentence.traducao.split(' ').length;
+      const emotionData = {
+        emotion: sentimentsMap[sentence.sentimento],
+        startIndex: wordCounter,
+        endIndex: wordCounter + wordCount - 1,
+      };
+      wordCounter += wordCount;
+      return emotionData;
+    });
+
+    setEmotionMap(newEmotionMap);
+  }, [sentimentAnalysis, selectedEmotion]);
 
   function handlePlay(gloss: string) {
     if (progressContainerRef.current) {
@@ -657,7 +693,27 @@ function Player() {
     }
   );
 
-  useOnCounterGloss((counter: number, _glossLength: number) => {
+  useOnCounterGloss((counter: number, glossLength: number) => {
+    if (selectedEmotion === 'Automático' && emotionMap.length > 0) {
+      const currentWordIndex = counter - 1;
+
+      const currentEmotionData = emotionMap.findIndex(
+        (e) =>
+          currentWordIndex >= e.startIndex && currentWordIndex <= e.endIndex,
+      );
+
+      if (
+        currentEmotionData !== -1 &&
+        lastPlayedEmotionIndex.current !== currentEmotionData
+      ) {
+        PlayerService.getPlayerInstance().send(
+          PlayerKeys.EMOTION_BRIDGE,
+          emotionMap[currentEmotionData].emotion,
+        );
+        lastPlayedEmotionIndex.current = currentEmotionData;
+      }
+    }
+
     if (counter === cache - 1) {
       glossLen = counter;
     }
@@ -673,7 +729,7 @@ function Player() {
       }%`;
     }
     dispatch(CreatorsVideo.setProgress(progress));
-  }, []);
+  }, [selectedEmotion, emotionMap]);
 
   function handlePause() {
     playerService.send(

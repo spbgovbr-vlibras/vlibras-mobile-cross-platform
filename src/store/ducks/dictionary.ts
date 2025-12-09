@@ -4,11 +4,13 @@ import { Reducer } from 'redux';
 import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
 import { FIRST_PAGE_INDEX } from 'constants/pagination';
-import { Words } from 'models/dictionary';
+import { Words, Tag } from 'models/dictionary';
+
 export interface MetadataParams {
   limit: number;
   page: number;
   name?: string;
+  tag?: string;
 }
 
 export interface RegionalismParams {
@@ -64,6 +66,12 @@ export const Types = {
   GET_BUNDLE_SUCCESS: '@dicinario/GET_BUNDLE_SUCCESS',
   GET_BUNDLE_FAILURE: '@dicinario/GET_BUNDLE_FAILURE',
   BUNDLE_CLEAR: '@dicinario/BUNDLE_CLEAR',
+  GET_TAGS_REQUEST: '@dictionary/GET_TAGS_REQUEST',
+  GET_TAGS_SUCCESS: '@dictionary/GET_TAGS_SUCCESS',
+  GET_TAGS_FAILURE: '@dictionary/GET_TAGS_FAILURE',
+  SET_ALL_WORDS: '@dictionary/SET_ALL_WORDS',
+  CLEAR_WORDS: '@dictionary/CLEAR_WORDS',
+  SET_ALL_WORDS_CACHE: '@dictionary/SET_ALL_WORDS_CACHE',
 };
 
 export interface DictionaryState {
@@ -73,7 +81,12 @@ export interface DictionaryState {
   loading: boolean;
   loadingBundle: boolean;
   regionalismWords: string[];
-  error: ErrorDictionaryRequest | null
+  error: ErrorDictionaryRequest | null;
+  tags: Tag[];
+  loadingTags: boolean;
+  allCurrentWords: string[]; // Cache for client-side pagination
+  currentTag: string | null;
+  allWordsCache: string[]; // Persistent cache for A-Z list
 }
 
 const INITIAL_STATE: DictionaryState = {
@@ -83,7 +96,12 @@ const INITIAL_STATE: DictionaryState = {
   loading: false,
   loadingBundle: false,
   regionalismWords: [],
-  error: null
+  error: null,
+  tags: [],
+  loadingTags: false,
+  allCurrentWords: [],
+  currentTag: null,
+  allWordsCache: [],
 };
 
 export const Creators = {
@@ -99,6 +117,14 @@ export const Creators = {
     Types.GET_BUNDLE_FAILURE
   )<RegionalismParams, ListBundleDictionary, unknown>(),
   clearRegionalismWords: createAction(Types.BUNDLE_CLEAR)<void>(),
+  fetchTags: createAsyncAction(
+    Types.GET_TAGS_REQUEST,
+    Types.GET_TAGS_SUCCESS,
+    Types.GET_TAGS_FAILURE
+  )<void, Tag[], unknown>(),
+  setAllWords: createAction(Types.SET_ALL_WORDS)<string[]>(),
+  clearWords: createAction(Types.CLEAR_WORDS)<void>(),
+  setAllWordsCache: createAction(Types.SET_ALL_WORDS_CACHE)<string[]>(),
 };
 
 export type ActionTypes = ActionType<typeof Creators>;
@@ -128,6 +154,11 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       if (payload.page === FIRST_PAGE_INDEX) {
         draft.metadata = METADATA_INITIAL_STATE;
         draft.words = [];
+        // Don't clear allCurrentWords here because we might need them if we are just filtering?
+        // Actually, if page is 1, we probably want to refresh or we rely on saga to set it.
+      }
+      if (payload.tag) {
+        draft.currentTag = payload.tag;
       }
       draft.error = null;
       draft.loading = true;
@@ -172,6 +203,37 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
     }
     case Types.BUNDLE_CLEAR: {
       draft.regionalismWords = [];
+      break;
+    }
+    case Types.GET_TAGS_REQUEST: {
+      draft.loadingTags = true;
+      draft.error = null;
+      break;
+    }
+    case Types.GET_TAGS_SUCCESS: {
+      draft.loadingTags = false;
+      draft.tags = payload as Tag[];
+      break;
+    }
+    case Types.GET_TAGS_FAILURE: {
+      const error = payload as Error;
+      draft.error = mapErrorToDictionaryRequest(error);
+      draft.loadingTags = false;
+      break;
+    }
+    case Types.SET_ALL_WORDS: {
+      draft.allCurrentWords = payload as string[];
+      break;
+    }
+    case Types.SET_ALL_WORDS_CACHE: {
+      draft.allWordsCache = payload as string[];
+      break;
+    }
+    case Types.CLEAR_WORDS: {
+      draft.words = [];
+      draft.allCurrentWords = [];
+      draft.metadata = METADATA_INITIAL_STATE;
+      draft.currentTag = null;
       break;
     }
     default:

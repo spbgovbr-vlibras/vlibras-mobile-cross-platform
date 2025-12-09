@@ -32,6 +32,7 @@ import {
 import { SVGProps } from 'assets/icons/types';
 import paths from 'constants/paths';
 
+import { useTranslation } from 'hooks/Translation';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -78,11 +79,11 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
   const onboardingFirstAccess = useSelector(({ video }: RootState) => video.onboardingFirstAccess);
   const domain = useSelector(({ video }: RootState) => video.domain);
   const current = useSelector((state: RootState) => state.regionalism.current);
+  const { selectedEmotion, setSelectedEmotion } = useTranslation();
 
   const [openSelect, setOpenSelect] = useState(false);
   const [valueSelected, setValueSelected] = useState<string>('');
 
-  const [selectedEmotion, setSelectedEmotion] = useState<string>('Neutra');
   const [openEmotionDropdown, setOpenEmotionDropdown] = useState<boolean>(false);
 
   const buttonMenu = useRef<any>(null);
@@ -250,37 +251,16 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
         </IonList>
         {openEmotionDropdown && (
   <div className="dropdown-emotion-picker floating-emotion">
-    {['Neutra', 'Feliz', 'Triste'].map((emotion) => {
+    {['Automático', 'Neutra', 'Feliz', 'Triste', 'Raiva', 'Desgosto', 'Medo', 'Surpresa'].map((emotion) => {
       const icons: Record<string, string> = {
-        Neutra: `<svg xmlns="http://www.w3.org/2000/svg"
-                  height="24px" viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#0F449C"><
-                  path d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 
-                  17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 
-                  17.5T280-580q0 25 17.5 42.5T340-520Zm50 180h180q13 0 21.5-8.5T600-370q0-13-8.5-21.5T570-400H390q-13 
-                  0-21.5 8.5T360-370q0 13 8.5 21.5T390-340Zm90 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 
-                  31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5
-                  156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 
-                  0-227 93t-93 227q0 134 93 227t227 93Z"/></svg>`,
-        Feliz: `<svg xmlns="http://www.w3.org/2000/svg" height="24px"
-                 viewBox="0 -960 960 960" width="24px" fill="#0F449C">
-                 <path d="M620-520q25 0 42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5
-                 42.5T620-520Zm-280 0q25 0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5
-                 42.5T340-520ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54
-                 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127
-                 85.5T480-80Zm0-400Zm0 320q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93
-                 227t227 93Zm0-100q58 0 107-28t79-76q6-12-1-24t-21-12H316q-14 0-21 12t-1 24q30 48 79.5
-                 76T480-260Z"/></svg>`,
-        Triste: `<svg xmlns="http://www.w3.org/2000/svg"
-                  height="24px" viewBox="0 -960 960 960" width="24px" fill="#0f449c"><path d="M480-420q-54 0-101.5
-                  23.5T302-328q-11 16-3 32t26 16q8 0 14.5-3.5T351-294q23-31 57-48.5t72-17.5q38 0 72 17.5t57 48.5q4 7
-                  10.5 10.5T634-280q18 0 26-16.5t-3-33.5q-29-44-76.5-67T480-420Zm140-100q25 0 
-                  42.5-17.5T680-580q0-25-17.5-42.5T620-640q-25 0-42.5 17.5T560-580q0 25 17.5 42.5T620-520Zm-280 0q25
-                  0 42.5-17.5T400-580q0-25-17.5-42.5T340-640q-25 0-42.5 17.5T280-580q0 25 17.5 42.5T340-520ZM480-80q-83
-                  0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156
-                  31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q134
-                  s0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z"/></svg>`
+        Automático: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>`,
+        Neutra: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><path d="M9 14h6v1.5H9z"/><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>`,
+        Feliz: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><path d="M12 17.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>`,
+        Triste: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><path d="M12 17.5c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z"/><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>`,
+        Raiva: `<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M12,2C6.47,2,2,6.47,2,12c0,5.53,4.47,10,10,10s10-4.47,10-10C22,6.47,17.53,2,12,2z M12,20c-4.41,0-8-3.59-8-8 s3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z"/><path d="M15.5,9.5c-0.83,0-1.5,0.67-1.5,1.5s0.67,1.5,1.5,1.5s1.5-0.67,1.5-1.5S16.33,9.5,15.5,9.5z"/><path d="M8.5,9.5c-0.83,0-1.5,0.67-1.5,1.5s0.67,1.5,1.5,1.5s1.5-0.67,1.5-1.5S9.33,9.5,8.5,9.5z"/><path d="M12,14c-1.48,0-2.75,0.81-3.45,2h6.89c-0.7-1.19-1.97-2-3.44-2z"/></g></g></g></svg>`,
+        Desgosto: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M11.99,2C6.47,2,2,6.48,2,12s4.47,10,9.99,10C17.52,22,22,17.52,22,12S17.52,2,11.99,2z M12,20c-4.42,0-8-3.58-8-8 s3.58-8,8-8s8,3.58,8,8S16.42,20,12,20z M7,14h10v1.5H7V14z"/></svg>`,
+        Medo: `<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M12,2C6.47,2,2,6.47,2,12s4.47,10,10,10s10-4.47,10-10S17.53,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8 S16.41,20,12,20z"/><circle cx="15.5" cy="9.5" r="1.25"/><circle cx="8.5" cy="9.5" r="1.25"/><path d="M12,13.5c-2.33,0-4.31,1.46-5.11,3.5h10.22C16.31,14.96,14.33,13.5,12,13.5z"/></g></g></svg>`,
+        Surpresa: `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#0F449C"><circle cx="12" cy="16" r="2"/><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M11.99,2C6.47,2,2,6.48,2,12s4.47,10,9.99,10C17.52,22,22,17.52,22,12S17.52,2,11.99,2z M12,20c-4.42,0-8-3.58-8-8 s3.58-8,8-8s8,3.58,8,8S16.42,20,12,20z"/></svg>`
       };
 
       return (
@@ -289,10 +269,24 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           className={`emotion-option ${selectedEmotion === emotion ? 'selected' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
+
+            const sentimentsMap: Record<string, PlayerKeys> = {
+              Feliz: PlayerKeys.APPLY_HAPPY_EMOTION,
+              Neutra: PlayerKeys.APPLY_DEFAULT_EMOTION,
+              Triste: PlayerKeys.APPLY_SAD_EMOTION,
+              Raiva: PlayerKeys.APPLY_ANGRY_EMOTION,
+              Desgosto: PlayerKeys.APPLY_DISGUST_EMOTION,
+              Medo: PlayerKeys.APPLY_FEAR_EMOTION,
+              Surpresa: PlayerKeys.APPLY_SURPRISE_EMOTION,
+            };
+
             setSelectedEmotion(emotion);
             setOpenEmotionDropdown(false);
 
             switch (emotion) {
+              case 'Automático':
+                // a lógica agora é tratada dentro do player
+                break;
               case 'Neutra':
                 applyEmotion(PlayerKeys.APPLY_DEFAULT_EMOTION);
                 break;
@@ -301,6 +295,18 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
                 break;
               case 'Triste':
                 applyEmotion(PlayerKeys.APPLY_SAD_EMOTION);
+                break;
+              case 'Raiva':
+                applyEmotion(PlayerKeys.APPLY_ANGRY_EMOTION);
+                break;
+              case 'Desgosto':
+                applyEmotion(PlayerKeys.APPLY_DISGUST_EMOTION);
+                break;
+              case 'Medo':
+                applyEmotion(PlayerKeys.APPLY_FEAR_EMOTION);
+                break;
+              case 'Surpresa':
+                applyEmotion(PlayerKeys.APPLY_SURPRISE_EMOTION);
                 break;
             }
           }}

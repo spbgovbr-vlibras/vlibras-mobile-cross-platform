@@ -24,6 +24,17 @@ interface TranslateData {
   text: string;
 }
 
+export interface SentimentSentence {
+  traducao: string;
+  sentimento: string;
+}
+
+export interface TranslateSentimentResponse {
+  traducao: string;
+  sentimentoGeral: string;
+  sentimentoPorSentenca: SentimentSentence[];
+}
+
 interface TranslateVideoData {
   gloss: string;
   calca?: string;
@@ -50,7 +61,7 @@ const defaultTranslateData = {
 };
 
 const api = axios.create({
-  baseURL: 'https://traducao2.vlibras.gov.br',
+  baseURL: 'https://traducao2-dth.vlibras.lavid.ufpb.br',
 });
 
 export async function fetchVideoStatus(
@@ -73,6 +84,14 @@ export async function translate(data: TranslateData): Promise<string> {
   } catch(error: unknown) {
     throw Error('Could parse received gloss data to string.');
   }
+}
+
+export async function translateWithSentiment(
+  data: TranslateData,
+): Promise<TranslateSentimentResponse> {
+  const normalizedText = removeAccents(data.text);
+  const response = await api.post('/translatesentiment', { text: normalizedText });
+  return response.data;
 }
 
 export async function generateVideoTranslate(

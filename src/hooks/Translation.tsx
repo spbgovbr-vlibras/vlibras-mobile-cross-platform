@@ -16,10 +16,14 @@ import {
   fetchVideoStatus,
   generateVideoTranslate,
   translate,
+  translateWithSentiment,
+  SentimentSentence,
   VideoStatusResponse,
   VideoTranslationStatus,
 } from 'services/translate';
 import { delay } from 'utils/delay';
+import { PlayerKeys } from 'constants/player';
+import UnityService from 'services/unity';
 
 interface PollParams {
   fn: () => Promise<VideoStatusResponse>;
@@ -52,6 +56,9 @@ interface TranslationContextData {
   setTextGloss: (text: string, fromDictionary: boolean) => void;
   recentTranslation: string[];
   generateVideo: (videoData: videoOptions) => void;
+  sentimentAnalysis: SentimentSentence[];
+  selectedEmotion: string;
+  setSelectedEmotion: (emotion: string) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
@@ -96,6 +103,8 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [textPtBr, setTextPtBr] = useState('');
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
+  const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentSentence[]>([]);
+  const [selectedEmotion, setSelectedEmotion] = useState('Automático');
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY)
@@ -124,7 +133,14 @@ const TranslationProvider: React.FC = ({ children }) => {
     setTranslateRequestType(TranslationRequestType.VIDEO_SHARE);
     setIsLoading(true);
     try {
-      const gloss = await translate({ text: textPtBr });
+      const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text: textPtBr });
+      setSentimentAnalysis(sentimentoPorSentenca);
+      UnityService.getPlayerInstance().send(
+        PlayerKeys.EMOTION_BRIDGE,
+        PlayerKeys.SET_SENTIMENT_ANALYSIS,
+        JSON.stringify(sentimentoPorSentenca),
+      );
+      const gloss = traducao;
       const response = await generateVideoTranslate({ gloss, ...videoOptions });
       const uuid = response.requestUID as string;
 
@@ -172,7 +188,14 @@ const TranslationProvider: React.FC = ({ children }) => {
       setTextPtBr(text);
 
       try {
-        const gloss = await translate({ text });
+        const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
+        setSentimentAnalysis(sentimentoPorSentenca);
+        UnityService.getPlayerInstance().send(
+          PlayerKeys.EMOTION_BRIDGE,
+          PlayerKeys.SET_SENTIMENT_ANALYSIS,
+          JSON.stringify(sentimentoPorSentenca),
+        );
+        const gloss = traducao;
         setTextGloss(gloss);
         translation = gloss;
         if (showLoading) {
@@ -227,6 +250,9 @@ const TranslationProvider: React.FC = ({ children }) => {
         setTextGloss: handleTextGloss,
         recentTranslation,
         generateVideo,
+        sentimentAnalysis,
+        selectedEmotion,
+        setSelectedEmotion,
       }}>
       {children}
       <GenerateModal

@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
-import { IconHandsTranslate } from 'assets';
+import { IconHandsTranslate, IconUndefined } from 'assets';
 import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
@@ -33,7 +33,7 @@ import CategoriesList from 'data/Categories';
 import wordsJson from 'data/classified_words_reduced.json';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
-import { Words } from 'models/dictionary';
+import { Words, Tag } from 'models/dictionary';
 import { DictionaryData } from 'services/types';
 import PlayerService from 'services/unity';
 import { getDictionaryData } from 'services/wiktionary';
@@ -77,15 +77,23 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
-  const stickyContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     metadata,
     words: dictionary,
+    tags,
     regionalismWords,
     loading,
     error,
+    loadingTags,
+    allCurrentWords,
+    currentTag
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
+
+  const allWordsList: Words[] = React.useMemo(() =>
+    allCurrentWords ? allCurrentWords.map((w, i) => ({id: i, name: w})) : []
+  , [allCurrentWords]);
+
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
   );
@@ -94,7 +102,6 @@ function Dictionary() {
 
   const { setTextGloss, setTextPtBr, recentTranslation } = useTranslation();
 
-  const [dicTest, setDicTest] = useState<Words[]>([]);
   const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
 
@@ -107,7 +114,14 @@ useIonViewDidEnter(() => {
   contentRef.current?.getScrollElement().then((el) => {
     const queryParams = new URLSearchParams(window.location.search);
     const scrollParam = queryParams.get('scroll');
-    el.scrollTop = toNumber(scrollParam);
+    // Only restore scroll if we are staying in the same view context or explicitly asked
+    // But for category changes, we might want to reset.
+    // The issue is when going BACK, we want to restore.
+    // When going INTO a category, we want top.
+    // The URL params are usually updated on push.
+    if (scrollParam) {
+      el.scrollTop = toNumber(scrollParam);
+    }
     const handler = () => {
       setscrollTopValue(el.scrollTop);
     };
@@ -117,6 +131,7 @@ useIonViewDidEnter(() => {
 });
 
   useIonViewWillEnter(() => {
+    dispatch(Creators.fetchTags.request());
     dispatch(
       currentRegionalism.abbreviation !== 'BR'
         ? Creators.fetchRegionalismWords.request({
@@ -151,7 +166,7 @@ useIonViewDidEnter(() => {
 
   async function translatePtBr(text: string) {
     saveDictionaryState();
-    const gloss = await setTextPtBr(text, false, false);
+    const gloss = await setTextPtBr(text, false, true);
     history.push(paths.HOME, { from: 'dictionary' });
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
@@ -203,6 +218,8 @@ useIonViewDidEnter(() => {
     params.delete('category');
     history.replace({ search: params.toString() });
     setVisibleVerbCount(VERB_COUNT);
+    // Reset scroll when clearing params (going back to main list)
+    contentRef.current?.scrollToTop(0);
   }
 
   const renderMeaningContent = (item: Words) => {
@@ -233,10 +250,6 @@ useIonViewDidEnter(() => {
     }
     return <div className="meaning-content not-found">Significado não encontrado.</div>;
   };
-
-  const filteredDicTest = dicTest.filter(item =>
-    item.name.toLowerCase().includes(searchText.toLowerCase())
-  );
 
   function renderContext(item: Words[]) {
     return (
@@ -352,7 +365,47 @@ useIonViewDidEnter(() => {
     </>
   );
 
-  const renderCategoryHeader = (categoryIndex: number) => (
+  // Helper to map API tag name to icon
+  const getCategoryIcon = (tagName: string) => {
+    // API tags might have underscores (e.g. "Aparelho_ou_Máquina") or be mixed case.
+    // We need to match against CategoriesList which has specific names.
+    // The simplest way is to try matching case-insensitive, or normalize spaces/underscores.
+    
+    // Try exact match first (case insensitive)
+    let match = CategoriesList.find(c => c.name.toLowerCase() === tagName.toLowerCase());
+    if (match) return match.logoUrl;
+
+    // Try replacing underscores with spaces
+    const normalizedTag = tagName.replace(/_/g, ' ').toLowerCase();
+    match = CategoriesList.find(c => c.name.toLowerCase() === normalizedTag);
+    if (match) return match.logoUrl;
+
+    return IconUndefined;
+  };
+
+  // Helper to format category name for display (Title Case, remove underscores)
+  const formatCategoryName = (tagName: string) => {
+    // Replace underscores with spaces
+    let formatted = tagName.replace(/_/g, ' ');
+    // Capitalize first letter of each word, lower case the rest (simple Title Case)
+    // However, some words like "e", "ou", "de" should be lowercase in Portuguese unless start of sentence.
+    // For simplicity, let's just Capitalize First Letter of each word for now, or match CategoriesList name if found.
+    
+    const match = CategoriesList.find(c => 
+      c.name.toLowerCase() === tagName.toLowerCase() || 
+      c.name.toLowerCase() === tagName.replace(/_/g, ' ').toLowerCase()
+    );
+    
+    if (match) {
+      return match.name;
+    }
+
+    // Fallback formatting
+    formatted = formatted.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    return formatted;
+  };
+
+  const renderCategoryHeader = (categoryName: string) => (
     <>
       <div className='category-header'>
         <IonItem lines="none" className="dictionary-word-item" onClick={handleFilterCategories}>
@@ -360,49 +413,51 @@ useIonViewDidEnter(() => {
           <IonIcon icon={chevronBack} />
         </IonButton>
             <IonImg
-              src={CategoriesList[categoryIndex].logoUrl}
+              src={getCategoryIcon(categoryName)}
               style={{ width: '30px', height: '30px', marginRight: '12px' }}
             />
           <IonText className="dictionary-words-style" style={{ fontWeight: 'bold' }}>
-            {CategoriesList[categoryIndex].name}
+            {formatCategoryName(categoryName)}
           </IonText>
         </IonItem>
       </div>
     </>
   );
 
-  const renderCategories = (item: {name: string; logoUrl: string; index: number}, isLast: boolean) => (
+  const renderCategories = (item: Tag, isLast: boolean) => (
     <>
       <IonItem
         className="dictionary-word-item category-item"
         button
         lines={'none'}
         onClick={() => {
-          history.push(`?category=${item.index}`);
+          history.push(`?category=${item.name}`);
         }}
       >
-        {item.logoUrl && (
-          <IonImg
-          src={item.logoUrl}
+        <IonImg
+          src={getCategoryIcon(item.name)}
           style={{ width: '25px', height: '25px', marginRight: '20px' }}
-          />
-        )}
-        <IonText className="dictionary-words-style">{item.name}</IonText>
+        />
+        <IonText className="dictionary-words-style">{formatCategoryName(item.name)}</IonText>
       </IonItem>
-      {!isLast && <div key={`divider-category-${item.index}`} className="words-list-popover-content-divider" />}
+      {!isLast && <div key={`divider-category-${item.id}`} className="words-list-popover-content-divider" />}
     </>
   );
 
-  const renderCategoryWords = (index: number) => (
+  const renderCategoryWords = () => (
     <>
-      {CategoriesList[index].name === 'Verbos' ?
-        renderVerbs() : renderNoVerbsWords(filteredDicTest)}
+      {category === 'VERBOS' || category === 'Verbos' ?
+        renderVerbs() : renderNoVerbsWords(allWordsList)}
     </>
   );
 
   const renderAllWords = () => {
-    // Helper function to group non-verb words, similar to the logic in renderNoVerbsWords
-    function groupNonVerbs(words: Words[]) {
+    // Use allWordsList instead of dictionary to ensure full A-Z structure
+    // dictionary is only the current page slice.
+    const wordsToRender = filter === 'alphabetical' && !searchText ? allWordsList : dictionary;
+
+    // Helper function to group words (handling & desambiguation)
+    function groupWords(words: Words[]) {
       const groups: (Words | Words[])[] = [];
       let i = 0;
       while(i < words.length) {
@@ -439,25 +494,16 @@ useIonViewDidEnter(() => {
       return groups;
     }
 
-    const nonVerbWords = sortedJson
-      .filter((item) => !item.categorias.includes('Verbos'))
-      .filter((item) => item.palavra.toLowerCase().includes(searchText.toLowerCase()))
-      .map((item, index) => ({id: index, name: item.palavra}));
+    const groupedWords = groupWords(wordsToRender);
 
-    const groupedNonVerbs = groupNonVerbs(nonVerbWords);
+    const allItems: { name: string, type: 'word' | 'desambiguation', data: any }[] = [];
 
-    const allItems: { name: string, type: 'verb' | 'word' | 'desambiguation', data: any }[] = [];
-
-    groupedNonVerbs.forEach(item => {
+    groupedWords.forEach(item => {
         if (Array.isArray(item)) {
             allItems.push({ name: item[0].name.split('&', 1)[0], type: 'desambiguation', data: item });
         } else {
             allItems.push({ name: item.name, type: 'word', data: item });
         }
-    });
-
-    filteredVerbList.forEach(([verb, groups]) => {
-        allItems.push({ name: verb, type: 'verb', data: { verb, groups } });
     });
 
     const groupedByLetter: { [key: string]: typeof allItems } = {};
@@ -473,14 +519,19 @@ useIonViewDidEnter(() => {
         groupedByLetter[firstChar].push(item);
     });
 
-    const alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    // Helper to sort letters: #, A, B, ...
+    const alphabet = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
     return alphabet.map(letter => {
         const itemsForLetter = groupedByLetter[letter];
+        // If searching, we might hide letters with no items.
+        // If A-Z mode, we usually show all letters even if empty? No, original likely hid empty.
+        // But for A-Z full list, we want all available letters.
         if (!itemsForLetter || itemsForLetter.length === 0) {
             return null;
         }
 
+        // Sort items within the letter group
         itemsForLetter.sort((a, b) => a.name.localeCompare(b.name));
 
         const isExpanded = expandedLetter === letter;
@@ -498,12 +549,14 @@ useIonViewDidEnter(() => {
                         const targetElement = e.currentTarget;
                         setTimeout(() => {
                           contentRef.current?.getScrollElement().then(scrollElement => {
-                            if (scrollElement && stickyContainerRef.current) {
+                            if (scrollElement) {
                               const itemRect = targetElement.getBoundingClientRect();
                               const scrollRect = scrollElement.getBoundingClientRect();
-                              const stickyHeaderHeight = stickyContainerRef.current.offsetHeight;
-                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top - stickyHeaderHeight;
-                              contentRef.current?.scrollToPoint(0, scrollTop, 300);
+                              // Add offset for sticky header (roughly 120px for search bar + chips)
+                              const stickyHeaderOffset = 120;
+                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top - stickyHeaderOffset;
+                              // Ensure we don't scroll past top
+                              contentRef.current?.scrollToPoint(0, Math.max(0, scrollTop), 300);
                             }
                           });
                         }, 100);
@@ -527,79 +580,6 @@ useIonViewDidEnter(() => {
                             }
                             if (item.type === 'desambiguation') {
                                 return renderDesambiguateWord(item.data, isLast);
-                            }
-                            if (item.type === 'verb') {
-                                const { verb, groups } = item.data;
-                                // Replicating renderVerbs logic for a single item
-                                const conjugationWords = groups.conjugation;
-                                const desambiguationWords = groups.desambiguation;
-                                const isVerbExpanded = expandedVerb === verb;
-                                const meaning = wordMeanings[verb];
-                                const isLoadingMeaning = loadingMeaning === verb;
-                                const slicedWords = conjugationWords.slice(verb === conjugationWords[0]?.original ? 1 : 0);
-                                return (
-                                  <div key={verb} className="verb-group">
-                                    <IonItem
-                                      lines={'none'}
-                                      className={`dictionary-word-item ${isVerbExpanded ? 'word-expanded-header' : ''}`}
-                                      button
-                                      detail={false}
-                                      onClick={() => toggleVerbMeaning(verb)}
-                                    >
-                                      <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{verb}</IonText>
-                                      <IonIcon icon={isVerbExpanded ? chevronUp : chevronDown}
-                                              slot="end"
-                                              className="verb-dropdown-icon"
-                                              />
-                                    </IonItem>
-                                    {isVerbExpanded && (
-                                      <div className="verb-details-container">
-                                        {isLoadingMeaning &&
-                                          <div style={{padding: '16px'}}><LoadingSpinner loadingDescription="Buscando significado..." /></div>}
-                                        {meaning?.definitions && meaning.definitions.length > 0 && (
-                                          <>
-                                            <div className="verb-section-header">SIGNIFICADO</div>
-                                            <ol className="verb-meaning-list">
-                                              {meaning.definitions.slice(0, 2).map((def, i) => {
-                                                const definitionText = def.split('§')[0];
-                                                return (
-                                                  <li key={i}>
-                                                    <span>{`${i + 1}. ${definitionText}`}</span>
-                                                    <button className='translate-def-button' onClick={(e) => { e.stopPropagation(); translatePtBr(definitionText); }}>
-                                                      <IconHandsTranslate size={18} color={'#1447a6'} />
-                                                    </button>
-                                                  </li>
-                                                );
-                                              })}
-                                            </ol>
-                                          </>
-                                        )}
-                                        {slicedWords.length > 0 && (
-                                        <>
-                                          <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
-                                          <IonList lines="none" className="dictionary-words-list conjugation-list">
-                                            {slicedWords.map((w: VerbConjugation, i: number) => {
-                                              return (
-                                                <IonItem key={`${verb}-form-${i}`}
-                                                        className="dictionary-word-item conjugation-item"
-                                                        onClick={(e) => { e.stopPropagation(); translate(w.original); }}>
-                                                  <div className="conjugation-text-wrapper">
-                                                    <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
-                                                    <IonIcon icon={arrowForward} className="conjugation-arrow" />
-                                                    <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
-                                                  </div>
-                                                </IonItem>
-                                              );
-                                            })}
-                                          </IonList>
-                                        </>
-                                        )}
-                                        {desambiguationWords.length > 0 && renderContext(desambiguationWords)}
-                                      </div>
-                                    )}
-                                    {!isVerbExpanded && !isLast && <div className="words-list-popover-content-divider" />}
-                                  </div>
-                                );
                             }
                             return null;
                         })}
@@ -764,7 +744,7 @@ useIonViewDidEnter(() => {
           i++;
         }
         i--;
-        elements.push(renderDesambiguateWord(group, i === filteredDicTest.length-1));
+        elements.push(renderDesambiguateWord(group, i === dictionary.length-1));
 
       } else if(i < words.length-1 && words[i+1].name.includes('&')) {
         const prefix = words[i+1].name.split('&', 1)[0];
@@ -777,13 +757,13 @@ useIonViewDidEnter(() => {
             i++;
           }
           i--;
-          elements.push(renderDesambiguateWord(group, i === filteredDicTest.length-1));
+          elements.push(renderDesambiguateWord(group, i === dictionary.length-1));
         } else {
-          elements.push(renderWord(word, i === filteredDicTest.length-1));
+          elements.push(renderWord(word, i === dictionary.length-1));
         }
 
       } else {
-        elements.push(renderWord(word, i === filteredDicTest.length-1));
+        elements.push(renderWord(word, i === dictionary.length-1));
       }
       i++;
     }
@@ -873,7 +853,12 @@ useIonViewDidEnter(() => {
   };
 
   const renderEmptyOrLoadingState = () => {
-    if (dictionary.length === 0 && filter === 'alphabetical' && searchText) {
+    const listIsEmpty =
+      (filter === 'alphabetical' && allWordsList.length === 0) ||
+      (filter === 'categories' && !category && tags.length === 0) ||
+      (filter === 'categories' && category && allWordsList.length === 0);
+
+    if (listIsEmpty) {
       if (error) {
         return (
           <div className="dictionary-word-item centered">
@@ -882,14 +867,17 @@ useIonViewDidEnter(() => {
               : Strings.DICTIONARY_REQUEST_ERROR}
           </div>
         );
-      } else if (loading) {
-        return <LoadingSpinner loadingDescription="Carregando sinais..." />;
-      } else {
+      } else if (loading || loadingTags) {
+        return <LoadingSpinner loadingDescription="Carregando..." />;
+      } else if (searchText) {
         return (
           <div className="dictionary-word-item centered">
             {Strings.DICTIONARY_WORD_NOT_FOUND}
           </div>
         );
+      } else {
+        // Initial load or just empty list
+        return null;
       }
     }
     return null;
@@ -897,11 +885,16 @@ useIonViewDidEnter(() => {
 
   useEffect(() => {
     const debouncedSearch = debounce(() => {
-      if (filter === 'alphabetical') {
+      if (filter === 'alphabetical' || (filter === 'categories' && category)) {
+        if (filter === 'categories' && category && category === currentTag && allWordsList.length > 0) {
+          // Data already loaded for this category
+          return;
+        }
         dispatch(
           Creators.fetchWords.request({
             page: FIRST_PAGE_INDEX,
             limit: MAX_PER_PAGE,
+            tag: category || undefined, // Pass category if present
             ...((searchText?.length || 0) > 0 && {
               name: `${searchText}%`,
             }),
@@ -915,7 +908,7 @@ useIonViewDidEnter(() => {
     return () => {
       debouncedSearch.cancel();
     };
-  }, [searchText, filter, dispatch]);
+  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length]); // Add category dependency
 
   useEffect(() => {
     if (!loading) {
@@ -923,29 +916,50 @@ useIonViewDidEnter(() => {
     }
   }, [infiniteScrollRef, loading]);
 
+  // This effect handles initial load when category changes via URL
   useEffect(() => {
-    dispatch(
-      Creators.fetchWords.request({
-        page: FIRST_PAGE_INDEX,
-        limit: MAX_PER_PAGE,
-      })
-    );
-  }, [dispatch]);
+    if (category) {
+      if (category === currentTag && allWordsList.length > 0) {
+        // Don't clear words if we are returning to the same category
+        return;
+      }
+      // Clear previous words to improve fluidity
+      dispatch(Creators.clearWords());
+      // Scroll to top when entering a new category
+      contentRef.current?.scrollToTop(0);
+    } else {
+      // If no category, we show tags. No fetch needed (fetchTags is in ViewWillEnter)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, dispatch]);
+
+  // Update verbGroupsState when dictionary changes and category is verbs
+  useEffect(() => {
+    if (category === 'VERBOS' || category === 'Verbos') {
+       // Use allWordsList for verbs to ensure all verbs are grouped
+       const groupedVerbs = groupVerbs(allWordsList);
+       const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
+       setVerbGroupsState(sortedGroupedVerbs);
+    }
+  }, [allWordsList, category]);
+
 
   const fetchWords = useCallback(() => {
     dispatch(
       Creators.fetchWords.request({
         page: metadata.current_page + PAGE_STEP_SIZE,
         limit: MAX_PER_PAGE,
+        tag: category || undefined,
         ...(searchText.length > 0 && {
           name: `${searchText}%`,
         }),
       })
     );
-  }, [dispatch, infiniteScrollRef, metadata, searchText]);
+  }, [dispatch, infiniteScrollRef, metadata, searchText, category]);
 
   function handleFilterAlpha() {
     clearUrlParams();
+    dispatch(Creators.clearWords()); // Clear stale words immediately
     setFilter('alphabetical');
   }
 
@@ -989,38 +1003,21 @@ useIonViewDidEnter(() => {
   });
 }
 
+  // Remove the local JSON effect
   useEffect(() => {
     const sorted = sortWordsWithAndFirst(wordsJson);
     setSortedJson(sorted);
-    const verbs = sorted
-      .filter(item => item.categorias.includes('Verbos'))
-      .map((item, index) => ({ id: index, name: item.palavra }));
-    const groupedVerbs = groupVerbs(verbs);
-    const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
-    setVerbGroupsState(sortedGroupedVerbs);
+    // No longer setting local verb state on mount
   }, []);
 
 
+  // Remove the local filteredDicTest effect
+  /*
   useEffect(() => {
     if (category === 'Verbos') {
-      const verbs = sortedJson
-        .filter(item => item.categorias.includes('Verbos'))
-        .map((item, index) => ({ id: index, name: item.palavra }));
-        setDicTest(verbs);
-        setVerbGroupsState(groupVerbs(verbs));
-    } else {
-        const index = Number(category);
-        const categoryName = CategoriesList[index].name;
-        setDicTest(sortedJson
-          .filter(item => item.categorias.includes(categoryName))
-          .map((item, index) => {
-            return {
-              id: index,
-              name: item.palavra
-            };
-        }));
-    }
+      ...
   }, [location.search]);
+  */
 
   const getResultsCount = () => {
     if (!searchText) return 0;
@@ -1034,12 +1031,12 @@ useIonViewDidEnter(() => {
         ).length;
       case 'categories':
         if (category) {
-          if (CategoriesList[Number(category)].name === 'Verbos') {
+          if (category === 'VERBOS' || category === 'Verbos') {
             return filteredVerbList.length;
           }
-          return filteredDicTest.length;
+          return allWordsList.length; // Use allWordsList.length instead of dictionary.length
         }
-        return CategoriesList.filter((item) =>
+        return tags.filter((item) =>
           item.name.toLowerCase().includes(searchText.toLowerCase())
         ).length;
       default:
@@ -1076,7 +1073,7 @@ useIonViewDidEnter(() => {
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent ref={contentRef}>
         <div className="dictionary-container">
-          <div className="sticky-container" ref={stickyContainerRef}>
+          <div className="sticky-container">
           <div className="dictionary-box">
             <IonSearchbar
               className="dictionary-textarea"
@@ -1122,7 +1119,7 @@ useIonViewDidEnter(() => {
             )}
           </div>
           <div className="dictionary-words-container-divider" />
-          {category && renderCategoryHeader(Number(category))}
+          {category && renderCategoryHeader(category)}
           </div>
 
           <div className="dictionary-words-container">
@@ -1139,13 +1136,12 @@ useIonViewDidEnter(() => {
                     .filter((item) => item.toUpperCase().includes(searchText.toUpperCase()))
                     .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
-                  ? renderCategoryWords(Number(category))
-                  : CategoriesList.filter(item =>
+                  ? renderCategoryWords()
+                  : tags.filter(item =>
                       item.name.toLowerCase().includes(searchText.toLowerCase())
                     ).map((item, index, arr) => {
-                      const originalIndex = CategoriesList.findIndex(c => c.name === item.name);
                       return renderCategories(
-                        { ...item, index: originalIndex },
+                        item,
                         index === arr.length - 1
                       );
                     })
@@ -1173,7 +1169,7 @@ useIonViewDidEnter(() => {
             />
           </IonInfiniteScroll>
         )}
-        {(filter === 'categories') && CategoriesList[Number(category)].name === 'Verbos'  && (
+        {(filter === 'categories') && (category === 'VERBOS' || category === 'Verbos')  && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
@@ -1185,6 +1181,7 @@ useIonViewDidEnter(() => {
             />
           </IonInfiniteScroll>
         )}
+        {/* Removed Infinite Scroll for regular categories because we are showing all words from cache now */}
       </IonContent>
     </MenuLayout>
   );
