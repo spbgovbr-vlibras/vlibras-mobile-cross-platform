@@ -509,10 +509,28 @@ useIonViewDidEnter(() => {
     const groupedByLetter: { [key: string]: typeof allItems } = {};
 
     allItems.forEach(item => {
-        let firstChar = item.name.charAt(0).toUpperCase();
+        const rawName = item.name.trim();
+        let firstChar = rawName.charAt(0).toUpperCase();
+
+        // Grupo "0..9" (letter '#') deve mostrar apenas números puros (0–9),
+        // evitando entradas do tipo 1P_AJUDAR_2S que também começam com dígito.
         if (/[0-9]/.test(firstChar)) {
-            firstChar = '#';
+            const isSingleDigit = /^[0-9]$/.test(rawName);
+            if (isSingleDigit) {
+                firstChar = '#';
+            } else {
+                // Para formas com pessoa (ex.: 1P_AJUDAR_2S), agrupa pela letra do verbo/base.
+                // Remove prefixos comuns (1S_, 2P_, etc) e pega a primeira letra A-Z.
+                const withoutPersonPrefix = rawName.replace(
+                  /^(1S_|2S_|3S_|1P_|2P_|3P_)/,
+                  ''
+                );
+                const alphaMatch = withoutPersonPrefix.match(/[A-ZÇÕÂÊÍÓÚ]/i);
+                if (!alphaMatch) return;
+                firstChar = alphaMatch[0].toUpperCase();
+            }
         }
+
         if (!groupedByLetter[firstChar]) {
             groupedByLetter[firstChar] = [];
         }

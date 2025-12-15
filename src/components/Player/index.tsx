@@ -17,6 +17,7 @@ import {
   IconPauseOutlined,
   IconRunning,
   IconPause,
+  IconPlay,
   IconShare,
   IconThumbs,
   IconClose,
@@ -84,6 +85,11 @@ function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
 }
 
+function formatSpeedLabel(speed: number): string {
+  const value = Number.isInteger(speed) ? speed.toFixed(0) : String(speed);
+  return `${value}x`;
+}
+
 let recording = false;
 let isLoading = false;
 let contador = 60;
@@ -129,6 +135,11 @@ function Player() {
   const chunkingIntervalRef = useRef<NodeJS.Timeout | null>(null); // Para o ciclo de 3s
   const isPlayerBusyRef = useRef<boolean>(false);
   const lastPlayedTextRef = useRef<string>(''); // Trava Anti-Repetição
+  const playbackProgressRef = useRef<{
+    counter: number;
+    glossLength: number;
+    lastUpdateAt: number;
+  }>({ counter: 0, glossLength: 0, lastUpdateAt: 0 });
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
@@ -510,6 +521,13 @@ function Player() {
 
       if (wasPlaying.current && !newIsPlaying) {
         setHasFinished(true);
+        // Garante que o avatar volte ao idle (evita ficar "travado" no último sinal).
+        setTimeout(() => {
+          playerService.send(
+            PlayerKeys.PLAYER_MANAGER,
+            PlayerKeys.INIT_RANDOM_ANIMATION
+          );
+        }, 120);
         // O Avatar terminou! Abre o semáforo e chama o gerente.
         isPlayerBusyRef.current = false;
         // Adiciona um "respiro" de 100ms para o Avatar antes de processar o próximo.
@@ -532,6 +550,32 @@ function Player() {
     },
     [processTranslationQueue]
   );
+
+  useEffect(() => {
+    // Watchdog: se o CounterGloss chegou ao fim e não há avanço/encerramento,
+    // força reset para evitar travar no último sinal.
+    if (!isPlaying || isPaused) return;
+    const id = window.setInterval(() => {
+      if (!isPlaying || isPaused) return;
+      const { counter, glossLength, lastUpdateAt } = playbackProgressRef.current;
+      if (!glossLength || !counter) return;
+      // Só atua quando já chegamos ao fim.
+      if (counter < glossLength) return;
+      const now = Date.now();
+      if (now - lastUpdateAt < 1200) return;
+
+      playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
+      playerService.send(
+        PlayerKeys.PLAYER_MANAGER,
+        PlayerKeys.INIT_RANDOM_ANIMATION
+      );
+      setIsPlaying(false);
+      setIsPaused(false);
+      setHasFinished(true);
+      isPlayerBusyRef.current = false;
+    }, 800);
+    return () => window.clearInterval(id);
+  }, [isPlaying, isPaused]);
 
   function startLiveRecognition() {
     // Reseta o estado para uma nova sessão de tradução.
@@ -694,6 +738,11 @@ function Player() {
   );
 
   useOnCounterGloss((counter: number, glossLength: number) => {
+    playbackProgressRef.current = {
+      counter,
+      glossLength,
+      lastUpdateAt: Date.now(),
+    };
     if (selectedEmotion === 'Automático' && emotionMap.length > 0) {
       const currentWordIndex = counter - 1;
 
@@ -795,14 +844,18 @@ function Player() {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
             }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
+            <div className="player-speed-trigger">
+              <span className="player-speed-trigger-label">
+                {formatSpeedLabel(speedValue)}
+              </span>
+            </div>
           </button>
           <button
             className="player-action-button player-action-button-insert"
             type="button"
             onClick={handlePause}>
             {isPaused ? (
-              <IconPauseOutlined color={buttonColors.VARIANT_BLUE} size={24} />
+              <IconPlay hideCircle color={buttonColors.VARIANT_BLUE} size={34} />
             ) : (
               <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
             )}
@@ -830,7 +883,11 @@ function Player() {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
             }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
+            <div className="player-speed-trigger">
+              <span className="player-speed-trigger-label">
+                {formatSpeedLabel(speedValue)}
+              </span>
+            </div>
           </button>
           <button
             className="player-action-button player-action-button-insert"
@@ -1365,6 +1422,9 @@ function Player() {
           setShowPopover({ showPopover: false, event: undefined })
         }>
         <div className="player-popover-content">
+          <div className="player-popover-current-speed">
+            Velocidade atual: <strong>{formatSpeedLabel(speedValue)}</strong>
+          </div>
           <button
             className={
               speedValue === X2_5
@@ -1429,7 +1489,7 @@ function Player() {
           width: '100vw',
           zIndex: 0,
           flexShrink: 0,
-          marginBottom: 70,
+          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : 70,
           flex: 1,
           display: 'flex',
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
