@@ -62,6 +62,7 @@ const defaultTranslateData = {
 
 const api = axios.create({
   baseURL: 'https://traducao2-dth.vlibras.lavid.ufpb.br',
+  timeout: 15000,
 });
 
 export async function fetchVideoStatus(
@@ -79,11 +80,17 @@ export async function fetchVideoStatus(
 export async function translate(data: TranslateData): Promise<string> {
   const normalizedText = removeAccents(data.text);
   const response = await api.post('/translate', { text: normalizedText });
-  try {
-    return String(response.data);
-  } catch(error: unknown) {
-    throw Error('Could parse received gloss data to string.');
+  const payload = response.data as unknown;
+  // API may return a raw string OR a structured object.
+  // Converting object directly results in "[object Object]" (avatar fingerspells "OBJECT").
+  if (typeof payload === 'string') return payload;
+  if (payload && typeof payload === 'object') {
+    const obj = payload as Record<string, unknown>;
+    if (typeof obj.traducao === 'string') return obj.traducao;
+    if (typeof obj.gloss === 'string') return obj.gloss;
+    if (typeof obj.translation === 'string') return obj.translation;
   }
+  throw Error('Could not parse received gloss data.');
 }
 
 export async function translateWithSentiment(

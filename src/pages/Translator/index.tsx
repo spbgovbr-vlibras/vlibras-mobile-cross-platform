@@ -8,19 +8,15 @@ import { useHistory } from 'react-router-dom';
 import IconHandsTranslate from 'assets/icons/IconHandsTranslate';
 import ErrorModal from 'components/ErrorModal';
 import paths from 'constants/paths';
-import { PlayerKeys } from 'constants/player';
 import { regex } from 'constants/types';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
-import PlayerService from 'services/unity';
 import { RootState } from 'store';
 import { Creators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 import './styles.css';
-
-const playerService = PlayerService.getPlayerInstance();
 
 const Translator = () => {
   const translatorText = useSelector(
@@ -53,8 +49,8 @@ const Translator = () => {
 
     const gloss = (await setTextPtBr(formatted, false)).toString();
 
-    history.replace(paths.HOME);
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
+    // Navigate first; Player will trigger playback when Unity is ready.
+    history.replace(paths.HOME, { playGloss: gloss, playAt: Date.now() });
     dispatch(Creators.setTranslatorText(formatted));
   }
 

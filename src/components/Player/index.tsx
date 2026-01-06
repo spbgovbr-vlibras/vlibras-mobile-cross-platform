@@ -143,9 +143,6 @@ function Player() {
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
-  history.listen(() => {
-    location.pathname !== '/' ? onCancel() : null;
-  });
 
   const {
     currentStep,
@@ -167,6 +164,75 @@ function Player() {
 
   const location = useLocation();
   const dispatch = useDispatch();
+
+  // Avoid leaking listeners: history.listen must be registered once with cleanup.
+  // Also cancel the tutorial when navigating away from HOME.
+  useEffect(() => {
+    const unlisten = history.listen((nextLocation: any) => {
+      if (nextLocation?.pathname !== paths.HOME) {
+        onCancel();
+      }
+    });
+    return () => {
+      if (typeof unlisten === 'function') unlisten();
+    };
+  }, [history, onCancel]);
+
+  // If another route navigated back to HOME with a pending gloss to play,
+  // only trigger playback after Unity has finished loading (visiblePlayer).
+  const consumedPlayRef = useRef<{ gloss: string; at?: number } | null>(null);
+  const pendingAutoPlayRef = useRef<{
+    gloss: string;
+    at?: number;
+    timeoutId: number;
+  } | null>(null);
+  useEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    if (!visiblePlayer) return;
+
+    const state = location.state as any;
+    const playGloss = state?.playGloss;
+    if (!playGloss) return;
+    const playAt = state?.playAt as number | undefined;
+
+    const glossStr = String(playGloss);
+    if (
+      consumedPlayRef.current &&
+      consumedPlayRef.current.gloss === glossStr &&
+      consumedPlayRef.current.at === playAt
+    ) {
+      return;
+    }
+
+    // In automatic emotion mode, give a small window for sentiment/emotionMap to arrive,
+    // so short phrases can still change expression.
+    if (selectedEmotion === 'Automático' && emotionMap.length === 0) {
+      // If we already scheduled a timeout for this exact play, don't schedule again.
+      if (
+        pendingAutoPlayRef.current &&
+        pendingAutoPlayRef.current.gloss === glossStr &&
+        pendingAutoPlayRef.current.at === playAt
+      ) {
+        return;
+      }
+      const timeoutId = window.setTimeout(() => {
+        consumedPlayRef.current = { gloss: glossStr, at: playAt };
+        handlePlay(glossStr);
+        pendingAutoPlayRef.current = null;
+      }, 700);
+      pendingAutoPlayRef.current = { gloss: glossStr, at: playAt, timeoutId };
+      return;
+    }
+
+    // If we had a pending autoplay and emotionMap is ready, play immediately and clear timeout.
+    if (pendingAutoPlayRef.current) {
+      window.clearTimeout(pendingAutoPlayRef.current.timeoutId);
+      pendingAutoPlayRef.current = null;
+    }
+    consumedPlayRef.current = { gloss: glossStr, at: playAt };
+    handlePlay(glossStr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.state, visiblePlayer, selectedEmotion, emotionMap.length]);
 
   const tutorialHandler = (hasFinished: boolean) => {
     if (hasFinished) {
@@ -365,13 +431,33 @@ function Player() {
 
   // To avoid the unity splash screen [MA]
   useEffect(() => {
-    playerService.getUnity().on('progress', (progression: number) => {
-      if (progression === 1) {
-        dispatch(Creators.loadAvatar.request());
-        dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
-        setVisiblePlayer(true);
-      }
-    });
+    let handled = false;
+    const unity: any = playerService.getUnity();
+
+    const onUnityReady = () => {
+      if (handled) return;
+      handled = true;
+      dispatch(Creators.loadAvatar.request());
+      dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
+      setVisiblePlayer(true);
+    };
+
+    // If Unity is already ready (e.g., navigating back from Translator), the progress
+    // event may not fire again. In that case, mark it visible immediately.
+    if ((playerService as any).getIsReady?.()) {
+      onUnityReady();
+      return;
+    }
+
+    const onProgress = (progression: number) => {
+      if (progression === 1) onUnityReady();
+    };
+
+    unity?.on?.('progress', onProgress);
+    return () => {
+      unity?.removeListener?.('progress', onProgress);
+      unity?.off?.('progress', onProgress);
+    };
   }, [dispatch]);
 
   // Adicionando de volta o "porteiro" que inicia o modo ao vivo
@@ -391,7 +477,8 @@ function Player() {
   }, [currentAvatar, visiblePlayer, dispatch]);
 
   useEffect(() => {
-    if (selectedEmotion !== 'Automático' || sentimentAnalysis.length === 0) {
+    const sentiments = Array.isArray(sentimentAnalysis) ? sentimentAnalysis : [];
+    if (selectedEmotion !== 'Automático' || sentiments.length === 0) {
       setEmotionMap([]);
       return;
     }
@@ -406,16 +493,28 @@ function Player() {
     };
 
     let wordCounter = 0;
-    const newEmotionMap = sentimentAnalysis.map((sentence) => {
-      const wordCount = sentence.traducao.split(' ').length;
-      const emotionData = {
-        emotion: sentimentsMap[sentence.sentimento],
-        startIndex: wordCounter,
-        endIndex: wordCounter + wordCount - 1,
-      };
-      wordCounter += wordCount;
-      return emotionData;
-    });
+    const newEmotionMap = sentiments
+      .map((sentence) => {
+        const translationText =
+          typeof (sentence as any)?.traducao === 'string'
+            ? ((sentence as any).traducao as string)
+            : '';
+        const wordCount = translationText
+          ? translationText.split(' ').filter(Boolean).length
+          : 0;
+        if (wordCount <= 0) return null;
+
+        const sentimentKey = String((sentence as any)?.sentimento ?? '').trim();
+        const emotion = sentimentsMap[sentimentKey] ?? PlayerKeys.APPLY_DEFAULT_EMOTION;
+        const emotionData = {
+          emotion,
+          startIndex: wordCounter,
+          endIndex: wordCounter + wordCount - 1,
+        };
+        wordCounter += wordCount;
+        return emotionData;
+      })
+      .filter(Boolean) as { emotion: PlayerKeys; startIndex: number; endIndex: number }[];
 
     setEmotionMap(newEmotionMap);
   }, [sentimentAnalysis, selectedEmotion]);
