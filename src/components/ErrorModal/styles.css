@@ -14,6 +14,22 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+  position: relative;
+}
+
+.error-modal-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  height: 32px;
+  width: 32px;
+  min-height: 32px;
+  min-width: 32px;
+  color: #1b1b1b;
 }
 
 .error-modal h1 {

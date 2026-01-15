@@ -17,6 +17,7 @@ import {
   IconPauseOutlined,
   IconRunning,
   IconPause,
+  IconPlay,
   IconShare,
   IconThumbs,
   IconClose,
@@ -84,6 +85,11 @@ function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
 }
 
+function formatSpeedLabel(speed: number): string {
+  const value = Number.isInteger(speed) ? speed.toFixed(0) : String(speed);
+  return `${value}x`;
+}
+
 let recording = false;
 let isLoading = false;
 let contador = 60;
@@ -129,12 +135,14 @@ function Player() {
   const chunkingIntervalRef = useRef<NodeJS.Timeout | null>(null); // Para o ciclo de 3s
   const isPlayerBusyRef = useRef<boolean>(false);
   const lastPlayedTextRef = useRef<string>(''); // Trava Anti-Repetição
+  const playbackProgressRef = useRef<{
+    counter: number;
+    glossLength: number;
+    lastUpdateAt: number;
+  }>({ counter: 0, glossLength: 0, lastUpdateAt: 0 });
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
-  history.listen(() => {
-    location.pathname !== '/' ? onCancel() : null;
-  });
 
   const {
     currentStep,
@@ -156,6 +164,75 @@ function Player() {
 
   const location = useLocation();
   const dispatch = useDispatch();
+
+  // Avoid leaking listeners: history.listen must be registered once with cleanup.
+  // Also cancel the tutorial when navigating away from HOME.
+  useEffect(() => {
+    const unlisten = history.listen((nextLocation: any) => {
+      if (nextLocation?.pathname !== paths.HOME) {
+        onCancel();
+      }
+    });
+    return () => {
+      if (typeof unlisten === 'function') unlisten();
+    };
+  }, [history, onCancel]);
+
+  // If another route navigated back to HOME with a pending gloss to play,
+  // only trigger playback after Unity has finished loading (visiblePlayer).
+  const consumedPlayRef = useRef<{ gloss: string; at?: number } | null>(null);
+  const pendingAutoPlayRef = useRef<{
+    gloss: string;
+    at?: number;
+    timeoutId: number;
+  } | null>(null);
+  useEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    if (!visiblePlayer) return;
+
+    const state = location.state as any;
+    const playGloss = state?.playGloss;
+    if (!playGloss) return;
+    const playAt = state?.playAt as number | undefined;
+
+    const glossStr = String(playGloss);
+    if (
+      consumedPlayRef.current &&
+      consumedPlayRef.current.gloss === glossStr &&
+      consumedPlayRef.current.at === playAt
+    ) {
+      return;
+    }
+
+    // In automatic emotion mode, give a small window for sentiment/emotionMap to arrive,
+    // so short phrases can still change expression.
+    if (selectedEmotion === 'Automático' && emotionMap.length === 0) {
+      // If we already scheduled a timeout for this exact play, don't schedule again.
+      if (
+        pendingAutoPlayRef.current &&
+        pendingAutoPlayRef.current.gloss === glossStr &&
+        pendingAutoPlayRef.current.at === playAt
+      ) {
+        return;
+      }
+      const timeoutId = window.setTimeout(() => {
+        consumedPlayRef.current = { gloss: glossStr, at: playAt };
+        handlePlay(glossStr);
+        pendingAutoPlayRef.current = null;
+      }, 700);
+      pendingAutoPlayRef.current = { gloss: glossStr, at: playAt, timeoutId };
+      return;
+    }
+
+    // If we had a pending autoplay and emotionMap is ready, play immediately and clear timeout.
+    if (pendingAutoPlayRef.current) {
+      window.clearTimeout(pendingAutoPlayRef.current.timeoutId);
+      pendingAutoPlayRef.current = null;
+    }
+    consumedPlayRef.current = { gloss: glossStr, at: playAt };
+    handlePlay(glossStr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.state, visiblePlayer, selectedEmotion, emotionMap.length]);
 
   const tutorialHandler = (hasFinished: boolean) => {
     if (hasFinished) {
@@ -354,13 +431,33 @@ function Player() {
 
   // To avoid the unity splash screen [MA]
   useEffect(() => {
-    playerService.getUnity().on('progress', (progression: number) => {
-      if (progression === 1) {
-        dispatch(Creators.loadAvatar.request());
-        dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
-        setVisiblePlayer(true);
-      }
-    });
+    let handled = false;
+    const unity: any = playerService.getUnity();
+
+    const onUnityReady = () => {
+      if (handled) return;
+      handled = true;
+      dispatch(Creators.loadAvatar.request());
+      dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
+      setVisiblePlayer(true);
+    };
+
+    // If Unity is already ready (e.g., navigating back from Translator), the progress
+    // event may not fire again. In that case, mark it visible immediately.
+    if ((playerService as any).getIsReady?.()) {
+      onUnityReady();
+      return;
+    }
+
+    const onProgress = (progression: number) => {
+      if (progression === 1) onUnityReady();
+    };
+
+    unity?.on?.('progress', onProgress);
+    return () => {
+      unity?.removeListener?.('progress', onProgress);
+      unity?.off?.('progress', onProgress);
+    };
   }, [dispatch]);
 
   // Adicionando de volta o "porteiro" que inicia o modo ao vivo
@@ -380,7 +477,8 @@ function Player() {
   }, [currentAvatar, visiblePlayer, dispatch]);
 
   useEffect(() => {
-    if (selectedEmotion !== 'Automático' || sentimentAnalysis.length === 0) {
+    const sentiments = Array.isArray(sentimentAnalysis) ? sentimentAnalysis : [];
+    if (selectedEmotion !== 'Automático' || sentiments.length === 0) {
       setEmotionMap([]);
       return;
     }
@@ -395,16 +493,28 @@ function Player() {
     };
 
     let wordCounter = 0;
-    const newEmotionMap = sentimentAnalysis.map((sentence) => {
-      const wordCount = sentence.traducao.split(' ').length;
-      const emotionData = {
-        emotion: sentimentsMap[sentence.sentimento],
-        startIndex: wordCounter,
-        endIndex: wordCounter + wordCount - 1,
-      };
-      wordCounter += wordCount;
-      return emotionData;
-    });
+    const newEmotionMap = sentiments
+      .map((sentence) => {
+        const translationText =
+          typeof (sentence as any)?.traducao === 'string'
+            ? ((sentence as any).traducao as string)
+            : '';
+        const wordCount = translationText
+          ? translationText.split(' ').filter(Boolean).length
+          : 0;
+        if (wordCount <= 0) return null;
+
+        const sentimentKey = String((sentence as any)?.sentimento ?? '').trim();
+        const emotion = sentimentsMap[sentimentKey] ?? PlayerKeys.APPLY_DEFAULT_EMOTION;
+        const emotionData = {
+          emotion,
+          startIndex: wordCounter,
+          endIndex: wordCounter + wordCount - 1,
+        };
+        wordCounter += wordCount;
+        return emotionData;
+      })
+      .filter(Boolean) as { emotion: PlayerKeys; startIndex: number; endIndex: number }[];
 
     setEmotionMap(newEmotionMap);
   }, [sentimentAnalysis, selectedEmotion]);
@@ -510,6 +620,13 @@ function Player() {
 
       if (wasPlaying.current && !newIsPlaying) {
         setHasFinished(true);
+        // Garante que o avatar volte ao idle (evita ficar "travado" no último sinal).
+        setTimeout(() => {
+          playerService.send(
+            PlayerKeys.PLAYER_MANAGER,
+            PlayerKeys.INIT_RANDOM_ANIMATION
+          );
+        }, 120);
         // O Avatar terminou! Abre o semáforo e chama o gerente.
         isPlayerBusyRef.current = false;
         // Adiciona um "respiro" de 100ms para o Avatar antes de processar o próximo.
@@ -532,6 +649,32 @@ function Player() {
     },
     [processTranslationQueue]
   );
+
+  useEffect(() => {
+    // Watchdog: se o CounterGloss chegou ao fim e não há avanço/encerramento,
+    // força reset para evitar travar no último sinal.
+    if (!isPlaying || isPaused) return;
+    const id = window.setInterval(() => {
+      if (!isPlaying || isPaused) return;
+      const { counter, glossLength, lastUpdateAt } = playbackProgressRef.current;
+      if (!glossLength || !counter) return;
+      // Só atua quando já chegamos ao fim.
+      if (counter < glossLength) return;
+      const now = Date.now();
+      if (now - lastUpdateAt < 1200) return;
+
+      playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
+      playerService.send(
+        PlayerKeys.PLAYER_MANAGER,
+        PlayerKeys.INIT_RANDOM_ANIMATION
+      );
+      setIsPlaying(false);
+      setIsPaused(false);
+      setHasFinished(true);
+      isPlayerBusyRef.current = false;
+    }, 800);
+    return () => window.clearInterval(id);
+  }, [isPlaying, isPaused]);
 
   function startLiveRecognition() {
     // Reseta o estado para uma nova sessão de tradução.
@@ -694,6 +837,11 @@ function Player() {
   );
 
   useOnCounterGloss((counter: number, glossLength: number) => {
+    playbackProgressRef.current = {
+      counter,
+      glossLength,
+      lastUpdateAt: Date.now(),
+    };
     if (selectedEmotion === 'Automático' && emotionMap.length > 0) {
       const currentWordIndex = counter - 1;
 
@@ -795,14 +943,18 @@ function Player() {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
             }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
+            <div className="player-speed-trigger">
+              <span className="player-speed-trigger-label">
+                {formatSpeedLabel(speedValue)}
+              </span>
+            </div>
           </button>
           <button
             className="player-action-button player-action-button-insert"
             type="button"
             onClick={handlePause}>
             {isPaused ? (
-              <IconPauseOutlined color={buttonColors.VARIANT_BLUE} size={24} />
+              <IconPlay hideCircle color={buttonColors.VARIANT_BLUE} size={34} />
             ) : (
               <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
             )}
@@ -830,7 +982,11 @@ function Player() {
               e.persist();
               setShowPopover({ showPopover: true, event: e });
             }}>
-            <IconRunning color={buttonColors.VARAINT_WHITE} />
+            <div className="player-speed-trigger">
+              <span className="player-speed-trigger-label">
+                {formatSpeedLabel(speedValue)}
+              </span>
+            </div>
           </button>
           <button
             className="player-action-button player-action-button-insert"
@@ -1365,6 +1521,9 @@ function Player() {
           setShowPopover({ showPopover: false, event: undefined })
         }>
         <div className="player-popover-content">
+          <div className="player-popover-current-speed">
+            Velocidade atual: <strong>{formatSpeedLabel(speedValue)}</strong>
+          </div>
           <button
             className={
               speedValue === X2_5
@@ -1429,7 +1588,7 @@ function Player() {
           width: '100vw',
           zIndex: 0,
           flexShrink: 0,
-          marginBottom: 70,
+          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : 70,
           flex: 1,
           display: 'flex',
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',

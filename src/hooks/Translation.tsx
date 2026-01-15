@@ -8,6 +8,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
 
 import { ErrorModal, GenerateModal } from 'components';
@@ -105,6 +106,7 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
   const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentSentence[]>([]);
   const [selectedEmotion, setSelectedEmotion] = useState('Automático');
+  const translateRequestIdRef = useRef(0);
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY)
@@ -134,12 +136,10 @@ const TranslationProvider: React.FC = ({ children }) => {
     setIsLoading(true);
     try {
       const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text: textPtBr });
-      setSentimentAnalysis(sentimentoPorSentenca);
-      UnityService.getPlayerInstance().send(
-        PlayerKeys.EMOTION_BRIDGE,
-        PlayerKeys.SET_SENTIMENT_ANALYSIS,
-        JSON.stringify(sentimentoPorSentenca),
-      );
+      const sentences = Array.isArray(sentimentoPorSentenca)
+        ? sentimentoPorSentenca
+        : [];
+      setSentimentAnalysis(sentences);
       const gloss = traducao;
       const response = await generateVideoTranslate({ gloss, ...videoOptions });
       const uuid = response.requestUID as string;
@@ -167,11 +167,14 @@ const TranslationProvider: React.FC = ({ children }) => {
   const handleTextPtBr = useCallback(
     async (text: string, fromDictionary: boolean, showLoading = true) => {
       let translation: string = text;
+      const requestId = ++translateRequestIdRef.current;
       setTranslateRequestType(TranslationRequestType.GLOSS_ONLY);
       if (showLoading) {
         setModalVisible(true);
       }
       setTranslationGlossError(false);
+      // Clear previous sentiment to avoid stale data affecting the next play.
+      setSentimentAnalysis([]);
       if (fromDictionary) {
         const recents =
           recentTranslation.length <= MAX_RECENTS_WORD
@@ -188,35 +191,64 @@ const TranslationProvider: React.FC = ({ children }) => {
       setTextPtBr(text);
 
       try {
-        const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
-        setSentimentAnalysis(sentimentoPorSentenca);
-        UnityService.getPlayerInstance().send(
-          PlayerKeys.EMOTION_BRIDGE,
-          PlayerKeys.SET_SENTIMENT_ANALYSIS,
-          JSON.stringify(sentimentoPorSentenca),
-        );
-        const gloss = traducao;
-        setTextGloss(gloss);
-        translation = gloss;
-        if (showLoading) {
-          setModalVisible(false);
+        // In Automatic emotion mode, we must wait for sentiment to ensure expressions are applied
+        // reliably (especially for short phrases) and that word ranges match the played gloss.
+        if (selectedEmotion === 'Automático') {
+          const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
+          const sentences = Array.isArray(sentimentoPorSentenca)
+            ? sentimentoPorSentenca
+            : [];
+          if (translateRequestIdRef.current === requestId) {
+            setSentimentAnalysis(sentences);
+          }
+          const gloss = traducao;
+          setTextGloss(gloss);
+          translation = gloss;
+          if (showLoading) {
+            setModalVisible(false);
+          }
+        } else {
+          // Fast path for non-automatic emotion mode: translate gloss only (lighter).
+          const gloss = (await translate({ text })).toString();
+          setTextGloss(gloss);
+          translation = gloss;
+          if (showLoading) {
+            setModalVisible(false);
+          }
         }
       } catch {
-        setTextGloss(text);
-        await delay(500);
-        if (showLoading) {
-          setIsLoading(false);
+        // Fallback to original behavior if /translate fails.
+        try {
+          const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
+          const sentences = Array.isArray(sentimentoPorSentenca)
+            ? sentimentoPorSentenca
+            : [];
+          if (translateRequestIdRef.current === requestId) {
+            setSentimentAnalysis(sentences);
+          }
+          const gloss = traducao;
+          setTextGloss(gloss);
+          translation = gloss;
+          if (showLoading) {
+            setModalVisible(false);
+          }
+        } catch {
+          setTextGloss(text);
+          await delay(500);
+          if (showLoading) {
+            setIsLoading(false);
+          }
+          if (showLoading) {
+            setTranslationGlossError(true);
+          }
+          await delay(1500);
+          translation = text;
         }
-        if (showLoading) {
-          setTranslationGlossError(true);
-        }
-        await delay(1500);
-        translation = text;
       }
 
       return translation;
     },
-    [recentTranslation, setModalVisible]
+    [recentTranslation, selectedEmotion, setModalVisible]
   );
 
   const handleTextGloss = useCallback(
