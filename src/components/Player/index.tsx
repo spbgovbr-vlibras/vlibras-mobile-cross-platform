@@ -204,25 +204,26 @@ function Player() {
       return;
     }
 
+    // COMENTADO PARA DEPLOY - Lógica de modo automático removida temporariamente
     // In automatic emotion mode, give a small window for sentiment/emotionMap to arrive,
     // so short phrases can still change expression.
-    if (selectedEmotion === 'Automático' && emotionMap.length === 0) {
-      // If we already scheduled a timeout for this exact play, don't schedule again.
-      if (
-        pendingAutoPlayRef.current &&
-        pendingAutoPlayRef.current.gloss === glossStr &&
-        pendingAutoPlayRef.current.at === playAt
-      ) {
-        return;
-      }
-      const timeoutId = window.setTimeout(() => {
-        consumedPlayRef.current = { gloss: glossStr, at: playAt };
-        handlePlay(glossStr);
-        pendingAutoPlayRef.current = null;
-      }, 700);
-      pendingAutoPlayRef.current = { gloss: glossStr, at: playAt, timeoutId };
-      return;
-    }
+    // if (selectedEmotion === 'Automático' && emotionMap.length === 0) {
+    //   // If we already scheduled a timeout for this exact play, don't schedule again.
+    //   if (
+    //     pendingAutoPlayRef.current &&
+    //     pendingAutoPlayRef.current.gloss === glossStr &&
+    //     pendingAutoPlayRef.current.at === playAt
+    //   ) {
+    //     return;
+    //   }
+    //   const timeoutId = window.setTimeout(() => {
+    //     consumedPlayRef.current = { gloss: glossStr, at: playAt };
+    //     handlePlay(glossStr);
+    //     pendingAutoPlayRef.current = null;
+    //   }, 700);
+    //   pendingAutoPlayRef.current = { gloss: glossStr, at: playAt, timeoutId };
+    //   return;
+    // }
 
     // If we had a pending autoplay and emotionMap is ready, play immediately and clear timeout.
     if (pendingAutoPlayRef.current) {
@@ -478,10 +479,11 @@ function Player() {
 
   useEffect(() => {
     const sentiments = Array.isArray(sentimentAnalysis) ? sentimentAnalysis : [];
-    if (selectedEmotion !== 'Automático' || sentiments.length === 0) {
+    // COMENTADO PARA DEPLOY - Lógica de modo automático removida temporariamente
+    // if (selectedEmotion !== 'Automático' || sentiments.length === 0) {
       setEmotionMap([]);
       return;
-    }
+    // }
 
     const sentimentsMap: Record<string, PlayerKeys> = {
       Feliz: PlayerKeys.APPLY_HAPPY_EMOTION,
@@ -842,25 +844,26 @@ function Player() {
       glossLength,
       lastUpdateAt: Date.now(),
     };
-    if (selectedEmotion === 'Automático' && emotionMap.length > 0) {
-      const currentWordIndex = counter - 1;
+    // COMENTADO PARA DEPLOY - Lógica de emoção automática removida temporariamente
+    // if (selectedEmotion === 'Automático' && emotionMap.length > 0) {
+    //   const currentWordIndex = counter - 1;
 
-      const currentEmotionData = emotionMap.findIndex(
-        (e) =>
-          currentWordIndex >= e.startIndex && currentWordIndex <= e.endIndex,
-      );
+    //   const currentEmotionData = emotionMap.findIndex(
+    //     (e) =>
+    //       currentWordIndex >= e.startIndex && currentWordIndex <= e.endIndex,
+    //   );
 
-      if (
-        currentEmotionData !== -1 &&
-        lastPlayedEmotionIndex.current !== currentEmotionData
-      ) {
-        PlayerService.getPlayerInstance().send(
-          PlayerKeys.EMOTION_BRIDGE,
-          emotionMap[currentEmotionData].emotion,
-        );
-        lastPlayedEmotionIndex.current = currentEmotionData;
-      }
-    }
+    //   if (
+    //     currentEmotionData !== -1 &&
+    //     lastPlayedEmotionIndex.current !== currentEmotionData
+    //   ) {
+    //     PlayerService.getPlayerInstance().send(
+    //       PlayerKeys.EMOTION_BRIDGE,
+    //       emotionMap[currentEmotionData].emotion,
+    //     );
+    //     lastPlayedEmotionIndex.current = currentEmotionData;
+    //   }
+    // }
 
     if (counter === cache - 1) {
       glossLen = counter;

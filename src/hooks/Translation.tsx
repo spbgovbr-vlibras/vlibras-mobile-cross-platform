@@ -105,7 +105,8 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [textGloss, setTextGloss] = useState('');
   const [recentTranslation, setRecentTranslation] = useState<string[]>([]);
   const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentSentence[]>([]);
-  const [selectedEmotion, setSelectedEmotion] = useState('Automático');
+  // COMENTADO PARA DEPLOY - Valor padrão mudado de 'Automático' para 'Neutra'
+  const [selectedEmotion, setSelectedEmotion] = useState('Neutra');
   const translateRequestIdRef = useRef(0);
 
   useEffect(() => {
@@ -191,23 +192,24 @@ const TranslationProvider: React.FC = ({ children }) => {
       setTextPtBr(text);
 
       try {
+        // COMENTADO PARA DEPLOY - Lógica de modo automático removida temporariamente
         // In Automatic emotion mode, we must wait for sentiment to ensure expressions are applied
         // reliably (especially for short phrases) and that word ranges match the played gloss.
-        if (selectedEmotion === 'Automático') {
-          const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
-          const sentences = Array.isArray(sentimentoPorSentenca)
-            ? sentimentoPorSentenca
-            : [];
-          if (translateRequestIdRef.current === requestId) {
-            setSentimentAnalysis(sentences);
-          }
-          const gloss = traducao;
-          setTextGloss(gloss);
-          translation = gloss;
-          if (showLoading) {
-            setModalVisible(false);
-          }
-        } else {
+        // if (selectedEmotion === 'Automático') {
+        //   const { traducao, sentimentoPorSentenca } = await translateWithSentiment({ text });
+        //   const sentences = Array.isArray(sentimentoPorSentenca)
+        //     ? sentimentoPorSentenca
+        //     : [];
+        //   if (translateRequestIdRef.current === requestId) {
+        //     setSentimentAnalysis(sentences);
+        //   }
+        //   const gloss = traducao;
+        //   setTextGloss(gloss);
+        //   translation = gloss;
+        //   if (showLoading) {
+        //     setModalVisible(false);
+        //   }
+        // } else {
           // Fast path for non-automatic emotion mode: translate gloss only (lighter).
           const gloss = (await translate({ text })).toString();
           setTextGloss(gloss);
@@ -215,7 +217,7 @@ const TranslationProvider: React.FC = ({ children }) => {
           if (showLoading) {
             setModalVisible(false);
           }
-        }
+        // }
       } catch {
         // Fallback to original behavior if /translate fails.
         try {
