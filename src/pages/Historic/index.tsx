@@ -1,5 +1,4 @@
-import { IonButton, IonChip, IonContent, IonText } from '@ionic/react';
-import { NativeStorage } from '@ionic-native/native-storage';
+import { IonButton, IonContent, IonText, useIonViewWillEnter } from '@ionic/react';
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -11,12 +10,15 @@ import { useTranslation } from 'hooks/Translation';
 import PlayerService from 'services/unity';
 import { Creators } from 'store/ducks/translator';
 import dateFormat from 'utils/dateFormat';
-import { reloadHistory } from 'utils/setHistory';
+import { reloadHistory, getHistory } from 'utils/setHistory';
 
 import { Strings } from './strings';
 import {
   IconArrowUp,
   IconArrowDown,
+  IconDictionary,
+  IconHandsTranslate,
+  IconHistory,
   logoTranslator1,
   logoTranslator2,
 } from '../../assets';
@@ -25,7 +27,6 @@ import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 
 import './styles.css';
-// import { Creators } from 'store/ducks/customization';
 
 type GenericObject = { [key: string]: any };
 
@@ -42,9 +43,6 @@ function Historic() {
   const [keysToShow, setKeysToShow] = useState(
     env.videoTranslator ? ['text', 'video'] : ['text']
   );
-  const [activeKey, setActiveKey] = useState(env.videoTranslator ? 0 : 2);
-
-  const style = { color: '#1447a6', background: '#d6e5f9', fontWeight: 'bold' };
 
   const { setTextPtBr } = useTranslation();
   const playerService = PlayerService.getPlayerInstance();
@@ -56,10 +54,11 @@ function Historic() {
 
   const loadHistory = useCallback(async () => {
     try {
-      const result = await NativeStorage.getItem('history');
-      setHistoryStorage(result);
-      // eslint-disable-next-line no-empty
-    } catch {}
+      const result = await getHistory();
+      setHistoryStorage(result || {});
+    } catch {
+      setHistoryStorage({});
+    }
   }, []);
 
   const hasItemsToRender = (): boolean => {
@@ -70,6 +69,12 @@ function Historic() {
     if (location.pathname === paths.HISTORY) loadHistory();
   }, [location, loadHistory]);
 
+  // Recarregar histórico toda vez que a página ficar visível
+  // (necessário porque o Ionic cacheia páginas no DOM)
+  useIonViewWillEnter(() => {
+    loadHistory();
+  });
+
   const formatArrayDate = () => {
     const arrayState = JSON.parse(JSON.stringify(historyStorage));
     const dates = Object.keys(arrayState);
@@ -78,12 +83,12 @@ function Historic() {
     dates.forEach((element) => {
       const formattedDate = dateFormat(element);
       if (formattedObjDate[formattedDate]) {
-        if (formattedObjDate[formattedDate].video) {
+        if (arrayState[element].video && formattedObjDate[formattedDate].video) {
           formattedObjDate[formattedDate].video.push(
             ...arrayState[element].video
           );
         }
-        if (formattedObjDate[formattedDate].text) {
+        if (arrayState[element].text && formattedObjDate[formattedDate].text) {
           formattedObjDate[formattedDate].text.push(
             ...arrayState[element].text
           );
@@ -101,10 +106,9 @@ function Historic() {
 
   async function onTranslationHistory(text: string) {
     const formatted = text.trim();
-
     const today = new Date().toLocaleDateString('pt-BR');
 
-    reloadHistory(today, formatted, 'text');
+    await reloadHistory(today, formatted, 'text');
 
     const gloss = await setTextPtBr(formatted, false);
 
@@ -133,14 +137,17 @@ function Historic() {
     return datesMapped.map((column) => {
       doesntHaveKey = 0;
       return keysToShow.map((key, keyOfKeys) => {
-        if (formattedHistoric[column][key].length !== 0) {
+        if (
+          formattedHistoric[column][key] &&
+          formattedHistoric[column][key].length !== 0
+        ) {
           return formattedHistoric[column][key].map(
             (item: any, elementKey: any) => {
               return (
-                <div key={elementKey}>
+                <div key={`${column}-${key}-${elementKey}`}>
                   {elementKey === 0 &&
                     (keyOfKeys === 0 || doesntHaveKey === 1) && (
-                      <p className="date-desc"> {column} </p>
+                      <p className="date-desc">{column}</p>
                     )}
                   {key === 'video' ? (
                     <>
@@ -159,7 +166,7 @@ function Historic() {
                           className="container-outputs"
                           onClick={() => openModalOutput(item)}
                           type="button">
-                          {item.map((value: string, keyWord: string) => (
+                          {item.map((value: string) => (
                             <span key={uuidv4()}>{value}</span>
                           ))}
                         </button>
@@ -195,30 +202,13 @@ function Historic() {
           );
         }
         doesntHaveKey = 1;
-        return <></>;
+        return <React.Fragment key={`${column}-${key}-empty`} />;
       });
     });
   };
 
-  const setScreenKey = (param: number) => {
-    setActiveKey(param);
-    switch (param) {
-      case 0:
-        setKeysToShow(['text', 'video']);
-        break;
-      case 1:
-        setKeysToShow(['text']);
-        break;
-      case 2:
-        setKeysToShow(['video']);
-        break;
-      default:
-        break;
-    }
-  };
-
   return (
-    <MenuLayout title={Strings.TOOLBAR_TITLE} mode="back">
+    <MenuLayout title={Strings.TOOLBAR_TITLE} mode="menu">
       <IonContent ref={contentRef}>
         {hasItemsToRender() && (
           <div className="scroll-buttons">
@@ -231,32 +221,6 @@ function Historic() {
           </div>
         )}
         <div className="historic-container">
-          <div className="historic-container-ion-chips">
-            {env.videoTranslator && (
-              <IonChip
-                className="historic-container-ion-chip"
-                onClick={() => setScreenKey(0)}
-                style={activeKey === 0 ? style : {}}>
-                {Strings.CHIP_TEXT_1}
-              </IonChip>
-            )}
-            {env.videoTranslator && (
-              <IonChip
-                className="historic-container-ion-chip"
-                onClick={() => setScreenKey(1)}
-                style={activeKey === 1 ? style : {}}>
-                {Strings.CHIP_TEXT_2}
-              </IonChip>
-            )}
-            {env.videoTranslator && (
-              <IonChip
-                className="historic-container-ion-chip"
-                onClick={() => setScreenKey(2)}
-                style={activeKey === 2 ? style : {}}>
-                {Strings.CHIP_TEXT_3}
-              </IonChip>
-            )}
-          </div>
           <div className="container-render-historic">
             {!hasItemsToRender() ? (
               <p className="empty-historic">Histórico vazio</p>
@@ -273,6 +237,31 @@ function Historic() {
           />
         </div>
       </IonContent>
+      {/* Tab bar inferior */}
+      <div className="historic-tab-bar">
+        <button
+          className="historic-tab-button"
+          type="button"
+          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
+          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
+          <span className="historic-tab-label">Dicionário</span>
+        </button>
+
+        <button
+          className="historic-tab-button"
+          type="button"
+          onClick={() => history.push(paths.HOME)}>
+          <IconHandsTranslate color="#888" size={24} />
+          <span className="historic-tab-label">Tradutor</span>
+        </button>
+
+        <div className="historic-tab-button historic-tab-active">
+          <div className="historic-tab-active-icon">
+            <IconHistory color="#1447a6" size={26} viewBox="25 5 25 22" />
+          </div>
+          <span className="historic-tab-label historic-tab-label-active">Histórico</span>
+        </div>
+      </div>
     </MenuLayout>
   );
 }

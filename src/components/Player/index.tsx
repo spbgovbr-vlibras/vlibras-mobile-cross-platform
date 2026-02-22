@@ -30,6 +30,7 @@ import {
   IconSubtitle,
   IconRefresh,
   IconTutorial,
+  IconHandsTranslate,
 } from 'assets';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
@@ -44,6 +45,7 @@ import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import { Creators as TranslatorCreators } from 'store/ducks/translator';
+import { reloadHistory } from 'utils/setHistory';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -531,6 +533,29 @@ function Player() {
     ({ translator }: RootState) => translator.translatorText
   );
 
+  const [showTranslateError, setShowTranslateError] = useState(false);
+
+  async function translateText() {
+    const formatted = translatorText.trim();
+
+    if (formatted === '') {
+      setShowTranslateError(true);
+      return;
+    }
+
+    const today = new Date().toLocaleDateString('pt-BR');
+    await reloadHistory(today, formatted, 'text');
+
+    if (formatted.toLocaleLowerCase() === 'ativar modo live') {
+      startLiveRecognition();
+      return;
+    }
+
+    const gloss = (await setTextPtBr(formatted, false)).toString();
+    handlePlay(gloss);
+    dispatch(TranslatorCreators.setTranslatorText(formatted));
+  }
+
   function handleStop() {
     const savedState = sessionStorage.getItem('dictionaryState');
     if(savedState) {
@@ -1012,224 +1037,9 @@ function Player() {
     }
     return (
       <>
+        {/* Tutorial popovers */}
         <div
           style={{
-            position: 'relative',
-          }}>
-          {currentStep === HomeTutorialSteps.DICTIONARY && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-10%',
-                left: '7%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '60px',
-                height: '45px',
-                borderRadius: '5px',
-                border: '2px solid #3885F9',
-                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          {currentStep === HomeTutorialSteps.PLAYBACK_SPEED && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-5%',
-                left: '-40%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '60px',
-                height: '45px',
-                borderRadius: '5px',
-                border: '2px solid #3885F9',
-                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          {currentStep === HomeTutorialSteps.TRANSLATION && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-12%',
-                left: '184%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                border: '2px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          {currentStep === HomeTutorialSteps.REPEAT && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-17%',
-                left: '285%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                border: '2px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          {currentStep >= HomeTutorialSteps.CLOSE &&
-          currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
-            <IconRunning color={buttonColors.VARAINT_WHITE} size={32} />
-          ) : (
-            <button
-              className="player-action-button-transparent"
-              type="button"
-              onClick={() => {
-                history.push(paths.DICTIONARY_PLAYER);
-              }}>
-              <IconDictionary color={buttonColors.VARAINT_WHITE} />
-            </button>
-          )}
-
-          {currentStep === HomeTutorialSteps.HISTORY && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-5%',
-                left: '347%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '60px',
-                height: '45px',
-                borderRadius: '5px',
-                border: '2px solid #3885F9',
-                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          {currentStep === HomeTutorialSteps.SUBTITLE && (
-            <div
-              style={{
-                margin: 'auto',
-                position: 'absolute',
-                bottom: '-7%',
-                left: '587%',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '56px',
-                height: '45px',
-                borderRadius: '5px',
-                border: '2px solid #3885F9',
-                boxShadow: '0px 0px 15px 0px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-        </div>
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 80,
-              left: 25,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Dicionário"
-              context="home"
-              description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
-              position="bl"
-              isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
-            />
-          </div>
-        </div>
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 80,
-              left: 25,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Tradução PT-BR"
-              context="home"
-              description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
-              position="bc"
-              isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
-            />
-          </div>
-        </div>
-        {currentStep >= HomeTutorialSteps.CLOSE &&
-        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
-          <button
-            className="player-action-button player-action-button-insert"
-            id="refresh-button"
-            type="button">
-            <IconRefresh color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
-        ) : (
-          <button
-            className="player-action-button player-action-button-insert"
-            id="translation-button"
-            type="button"
-            onClick={() => {
-              dispatch(TranslatorCreators.setTranslatorText(''));
-              history.push(paths.TRANSLATOR);
-            }}>
-            <IconEdit color={buttonColors.VARIANT_BLUE} size={24} />
-          </button>
-        )}
-
-        <div
-          style={{
-            margin: 'auto',
-            position: 'absolute',
-            bottom: 85,
-            left: 20,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-          }}>
-          <TutorialPopover
-            title="Repetir tradução"
-            context="home"
-            description="Repita a última tradução feita"
-            position="bc"
-            isEnabled={currentStep === HomeTutorialSteps.REPEAT}
-          />
-        </div>
-
-        <div
-          style={{
-            margin: 'auto',
             position: 'absolute',
             bottom: 80,
             left: 25,
@@ -1238,6 +1048,47 @@ function Player() {
             justifyContent: 'center',
             alignItems: 'center',
             width: '100vw',
+            zIndex: 10,
+          }}>
+          <TutorialPopover
+            title="Dicionário"
+            context="home"
+            description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
+            position="bl"
+            isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 80,
+            left: 25,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+            zIndex: 10,
+          }}>
+          <TutorialPopover
+            title="Tradução PT-BR"
+            context="home"
+            description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
+            position="bc"
+            isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 85,
+            left: 20,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+            zIndex: 10,
           }}>
           <TutorialPopover
             title="Histórico"
@@ -1247,67 +1098,70 @@ function Player() {
             isEnabled={currentStep === HomeTutorialSteps.HISTORY}
           />
         </div>
-
-        {currentStep >= HomeTutorialSteps.CLOSE &&
-        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
-          <IconSubtitle color={buttonColors.VARAINT_WHITE} size={32} />
-        ) : (
-          <button
-            className="player-action-button-transparent"
-            id="history-button"
-            type="button"
-            onClick={() => {
-              history.push(paths.HISTORY);
-            }}>
-            <IconHistory color={buttonColors.VARAINT_WHITE} size={32} />
-          </button>
-        )}
-
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 85,
-              left: 20,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Legenda"
-              context="home"
-              description="Habilite legenda para tradução"
-              position="br"
-              isEnabled={currentStep === HomeTutorialSteps.SUBTITLE}
-            />
-          </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 85,
+            left: 20,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+            zIndex: 10,
+          }}>
+          <TutorialPopover
+            title="Legenda"
+            context="home"
+            description="Habilite legenda para tradução"
+            position="br"
+            isEnabled={currentStep === HomeTutorialSteps.SUBTITLE}
+          />
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 85,
+            left: 20,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100vw',
+            zIndex: 10,
+          }}>
+          <TutorialPopover
+            title="Velocidade de reprodução"
+            context="home"
+            description="Altere a velocidade de reprodução"
+            position="bl"
+            isEnabled={currentStep === HomeTutorialSteps.PLAYBACK_SPEED}
+          />
         </div>
 
-        <div>
-          <div
-            style={{
-              margin: 'auto',
-              position: 'absolute',
-              bottom: 85,
-              left: 20,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100vw',
-            }}>
-            <TutorialPopover
-              title="Velocidade de reprodução"
-              context="home"
-              description="Altere a velocidade de reprodução"
-              position="bl"
-              isEnabled={currentStep === HomeTutorialSteps.PLAYBACK_SPEED}
-            />
+        {/* Tab bar com labels */}
+        <button
+          className="player-tab-button"
+          type="button"
+          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
+          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
+          <span className="player-tab-label">Dicionário</span>
+        </button>
+
+        <div className="player-tab-button player-tab-active">
+          <div className="player-tab-active-icon">
+            <IconHandsTranslate color="#1447a6" size={26} />
           </div>
+          <span className="player-tab-label player-tab-label-active">Tradutor</span>
         </div>
+
+        <button
+          className="player-tab-button"
+          type="button"
+          onClick={() => history.push(paths.HISTORY)}>
+          <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
+          <span className="player-tab-label">Histórico</span>
+        </button>
       </>
     );
   };
@@ -1376,97 +1230,9 @@ function Player() {
         </div>
       );
     }
-    return (
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <div
-          style={{
-            position: 'absolute',
-            padding: '8px',
-            right: 15,
-            top: 20,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            zIndex: 2,
-          }}>
-          <TutorialPopover
-            title="Trocar avatar"
-            context="home"
-            description="Escolha qual avatar interpretará os sinais em LIBRAS."
-            position="rc"
-            isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
-          />
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            padding: '8px',
-            right: 15,
-            top: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            zIndex: 2,
-          }}>
-          <TutorialPopover
-            title="Central de ajuda"
-            context="home"
-            description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
-            position="rt"
-            isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
-          />
-        </div>
-        {currentStep === HomeTutorialSteps.CHANGE_AVATAR && (
-          <div
-            style={{
-              position: 'absolute',
-              display: 'flex',
-              bottom: '16px',
-              width: '44px',
-              height: '44px',
-              borderRadius: '50%',
-              border: '1px solid white',
-              boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-            }}></div>
-        )}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: 'fit-content',
-          }}>
-          {currentStep === HomeTutorialSteps.TUTORIAL && (
-            <div
-              style={{
-                marginTop: 'auto',
-                position: 'absolute',
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                border: '1px solid white',
-                boxShadow: '0px 0px 18px rgba(86, 154, 255, 0.75)',
-              }}></div>
-          )}
-          <>
-            <button
-              disabled={currentStep !== HomeTutorialSteps.IDLE}
-              className="player-button-tutorial-rounded-top"
-              type="button"
-              onClick={goNextStep}>
-              <IconTutorial color="black" size={44} />
-            </button>
-          </>
-          <button
-            className="player-button-avatar-rounded-top"
-            type="button"
-            onClick={handleChangeAvatar}>
-            {currentAvatar === 'icaro' && <HozanaAvatar />}
-            {currentAvatar === 'hozana' && <GugaAvatar />}
-            {currentAvatar === 'guga' && <IcaroAvatar />}
-          </button>
-        </div>
-      </div>
-    );
+    // Botões de tutorial e troca de avatar removidos da UI (lógica preservada).
+    // Serão reimplementados em outro lugar.
+    return null;
   };
 
   useEffect(() => {
@@ -1591,7 +1357,7 @@ function Player() {
           width: '100vw',
           zIndex: 0,
           flexShrink: 0,
-          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : 70,
+          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : (isPlaying || hasFinished ? 78 : 120),
           flex: 1,
           display: 'flex',
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
@@ -1679,11 +1445,40 @@ function Player() {
         </div>
       )}
       <div className="player-action-container">
+        {/* Campo de texto + botão Traduzir (visível apenas no estado idle) */}
+        {!isPlaying && !hasFinished && !isLiveListening &&
+          !(currentStep >= HomeTutorialSteps.CLOSE && currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) && (
+          <div className="player-translate-input-row">
+            <input
+              className="player-translate-input"
+              type="text"
+              value={translatorText}
+              onChange={(e) => dispatch(TranslatorCreators.setTranslatorText(e.target.value))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') translateText();
+              }}
+            />
+            <button
+              className="player-translate-button"
+              onClick={translateText}
+              type="button"
+            >
+              <IconHandsTranslate color={translatorText.trim() ? '#1447a6' : '#b0b0b0'} size={20} />
+              <span>Traduzir</span>
+            </button>
+          </div>
+        )}
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
         <div className="play-action-content">{renderPlayerButtons()}</div>
       </div>
+
+      <ErrorModal
+        show={showTranslateError}
+        errorMsg="Erro ao tentar traduzir: caixa de texto vazia."
+        setShow={setShowTranslateError}
+      />
 
       <EvaluationModal
         show={showModal}
