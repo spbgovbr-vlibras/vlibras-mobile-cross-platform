@@ -10,9 +10,10 @@ export const useLoadCurrentAvatar = (
   initialAvatar: Avatar,
   unityService: UnityService,
   nextAvatar: Avatar,
-  onAvatarFirstLoaded?: () => void
+  onAvatarFirstLoaded?: () => void,
+  alreadyLoaded?: boolean
 ) => {
-  const [isFirstLoaded, setIsFirstLoaded] = useState(false);
+  const [isFirstLoaded, setIsFirstLoaded] = useState(alreadyLoaded ?? false);
 
   const loadCurrentAvatar = useCallback(() => {
     let innerTimeout: NodeJS.Timeout | undefined;

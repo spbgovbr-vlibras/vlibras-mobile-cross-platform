@@ -3,11 +3,10 @@
 /* eslint-disable quotes */
 /* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
-import { IonPopover, isPlatform } from '@ionic/react';
+import { IonPopover } from '@ionic/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
-import Unity from 'react-unity-webgl';
 import { App, StateChangeListener } from '@capacitor/app';
 
 import {
@@ -95,6 +94,9 @@ let isLoading = false;
 let contador = 60;
 let isBreak = false;
 
+let unityLoadedGlobally = false;
+let avatarLoadedGlobally = false;
+
 let mediaRecorder: MediaRecorder;
 let recordedChunks: BlobPart[] | undefined;
 const info = Device.getInfo();
@@ -106,7 +108,7 @@ function Player() {
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [tryShowTutorial, setTryShowTutorial] = useState(false);
-  const [visiblePlayer, setVisiblePlayer] = useState(false);
+  const [visiblePlayer, setVisiblePlayer] = useState(unityLoadedGlobally);
   const [speedValue, setSpeedValue] = useState(X1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -119,7 +121,7 @@ function Player() {
     showPopover: false,
     event: undefined,
   });
-  const [hasLoadedAvatarOnce, setHasLoadedAvatarOnce] = useState(false);
+  const [hasLoadedAvatarOnce, setHasLoadedAvatarOnce] = useState(avatarLoadedGlobally);
   const [isInBackground, setIsInBackground] = useState(false);
   const [shouldUnPauseOnForeground, setShouldUnPauseOnForeground] =
     useState(false);
@@ -156,6 +158,7 @@ function Player() {
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+  const canvasHostRef = useRef<HTMLDivElement>(null);
 
   const [emotionMap, setEmotionMap] = useState<
     { emotion: PlayerKeys; startIndex: number; endIndex: number }[]
@@ -164,6 +167,22 @@ function Player() {
 
   const location = useLocation();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const persistentContainer = document.getElementById('persistent-unity-container');
+    const host = canvasHostRef.current;
+    if (!persistentContainer || !host) return;
+
+    while (persistentContainer.firstChild) {
+      host.appendChild(persistentContainer.firstChild);
+    }
+
+    return () => {
+      while (host.firstChild) {
+        persistentContainer.appendChild(host.firstChild);
+      }
+    };
+  }, []);
 
   // Avoid leaking listeners: history.listen must be registered once with cleanup.
   // Also cancel the tutorial when navigating away from HOME.
@@ -231,7 +250,20 @@ function Player() {
       pendingAutoPlayRef.current = null;
     }
     consumedPlayRef.current = { gloss: glossStr, at: playAt };
-    handlePlay(glossStr);
+
+    let cancelled = false;
+    const waitForCanvasAndPlay = () => {
+      if (cancelled) return;
+      const canvas = document.querySelector('canvas');
+      if (canvas && canvas.offsetWidth > 0 && canvas.offsetHeight > 0) {
+        handlePlay(glossStr);
+      } else {
+        requestAnimationFrame(waitForCanvasAndPlay);
+      }
+    };
+    requestAnimationFrame(waitForCanvasAndPlay);
+
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.state, visiblePlayer, selectedEmotion, emotionMap.length]);
 
@@ -430,25 +462,25 @@ function Player() {
 
   useOnFinisheWelcome(tutorialHandler, []);
 
-  // To avoid the unity splash screen [MA]
   useEffect(() => {
+    if (unityLoadedGlobally) {
+      dispatch(Creators.loadAvatar.request());
+      dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
+      setVisiblePlayer(true);
+      return;
+    }
+
     let handled = false;
     const unity: any = playerService.getUnity();
 
     const onUnityReady = () => {
       if (handled) return;
       handled = true;
+      unityLoadedGlobally = true;
       dispatch(Creators.loadAvatar.request());
       dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
       setVisiblePlayer(true);
     };
-
-    // If Unity is already ready (e.g., navigating back from Translator), the progress
-    // event may not fire again. In that case, mark it visible immediately.
-    if ((playerService as any).getIsReady?.()) {
-      onUnityReady();
-      return;
-    }
 
     const onProgress = (progression: number) => {
       if (progression === 1) onUnityReady();
@@ -834,8 +866,10 @@ function Player() {
     PlayerService.getPlayerInstance(),
     currentAvatar,
     () => {
+      avatarLoadedGlobally = true;
       setHasLoadedAvatarOnce(true);
-    }
+    },
+    avatarLoadedGlobally
   );
 
   useOnCounterGloss((counter: number, glossLength: number) => {
@@ -1587,6 +1621,7 @@ function Player() {
         {renderPlayerButtonsContainer()}
       </div>
       <div
+        ref={canvasHostRef}
         style={{
           width: '100vw',
           zIndex: 0,
@@ -1594,13 +1629,9 @@ function Player() {
           marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : 70,
           flex: 1,
           display: 'flex',
-          background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
-        }}>
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
-      </div>
+          background: '#E5E5E5',
+        }}
+      />
 
       {((currentStep >= HomeTutorialSteps.CLOSE &&
         currentStep <= HomeTutorialSteps.PLAYBACK_SPEED &&

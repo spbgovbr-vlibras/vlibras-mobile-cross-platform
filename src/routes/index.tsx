@@ -3,8 +3,10 @@ import { IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import React from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
+import Unity from 'react-unity-webgl';
 
 import { DrawerMenu } from 'components';
+import PlayerService from 'services/unity';
 
 import paths from '../constants/paths';
 import {
@@ -23,6 +25,7 @@ import {
 } from '../pages';
 
 const CONTENT_ID = '@vlibras/mobile';
+const playerService = PlayerService.getPlayerInstance();
 
 function Routes() {
   document.addEventListener('ionBackButton', (ev: any) => {
@@ -36,6 +39,22 @@ function Routes() {
   return (
     <BrowserRouter>
       <IonReactRouter>
+        <div
+          id="persistent-unity-container"
+          style={{
+            position: 'fixed',
+            left: '-200vw',
+            top: 0,
+            width: '100vw',
+            height: '100vh',
+            pointerEvents: 'none',
+          }}
+        >
+          <Unity
+            unityContent={playerService.getUnity()}
+            className="player-content"
+          />
+        </div>
         <DrawerMenu contentId={CONTENT_ID} />
         <IonRouterOutlet id={CONTENT_ID}>
           <Route exact component={Home} path={paths.HOME} />
