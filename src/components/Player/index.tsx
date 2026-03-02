@@ -95,9 +95,15 @@ let isLoading = false;
 let contador = 60;
 let isBreak = false;
 
-let mediaRecorder: MediaRecorder;
-let recordedChunks: BlobPart[] | undefined;
-const info = Device.getInfo();
+let mediaRecorder: MediaRecorder | null = null;
+let recordedChunks: BlobPart[] = [];
+let recordedMimeType = 'video/mp4';
+let proxyAnimFrameId: number | null = null;
+let proxyCanvas: HTMLCanvasElement | null = null;
+let proxyCtx: CanvasRenderingContext2D | null = null;
+let cachedPlatform: string | null = null;
+let recorderStoppedPromise: Promise<void> | null = null;
+Device.getInfo().then((info) => { cachedPlatform = info.platform; });
 
 function Player() {
   const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
@@ -259,125 +265,301 @@ function Player() {
     setModalOpen(false);
   };
 
-  const handleClick = () => {
-    setShowCloseButton(false);
-    if (!recording && isLoading) {
-      openModal();
-    }
-  };
-
   const onBreak = () => {
     closeModal();
     isBreak = !isBreak;
   };
 
-  const handleVideoReading = (fileReader: FileReader, blob: Blob) => {
-    fileReader.readAsDataURL(blob);
-    return async () => {
-      const base64data = fileReader.result as string;
+  const shareBlob = async (blob: Blob) => {
+    try {
+      const base64data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('FileReader falhou'));
+        reader.readAsDataURL(blob);
+      });
+
       const uri = await Filesystem.writeFile({
         path: Strings.VIDEO_SHARE_FILENAME,
         data: base64data,
         directory: Directory.Cache,
         recursive: true,
       });
+
       try {
         await Share.share({
           dialogTitle: Strings.VIDEO_SHARE_TITLE_DIALOG,
           title: Strings.VIDEO_SHARE_TITLE_DIALOG,
           url: uri.uri,
         });
-      } catch (error: unknown) {
-        /** ignore */
+      } catch (_) {
+        /** usuário cancelou o share */
       }
+    } catch (e) {
+      console.error('[VLibras Share] Erro em shareBlob:', e);
+      openErrorModal();
+    } finally {
       closeModal();
       isLoading = false;
-    };
+      resetRecording();
+    }
   };
 
-  const initRecorder = async () => {
-    const platform = (await info).platform;
-    const mimeType = ['android', 'web'].includes(platform)
-      ? 'video/webm'
-      : 'video/mp4';
+  const stopProxyLoop = () => {
+    if (proxyAnimFrameId !== null) {
+      cancelAnimationFrame(proxyAnimFrameId);
+      proxyAnimFrameId = null;
+    }
+  };
 
-    const canvas = document.querySelector('canvas');
-    const stream = canvas?.captureStream(60);
-    if (stream) {
-      mediaRecorder = new MediaRecorder(stream, {
-        mimeType,
-      });
+  const startProxyLoop = () => {
+    stopProxyLoop();
+    if (!proxyCanvas || !proxyCtx) return;
+    const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+    if (!glCanvas) return;
+    const drawFrame = () => {
+      proxyCtx!.fillStyle = '#E5E5E5';
+      proxyCtx!.fillRect(0, 0, proxyCanvas!.width, proxyCanvas!.height);
+      try { proxyCtx!.drawImage(glCanvas, 0, 0); } catch (_) { /* */ }
+      proxyAnimFrameId = requestAnimationFrame(drawFrame);
+    };
+    drawFrame();
+  };
+
+  const resetRecording = () => {
+    try {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    } catch (_) { /* */ }
+    stopProxyLoop();
+    mediaRecorder = null;
+    recordedChunks = [];
+    proxyCanvas = null;
+    proxyCtx = null;
+    recorderStoppedPromise = null;
+    recording = false;
+  };
+
+  const ensureRecorderStarted = (attempt = 0): boolean => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      recording = true;
+      return true;
+    }
+
+    const started = initRecorder();
+    if (started) {
+      recording = true;
+      console.log('[VLibras Share] Recorder iniciado com sucesso. tentativa:', attempt);
+      return true;
+    }
+
+    if (attempt < 8) {
+      window.setTimeout(() => ensureRecorderStarted(attempt + 1), 150);
+    } else {
+      console.warn('[VLibras Share] Não foi possível iniciar recorder após tentativas');
+    }
+    return false;
+  };
+
+  const initRecorder = (): boolean => {
+    console.log('[VLibras Share] initRecorder chamado');
+    try {
+      if (typeof MediaRecorder === 'undefined') {
+        console.warn('[VLibras Share] MediaRecorder não disponível');
+        return false;
+      }
+
+      const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+      if (!glCanvas) {
+        console.warn('[VLibras Share] Canvas não encontrado');
+        return false;
+      }
+
+      console.log('[VLibras Share] Canvas:', glCanvas.width, 'x', glCanvas.height);
+      if (glCanvas.width <= 0 || glCanvas.height <= 0) {
+        console.warn('[VLibras Share] Canvas ainda sem tamanho válido, adiando initRecorder');
+        return false;
+      }
+
+      if (typeof glCanvas.captureStream !== 'function') {
+        console.warn('[VLibras Share] captureStream não suportado');
+        return false;
+      }
+
+      const isIOS = cachedPlatform === 'ios';
+      let mimeType: string;
+
+      if (isIOS) {
+        mimeType = 'video/mp4';
+      } else {
+        mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+          ? 'video/webm;codecs=vp8'
+          : MediaRecorder.isTypeSupported('video/webm')
+            ? 'video/webm'
+            : 'video/mp4';
+      }
+
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        console.warn('[VLibras Share] mimeType não suportado:', mimeType);
+        return false;
+      }
+
+      console.log('[VLibras Share] mimeType:', mimeType);
+      recordedMimeType = mimeType;
+
+      proxyCanvas = document.createElement('canvas');
+      proxyCanvas.width = glCanvas.width;
+      proxyCanvas.height = glCanvas.height;
+      proxyCtx = proxyCanvas.getContext('2d');
+      if (!proxyCtx) {
+        console.warn('[VLibras Share] Falha ao criar contexto 2D');
+        return false;
+      }
+
+      startProxyLoop();
+
+      const stream = proxyCanvas.captureStream();
+      const tracks = stream.getVideoTracks();
+      console.log('[VLibras Share] Stream tracks:', tracks.length);
+
+      if (tracks.length === 0) {
+        console.warn('[VLibras Share] Stream sem tracks');
+        stopProxyLoop();
+        return false;
+      }
+
+      mediaRecorder = new MediaRecorder(stream, { mimeType });
       recordedChunks = [];
+
       mediaRecorder.ondataavailable = (e) => {
+        console.log('[VLibras Share] ondataavailable:', e.data.size, 'bytes');
         if (e.data.size > 0) {
-          recordedChunks?.push(e.data);
+          recordedChunks.push(e.data);
         }
       };
+
+      mediaRecorder.onerror = (e) => {
+        console.error('[VLibras Share] MediaRecorder erro:', e);
+      };
+
       mediaRecorder.start();
+      console.log('[VLibras Share] Gravação iniciada. state:', mediaRecorder.state);
+      return true;
+    } catch (e) {
+      console.error('[VLibras Share] Falha ao inicializar:', e);
+      mediaRecorder = null;
+      return false;
     }
   };
 
   const checkBlob = (count: number, id: string) => {
     setTimeout(async () => {
-      if (count === 0 || !isLoading) {
-        let blob = new Blob();
-        try {
-          blob = await getVideo(id);
-        } catch (_) {
-          openErrorModal();
-          isLoading = false;
-        }
-        const reader = new FileReader();
-        reader.onloadend = handleVideoReading(reader, blob);
+      if (!isLoading || isBreak) {
+        isBreak = false;
         return;
       }
-      if (count > 0 || isLoading) {
-        try {
-          const blob = await getVideo(id);
-          if (blob.size > 24) {
-            closeModal();
-            isLoading = false;
-          }
-        } catch (_) {
+
+      try {
+        const blob = await getVideo(id);
+        console.log('[VLibras Share] checkBlob tentativa', 60 - count, '- blob:', blob.size, 'bytes');
+        if (blob.size > 24) {
+          console.log('[VLibras Share] Vídeo convertido pronto, compartilhando...');
+          await shareBlob(blob);
+          return;
+        }
+      } catch (err) {
+        console.warn('[VLibras Share] checkBlob erro:', err);
+        if (count <= 0) {
           isLoading = false;
           openErrorModal();
+          return;
         }
       }
+
+      if (count <= 0) {
+        isLoading = false;
+        openErrorModal();
+        return;
+      }
+
       if (count === 51) {
         setShowCloseButton(true);
       }
-      if (isBreak) {
-        isBreak = !isBreak;
-        return;
-      }
+
       checkBlob(count - 1, id);
     }, 1000);
   };
 
   const initVideoSharing = async () => {
     isLoading = true;
-    if ((await info).platform === 'android') {
-      let id = '';
-      const blob = new Blob(recordedChunks, {
-        type: 'video/webm',
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      recorderStoppedPromise = new Promise<void>((resolve) => {
+        mediaRecorder!.onstop = () => {
+          console.log('[VLibras Share] onstop disparado. Chunks:', recordedChunks.length);
+          resolve();
+        };
       });
-      try {
-        id = await postVideo({ blob: blob });
-        const jsonId = JSON.stringify(id);
-        if (jsonId !== '') {
-          checkBlob(contador, id);
-        }
-      } catch (_) {
+      mediaRecorder.stop();
+      stopProxyLoop();
+      recording = false;
+      console.log('[VLibras Share] Recorder parado, aguardando dados...');
+    }
+
+    if (recorderStoppedPromise) {
+      await recorderStoppedPromise;
+      recorderStoppedPromise = null;
+    }
+
+    console.log('[VLibras Share] Chunks:', recordedChunks.length, 'mimeType:', recordedMimeType);
+
+    if (recordedChunks.length === 0) {
+      console.error('[VLibras Share] Nenhum dado gravado');
+      isLoading = false;
+      resetRecording();
+      openErrorModal();
+      return;
+    }
+
+    setShowCloseButton(false);
+    openModal();
+
+    const blob = new Blob(recordedChunks, { type: recordedMimeType });
+    console.log('[VLibras Share] Blob criado:', blob.size, 'bytes, tipo:', blob.type);
+
+    if (blob.size === 0) {
+      console.error('[VLibras Share] Blob vazio');
+      isLoading = false;
+      resetRecording();
+      openErrorModal();
+      return;
+    }
+
+    if (cachedPlatform === 'ios') {
+      console.log('[VLibras Share] iOS: compartilhando MP4 diretamente');
+      await shareBlob(blob);
+      return;
+    }
+
+    try {
+      console.log('[VLibras Share] Android: enviando para transcodificador...');
+      const id = await postVideo({ blob });
+      console.log('[VLibras Share] ID recebido:', id);
+      if (id) {
+        checkBlob(contador, id);
+      } else {
+        console.error('[VLibras Share] ID vazio na resposta');
+        isLoading = false;
         openErrorModal();
       }
-    }
-    if ((await info).platform === 'ios') {
-      const blob = new Blob(recordedChunks, {
-        type: 'video/mp4',
-      });
-
-      const reader = new FileReader();
-      reader.onloadend = handleVideoReading(reader, blob);
+    } catch (err: unknown) {
+      const detail = err instanceof Error
+        ? { name: err.name, message: err.message }
+        : { raw: String(err) };
+      console.error('[VLibras Share] Erro no postVideo:', JSON.stringify(detail));
+      isLoading = false;
+      openErrorModal();
     }
   };
 
@@ -525,6 +707,14 @@ function Player() {
     if (progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
     }
+
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      resetRecording();
+      const success = ensureRecorderStarted();
+      if (success) recording = true;
+      console.log('[VLibras Share] Recorder iniciado via handlePlay:', success);
+    }
+
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
   const translatorText = useSelector(
@@ -591,12 +781,7 @@ function Player() {
       lastPlayedTextRef.current = textToPlay; // Armazena o texto que será executado.
       if (textToPlay) {
         const gloss = (await setTextPtBr(textToPlay, false, false)).toString();
-
-        playerService.send(
-          PlayerKeys.PLAYER_MANAGER,
-          PlayerKeys.PLAY_NOW,
-          gloss
-        );
+        handlePlay(gloss);
       } else {
         // Se por acaso o item for inválido, abre o semáforo novamente.
         isPlayerBusyRef.current = false;
@@ -639,13 +824,18 @@ function Player() {
 
       wasPlaying.current = newIsPlaying;
 
-      // Código de gravação de vídeo (não relacionado à fila)
+      // Gravação de vídeo: gerencia o proxy loop (recorder é iniciado em handlePlay)
       if (newIsPlaying && recording === false) {
-        initRecorder();
-        recording = true;
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          startProxyLoop();
+          recording = true;
+        } else if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+          recording = ensureRecorderStarted();
+          console.log('[VLibras Share] Recorder iniciado via stateChange:', recording);
+        }
       }
       if (!newIsPlaying && recording === true) {
-        mediaRecorder.stop();
+        stopProxyLoop();
         recording = false;
       }
     },
@@ -798,6 +988,7 @@ function Player() {
   // --- End of Live Translation Logic ---
 
   function resetTranslation() {
+    resetRecording();
     setHasFinished(false);
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'hidden';
@@ -1656,10 +1847,9 @@ function Player() {
             className="player-button-rounded"
             type="button"
             onClick={() => {
-              // // Parando A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
+              console.log('[VLibras Share] Botão compartilhar clicado. recording:', recording);
               if (!recording) {
                 initVideoSharing();
-                handleClick();
               }
             }}>
             <IconShare color="#FFF" size={18} />

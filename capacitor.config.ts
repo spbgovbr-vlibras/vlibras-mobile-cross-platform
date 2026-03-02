@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   cordova: {},
   server: {
+    iosScheme: 'https',
     androidScheme: 'http',
     allowNavigation: ['lavid.nsa.root.sx'],
   },
