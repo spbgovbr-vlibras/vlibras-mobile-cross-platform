@@ -1,35 +1,35 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'https://transcodificador.vlibras.gov.br/api/v1/',
-});
+const BASE_URL = 'https://transcodificador.vlibras.gov.br/api/v1';
 
 export interface VideoData {
   blob: Blob;
 }
 
-export async function getVideo(id: string): Promise<Blob> {
-  const jsonId = JSON.stringify(id);
-  const parseId = JSON.parse(jsonId);
+interface ConversionResponse {
+  id: string;
+}
 
-  const response = await api.get(`/conversion/${parseId.id}`, {
-    responseType: 'blob',
-  });
-  return response.data;
+export async function getVideo(id: string): Promise<Blob> {
+  const response = await fetch(`${BASE_URL}/conversion/${id}`);
+  if (!response.ok) {
+    throw new Error(`getVideo falhou: ${response.status}`);
+  }
+  return response.blob();
 }
 
 export async function postVideo(data: VideoData): Promise<string> {
   const form = new FormData();
-  form.append('videoConversion', data.blob);
-  const response = await api.post('/conversion', form, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      Accept: 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-  return response.data;
-}
+  form.append('videoConversion', data.blob, 'video.webm');
 
-export default api;
+  const response = await fetch(`${BASE_URL}/conversion`, {
+    method: 'POST',
+    body: form,
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`postVideo falhou: ${response.status} ${text}`);
+  }
+
+  const result: ConversionResponse = await response.json();
+  return result.id;
+}
