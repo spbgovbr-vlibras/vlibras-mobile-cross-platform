@@ -1,11 +1,11 @@
+/* Barra lateral - estilo conforme protótipo */
 .drawer-menu-container {
-  padding: 40px 0 24px 0;
+  padding: 20px 0 16px 0;
+  background: #fff;
 }
 
 .drawer-menu-image-header {
-  /*width: 111px;
-  height: 38px;*/
-  margin-left: 32px;
+  margin-left: 16px;
 }
 
 .drawer-menu-header-logo {
@@ -14,15 +14,13 @@
   flex-direction: row;
 }
 .drawer-menu-header-label {
-  font-family: Mulish;
+  font-family: Mulish, -apple-system, BlinkMacSystemFont, sans-serif;
   font-style: normal;
   font-weight: bold;
-  font-size: 24px;
+  font-size: 22px;
   letter-spacing: 0.3px;
   color: #373f41;
-
-  margin-left: 4px;
-
+  margin-left: 8px;
   align-self: center;
 }
 
@@ -32,44 +30,79 @@
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+.drawer-menu-container .ion-list-inset,
+.drawer-menu-container ion-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.drawer-menu-container ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --min-height: 40px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+}
+
+.drawer-menu-container ion-list-header {
+  --padding-start: 16px;
+  min-height: 24px;
+}
+
 .drawer-menu-title-header {
-  font-family: Rawline;
+  font-family: Rawline, -apple-system, BlinkMacSystemFont, sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
   line-height: 125%;
   color: #939293;
-  margin: 16px 8px 8px 8px;
+  margin: 10px 0 4px 0;
+  text-transform: none;
+}
+
+.drawer-menu-icon-wrap {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.drawer-menu-icon-wrap svg,
+.drawer-menu-icon-wrap ion-icon {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  flex-shrink: 0;
 }
 
 .drawer-menu-item {
-  font-family: Rawline;
+  font-family: Rawline, -apple-system, BlinkMacSystemFont, sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
   line-height: 125%;
-  margin: 0px 10px;
 
   --color: #4b4b4b;
 
   border-radius: 4px;
-  /* margin: 0 8px; */
 }
 
 .drawer-menu-item-activated {
   --background: #d6e5f9;
   --color: #1447a6;
   border-radius: 4px;
-  margin: 0px 10px;
 }
 
-.drawer-menu-item svg {
-  min-width: 24px;
+.drawer-menu-item-activated .arrow-down {
+  border-top-color: #1447a6;
 }
 
 .drawer-menu-item-label {
-  margin-left: 18px;
-  width: 100%;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer-menu-content {
@@ -78,23 +111,34 @@
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  padding-bottom: 32px;
+  padding-bottom: 24px;
+}
+
+.drawer-menu-sub-wrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .drawer-menu-sub-item {
-  text-align: right;
-  flex: auto;
   color: #1447a6;
-  margin-right: 7px;
-  width: 40%;
+  margin: 0 4px 0 0;
   background: none;
   font-size: 14px;
   font-weight: 600;
   padding: 0;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
 }
 
 .drawer-menu-sub-item.translator {
   outline: none;
+  cursor: pointer;
+}
+
+.drawer-menu-sub-wrap .arrow-down {
+  flex-shrink: 0;
 }
 
 .arrow-down {
@@ -133,7 +177,7 @@
   margin-left: auto;
   cursor: pointer;
   font-weight: 500;
-  color: #0F449C;
+  color: #1447a6;
   position: relative;
 }
 

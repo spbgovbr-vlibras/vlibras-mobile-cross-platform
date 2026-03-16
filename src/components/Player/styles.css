@@ -29,18 +29,17 @@
   justify-items: flex-end;
   z-index: 1;
   background: white;
-  border-radius: 20px 20px 0 0;
+  border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
 
 .play-action-content {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  min-height: calc(56px + var(--ion-safe-area-bottom) * 0.3);
-  padding-bottom: calc(var(--ion-safe-area-bottom) * 0.5);
-  padding-top: 0;
+  min-height: 64px;
+  padding: 8px 0 calc(8px + var(--ion-safe-area-bottom, 0)) 0;
   background: white;
 }
 
@@ -357,4 +356,111 @@
 .player-tab-label-active {
   color: #1447a6;
   font-weight: bold;
+}
+
+/* ===== Overlay control bar (during translation) ===== */
+.player-avatar-wrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+
+.player-overlay-control-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 12px 20px;
+  background: rgba(245, 245, 245, 0.95);
+  border-radius: 28px;
+  z-index: 2;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.player-overlay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.player-overlay-btn-pause {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+}
+
+.player-overlay-btn-pause img,
+.player-overlay-btn-pause svg {
+  width: 24px;
+  height: 24px;
+}
+
+.player-overlay-speed {
+  font-family: Rawline, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  color: #4b4b4b;
+  min-width: 28px;
+  text-align: center;
+}
+
+.player-overlay-speed-btn {
+  padding: 4px 8px;
+}
+
+.player-overlay-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.player-overlay-top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  z-index: 2;
+}
+
+/* Botão fechar - estilo protótipo: círculo cinza escuro, X branco */
+.player-button-close-overlay {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(27, 27, 27, 0.75);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.player-button-close-overlay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.player-tab-bar-only {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 64px;
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
 }

@@ -19,7 +19,6 @@ import {
   IconPause,
   IconPlay,
   IconShare,
-  IconThumbs,
   IconClose,
   logoRefresh,
   logoSubtitleOn,
@@ -32,6 +31,7 @@ import {
   IconTutorial,
   IconHandsTranslate,
 } from 'assets';
+import IconEmotions from 'assets/icons/IconEmotions';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
@@ -944,6 +944,31 @@ function Player() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
+  const renderTabBar = () => (
+    <>
+      <button
+        className="player-tab-button"
+        type="button"
+        onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
+        <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
+        <span className="player-tab-label">Dicionário</span>
+      </button>
+      <div className="player-tab-button player-tab-active">
+        <div className="player-tab-active-icon">
+          <IconHandsTranslate color="#1447a6" size={26} />
+        </div>
+        <span className="player-tab-label player-tab-label-active">Tradutor</span>
+      </div>
+      <button
+        className="player-tab-button"
+        type="button"
+        onClick={() => history.push(paths.HISTORY)}>
+        <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
+        <span className="player-tab-label">Histórico</span>
+      </button>
+    </>
+  );
+
   const renderPlayerButtons = () => {
     // Se estiver no modo live, o botão central para a gravação
     if (isLiveListening) {
@@ -960,80 +985,9 @@ function Player() {
       );
     }
 
-    // Lógica padrão dos botões
-    if (isPlaying) {
-      return (
-        <>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={(e: any) => {
-              e.persist();
-              setShowPopover({ showPopover: true, event: e });
-            }}>
-            <div className="player-speed-trigger">
-              <span className="player-speed-trigger-label">
-                {formatSpeedLabel(speedValue)}
-              </span>
-            </div>
-          </button>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={handlePause}>
-            {isPaused ? (
-              <IconPlay hideCircle color={buttonColors.VARIANT_BLUE} size={34} />
-            ) : (
-              <IconPause color={buttonColors.VARIANT_BLUE} size={24} />
-            )}
-          </button>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={handleSubtitle}>
-            {isShowSubtitle ? (
-              <img src={logoSubtitleOn} alt="refresh" />
-            ) : (
-              <img src={logoSubtitleOff} alt="refresh" />
-            )}
-          </button>
-        </>
-      );
-    }
-    if (hasFinished) {
-      return (
-        <>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={(e: any) => {
-              e.persist();
-              setShowPopover({ showPopover: true, event: e });
-            }}>
-            <div className="player-speed-trigger">
-              <span className="player-speed-trigger-label">
-                {formatSpeedLabel(speedValue)}
-              </span>
-            </div>
-          </button>
-          <button
-            className="player-action-button player-action-button-insert"
-            type="button"
-            onClick={() => handlePlay(textGloss)}>
-            <img src={logoRefresh} alt="refresh" />
-          </button>
-          <button
-            className="player-action-button-transparent"
-            type="button"
-            onClick={handleSubtitle}>
-            {isShowSubtitle ? (
-              <img src={logoSubtitleOn} alt="refresh" />
-            ) : (
-              <img src={logoSubtitleOff} alt="refresh" />
-            )}
-          </button>
-        </>
-      );
+    // Durante tradução: controles estão na overlay, mostrar apenas tab bar
+    if (isPlaying || hasFinished) {
+      return renderTabBar();
     }
     return (
       <>
@@ -1139,29 +1093,7 @@ function Player() {
           />
         </div>
 
-        {/* Tab bar com labels */}
-        <button
-          className="player-tab-button"
-          type="button"
-          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
-          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
-          <span className="player-tab-label">Dicionário</span>
-        </button>
-
-        <div className="player-tab-button player-tab-active">
-          <div className="player-tab-active-icon">
-            <IconHandsTranslate color="#1447a6" size={26} />
-          </div>
-          <span className="player-tab-label player-tab-label-active">Tradutor</span>
-        </div>
-
-        <button
-          className="player-tab-button"
-          type="button"
-          onClick={() => history.push(paths.HISTORY)}>
-          <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
-          <span className="player-tab-label">Histórico</span>
-        </button>
+        {renderTabBar()}
       </>
     );
   };
@@ -1172,11 +1104,14 @@ function Player() {
       return null;
     }
 
+    // Quando traduzindo, os botões (fechar, thumbs up) estão na overlay - não duplicar
+    if (isPlaying || hasFinished) {
+      return null;
+    }
+
     if (
-      isPlaying ||
-      hasFinished ||
-      (currentStep >= HomeTutorialSteps.CLOSE &&
-        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED)
+      currentStep >= HomeTutorialSteps.CLOSE &&
+      currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
     ) {
       return (
         <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -1349,101 +1284,133 @@ function Player() {
           </button>
         </div>
       </IonPopover>
-      <div className="player-container-button">
-        {renderPlayerButtonsContainer()}
-      </div>
-      <div
+      <div className="player-avatar-wrapper"
         style={{
-          width: '100vw',
-          zIndex: 0,
+          width: '100%',
           flexShrink: 0,
-          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : (isPlaying || hasFinished ? 78 : 120),
-          flex: 1,
-          display: 'flex',
+          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : (isPlaying || hasFinished ? 72 : 120),
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
         }}>
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
-      </div>
-
-      {((currentStep >= HomeTutorialSteps.CLOSE &&
-        currentStep <= HomeTutorialSteps.PLAYBACK_SPEED &&
-        currentStep !== HomeTutorialSteps.INITIAL) ||
-        (hasFinished && !isPlaying)) && (
-        <div className="player-container-buttons">
-          <div
-            style={{
-              top: -54,
-              position: 'absolute',
-              right: 25,
-            }}>
-            <TutorialPopover
-              title="Gostou da tradução?"
-              context="home"
-              description="Avalie e sugira melhorias."
-              position="rb"
-              isEnabled={currentStep === HomeTutorialSteps.LIKED_TRANSLATION}
-            />
-          </div>
-          {!submittedRevision && (
+        {/* Botão fechar (canto superior direito) - estilo protótipo: círculo cinza escuro com X branco */}
+        {(isPlaying || hasFinished) && !isLiveListening && (
+          <div className="player-overlay-top-right">
+            {currentStep >= HomeTutorialSteps.CLOSE && currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
+              <TutorialPopover
+                title="Fechar"
+                context="home"
+                description="Feche tradução e volte à tela anterior."
+                position="rt"
+                isEnabled={currentStep === HomeTutorialSteps.CLOSE}
+              />
+            ) : null}
             <button
               disabled={
                 currentStep >= HomeTutorialSteps.CLOSE &&
                 currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
               }
-              className="player-button-rounded"
+              className="player-button-close-overlay"
               type="button"
-              onClick={() => setShowModal(true)}>
-              <IconThumbs color="#FFF" size={18} />
+              onClick={handleStop}>
+              <IconClose color="#FFF" size={24} />
             </button>
-          )}
-          <div
-            style={{
-              top: -2,
-              position: 'absolute',
-              right: 25,
-            }}>
-            <TutorialPopover
-              title="Compartilhar"
-              context="home"
-              description="Vídeo com a tradução"
-              position="rb"
-              isEnabled={currentStep === HomeTutorialSteps.SHARE}
-            />
           </div>
-          <button
-            style={{ marginBottom: 0 }}
-            disabled={
-              currentStep >= HomeTutorialSteps.CLOSE &&
-              currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
-            }
-            className="player-button-rounded"
-            type="button"
-            onClick={() => {
-              // // Parando A GRAVAÇÃO E COMPARTILHANDO O ARQUIVO GRAVADO
-              if (!recording) {
-                initVideoSharing();
-                handleClick();
-              }
-            }}>
-            <IconShare color="#FFF" size={18} />
-          </button>
-          <GenerateModal
-            visible={modalOpen}
-            setVisible={closeModal}
-            translationRequestType={TranslationRequestType.VIDEO_SHARE}
-            showCloseButton={showCloseButton}
-            onBreak={onBreak}
-          />
-          <ErrorModal
-            show={errorModalOpen}
-            setShow={closeErrorModal}
-            errorMsg={errorMessage}
-          />
-        </div>
-      )}
+        )}
+        <Unity
+          unityContent={playerService.getUnity()}
+          className="player-content"
+        />
+        {/* Barra overlay de controles durante tradução: Pause | 1X | Emoji | Lista | Compartilhar */}
+        {(isPlaying || hasFinished) && !isLiveListening && (
+          <div className="player-overlay-control-bar">
+            {isPlaying ? (
+              <button
+                className="player-overlay-btn player-overlay-btn-pause"
+                type="button"
+                onClick={handlePause}>
+                {isPaused ? (
+                  <IconPlay hideCircle color="#1447a6" size={28} />
+                ) : (
+                  <IconPause color="#4b4b4b" size={24} />
+                )}
+              </button>
+            ) : null}
+            {hasFinished && !isPlaying ? (
+              <button
+                className="player-overlay-btn player-overlay-btn-pause"
+                type="button"
+                onClick={() => handlePlay(textGloss)}>
+                <img src={logoRefresh} alt="Reproduzir novamente" />
+              </button>
+            ) : null}
+            <button
+              className="player-overlay-btn player-overlay-speed-btn"
+              type="button"
+              onClick={(e: any) => {
+                e.persist();
+                setShowPopover({ showPopover: true, event: e });
+              }}>
+              <span className="player-overlay-speed">
+                {formatSpeedLabel(speedValue)}
+              </span>
+            </button>
+            <button
+              className="player-overlay-btn"
+              type="button"
+              onClick={() => setShowModal(true)}
+              title="Avaliar">
+              <IconEmotions color="#4b4b4b" size={22} />
+            </button>
+            <button
+              className="player-overlay-btn"
+              type="button"
+              onClick={handleSubtitle}>
+              {isShowSubtitle ? (
+                <img src={logoSubtitleOn} alt="Legenda ativada" />
+              ) : (
+                <img src={logoSubtitleOff} alt="Legenda desativada" />
+              )}
+            </button>
+            <div style={{ position: 'relative' }}>
+              <TutorialPopover
+                title="Compartilhar"
+                context="home"
+                description="Vídeo com a tradução"
+                position="rb"
+                isEnabled={currentStep === HomeTutorialSteps.SHARE}
+              />
+              <button
+                className="player-overlay-btn"
+                type="button"
+                disabled={
+                  currentStep >= HomeTutorialSteps.CLOSE &&
+                  currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
+                }
+                onClick={() => {
+                  if (!recording) {
+                    initVideoSharing();
+                    handleClick();
+                  }
+                }}>
+                <IconShare color="#4b4b4b" size={22} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* GenerateModal e ErrorModal para compartilhar - usados pela barra overlay */}
+      <GenerateModal
+        visible={modalOpen}
+        setVisible={closeModal}
+        translationRequestType={TranslationRequestType.VIDEO_SHARE}
+        showCloseButton={showCloseButton}
+        onBreak={onBreak}
+      />
+      <ErrorModal
+        show={errorModalOpen}
+        setShow={closeErrorModal}
+        errorMsg={errorMessage}
+      />
       <div className="player-action-container">
         {/* Campo de texto + botão Traduzir (visível apenas no estado idle) */}
         {!isPlaying && !hasFinished && !isLiveListening &&
