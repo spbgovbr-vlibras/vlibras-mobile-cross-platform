@@ -20,7 +20,7 @@ export async function postVideo(data: VideoData): Promise<string> {
   const form = new FormData();
   form.append('videoConversion', data.blob, 'video.webm');
 
-  const response = await fetch(`${BASE_URL}/conversion`, {
+  const response = await fetch(`${BASE_URL}/conversion/`, {
     method: 'POST',
     body: form,
   });

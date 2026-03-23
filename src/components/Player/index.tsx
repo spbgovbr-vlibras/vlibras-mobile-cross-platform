@@ -146,6 +146,8 @@ function Player() {
     glossLength: number;
     lastUpdateAt: number;
   }>({ counter: 0, glossLength: 0, lastUpdateAt: 0 });
+  const pendingShareAfterReplayRef = useRef(false);
+  const autoShareRetryCountRef = useRef(0);
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
@@ -515,7 +517,18 @@ function Player() {
     console.log('[VLibras Share] Chunks:', recordedChunks.length, 'mimeType:', recordedMimeType);
 
     if (recordedChunks.length === 0) {
+      const canAutoReplay = Boolean(textGloss) && !isPlaying && autoShareRetryCountRef.current === 0;
+      if (canAutoReplay) {
+        console.warn('[VLibras Share] Nenhum dado gravado. Iniciando replay automático antes do share.');
+        autoShareRetryCountRef.current = 1;
+        pendingShareAfterReplayRef.current = true;
+        isLoading = false;
+        closeModal();
+        handlePlay(textGloss);
+        return;
+      }
       console.error('[VLibras Share] Nenhum dado gravado');
+      autoShareRetryCountRef.current = 0;
       isLoading = false;
       resetRecording();
       openErrorModal();
@@ -530,6 +543,7 @@ function Player() {
 
     if (blob.size === 0) {
       console.error('[VLibras Share] Blob vazio');
+      autoShareRetryCountRef.current = 0;
       isLoading = false;
       resetRecording();
       openErrorModal();
@@ -546,6 +560,7 @@ function Player() {
       console.log('[VLibras Share] Android: enviando para transcodificador...');
       const id = await postVideo({ blob });
       console.log('[VLibras Share] ID recebido:', id);
+      autoShareRetryCountRef.current = 0;
       if (id) {
         checkBlob(contador, id);
       } else {
@@ -558,6 +573,7 @@ function Player() {
         ? { name: err.name, message: err.message }
         : { raw: String(err) };
       console.error('[VLibras Share] Erro no postVideo:', JSON.stringify(detail));
+      autoShareRetryCountRef.current = 0;
       isLoading = false;
       openErrorModal();
     }
@@ -820,6 +836,14 @@ function Player() {
         setTimeout(() => {
           processTranslationQueue();
         }, 100);
+
+        if (pendingShareAfterReplayRef.current) {
+          pendingShareAfterReplayRef.current = false;
+          console.log('[VLibras Share] Replay automático finalizado. Tentando compartilhar novamente...');
+          setTimeout(() => {
+            initVideoSharing();
+          }, 120);
+        }
       }
 
       wasPlaying.current = newIsPlaying;
