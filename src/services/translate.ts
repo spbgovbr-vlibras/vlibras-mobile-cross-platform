@@ -61,7 +61,7 @@ const defaultTranslateData = {
 };
 
 const api = axios.create({
-  baseURL: 'https://traducao2-dth.vlibras.lavid.ufpb.br',
+  baseURL: 'https://traducao2.vlibras.gov.br',
   timeout: 15000,
 });
 
