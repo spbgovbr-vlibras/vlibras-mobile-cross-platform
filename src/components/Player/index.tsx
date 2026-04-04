@@ -736,6 +736,9 @@ function Player() {
   const translatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText
   );
+  const playerCanvasMode = useSelector(
+    ({ playerCanvas }: RootState) => playerCanvas.mode
+  );
 
   function handleStop() {
     const savedState = sessionStorage.getItem('dictionaryState');
@@ -1809,12 +1812,21 @@ function Player() {
           marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : 70,
           flex: 1,
           display: 'flex',
-          background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
+          background:
+            playerCanvasMode === 'hidden' && isPlatform('ios') && visiblePlayer
+              ? 'black'
+              : playerCanvasMode === 'hidden'
+                ? '#E5E5E5'
+                : 'transparent',
         }}>
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
+        {playerCanvasMode === 'hidden' ? (
+          <Unity
+            unityContent={playerService.getUnity()}
+            className="player-content"
+          />
+        ) : (
+          <div className="player-content player-unity-placeholder" aria-hidden />
+        )}
       </div>
 
       {((currentStep >= HomeTutorialSteps.CLOSE &&

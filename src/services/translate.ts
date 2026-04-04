@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { Avatar } from 'constants/types';
-import { removeAccents } from 'utils/normalize';
+import { accentuatePortugueseText } from 'utils/accentuatePtBr';
 
 export enum VideoTranslationStatus {
   QUEUED = 'queued',
@@ -78,8 +78,8 @@ export async function fetchVideoStatus(
  * @throws {Error} Throws an error if the received value cant be parsed to string.
  */
 export async function translate(data: TranslateData): Promise<string> {
-  const normalizedText = removeAccents(data.text);
-  const response = await api.post('/translate', { text: normalizedText });
+  const textForApi = accentuatePortugueseText(data.text);
+  const response = await api.post('/translate', { text: textForApi });
   const payload = response.data as unknown;
   // API may return a raw string OR a structured object.
   // Converting object directly results in "[object Object]" (avatar fingerspells "OBJECT").
@@ -96,8 +96,8 @@ export async function translate(data: TranslateData): Promise<string> {
 export async function translateWithSentiment(
   data: TranslateData,
 ): Promise<TranslateSentimentResponse> {
-  const normalizedText = removeAccents(data.text);
-  const response = await api.post('/translatesentiment', { text: normalizedText });
+  const textForApi = accentuatePortugueseText(data.text);
+  const response = await api.post('/translatesentiment', { text: textForApi });
   return response.data;
 }
 

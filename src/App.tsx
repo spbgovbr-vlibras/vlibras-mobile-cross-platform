@@ -20,6 +20,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import GlobalPlayerCanvas from 'components/GlobalPlayerCanvas';
 import { CustomizationTutorialProvider } from 'hooks/CustomizationTutorial';
 import { HomeTutorialProvider } from 'hooks/HomeTutorial';
 import { TranslationProvider } from 'hooks/Translation';
@@ -38,6 +39,7 @@ function App() {
         <TranslationProvider>
           <HomeTutorialProvider>
           <CustomizationTutorialProvider>
+            <GlobalPlayerCanvas />
             <Routes />
           </CustomizationTutorialProvider>
           </HomeTutorialProvider>

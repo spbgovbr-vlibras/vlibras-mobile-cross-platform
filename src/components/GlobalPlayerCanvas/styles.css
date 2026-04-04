@@ -1,0 +1,40 @@
+.global-player-canvas {
+  position: fixed;
+  overflow: hidden;
+  background: #e5e5e5;
+}
+
+/* Mode: home — covers full viewport behind the transparent Home page */
+.global-player-canvas--home {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+/* Mode: dict-mini — fills the canvas-area inside .dict-mini-player */
+/* The controls bar is ~54px, header 56px, close btn overlay */
+.global-player-canvas--dict-mini {
+  top: 56px;
+  right: 0;
+  width: 55%;
+  /* leave room for controls bar (54px) at bottom */
+  bottom: calc(80px + 54px);
+  z-index: 601;
+}
+
+/* Mode: hidden — off-screen but still mounted so Unity keeps running */
+.global-player-canvas--hidden {
+  top: -9999px;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  z-index: -1;
+}
+
+.global-player-canvas-unity {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
