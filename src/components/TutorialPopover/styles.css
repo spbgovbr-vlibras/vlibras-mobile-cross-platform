@@ -5,12 +5,37 @@
   display: flex;
   flex-direction: column;
   padding: 12px;
-  width: auto;
+  width: min(340px, calc(100vw - 32px));
   max-width: 340px;
-  min-width: 290px;
+  min-width: 0;
   height: max-content;
-  position: relative;
-  margin-right: 50px;
+  position: absolute;
+  margin-right: 0;
+  z-index: 20;
+}
+
+.tutorial-popover-container--anchor-t {
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tutorial-popover-container--anchor-b {
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tutorial-popover-container--anchor-r {
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tutorial-popover-container--anchor-l {
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .tutorial-row {

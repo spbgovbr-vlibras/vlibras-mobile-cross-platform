@@ -5,9 +5,9 @@
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Unity from 'react-unity-webgl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
-import Unity from 'react-unity-webgl';
 import { App, StateChangeListener } from '@capacitor/app';
 
 import {
@@ -30,6 +30,7 @@ import {
   IconRefresh,
   IconTutorial,
   IconHandsTranslate,
+  IconThumbUp,
 } from 'assets';
 import IconEmotions from 'assets/icons/IconEmotions';
 import EvaluationModal from 'components/EvaluationModal';
@@ -100,6 +101,19 @@ let isBreak = false;
 let mediaRecorder: MediaRecorder;
 let recordedChunks: BlobPart[] | undefined;
 const info = Device.getInfo();
+
+// Steps that require the avatar to be in playing/finished state during the tutorial.
+// These enum values don't form a contiguous numeric range after queue reordering,
+// so we use a Set for reliable membership checks.
+const TUTORIAL_PLAYING_STEPS = new Set([
+  HomeTutorialSteps.CLOSE,
+  HomeTutorialSteps.LIKED_TRANSLATION,
+  HomeTutorialSteps.SHARE,
+  HomeTutorialSteps.SUBTITLE,
+  HomeTutorialSteps.REPEAT,
+  HomeTutorialSteps.CHANGE_AVATAR,
+  HomeTutorialSteps.PLAYBACK_SPEED,
+]);
 
 function Player() {
   const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
@@ -749,7 +763,7 @@ function Player() {
       }
 
       speechBufferRef.current = finalTranscriptRef.current + interimTranscript;
-      
+
       console.log('[MODO LIVE] Final:', finalTranscriptRef.current);
       console.log('[MODO LIVE] Interino:', interimTranscript);
     };
@@ -850,6 +864,17 @@ function Player() {
     }
   }, [hasLoadedAvatarOnce, hasLoadedTutotiralConfigurations]);
 
+  // When the tutorial advances to a step that requires playing state,
+  // auto-play a demo gloss so the controls overlay becomes visible.
+  useEffect(() => {
+    if (!TUTORIAL_PLAYING_STEPS.has(currentStep)) return;
+    if (isPlaying || hasFinished) return;
+    if (!visiblePlayer) return;
+    const demoGloss = textGloss || 'BOM DIA';
+    handlePlay(demoGloss);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
+
   const onSubmittedRevision = useCallback(() => {
     setSubmittedRevision(true);
   }, []);
@@ -944,28 +969,194 @@ function Player() {
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
   }
 
+  const renderPlaybackControls = () => (
+    <>
+      {/* Replay / Pause — tutorial: Repetir tradução */}
+      <div style={{ position: 'relative' }}>
+        <TutorialPopover
+          title="Repetir tradução"
+          context="home"
+          description="Reproduza novamente a tradução atual."
+          position="bl"
+          floatingStyle={{ left: -10, transform: 'none' }}
+          isEnabled={currentStep === HomeTutorialSteps.REPEAT}
+        />
+        <button
+          className="player-ctrl-pause-btn"
+          type="button"
+          onClick={isPlaying ? handlePause : () => handlePlay(textGloss)}>
+          {isPlaying ? (
+            isPaused ? (
+              <IconPlay hideCircle color="#FFF" size={26} />
+            ) : (
+              <IconPause color="#FFF" size={26} />
+            )
+          ) : (
+            <img src={logoRefresh} alt="Reproduzir novamente" className="player-ctrl-refresh-icon" />
+          )}
+        </button>
+      </div>
+
+      {/* Speed — tutorial: Velocidade de reprodução */}
+      <button
+        className="player-ctrl-speed-btn"
+        type="button"
+        onClick={(e: any) => {
+          e.persist();
+          setShowPopover({ showPopover: true, event: e });
+        }}>
+        <div style={{ position: 'relative' }}>
+          <TutorialPopover
+            title="Velocidade de reprodução"
+            context="home"
+            description="Altere a velocidade de reprodução"
+            position="bc"
+            floatingStyle={{
+              left: -82,
+              transform: 'none',
+              bottom: 'calc(100% + 18px)',
+            }}
+            arrowStyle={{ left: '28%' }}
+            onPrimaryAction={() => {
+              if (currentStep === HomeTutorialSteps.PLAYBACK_SPEED) {
+                handleStop();
+              }
+              goNextStep();
+            }}
+            isEnabled={currentStep === HomeTutorialSteps.PLAYBACK_SPEED}
+          />
+          <span className="player-ctrl-speed-label">{formatSpeedLabel(speedValue)}</span>
+        </div>
+      </button>
+
+      {/* Evaluation — tutorial: Emoção do avatar */}
+      <div style={{ position: 'relative' }}>
+        <TutorialPopover
+          title="Emoção do avatar"
+          context="home"
+          description="Altere a emoção do avatar."
+          position="bc"
+          isEnabled={currentStep === HomeTutorialSteps.CHANGE_AVATAR}
+        />
+        <button
+          className="player-ctrl-btn"
+          type="button"
+          disabled={
+            TUTORIAL_PLAYING_STEPS.has(currentStep) &&
+            currentStep !== HomeTutorialSteps.CHANGE_AVATAR
+          }
+          onClick={() => setShowModal(true)}
+          title="Avaliar">
+          <IconEmotions color="#1447a6" size={22} />
+        </button>
+      </div>
+
+      {/* Subtitle — tutorial: Legenda */}
+      <div style={{ position: 'relative' }}>
+        <TutorialPopover
+          title="Legenda"
+          context="home"
+          description="Ative ou desative a legenda durante a tradução."
+          position="br"
+          floatingStyle={{
+            right: -16,
+            left: 'auto',
+            transform: 'none',
+            width: '300px',
+            maxWidth: 'calc(100vw - 18px)',
+          }}
+          arrowStyle={{ right: '34px' }}
+          isEnabled={currentStep === HomeTutorialSteps.SUBTITLE}
+        />
+        <button
+          className="player-ctrl-btn"
+          type="button"
+          onClick={handleSubtitle}>
+          {isShowSubtitle ? (
+            <img src={logoSubtitleOn} alt="Legenda ativada" />
+          ) : (
+            <img src={logoSubtitleOff} alt="Legenda desativada" />
+          )}
+        </button>
+      </div>
+
+      {/* Share — tutorial: Compartilhar */}
+      <div style={{ position: 'relative' }}>
+        <TutorialPopover
+          title="Compartilhar"
+          context="home"
+          description="Vídeo com a tradução"
+          position="br"
+          floatingStyle={{ right: -10, left: 'auto', transform: 'none' }}
+          isEnabled={currentStep === HomeTutorialSteps.SHARE}
+        />
+        <button
+          className="player-ctrl-btn"
+          type="button"
+          disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
+          onClick={() => {
+            if (!recording) {
+              initVideoSharing();
+              handleClick();
+            }
+          }}>
+          <IconShare color="#1447a6" size={22} />
+        </button>
+      </div>
+    </>
+  );
+
   const renderTabBar = () => (
     <>
-      <button
-        className="player-tab-button"
-        type="button"
-        onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
-        <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
-        <span className="player-tab-label">Dicionário</span>
-      </button>
-      <div className="player-tab-button player-tab-active">
-        <div className="player-tab-active-icon">
-          <IconHandsTranslate color="#1447a6" size={26} />
-        </div>
-        <span className="player-tab-label player-tab-label-active">Tradutor</span>
+      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+        <TutorialPopover
+          title="Dicionário"
+          context="home"
+          description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
+          position="bl"
+          floatingStyle={{ left: 26, transform: 'none' }}
+          isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
+        />
+        <button
+          className="player-tab-button"
+          type="button"
+          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
+          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
+          <span className="player-tab-label">Dicionário</span>
+        </button>
       </div>
-      <button
-        className="player-tab-button"
-        type="button"
-        onClick={() => history.push(paths.HISTORY)}>
-        <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
-        <span className="player-tab-label">Histórico</span>
-      </button>
+      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+        <TutorialPopover
+          title="Tradução PT-BR"
+          context="home"
+          description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
+          position="bc"
+          isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
+        />
+        <div className="player-tab-button player-tab-active">
+          <div className="player-tab-active-icon">
+            <IconHandsTranslate color="#1447a6" size={26} />
+          </div>
+          <span className="player-tab-label player-tab-label-active">Tradutor</span>
+        </div>
+      </div>
+      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+        <TutorialPopover
+          title="Histórico"
+          context="home"
+          description="Acesse as traduções que foram realizadas nos últimos 30 dias."
+          position="br"
+          floatingStyle={{ right: 24, left: 'auto', transform: 'none' }}
+          isEnabled={currentStep === HomeTutorialSteps.HISTORY}
+        />
+        <button
+          className="player-tab-button"
+          type="button"
+          onClick={() => history.push(paths.HISTORY)}>
+          <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
+          <span className="player-tab-label">Histórico</span>
+        </button>
+      </div>
     </>
   );
 
@@ -985,114 +1176,21 @@ function Player() {
       );
     }
 
-    // Durante tradução: controles estão na overlay, mostrar apenas tab bar
+    // Durante tradução: mostra controles + tab bar no painel inferior
     if (isPlaying || hasFinished) {
-      return renderTabBar();
+      return (
+        <div className="player-playing-panel">
+          <div className="player-controls-bar">
+            {renderPlaybackControls()}
+          </div>
+          <div className="play-action-content-inner">
+            {renderTabBar()}
+          </div>
+        </div>
+      );
     }
     return (
       <>
-        {/* Tutorial popovers */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 80,
-            left: 25,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            zIndex: 10,
-          }}>
-          <TutorialPopover
-            title="Dicionário"
-            context="home"
-            description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
-            position="bl"
-            isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
-          />
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 80,
-            left: 25,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            zIndex: 10,
-          }}>
-          <TutorialPopover
-            title="Tradução PT-BR"
-            context="home"
-            description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
-            position="bc"
-            isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
-          />
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 85,
-            left: 20,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            zIndex: 10,
-          }}>
-          <TutorialPopover
-            title="Histórico"
-            context="home"
-            description="Acesse as traduções que foram realizadas nos últimos 30 dias."
-            position="br"
-            isEnabled={currentStep === HomeTutorialSteps.HISTORY}
-          />
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 85,
-            left: 20,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            zIndex: 10,
-          }}>
-          <TutorialPopover
-            title="Legenda"
-            context="home"
-            description="Habilite legenda para tradução"
-            position="br"
-            isEnabled={currentStep === HomeTutorialSteps.SUBTITLE}
-          />
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 85,
-            left: 20,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100vw',
-            zIndex: 10,
-          }}>
-          <TutorialPopover
-            title="Velocidade de reprodução"
-            context="home"
-            description="Altere a velocidade de reprodução"
-            position="bl"
-            isEnabled={currentStep === HomeTutorialSteps.PLAYBACK_SPEED}
-          />
-        </div>
-
         {renderTabBar()}
       </>
     );
@@ -1192,31 +1290,36 @@ function Player() {
     <div className="player-container">
       <div
         style={{
-          position: 'absolute',
-          padding: '8px',
-          display: 'flex',
-          right: 10,
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          zIndex: 2,
+          position: 'fixed',
+          left: 8,
+          top: 34,
+          zIndex: 12,
         }}>
         <TutorialPopover
           title="Menu"
           context="home"
           description="Acesse outras funcionalidades do tradutor e configure sua experiência no VLibras."
           position="tl"
+          floatingStyle={{ left: 0, transform: 'none' }}
           isEnabled={currentStep === HomeTutorialSteps.MENU}
         />
       </div>
       <div
         style={{
-          position: 'absolute',
-          padding: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          zIndex: 2,
-        }}></div>
+          position: 'fixed',
+          right: 8,
+          top: 34,
+          zIndex: 12,
+        }}>
+        <TutorialPopover
+          title="Central de ajuda"
+          context="home"
+          description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+          position="tr"
+          floatingStyle={{ right: 0, left: 'auto', transform: 'none' }}
+          isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
+        />
+      </div>
       <IonPopover
         className="player-popover"
         event={popoverState.event}
@@ -1288,110 +1391,68 @@ function Player() {
         style={{
           width: '100%',
           flexShrink: 0,
-          marginBottom: HomeTutorialSteps.INITIAL === currentStep ? 0 : (isPlaying || hasFinished ? 72 : 120),
+          marginBottom: HomeTutorialSteps.INITIAL === currentStep
+            ? 0
+            : (isPlaying || hasFinished
+              ? 138
+              : (currentStep === HomeTutorialSteps.DICTIONARY ||
+                 currentStep === HomeTutorialSteps.TRANSLATION ||
+                 currentStep === HomeTutorialSteps.HISTORY
+                ? 270
+                : 126)),
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
         }}>
-        {/* Botão fechar (canto superior direito) - estilo protótipo: círculo cinza escuro com X branco */}
+        <Unity
+          unityContent={playerService.getUnity()}
+          className="player-content"
+        />
         {(isPlaying || hasFinished) && !isLiveListening && (
           <div className="player-overlay-top-right">
-            {currentStep >= HomeTutorialSteps.CLOSE && currentStep <= HomeTutorialSteps.PLAYBACK_SPEED ? (
+            <div style={{ position: 'relative' }}>
               <TutorialPopover
                 title="Fechar"
                 context="home"
                 description="Feche tradução e volte à tela anterior."
                 position="rt"
+                floatingStyle={{
+                  top: -12,
+                  right: 'calc(100% + 8px)',
+                  transform: 'none',
+                  width: '300px',
+                  maxWidth: 'calc(100vw - 28px)',
+                }}
                 isEnabled={currentStep === HomeTutorialSteps.CLOSE}
               />
-            ) : null}
-            <button
-              disabled={
-                currentStep >= HomeTutorialSteps.CLOSE &&
-                currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
-              }
-              className="player-button-close-overlay"
-              type="button"
-              onClick={handleStop}>
-              <IconClose color="#FFF" size={24} />
-            </button>
+              <button
+                disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
+                className="player-button-close-overlay"
+                type="button"
+                onClick={handleStop}>
+                <IconClose color="#FFF" size={20} />
+              </button>
+            </div>
           </div>
         )}
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
-        {/* Barra overlay de controles durante tradução: Pause | 1X | Emoji | Lista | Compartilhar */}
         {(isPlaying || hasFinished) && !isLiveListening && (
-          <div className="player-overlay-control-bar">
-            {isPlaying ? (
-              <button
-                className="player-overlay-btn player-overlay-btn-pause"
-                type="button"
-                onClick={handlePause}>
-                {isPaused ? (
-                  <IconPlay hideCircle color="#1447a6" size={28} />
-                ) : (
-                  <IconPause color="#4b4b4b" size={24} />
-                )}
-              </button>
-            ) : null}
-            {hasFinished && !isPlaying ? (
-              <button
-                className="player-overlay-btn player-overlay-btn-pause"
-                type="button"
-                onClick={() => handlePlay(textGloss)}>
-                <img src={logoRefresh} alt="Reproduzir novamente" />
-              </button>
-            ) : null}
-            <button
-              className="player-overlay-btn player-overlay-speed-btn"
-              type="button"
-              onClick={(e: any) => {
-                e.persist();
-                setShowPopover({ showPopover: true, event: e });
-              }}>
-              <span className="player-overlay-speed">
-                {formatSpeedLabel(speedValue)}
-              </span>
-            </button>
-            <button
-              className="player-overlay-btn"
-              type="button"
-              onClick={() => setShowModal(true)}
-              title="Avaliar">
-              <IconEmotions color="#4b4b4b" size={22} />
-            </button>
-            <button
-              className="player-overlay-btn"
-              type="button"
-              onClick={handleSubtitle}>
-              {isShowSubtitle ? (
-                <img src={logoSubtitleOn} alt="Legenda ativada" />
-              ) : (
-                <img src={logoSubtitleOff} alt="Legenda desativada" />
-              )}
-            </button>
+          <div className="player-overlay-like-anchor">
             <div style={{ position: 'relative' }}>
               <TutorialPopover
-                title="Compartilhar"
+                title="Gostou da tradução?"
                 context="home"
-                description="Vídeo com a tradução"
+                description="Avalie e sugira melhorias."
                 position="rb"
-                isEnabled={currentStep === HomeTutorialSteps.SHARE}
+                floatingStyle={{
+                  right: 'calc(100% + 10px)',
+                  bottom: 0,
+                  top: 'auto',
+                  transform: 'none',
+                  width: '300px',
+                  maxWidth: 'calc(100vw - 28px)',
+                }}
+                isEnabled={currentStep === HomeTutorialSteps.LIKED_TRANSLATION}
               />
-              <button
-                className="player-overlay-btn"
-                type="button"
-                disabled={
-                  currentStep >= HomeTutorialSteps.CLOSE &&
-                  currentStep <= HomeTutorialSteps.PLAYBACK_SPEED
-                }
-                onClick={() => {
-                  if (!recording) {
-                    initVideoSharing();
-                    handleClick();
-                  }
-                }}>
-                <IconShare color="#4b4b4b" size={22} />
+              <button className="player-button-like-overlay" type="button">
+                <IconThumbUp color="#7D7D7D" size={20} />
               </button>
             </div>
           </div>
@@ -1414,7 +1475,7 @@ function Player() {
       <div className="player-action-container">
         {/* Campo de texto + botão Traduzir (visível apenas no estado idle) */}
         {!isPlaying && !hasFinished && !isLiveListening &&
-          !(currentStep >= HomeTutorialSteps.CLOSE && currentStep <= HomeTutorialSteps.PLAYBACK_SPEED) && (
+          !TUTORIAL_PLAYING_STEPS.has(currentStep) && (
           <div className="player-translate-input-row">
             <input
               className="player-translate-input"
