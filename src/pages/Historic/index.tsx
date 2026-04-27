@@ -16,13 +16,10 @@ import { Strings } from './strings';
 import {
   IconArrowUp,
   IconArrowDown,
-  IconDictionary,
-  IconHandsTranslate,
-  IconHistory,
   logoTranslator1,
   logoTranslator2,
 } from '../../assets';
-import { VideoOutputModal } from '../../components';
+import { BottomTabBar, VideoOutputModal } from '../../components';
 import { env } from '../../environment/env';
 import { MenuLayout } from '../../layouts';
 
@@ -210,16 +207,6 @@ function Historic() {
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode="menu">
       <IonContent ref={contentRef}>
-        {hasItemsToRender() && (
-          <div className="scroll-buttons">
-            <IonButton shape="round" className="arrowBtn" onClick={scrollUp}>
-              <IconArrowUp />
-            </IonButton>
-            <IonButton shape="round" className="arrowBtn" onClick={scrollDown}>
-              <IconArrowDown />
-            </IonButton>
-          </div>
-        )}
         <div className="historic-container">
           <div className="container-render-historic">
             {!hasItemsToRender() ? (
@@ -237,31 +224,17 @@ function Historic() {
           />
         </div>
       </IonContent>
-      {/* Tab bar inferior */}
-      <div className="historic-tab-bar">
-        <button
-          className="historic-tab-button"
-          type="button"
-          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
-          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
-          <span className="historic-tab-label">Dicionário</span>
-        </button>
-
-        <button
-          className="historic-tab-button"
-          type="button"
-          onClick={() => history.push(paths.HOME)}>
-          <IconHandsTranslate color="#888" size={24} />
-          <span className="historic-tab-label">Tradutor</span>
-        </button>
-
-        <div className="historic-tab-button historic-tab-active">
-          <div className="historic-tab-active-icon">
-            <IconHistory color="#1447a6" size={26} viewBox="25 5 25 22" />
-          </div>
-          <span className="historic-tab-label historic-tab-label-active">Histórico</span>
+      {hasItemsToRender() && (
+        <div className="scroll-buttons">
+          <IonButton shape="round" className="arrowBtn" onClick={scrollUp}>
+            <IconArrowUp />
+          </IonButton>
+          <IonButton shape="round" className="arrowBtn" onClick={scrollDown}>
+            <IconArrowDown />
+          </IonButton>
         </div>
-      </div>
+      )}
+      <BottomTabBar active="history" />
     </MenuLayout>
   );
 }

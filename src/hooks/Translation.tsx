@@ -60,6 +60,8 @@ interface TranslationContextData {
   sentimentAnalysis: SentimentSentence[];
   selectedEmotion: string;
   setSelectedEmotion: (emotion: string) => void;
+  dictMiniPlayer: { active: boolean; gloss: string };
+  setDictMiniPlayer: (active: boolean, gloss?: string) => void;
 }
 
 const TranslationContext = createContext<TranslationContextData>(
@@ -107,7 +109,12 @@ const TranslationProvider: React.FC = ({ children }) => {
   const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentSentence[]>([]);
   // COMENTADO PARA DEPLOY - Valor padrão mudado de 'Automático' para 'Neutra'
   const [selectedEmotion, setSelectedEmotion] = useState('Neutra');
+  const [dictMiniPlayer, setDictMiniPlayerState] = useState({ active: false, gloss: '' });
   const translateRequestIdRef = useRef(0);
+
+  function setDictMiniPlayer(active: boolean, gloss?: string) {
+    setDictMiniPlayerState({ active, gloss: active && gloss ? gloss : '' });
+  }
 
   useEffect(() => {
     NativeStorage.getItem(PROPERTY_KEY)
@@ -287,6 +294,8 @@ const TranslationProvider: React.FC = ({ children }) => {
         sentimentAnalysis,
         selectedEmotion,
         setSelectedEmotion,
+        dictMiniPlayer,
+        setDictMiniPlayer,
       }}>
       {children}
       <GenerateModal

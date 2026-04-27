@@ -33,8 +33,10 @@ import {
   IconThumbUp,
 } from 'assets';
 import IconEmotions from 'assets/icons/IconEmotions';
+import { BottomTabBar } from 'components';
 import EvaluationModal from 'components/EvaluationModal';
 import TutorialPopover from 'components/TutorialPopover';
+import { EMOTION_OPTIONS, EmotionOption } from 'constants/emotions';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
 import { TranslationRequestType } from 'constants/types';
@@ -66,6 +68,7 @@ import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationPro
 import IconHand from 'assets/icons/IconHand';
 import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
 import { DictionaryFilter } from 'pages/Dictionary';
+import { MINI_PLAYER_SHARE_EVENT } from 'pages/Dictionary/MiniPlayer';
 
 const playerService = PlayerService.getPlayerInstance();
 
@@ -135,6 +138,13 @@ function Player() {
     showPopover: false,
     event: undefined,
   });
+  const [emotionPopoverState, setEmotionPopoverState] = useState<{
+    showPopover: boolean;
+    event?: React.MouseEvent<HTMLButtonElement, MouseEvent>;
+  }>({
+    showPopover: false,
+    event: undefined,
+  });
   const [hasLoadedAvatarOnce, setHasLoadedAvatarOnce] = useState(false);
   const [isInBackground, setIsInBackground] = useState(false);
   const [shouldUnPauseOnForeground, setShouldUnPauseOnForeground] =
@@ -166,7 +176,7 @@ function Player() {
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
   } = useHomeTutorial();
-  const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion } =
+  const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion, setSelectedEmotion } =
     useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
@@ -571,24 +581,16 @@ function Player() {
   }
 
   function handleStop() {
-    const savedState = sessionStorage.getItem('dictionaryState');
-    if(savedState) {
-      const parsed = JSON.parse(savedState);
-      const params = new URLSearchParams();
-      if(parsed.filter) {
-        params.set('filter', parsed.filter);
-        if(parsed.category) {
-          params.set('category', parsed.category);
-        }
-        if(parsed.scrollTop) {
-          params.set('scroll', parsed.scrollTop);
-        }
-        history.push(`${paths.DICTIONARY_PLAYER}?${params.toString()}`);
-      } else {
-
-        history.replace(paths.HOME);
-      }
-    }
+    /*
+     * NOTE: previously this also redirected the user to the Dictionary
+     * whenever a `dictionaryState` entry was present in sessionStorage.
+     * That entry, however, sticks around for the whole session, so the
+     * Translator's close button could end up navigating to the Dictionary
+     * when the user had simply visited it earlier. The dictionary route is
+     * now reachable through the persistent BottomTabBar, so closing the
+     * player should only stop playback and trigger the existing
+     * tutorial/exit popups – the original behaviour the user relies on.
+     */
     sessionStorage.removeItem('dictionaryState');
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
@@ -946,6 +948,12 @@ function Player() {
     setShowPopover({ showPopover: false, event: undefined });
   }
 
+  function handleEmotion(option: EmotionOption) {
+    setSelectedEmotion(option.id);
+    playerService.send(PlayerKeys.EMOTION_BRIDGE, option.applyKey);
+    setEmotionPopoverState({ showPopover: false, event: undefined });
+  }
+
   function handleChangeAvatar() {
     if (currentAvatar === 'icaro') {
       dispatch(Creators.storeAvatar.request('hozana'));
@@ -1029,7 +1037,7 @@ function Player() {
         </div>
       </button>
 
-      {/* Evaluation — tutorial: Emoção do avatar */}
+      {/* Emotion — tutorial: Emoção do avatar */}
       <div style={{ position: 'relative' }}>
         <TutorialPopover
           title="Emoção do avatar"
@@ -1045,8 +1053,11 @@ function Player() {
             TUTORIAL_PLAYING_STEPS.has(currentStep) &&
             currentStep !== HomeTutorialSteps.CHANGE_AVATAR
           }
-          onClick={() => setShowModal(true)}
-          title="Avaliar">
+          onClick={(e: any) => {
+            e.persist();
+            setEmotionPopoverState({ showPopover: true, event: e });
+          }}
+          title="Emoções">
           <IconEmotions color="#1447a6" size={22} />
         </button>
       </div>
@@ -1107,64 +1118,54 @@ function Player() {
   );
 
   const renderTabBar = () => (
-    <>
-      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
-        <TutorialPopover
-          title="Dicionário"
-          context="home"
-          description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
-          position="bl"
-          floatingStyle={{ left: 26, transform: 'none' }}
-          isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
-        />
-        <button
-          className="player-tab-button"
-          type="button"
-          onClick={() => history.push(paths.DICTIONARY_PLAYER)}>
-          <IconDictionary color="#888" size={28} viewBox="28 6 24 20" />
-          <span className="player-tab-label">Dicionário</span>
-        </button>
-      </div>
-      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
-        <TutorialPopover
-          title="Tradução PT-BR"
-          context="home"
-          description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
-          position="bc"
-          isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
-        />
-        <div className="player-tab-button player-tab-active">
-          <div className="player-tab-active-icon">
-            <IconHandsTranslate color="#1447a6" size={26} />
-          </div>
-          <span className="player-tab-label player-tab-label-active">Tradutor</span>
-        </div>
-      </div>
-      <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
-        <TutorialPopover
-          title="Histórico"
-          context="home"
-          description="Acesse as traduções que foram realizadas nos últimos 30 dias."
-          position="br"
-          floatingStyle={{ right: 24, left: 'auto', transform: 'none' }}
-          isEnabled={currentStep === HomeTutorialSteps.HISTORY}
-        />
-        <button
-          className="player-tab-button"
-          type="button"
-          onClick={() => history.push(paths.HISTORY)}>
-          <IconHistory color="#888" size={28} viewBox="25 5 25 22" />
-          <span className="player-tab-label">Histórico</span>
-        </button>
-      </div>
-    </>
+    <BottomTabBar
+      active="translator"
+      renderTabExtras={(tab) => {
+        if (tab === 'dictionary') {
+          return (
+            <TutorialPopover
+              title="Dicionário"
+              context="home"
+              description="Consulte os sinais de LIBRAS disponíveis no nosso dicionário."
+              position="bl"
+              floatingStyle={{ left: 26, transform: 'none' }}
+              isEnabled={currentStep === HomeTutorialSteps.DICTIONARY}
+            />
+          );
+        }
+        if (tab === 'translator') {
+          return (
+            <TutorialPopover
+              title="Tradução PT-BR"
+              context="home"
+              description="Escreva ou cole textos e traduza-os para a Língua Brasileira de Sinais (LIBRAS)."
+              position="bc"
+              isEnabled={currentStep === HomeTutorialSteps.TRANSLATION}
+            />
+          );
+        }
+        return (
+          <TutorialPopover
+            title="Histórico"
+            context="home"
+            description="Acesse as traduções que foram realizadas nos últimos 30 dias."
+            position="br"
+            floatingStyle={{ right: 24, left: 'auto', transform: 'none' }}
+            isEnabled={currentStep === HomeTutorialSteps.HISTORY}
+          />
+        );
+      }}
+    />
   );
 
   const renderPlayerButtons = () => {
-    // Se estiver no modo live, o botão central para a gravação
+    /* Modo live: precisa do wrapper `.play-action-content` (layout em linha
+     * com placeholders nas laterais). Os outros estados renderizam a
+     * `BottomTabBar` direto, para que ela controle sua própria altura e não
+     * receba o padding adicional do wrapper. */
     if (isLiveListening) {
       return (
-        <>
+        <div className="play-action-content">
           <div /> {/* Placeholder para manter o espaçamento */}
           <button
             className="player-button-center-live"
@@ -1172,28 +1173,22 @@ function Player() {
             <LiveWaveIcon />
           </button>
           <div /> {/* Placeholder para manter o espaçamento */}
-        </>
+        </div>
       );
     }
 
-    // Durante tradução: mostra controles + tab bar no painel inferior
     if (isPlaying || hasFinished) {
       return (
         <div className="player-playing-panel">
           <div className="player-controls-bar">
             {renderPlaybackControls()}
           </div>
-          <div className="play-action-content-inner">
-            {renderTabBar()}
-          </div>
+          {renderTabBar()}
         </div>
       );
     }
-    return (
-      <>
-        {renderTabBar()}
-      </>
-    );
+
+    return renderTabBar();
   };
 
   const renderPlayerButtonsContainer = () => {
@@ -1285,6 +1280,22 @@ function Player() {
       preProcessingPreview
     );
   }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+
+  // The dictionary mini player relays its share button via this event because
+  // the recorder + share state lives here in the Home Player. We handle it
+  // exactly the same way as a tap on the Player's own share button.
+  useEffect(() => {
+    const onMiniPlayerShare = () => {
+      if (recording) return;
+      initVideoSharing();
+      handleClick();
+    };
+    window.addEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
+    return () => {
+      window.removeEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="player-container">
@@ -1385,6 +1396,33 @@ function Player() {
             onClick={() => handleSpeed(X0_5)}>
             <span>0.5x</span>
           </button>
+        </div>
+      </IonPopover>
+      <IonPopover
+        className="player-popover player-emotion-popover"
+        event={emotionPopoverState.event}
+        isOpen={emotionPopoverState.showPopover}
+        onDidDismiss={() =>
+          setEmotionPopoverState({ showPopover: false, event: undefined })
+        }>
+        <div className="player-emotion-list">
+          {EMOTION_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={`player-emotion-item ${
+                selectedEmotion === option.id ? 'is-active' : ''
+              }`}
+              onClick={() => handleEmotion(option)}
+            >
+              <span
+                className="player-emotion-emoji"
+                aria-hidden
+                dangerouslySetInnerHTML={{ __html: option.svg }}
+              />
+              <span className="player-emotion-label">{option.label}</span>
+            </button>
+          ))}
         </div>
       </IonPopover>
       <div className="player-avatar-wrapper"
@@ -1499,7 +1537,7 @@ function Player() {
         <div ref={progressContainerRef} className="player-progress-container">
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
-        <div className="play-action-content">{renderPlayerButtons()}</div>
+        {renderPlayerButtons()}
       </div>
 
       <ErrorModal

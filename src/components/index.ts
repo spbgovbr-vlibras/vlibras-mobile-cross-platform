@@ -6,3 +6,4 @@ export { default as LoadingModal } from './LoadingModal';
 export { default as ErrorModal } from './ErrorModal';
 export { default as GenerateModal } from './GenerateModal';
 export { default as LoadingBar } from './LoadingBar';
+export { default as BottomTabBar } from './BottomTabBar';

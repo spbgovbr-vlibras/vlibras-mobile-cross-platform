@@ -258,6 +258,45 @@
   border: 1px solid rgba(191, 191, 191, 0.2);
 }
 
+.player-emotion-popover {
+  --width: 188px;
+}
+
+.player-emotion-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+
+.player-emotion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.player-emotion-item.is-active {
+  background: #d6e5f9;
+}
+
+.player-emotion-emoji {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-emotion-label {
+  font-family: Rawline, sans-serif;
+  font-size: 14px;
+  color: #1447a6;
+}
+
 .player-button-center-live {
   background-color: transparent;
   border: none;
@@ -490,15 +529,6 @@
   gap: 8px;
 }
 
-.play-action-content-inner {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  justify-content: center;
-  min-height: 64px;
-  padding: 8px 0 calc(8px + var(--ion-safe-area-bottom, 0)) 0;
-  background: white;
-}
 
 
 /* Botão pause/play/refresh na barra de controles — círculo azul filled */

@@ -24,6 +24,7 @@ import {
   IconHandsTranslate,
   IconUndefined,
 } from 'assets';
+import { BottomTabBar } from 'components';
 import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
@@ -41,6 +42,7 @@ import { getDictionaryData } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
+import DictionaryMiniPlayer from './MiniPlayer';
 import { Strings } from './strings';
 
 import './styles.css';
@@ -60,6 +62,12 @@ function getChipClassName(
 
 function Dictionary() {
   const location = useLocation();
+  // Both /dictionary (opened from drawer) and /dictionary-player (opened from
+  // the home tab bar) should use the floating mini player to keep the user on
+  // the dictionary while playing the sign.
+  const isDictionaryPlayerRoute =
+    location.pathname === paths.DICTIONARY_PLAYER ||
+    location.pathname === paths.DICTIONARY;
   const queryParams = new URLSearchParams(location.search);
   const [searchText, setSearchText] = useState('');
   const initialFilter = (queryParams.get('filter') as DictionaryFilter) || 'categories';
@@ -97,7 +105,8 @@ function Dictionary() {
 
   const history = useHistory();
 
-  const { setTextGloss, setTextPtBr, recentTranslation } = useTranslation();
+  const { setTextGloss, setTextPtBr, recentTranslation, dictMiniPlayer, setDictMiniPlayer } = useTranslation();
+  const isMiniPlayerActive = isDictionaryPlayerRoute && dictMiniPlayer.active;
 
   const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
 
@@ -116,6 +125,12 @@ useIonViewDidEnter(() => {
   });
 });
 
+  useEffect(() => {
+    if (!isDictionaryPlayerRoute && dictMiniPlayer.active) {
+      setDictMiniPlayer(false);
+    }
+  }, [isDictionaryPlayerRoute, dictMiniPlayer.active, setDictMiniPlayer]);
+
   useIonViewWillEnter(() => {
     dispatch(Creators.fetchTags.request());
     dispatch(
@@ -131,12 +146,20 @@ useIonViewDidEnter(() => {
     if (text === '%') text = '%25';
     setTextGloss(text, true);
     saveDictionaryState();
+    if (isDictionaryPlayerRoute) {
+      setDictMiniPlayer(true, text);
+      return;
+    }
     history.push(paths.HOME, { playGloss: text });
   }
 
   async function translatePtBr(text: string) {
     const gloss = await setTextPtBr(text, false, false);
     saveDictionaryState();
+    if (isDictionaryPlayerRoute) {
+      setDictMiniPlayer(true, gloss);
+      return;
+    }
     history.push(paths.HOME, { playGloss: gloss });
   }
 
@@ -1182,6 +1205,13 @@ useIonViewDidEnter(() => {
         )}
         {/* Removed Infinite Scroll for regular categories because we are showing all words from cache now */}
         </IonContent>
+      <BottomTabBar active="dictionary" />
+      {isMiniPlayerActive && (
+        <DictionaryMiniPlayer
+          gloss={dictMiniPlayer.gloss}
+          onClose={() => setDictMiniPlayer(false)}
+        />
+      )}
     </MenuLayout>
   );
 }
