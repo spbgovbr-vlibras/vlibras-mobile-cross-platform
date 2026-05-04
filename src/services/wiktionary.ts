@@ -2,23 +2,78 @@ import type { DictionaryData } from './types';
 
 const genders = ['masculino', 'feminino', 'neutro'];
 
+/**
+ * Limpa um texto extraído da Wikipédia/Wiktionary deixando apenas
+ * conteúdo legível (sem tags, sem entidades HTML escapadas, sem
+ * referências do tipo `[1]`, espaços normalizados).
+ */
+function sanitizeWikiText(raw: string): string {
+  if (!raw) return '';
+  let text = raw;
+
+  // Remove blocos completos de <style>, <script>, <noscript> e <link>
+  // (com seu conteúdo) — sem isso, o textContent de algumas definições do
+  // Wiktionary traz CSS injetado pelo MediaWiki como se fosse texto.
+  text = text.replace(/<style[\s\S]*?<\/style>/gi, '');
+  text = text.replace(/<script[\s\S]*?<\/script>/gi, '');
+  text = text.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
+
+  // Remove tags HTML que possam ter sobrado.
+  text = text.replace(/<[^>]+>/g, '');
+
+  // Decodifica entidades HTML usando um elemento temporário (apenas no
+  // navegador; a função é executada client-side).
+  if (typeof document !== 'undefined') {
+    const div = document.createElement('div');
+    div.innerHTML = text;
+    text = div.textContent || div.innerText || text;
+  }
+
+  // Remove marcadores de citação como [1], [nota 2], [carece de fontes].
+  text = text.replace(/\[[^\]]*\]/g, '');
+
+  // Normaliza espaços em branco.
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
+}
+
+/**
+ * Extrai o texto principal de um <li> ignorando subdefinições aninhadas
+ * (que ficam dentro de <ul>/<ol>). Sem isso, a definição principal vinha
+ * concatenada com todas as subdefinições, gerando frases gigantes.
+ */
+function extractMainLiText(li: Element): string {
+  const clone = li.cloneNode(true) as Element;
+  // Remove subdefinições aninhadas para não concatenar texto.
+  clone.querySelectorAll('ul, ol').forEach((n) => n.remove());
+  // Remove blocos de estilo/script/link inline que o MediaWiki injeta
+  // (TemplateStyles), pois o `textContent` inclui o conteúdo de <style>
+  // o que faz CSS aparecer no significado da palavra.
+  clone
+    .querySelectorAll('style, script, link, meta, noscript')
+    .forEach((n) => n.remove());
+  clone
+    .querySelectorAll('span.mw-cite-backlink, sup.reference, sup.cite_ref')
+    .forEach((n) => n.remove());
+  return sanitizeWikiText(clone.textContent || '');
+}
+
 function extractDefinitionData(html: string, word: string): Omit<DictionaryData, 'title'> {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, 'text/html');
 
 	const gender = doc.querySelector('tbody')?.innerHTML.match(new RegExp(`title='(?<gender>${genders.join('|')})'`))
 		?.groups?.gender;
+
 	const definitions = Array.from(doc.querySelectorAll('ol > li'))
 		.map((el) => {
-			const spans = el?.querySelectorAll('span.mw-cite-backlink');
-			spans?.forEach((span) => span.remove());
+			let definitionText = extractMainLiText(el);
 
-			let definitionText = el?.textContent?.trim() || '';
-
-			const subdefinitions = el?.querySelectorAll('ul > li') || el?.querySelectorAll('ol > li');
-			if (subdefinitions?.length) {
+			const subdefinitions = el.querySelectorAll(':scope > ul > li, :scope > ol > li');
+			if (subdefinitions.length) {
 				const subdefTexts = Array.from(subdefinitions)
-					.map((subdef) => subdef.textContent?.trim())
+					.map((subdef) => extractMainLiText(subdef))
 					.filter(Boolean);
 
 				if (subdefTexts.length) {
@@ -28,7 +83,7 @@ function extractDefinitionData(html: string, word: string): Omit<DictionaryData,
 
 			return definitionText;
 		})
-		.filter((d) => d !== word)
+		.filter((d) => d && d !== word)
 		.filter((d, i, list) => list.indexOf(d) === i)
 		.filter(Boolean) as string[];
 
@@ -83,7 +138,7 @@ function extractEtymology(doc: Document): string | undefined {
 
 	if (etymologyHeader) {
 		const node = etymologyHeader.parentElement?.nextElementSibling;
-		etymology = node?.firstChild?.textContent?.trim();
+		etymology = sanitizeWikiText(node?.firstChild?.textContent || '');
 	}
 
 	return etymology;
@@ -91,8 +146,16 @@ function extractEtymology(doc: Document): string | undefined {
 
 async function fetchWiktionaryPageHTML(word: string): Promise<string | null> {
 	const processedWord = word.toLowerCase().replace(/_/g, ' ');
-	const url = `https://pt.wiktionary.org/w/api.php?action=parse&redirects=1&
-				 format=json&origin=*&page=${encodeURIComponent(processedWord)}&prop=text&formatversion=2`;
+	const params = new URLSearchParams({
+		action: 'parse',
+		redirects: '1',
+		format: 'json',
+		origin: '*',
+		page: processedWord,
+		prop: 'text',
+		formatversion: '2',
+	});
+	const url = `https://pt.wiktionary.org/w/api.php?${params.toString()}`;
 	try {
         const res = await fetch(url);
         if (!res.ok) return null;
@@ -105,8 +168,8 @@ async function fetchWiktionaryPageHTML(word: string): Promise<string | null> {
 
 async function fetchSuggestedWord(word: string): Promise<string | null> {
 	const processedWord = word.toLowerCase().replace(/_/g, ' ');
-	const searchUrl = `https://pt.wiktionary.org/w/rest.php/v1/search/title?
-					   q=${encodeURIComponent(processedWord)}&limit=1`;
+	const params = new URLSearchParams({ q: processedWord, limit: '1' });
+	const searchUrl = `https://pt.wiktionary.org/w/rest.php/v1/search/title?${params.toString()}`;
 	try {
         const res = await fetch(searchUrl);
         if (!res.ok) return null;
@@ -131,3 +194,5 @@ export async function getDictionaryData(word: string): Promise<Partial<Dictionar
 
 	return data;
 }
+
+export { sanitizeWikiText };

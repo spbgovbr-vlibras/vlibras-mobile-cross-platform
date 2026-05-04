@@ -20,7 +20,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
-import { IconHandsTranslate, IconUndefined } from 'assets';
+import {
+  IconHandsTranslate,
+  IconUndefined,
+} from 'assets';
+import { BottomTabBar } from 'components';
 import LoadingSpinner from 'components/LoadingSpinner';
 import {
   FIRST_PAGE_INDEX,
@@ -28,28 +32,24 @@ import {
   PAGE_STEP_SIZE,
 } from 'constants/pagination';
 import paths from 'constants/paths';
-import { PlayerKeys } from 'constants/player';
 import CategoriesList from 'data/Categories';
 import wordsJson from 'data/classified_words_reduced.json';
 import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words, Tag } from 'models/dictionary';
 import { DictionaryData } from 'services/types';
-import PlayerService from 'services/unity';
-import { getDictionaryData } from 'services/wiktionary';
+import { getDictionaryData, sanitizeWikiText } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
+import DictionaryMiniPlayer from './MiniPlayer';
 import { Strings } from './strings';
 
 import './styles.css';
 
 export type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
 
-const playerService = PlayerService.getPlayerInstance();
-
 const TIME_DEBOUNCE_MS = 200;
-
 
 function getChipClassName(
   filter: DictionaryFilter,
@@ -62,6 +62,12 @@ function getChipClassName(
 
 function Dictionary() {
   const location = useLocation();
+  // Both /dictionary (opened from drawer) and /dictionary-player (opened from
+  // the home tab bar) should use the floating mini player to keep the user on
+  // the dictionary while playing the sign.
+  const isDictionaryPlayerRoute =
+    location.pathname === paths.DICTIONARY_PLAYER ||
+    location.pathname === paths.DICTIONARY;
   const queryParams = new URLSearchParams(location.search);
   const [searchText, setSearchText] = useState('');
   const initialFilter = (queryParams.get('filter') as DictionaryFilter) || 'categories';
@@ -72,7 +78,6 @@ function Dictionary() {
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
-  const [scrollTopValue, setscrollTopValue] = useState<number>();
   const dispatch = useDispatch();
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
@@ -100,10 +105,10 @@ function Dictionary() {
 
   const history = useHistory();
 
-  const { setTextGloss, setTextPtBr, recentTranslation } = useTranslation();
+  const { setTextGloss, setTextPtBr, recentTranslation, dictMiniPlayer, setDictMiniPlayer } = useTranslation();
+  const isMiniPlayerActive = isDictionaryPlayerRoute && dictMiniPlayer.active;
 
   const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
-
 
   const VERB_COUNT = 20;
   const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
@@ -114,21 +119,17 @@ useIonViewDidEnter(() => {
   contentRef.current?.getScrollElement().then((el) => {
     const queryParams = new URLSearchParams(window.location.search);
     const scrollParam = queryParams.get('scroll');
-    // Only restore scroll if we are staying in the same view context or explicitly asked
-    // But for category changes, we might want to reset.
-    // The issue is when going BACK, we want to restore.
-    // When going INTO a category, we want top.
-    // The URL params are usually updated on push.
     if (scrollParam) {
       el.scrollTop = toNumber(scrollParam);
     }
-    const handler = () => {
-      setscrollTopValue(el.scrollTop);
-    };
-    el.addEventListener('scroll', handler);
-    return () => el.removeEventListener('scroll', handler);
   });
 });
+
+  useEffect(() => {
+    if (!isDictionaryPlayerRoute && dictMiniPlayer.active) {
+      setDictMiniPlayer(false);
+    }
+  }, [isDictionaryPlayerRoute, dictMiniPlayer.active, setDictMiniPlayer]);
 
   useIonViewWillEnter(() => {
     dispatch(Creators.fetchTags.request());
@@ -141,8 +142,37 @@ useIonViewDidEnter(() => {
     );
   }, [dispatch, currentRegionalism.abbreviation]);
 
-  async function saveDictionaryState() {
-    const scrollTop = scrollTopValue;
+  function translate(text: string) {
+    if (text === '%') text = '%25';
+    setTextGloss(text, true);
+    saveDictionaryState();
+    if (isDictionaryPlayerRoute) {
+      setDictMiniPlayer(true, text);
+      return;
+    }
+    history.push(paths.HOME, { playGloss: text });
+  }
+
+  async function translatePtBr(text: string) {
+    const cleanText = sanitizeWikiText(text);
+    saveDictionaryState();
+    if (isDictionaryPlayerRoute) {
+      // Abre o mini player na hora com indicador de "traduzindo".
+      // O gloss real chega depois e dispara a reprodução automaticamente.
+      setDictMiniPlayer(true, '', { loading: true });
+      try {
+        const gloss = await setTextPtBr(cleanText, false, false);
+        setDictMiniPlayer(true, gloss);
+      } catch {
+        setDictMiniPlayer(false);
+      }
+      return;
+    }
+    const gloss = await setTextPtBr(cleanText, false, false);
+    history.push(paths.HOME, { playGloss: gloss });
+  }
+
+  function saveDictionaryState() {
     const dictionaryState = {
       filter,
       searchText,
@@ -150,25 +180,8 @@ useIonViewDidEnter(() => {
       expandedVerb,
       visibleVerbCount,
       category,
-      scrollTop,
     };
     sessionStorage.setItem('dictionaryState', JSON.stringify(dictionaryState));
-  };
-
-
-  function translate(text: string) {
-    saveDictionaryState();
-    if (text === '%') text = '%25';
-    setTextGloss(text, true);
-    history.push(paths.HOME, { from: 'dictionary' });
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, text);
-  }
-
-  async function translatePtBr(text: string) {
-    saveDictionaryState();
-    const gloss = await setTextPtBr(text, false, true);
-    history.push(paths.HOME, { from: 'dictionary' });
-    playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
 
   async function toggleWordMeaning(word: Words) {
@@ -191,7 +204,14 @@ useIonViewDidEnter(() => {
   }
 
   const formattedGloss = (gloss: string) => {
-    return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
+    // O sinal vem da API com `_` separando palavras compostas
+    // (ex.: CACHORRO_QUENTE) e com `&` para desambiguação
+    // (ex.: MACACO&MICO_LEÃO_DOURADO). No display queremos espaços
+    // e parênteses, mantendo o gloss original para enviar ao avatar.
+    const withParens = gloss.indexOf('&') > -1
+      ? gloss.replace('&', '(') + ')'
+      : gloss;
+    return withParens.replace(/_/g, ' ');
   };
 
   async function toggleVerbMeaning(verbName: string) {
@@ -257,13 +277,15 @@ useIonViewDidEnter(() => {
       <div className="verb-section-header">CONTEXTO</div>
       {item.map((word, index) => {
         const [mainWord, suffix] = word.name.split('&', 2);
+        const prettyMain = (mainWord || '').replace(/_/g, ' ');
+        const prettySuffix = (suffix || '').replace(/_/g, ' ');
         return (
           <div key={`teste-${index}`} className="desambiguation-section-header">
             <IonItem key={`${suffix}-form-${index}`}
                     className="dictionary-word-item desambiguation-text"
                     onClick={(e) => { e.stopPropagation(); translate(word.name); }}>
               <div className="desambiguation-text">
-                <IonText className="dictionary-words-style">{mainWord} ({suffix})</IonText>
+                <IonText className="dictionary-words-style">{prettyMain} ({prettySuffix})</IonText>
               </div>
             </IonItem>
           </div>
@@ -806,7 +828,7 @@ useIonViewDidEnter(() => {
             detail={false}
             onClick={() => toggleVerbMeaning(verb)}
           >
-            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{verb}</IonText>
+            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{formattedGloss(verb)}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
                     slot="end"
                     className="verb-dropdown-icon"
@@ -1200,7 +1222,15 @@ useIonViewDidEnter(() => {
           </IonInfiniteScroll>
         )}
         {/* Removed Infinite Scroll for regular categories because we are showing all words from cache now */}
-      </IonContent>
+        </IonContent>
+      <BottomTabBar active="dictionary" />
+      {isMiniPlayerActive && (
+        <DictionaryMiniPlayer
+          gloss={dictMiniPlayer.gloss}
+          loading={dictMiniPlayer.loading}
+          onClose={() => setDictMiniPlayer(false)}
+        />
+      )}
     </MenuLayout>
   );
 }

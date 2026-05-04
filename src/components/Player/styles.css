@@ -29,21 +29,23 @@
 .player-action-container {
   position: absolute;
   bottom: 0;
-  min-height: 78px;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-items: flex-end;
   z-index: 1;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  overflow: visible;
 }
 
 .play-action-content {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  min-height: calc(72px + var(--ion-safe-area-bottom) * 0.3);
-  padding-bottom: calc(var(--ion-safe-area-bottom) * 0.5);
+  min-height: 64px;
+  padding: 8px 0 calc(8px + var(--ion-safe-area-bottom, 0)) 0;
   background: white;
 }
 
@@ -262,10 +264,356 @@
   border: 1px solid rgba(191, 191, 191, 0.2);
 }
 
+.player-emotion-popover {
+  --width: 188px;
+}
+
+.player-emotion-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+
+.player-emotion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.player-emotion-item.is-active {
+  background: #d6e5f9;
+}
+
+.player-emotion-emoji {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-emotion-label {
+  font-family: Rawline, sans-serif;
+  font-size: 14px;
+  color: #1447a6;
+}
+
 .player-button-center-live {
   background-color: transparent;
   border: none;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* ===== Text input row (translate inline) ===== */
+.player-translate-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 16px 2px;
+  gap: 10px;
+  background: white;
+  z-index: 1;
+}
+
+.player-translate-input {
+  flex: 1;
+  height: 42px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-family: Rawline, sans-serif;
+  font-size: 15px;
+  outline: none;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.player-translate-input:focus {
+  border-color: #1447a6;
+}
+
+.player-translate-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: #e8e8e8;
+  border: none;
+  border-radius: 22px;
+  font-family: Rawline, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.player-translate-button:active {
+  background: #d0d0d0;
+}
+
+/* ===== Tab bar styles ===== */
+.player-tab-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 8px 0 4px;
+  flex: 1;
+  cursor: pointer;
+  gap: 4px;
+}
+
+.player-tab-label {
+  font-family: Rawline, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #888;
+  margin-top: 2px;
+}
+
+.player-tab-active {
+  cursor: default;
+}
+
+.player-tab-active-icon {
+  background: #d6e5f9;
+  border-radius: 14px;
+  width: 56px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-tab-label-active {
+  color: #1447a6;
+  font-weight: bold;
+}
+
+/* ===== Overlay control bar (during translation) ===== */
+.player-avatar-wrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+
+.player-overlay-control-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 12px 20px;
+  background: rgba(245, 245, 245, 0.95);
+  border-radius: 28px;
+  z-index: 2;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.player-overlay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.player-overlay-btn-pause {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+}
+
+.player-overlay-btn-pause img,
+.player-overlay-btn-pause svg {
+  width: 24px;
+  height: 24px;
+}
+
+.player-overlay-speed {
+  font-family: Rawline, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  color: #4b4b4b;
+  min-width: 28px;
+  text-align: center;
+}
+
+.player-overlay-speed-btn {
+  padding: 4px 8px;
+}
+
+.player-overlay-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.player-overlay-top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.player-overlay-like-anchor {
+  position: absolute;
+  right: 0;
+  bottom: 22%;
+  z-index: 3;
+}
+
+/* Botão fechar - estilo protótipo: círculo cinza escuro, X branco */
+.player-button-close-overlay {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(27, 27, 27, 0.75);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.player-button-close-overlay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.player-button-like-overlay {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px 0 0 14px;
+  border: none;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Playing panel (controls + tab bar stacked) ===== */
+.player-playing-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.player-controls-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 8px;
+}
+
+
+
+/* Botão pause/play/refresh na barra de controles — círculo azul filled */
+.player-ctrl-pause-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1447a6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(20, 71, 166, 0.35);
+}
+
+.player-ctrl-pause-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+.player-ctrl-refresh-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+/* Botão velocidade */
+.player-ctrl-speed-btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-ctrl-speed-label {
+  font-family: Rawline, sans-serif;
+  font-weight: bold;
+  font-size: 15px;
+  color: #1447a6;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* Botões genéricos da barra de controles */
+.player-ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.player-ctrl-btn img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.player-ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.player-tab-bar-only {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  min-height: 64px;
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+  background: white;
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
 }

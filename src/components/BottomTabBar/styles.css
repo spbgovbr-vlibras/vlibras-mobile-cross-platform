@@ -1,0 +1,70 @@
+.bottom-tab-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+  width: 100%;
+  background: #ffffff;
+  /* Fixed total height so the bar never resizes between routes. */
+  height: calc(68px + var(--ion-safe-area-bottom, 0px));
+  padding-bottom: var(--ion-safe-area-bottom, 0px);
+  border-top: 1px solid #ececec;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.bottom-tab-cell {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.bottom-tab-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  flex: 1;
+  cursor: pointer;
+  gap: 2px;
+}
+
+.bottom-tab-button:disabled {
+  cursor: default;
+}
+
+.bottom-tab-icon-slot {
+  /* Identical dimensions for every tab, in every state. The active state
+     only changes the background colour. */
+  width: 50px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: transparent;
+  transition: background 120ms ease;
+}
+
+.bottom-tab-icon-slot.is-active {
+  background: #d6e5f9;
+}
+
+.bottom-tab-label {
+  font-family: Rawline, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #888;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.bottom-tab-label.is-active {
+  color: #1447a6;
+  font-weight: bold;
+}

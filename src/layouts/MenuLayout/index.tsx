@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
-import { IconTranslate, IconArrowLeft } from 'assets';
+import { IconTranslate, IconArrowLeft, IconInfo } from 'assets';
 import paths from 'constants/paths';
 import { env } from 'environment/env';
 import { RootState } from 'store';
@@ -55,27 +55,16 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
   const ToolbarAction = useMemo(() => {
     switch (location.pathname) {
       case paths.HOME:
+      case paths.HISTORY:
         dispatch(Creators.setIsVideoScreen(false));
-        if (env.videoTranslator) {
-          return (
-            <>
-              <button
-                className="menu-item-text"
-                onClick={() =>
-                  history.push(
-                    onboardingFirstAccess
-                      ? paths.ONBOARDING
-                      : paths.RECORDERAREA
-                  )
-                }
-                type="button">
-                {Strings.MENU_PT_BR}
-              </button>
-              <IconTranslate color="#2365DE" />
-            </>
-          );
-        }
-        return <></>;
+        return (
+          <button
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+            onClick={() => history.push(paths.ABOUT)}
+            type="button">
+            <IconInfo color="#363636" size={24} />
+          </button>
+        );
 
       case paths.RECORDERAREA:
       case paths.ONBOARDING:

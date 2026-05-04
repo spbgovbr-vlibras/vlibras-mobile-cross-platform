@@ -28,6 +28,9 @@ interface TutorialPopoverProps {
   position: ArrowPosition;
   isEnabled?: boolean;
   context: TutorialContext;
+  floatingStyle?: React.CSSProperties;
+  arrowStyle?: React.CSSProperties;
+  onPrimaryAction?: () => void;
 }
 
 const TutorialPopover = ({
@@ -36,6 +39,9 @@ const TutorialPopover = ({
   position,
   isEnabled = false,
   context,
+  floatingStyle,
+  arrowStyle,
+  onPrimaryAction,
 }: TutorialPopoverProps) => {
   const { currentStepIndex, goNextStep, goPreviousStep, onCancel } =
     context === 'home' ? useHomeTutorial() : useCustomizationTutorial();
@@ -43,15 +49,24 @@ const TutorialPopover = ({
   const QUEUE = context === 'home' ? HOME_TUTORIAL_QUEUE : CUSTOMIZATION_TUTORIAL_QUEUE;
 
   return isEnabled ? (
-    <div className="tutorial-popover-container">
+    <div
+      className={`tutorial-popover-container tutorial-popover-container--anchor-${position[0]}`}
+      style={floatingStyle}>
       <div className="tutorial-row">
         <h1>{title}</h1>
-        <button onClick={onCancel}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onCancel();
+          }}>
           <IconClose color="white" size={15} />
         </button>
       </div>
       <h2>{description}</h2>
-      <div className={`container__arrow container__arrow--${position}`} />
+      <div
+        className={`container__arrow container__arrow--${position}`}
+        style={arrowStyle}
+      />
       <hr />
       <div className="tutorial-row">
         <span>{`${currentStepIndex + 1} de ${QUEUE.length}`}</span>
@@ -59,12 +74,24 @@ const TutorialPopover = ({
           {currentStepIndex !== 0 && (
             <button
               className="button-outlined-tutorial"
-              onClick={goPreviousStep}>
+              onClick={(e) => {
+                e.stopPropagation();
+                goPreviousStep();
+              }}>
               Voltar
             </button>
           )}
-          <button className="button-solid-tutorial" onClick={goNextStep}>
-            Avançar
+          <button
+            className="button-solid-tutorial"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onPrimaryAction) {
+                onPrimaryAction();
+              } else {
+                goNextStep();
+              }
+            }}>
+            {currentStepIndex === QUEUE.length - 1 ? 'Fechar' : 'Avançar'}
           </button>
         </div>
       </div>

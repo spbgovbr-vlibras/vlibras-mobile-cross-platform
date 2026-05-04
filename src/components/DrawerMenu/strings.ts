@@ -8,6 +8,7 @@ export const Strings = {
   TITLE_MENU_ABOUT: 'Sobre o Vlibras',
   TITLE_MENU_CUSTOMIZATION: 'Personalização',
   TITLE_MENU_EMOTIONS: 'Emoções',
+  TITLE_MENU_HISTORY: 'Histórico',
   HEADER_TITLE_SERVICES: 'Serviços',
   HEADER_TITLE_DEFINITIONS: 'Pré-definições',
   HEADER_VLIBRAS_LABEL: 'VLIBRAS',

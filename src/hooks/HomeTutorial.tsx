@@ -43,12 +43,12 @@ export const HOME_TUTORIAL_QUEUE = [
   HomeTutorialSteps.HISTORY,
   HomeTutorialSteps.MENU,
   HomeTutorialSteps.TUTORIAL,
-  HomeTutorialSteps.CHANGE_AVATAR,
   HomeTutorialSteps.CLOSE,
   HomeTutorialSteps.LIKED_TRANSLATION,
   HomeTutorialSteps.SHARE,
   HomeTutorialSteps.SUBTITLE,
   HomeTutorialSteps.REPEAT,
+  HomeTutorialSteps.CHANGE_AVATAR,
   HomeTutorialSteps.PLAYBACK_SPEED,
 ];
 

@@ -20,13 +20,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { env } from '../../environment/env';
 
 import {
-  IconTranslate,
-  IconDictionary,
-  IconRegionalism,
-  IconInfo,
-  IconTutorial,
+  IconHandsTranslate,
   IconDomain,
-  IconCustomization,
+  IconHistory,
   Vlibraslogo,
 } from 'assets';
 import { SVGProps } from 'assets/icons/types';
@@ -38,6 +34,8 @@ import { Strings } from './strings';
 import './styles.css';
 import IconDictionary2 from 'assets/icons/IconDictionary2';
 import IconEmotions from 'assets/icons/IconEmotions';
+import IconFlagOutline from 'assets/icons/IconFlagOutline';
+import IconPersonOutline from 'assets/icons/IconPersonOutline';
 import { PlayerKeys } from 'constants/player';
 import UnityService from 'services/unity';
 
@@ -47,7 +45,7 @@ interface DrawerMenuProps {
 
 const CLASS_NAME_MENU = 'drawer-menu-item';
 const CLASS_NAME_ACTIVED_MENU = `drawer-menu-item-activated ${CLASS_NAME_MENU}`;
-const ACTIVED_COLOR = '#2365DE';
+const ACTIVED_COLOR = '#1447a6';
 const DEFAULT_COLOR = '#4B4B4B';
 
 function videoArea(value: string, expected: string) {
@@ -143,7 +141,8 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
     tab: string,
     title: string,
     IconComponent: React.ComponentType<SVGProps>,
-    selectable: boolean
+    selectable: boolean,
+    iconSize = 24
   ) => (
     <IonItem
       className={selectable ? getClassName(tab, location.pathname) : CLASS_NAME_MENU}
@@ -151,11 +150,12 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
       onClick={(e) => {
         if (title !== Strings.TITLE_MENU_EMOTIONS) navLink(e, tab);
       }}>
-      <IconComponent color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR} />
-      <span className="drawer-menu-item-label">{title}</span>
-
+      <span slot="start" className="drawer-menu-icon-wrap">
+        <IconComponent color={selectable ? getColor(tab, location.pathname) : DEFAULT_COLOR} size={iconSize} />
+      </span>
+      <IonLabel className="drawer-menu-item-label">{title}</IonLabel>
       {title === Strings.TITLE_MENU_TRANSLATOR && env.videoTranslator && (
-        <>
+        <span slot="end" className="drawer-menu-sub-wrap">
           <button
             className="drawer-menu-sub-item translator"
             onClick={() => setOpenSelect(true)}
@@ -163,22 +163,22 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             {valueSelected || 'Libras'}
           </button>
           <div className="arrow-down" />
-        </>
+        </span>
       )}
       {title === Strings.TITLE_MENU_DOMAIN && (
-        <>
+        <span slot="end" className="drawer-menu-sub-wrap">
           <p className="drawer-menu-sub-item">{domain}</p>
           <div className="arrow-down" />
-        </>
+        </span>
       )}
       {title === Strings.TITLE_MENU_REGIONALISM && (
-        <>
+        <span slot="end" className="drawer-menu-sub-wrap">
           <p className="drawer-menu-sub-item">{current.abbreviation}</p>
           <div className="arrow-down" />
-        </>
+        </span>
       )}
       {title === Strings.TITLE_MENU_EMOTIONS && (
-        <>
+        <span slot="end" className="drawer-menu-sub-wrap">
           <p
             className="drawer-menu-sub-item emotion-picker"
             onClick={(e) => {
@@ -189,7 +189,7 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
             {selectedEmotion}
           </p>
           <div className="arrow-down" />
-        </>
+        </span>
       )}
     </IonItem>
   );
@@ -226,8 +226,9 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
               {Strings.HEADER_TITLE_SERVICES}
             </IonLabel>
           </IonListHeader>
-          {renderItemTab(paths.HOME, Strings.TITLE_MENU_TRANSLATOR, IconTranslate, true)}
+          {renderItemTab(paths.HOME, Strings.TITLE_MENU_TRANSLATOR, IconHandsTranslate, true)}
           {renderItemTab(paths.DICTIONARY, Strings.TITLE_MENU_DICTIONARY, IconDictionary2, true)}
+          {renderItemTab(paths.HISTORY, Strings.TITLE_MENU_HISTORY, IconHistory, true)}
         </IonList>
       </IonHeader>
       <div className="drawer-menu-divider" />
@@ -240,14 +241,10 @@ function DrawerMenu({ contentId }: DrawerMenuProps) {
           </IonListHeader>
           {isVideoScreen
             ? renderItemTab(paths.DOMAIN, Strings.TITLE_MENU_DOMAIN, IconDomain, true)
-            : renderItemTab(paths.REGIONALISM, Strings.TITLE_MENU_REGIONALISM, IconRegionalism, true)}
+            : renderItemTab(paths.REGIONALISM, Strings.TITLE_MENU_REGIONALISM, IconFlagOutline, true)}
           {!isLoadingAction &&
-            renderItemTab(paths.CUSTOMIZATION, Strings.TITLE_MENU_CUSTOMIZATION, IconCustomization, true)}
+            renderItemTab(paths.CUSTOMIZATION, Strings.TITLE_MENU_CUSTOMIZATION, IconPersonOutline, true)}
           {renderItemTab(paths.EMOTIONS, Strings.TITLE_MENU_EMOTIONS, IconEmotions, true)}
-        </IonList>
-        <IonList lines="none">
-          {renderItemTab(paths.TUTORIAL, Strings.TITLE_MENU_TUTORIAL, IconTutorial, false)}
-          {renderItemTab(paths.ABOUT, Strings.TITLE_MENU_ABOUT, IconInfo, false)}
         </IonList>
         {openEmotionDropdown && (
   <div className="dropdown-emotion-picker floating-emotion">

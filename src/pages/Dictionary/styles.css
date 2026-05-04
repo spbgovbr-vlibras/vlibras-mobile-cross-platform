@@ -402,3 +402,333 @@
 .conjugation-list .words-popover-content-divider {
   display: none;
 }
+
+/* ===== Dictionary Mini Player (floating overlay - Figma style) ===== */
+
+.dict-mini-player {
+  position: fixed;
+  right: 8px;
+  /* Sits flush above the persistent BottomTabBar (height = 68px + safe-area). */
+  bottom: calc(68px + var(--ion-safe-area-bottom, 0px));
+  width: min(56%, 280px);
+  height: min(48%, 340px);
+  z-index: 700;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.dict-mini-player-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.dict-mini-player-header > button {
+  pointer-events: auto;
+}
+
+.dict-mini-player-expand,
+.dict-mini-player-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dict-mini-player-expand {
+  background: transparent;
+  box-shadow: none;
+}
+
+.dict-mini-player-close {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.dict-mini-player-canvas-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: #ffffff;
+  display: flex;
+  overflow: hidden;
+}
+
+.dict-mini-player-canvas-area > div[id^="__ReactUnityWebGL_"] {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+.dict-mini-player-canvas-area canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.dict-mini-player-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #ffffff;
+  color: #1447a6;
+  font-family: Rawline, sans-serif;
+  font-size: 12px;
+  padding: 12px 14px;
+  gap: 6px;
+}
+
+.dict-mini-player-loading .dict-mini-player-spinner {
+  width: 22px;
+  height: 22px;
+}
+
+.dict-mini-player-loading-title {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.dict-mini-player-loading small {
+  display: block;
+  margin-top: 2px;
+  color: #6c6c6c;
+  font-size: 10px;
+  line-height: 1.25;
+  max-width: 220px;
+}
+
+.dict-mini-player-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #1447a6;
+  font-family: Rawline, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.dict-mini-player-spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid #d6e5f9;
+  border-top-color: #1447a6;
+  animation: dict-mini-spin 0.7s linear infinite;
+}
+
+@keyframes dict-mini-spin {
+  to { transform: rotate(360deg); }
+}
+
+.dict-mini-player-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  gap: 4px;
+  background: #ffffff;
+  border-top: 1px solid #ececec;
+  flex-shrink: 0;
+}
+
+/* Solid blue circular play/pause button (mirrors the Home Player). The inner
+   icon is white in every state, including the refresh icon (achieved with a
+   filter on the PNG asset). */
+.dict-mini-pause-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1447a6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(20, 71, 166, 0.3);
+}
+
+.dict-mini-pause-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dict-mini-pause-refresh {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  /* Force the rotate-ccw PNG (originally dark grey) to render white. */
+  filter: brightness(0) invert(1);
+}
+
+/* All non-pause control buttons share the exact same hit area so they look
+   visually balanced regardless of which icon they hold. */
+.dict-mini-ctrl-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.dict-mini-ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dict-mini-ctrl-btn svg,
+.dict-mini-ctrl-btn img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.dict-mini-ctrl-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.dict-mini-speed-btn span {
+  font-family: Rawline, sans-serif;
+  font-weight: bold;
+  font-size: 15px;
+  color: #1447a6;
+  min-width: 24px;
+  text-align: center;
+  display: block;
+  line-height: 1;
+}
+
+.dict-mini-like-btn {
+  position: absolute;
+  right: 0;
+  bottom: 70px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px 0 0 12px;
+  background: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+}
+
+.dict-mini-popover {
+  --width: 70px;
+  --background: white;
+}
+
+.dict-mini-popover-content {
+  display: flex;
+  flex-direction: column;
+  width: 70px;
+  padding: 4px;
+}
+
+.dict-mini-popover-item {
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  height: 32px;
+  font-family: Rawline, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1447a6;
+  cursor: pointer;
+}
+
+.dict-mini-popover-item.is-active {
+  background: #d6e5f9;
+}
+
+.dict-mini-popover-divider {
+  height: 1px;
+  background: rgba(191, 191, 191, 0.3);
+}
+
+/* Emotion picker popover — wider to accommodate the emotion label. */
+.dict-mini-emotion-popover {
+  --width: 160px;
+}
+
+.dict-mini-emotion-list {
+  display: flex;
+  flex-direction: column;
+  width: 160px;
+  padding: 6px;
+  gap: 2px;
+}
+
+.dict-mini-emotion-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  height: 36px;
+  padding: 0 10px;
+  font-family: Rawline, sans-serif;
+  font-size: 14px;
+  color: #1447a6;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dict-mini-emotion-item.is-active {
+  background: #d6e5f9;
+  font-weight: bold;
+}
+
+.dict-mini-emotion-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.dict-mini-emotion-emoji svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dict-mini-emotion-label {
+  flex: 1;
+}
