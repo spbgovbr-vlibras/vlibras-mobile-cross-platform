@@ -1,172 +1,116 @@
 import axios from 'axios';
 
-import CategoriesList from 'data/Categories';
-import classifiedWordsJson from 'data/classified_words_reduced.json';
 import { Tag, TagSignsResponse } from 'models/dictionary';
 
 /* =============================================================================
- * Dicionário – fonte de dados
+ * Dicionário – fonte de dados (DTH / repositorio-dth.vlibras.lavid.ufpb.br)
  * -----------------------------------------------------------------------------
- * Quando o backend antigo do dicionário (repositorio-dth.vlibras.lavid.ufpb.br)
- * voltar a funcionar – ou quando a nova rota for criada no servidor – basta
- * trocar as duas funções abaixo (`getTags` e `getSignsByTag`) por chamadas
- * HTTP. As três fontes que estamos usando hoje são:
+ * Endpoints utilizados (todas as listas voltam diretamente do backend):
  *
- *  1. Lista completa de sinais (A-Z):
- *     GET https://dicionario2.vlibras.gov.br/bundles?region=BR
- *     -> retorna `string[]` com TODOS os sinais disponíveis.
+ *   GET /api/tags
+ *     -> Tag[]                     (nome em CAIXA_ALTA com underscores)
  *
- *  2. Categorias do dicionário:
- *     `src/data/Categories.ts` – lista local com nome + ícone.
+ *   GET /api/tagsigns?tag=NOME
+ *     -> { tags, signs: string[] } (todos os sinais que pertencem à tag)
  *
- *  3. Mapeamento palavra → categoria (incluindo Verbos):
- *     `src/data/classified_words_reduced.json` – arquivo local.
+ *   GET /api/signs
+ *     -> string[]                  (TODOS os sinais — usado para A-Z)
  *
- * Ou seja, a categorização (Animais, Verbos, Comidas, etc.) e o filtro A-Z
- * são todos resolvidos client-side com as duas fontes locais + o endpoint
- * /bundles. O endpoint /static/TREES/2018.3.1.json também está aqui pronto
- * para ser usado, basta trocar `useTreesEndpoint` para `true` em DICT_CONFIG.
+ * Caso a base mude novamente, basta atualizar `apiBaseUrl` em DICT_CONFIG.
  * =========================================================================== */
 
 export const DICT_CONFIG = {
-  /** Base URL do dicionário público da VLibras. */
-  apiBaseUrl: 'https://dicionario2.vlibras.gov.br',
-  /** Endpoint que devolve a lista de bundles (todos os sinais). */
-  bundlesPath: '/bundles',
-  /** Endpoint alternativo (árvore por release). Não usado por padrão. */
-  treesPath: '/static/TREES/2018.3.1.json',
-  /** Quando `true`, prefere o endpoint TREES; caso contrário, usa /bundles. */
-  useTreesEndpoint: false,
-  /** Região aceita pelo /bundles. */
-  region: 'BR',
+  apiBaseUrl: 'https://repositorio-dth.vlibras.lavid.ufpb.br',
+  tagsPath: '/api/tags',
+  tagSignsPath: '/api/tagsigns',
+  allSignsPath: '/api/signs',
 };
 
-const dicionarioApi = axios.create({
+const api = axios.create({
   baseURL: DICT_CONFIG.apiBaseUrl,
   timeout: 30000,
 });
 
-interface ClassifiedWord {
-  palavra: string;
-  categorias: string[];
-}
-
-const classifiedWords = classifiedWordsJson as ClassifiedWord[];
-
 let cachedAllSigns: string[] | null = null;
 
-async function getAllSignsFromBundles(): Promise<string[]> {
+async function getAllSigns(): Promise<string[]> {
   if (cachedAllSigns) return cachedAllSigns;
-  if (DICT_CONFIG.useTreesEndpoint) {
-    const response = await dicionarioApi.get(DICT_CONFIG.treesPath);
-    /* The TREES JSON is a giant tree; we just flatten it to a list of leaves. */
-    const collected: string[] = [];
-    const walk = (node: any) => {
-      if (!node || typeof node !== 'object') return;
-      if (typeof node.gloss === 'string') collected.push(node.gloss);
-      Object.values(node).forEach(walk);
-    };
-    walk(response.data);
-    cachedAllSigns = Array.from(new Set(collected));
-    return cachedAllSigns;
-  }
-  const response = await dicionarioApi.get<string[]>(DICT_CONFIG.bundlesPath, {
-    params: { region: DICT_CONFIG.region },
-  });
+  const response = await api.get<string[]>(DICT_CONFIG.allSignsPath);
   cachedAllSigns = Array.isArray(response.data) ? response.data : [];
   return cachedAllSigns;
 }
 
 export async function getTags(): Promise<Tag[]> {
-  return CategoriesList.map((category, index) => ({
-    id: index,
-    active: true,
-    name: category.name,
-    description: null,
-    url: null,
-  }));
+  const response = await api.get<Tag[]>(DICT_CONFIG.tagsPath);
+  return Array.isArray(response.data) ? response.data : [];
 }
 
-/* Mesma regex usada em `pages/Dictionary/index.tsx` para detectar
- * verbos com prefixo/sufixo direcional (ex.: 1S_AJUDAR_2S). */
-const VERB_REGEX = new RegExp(
+/**
+ * Regex usada para identificar verbos com sinais direcionais
+ * (ex.: 1S_AJUDAR_2S → base "AJUDAR"). Mantida idêntica à do
+ * `Dictionary/index.tsx`, que faz o agrupamento.
+ */
+const VERB_DIRECTIONAL_REGEX = new RegExp(
   '^(1S_|2S_|3S_|1P_|2P_|3P_)?'
   + '([A-ZÇÕÂÊÍÓÚ]+(?:_(?![123][SP])[A-ZÇÕÂÊÍÓÚ]+)*)'
   + '(_1S|_2S|_3S|_1P|_2P|_3P)?$'
 );
 
 /**
- * Devolve o conjunto de sinais que devem aparecer na categoria "Verbos".
- *
- * Por que não usamos só o `classified_words_reduced.json`?
- *  – O JSON local não traz a forma base do verbo (ex.: contém
- *    `1S_AJUDAR_2S` mas não contém `AJUDAR`). Sem a forma base, a UI
- *    exibe a conjugação como se fosse o verbo, e a tradução fica
- *    "estranha".
- *
- * Solução: cruzar o JSON local com a lista oficial de bundles.
- *  1. Pega tudo que o JSON classifica como Verbos.
- *  2. Adiciona, da lista de /bundles, todos os sinais com
- *     prefixo/sufixo direcional (1S_X_2S, etc.) e a forma base do
- *     verbo correspondente, garantindo as setinhas (EU → VOCÊ, …).
- *  3. Inclui também desambiguações (X&VERBO) cuja base é um verbo.
+ * Recupera, para a categoria VERBOS, a forma base de cada verbo
+ * (ex.: AJUDAR para 1S_AJUDAR_2S). A nova rota `/api/tagsigns?tag=VERBOS`
+ * só devolve as conjugações direcionais — sem isso, o cabeçalho do verbo
+ * fica sem o sinal-base para ser tocado.
  */
-async function getVerbSigns(): Promise<string[]> {
-  const allSigns = await getAllSignsFromBundles();
-
-  const localVerbs = classifiedWords
-    .filter((item) => item.categorias.some((c) => c.toLowerCase() === 'verbos'))
-    .map((item) => item.palavra);
-
-  const baseVerbs = new Set<string>();
-  const directionalSigns = new Set<string>();
-
-  for (const sign of allSigns) {
-    const match = sign.match(VERB_REGEX);
-    if (match && (match[1] || match[3])) {
-      directionalSigns.add(sign);
-      baseVerbs.add(match[2]);
+async function enrichVerbsWithBaseForms(signs: string[]): Promise<string[]> {
+  const directionalBases = new Set<string>();
+  for (const sign of signs) {
+    const match = sign.match(VERB_DIRECTIONAL_REGEX);
+    if (match && (match[1] || match[3]) && match[2]) {
+      directionalBases.add(match[2]);
     }
   }
+  if (!directionalBases.size) return signs;
 
-  const result = new Set<string>(localVerbs);
-
-  directionalSigns.forEach((sign) => result.add(sign));
-
-  for (const sign of allSigns) {
-    if (baseVerbs.has(sign)) {
-      result.add(sign);
-      continue;
-    }
-    if (sign.includes('&')) {
-      const after = sign.split('&').pop();
-      if (after && baseVerbs.has(after)) {
-        result.add(sign);
-      }
-    }
+  let allSigns: string[] = [];
+  try {
+    allSigns = await getAllSigns();
+  } catch (error) {
+    return signs;
   }
+  const allSignsSet = new Set(allSigns);
 
-  return Array.from(result).sort();
+  const existing = new Set(signs);
+  const enriched = [...signs];
+  directionalBases.forEach((base) => {
+    if (allSignsSet.has(base) && !existing.has(base)) {
+      enriched.push(base);
+    }
+  });
+
+  return enriched;
 }
 
 export async function getSignsByTag(tag: string): Promise<TagSignsResponse> {
   if (!tag) {
-    const signs = await getAllSignsFromBundles();
+    const signs = await getAllSigns();
     return { tags: '', signs };
   }
+  const response = await api.get<TagSignsResponse>(DICT_CONFIG.tagSignsPath, {
+    params: { tag },
+  });
+  const data = response.data || ({} as TagSignsResponse);
+  let signs = Array.isArray(data.signs) ? data.signs : [];
 
-  const lowered = tag.toLowerCase();
-
-  if (lowered === 'verbos') {
-    const signs = await getVerbSigns();
-    return { tags: tag, signs };
+  const tagName = (typeof data.tags === 'string' ? data.tags : tag) || tag;
+  if (tagName.toUpperCase() === 'VERBOS') {
+    signs = await enrichVerbsWithBaseForms(signs);
   }
 
-  const signs = classifiedWords
-    .filter((item) => item.categorias.some((c) => c.toLowerCase() === lowered))
-    .map((item) => item.palavra);
-
-  return { tags: tag, signs };
+  return {
+    tags: tagName,
+    signs,
+  };
 }
 
-export default dicionarioApi;
+export default api;

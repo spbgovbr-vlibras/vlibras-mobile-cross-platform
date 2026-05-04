@@ -485,6 +485,7 @@
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -492,14 +493,57 @@
   color: #1447a6;
   font-family: Rawline, sans-serif;
   font-size: 12px;
-  padding: 16px;
+  padding: 12px 14px;
+  gap: 6px;
+}
+
+.dict-mini-player-loading .dict-mini-player-spinner {
+  width: 22px;
+  height: 22px;
+}
+
+.dict-mini-player-loading-title {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .dict-mini-player-loading small {
   display: block;
-  margin-top: 6px;
+  margin-top: 2px;
   color: #6c6c6c;
   font-size: 10px;
+  line-height: 1.25;
+  max-width: 220px;
+}
+
+.dict-mini-player-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #1447a6;
+  font-family: Rawline, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.dict-mini-player-spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid #d6e5f9;
+  border-top-color: #1447a6;
+  animation: dict-mini-spin 0.7s linear infinite;
+}
+
+@keyframes dict-mini-spin {
+  to { transform: rotate(360deg); }
 }
 
 .dict-mini-player-controls {

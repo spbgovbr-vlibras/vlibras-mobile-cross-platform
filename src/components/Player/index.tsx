@@ -1489,7 +1489,11 @@ function Player() {
                 }}
                 isEnabled={currentStep === HomeTutorialSteps.LIKED_TRANSLATION}
               />
-              <button className="player-button-like-overlay" type="button">
+              <button
+                className="player-button-like-overlay"
+                type="button"
+                aria-label="Avaliar tradução"
+                onClick={() => setShowModal(true)}>
                 <IconThumbUp color="#7D7D7D" size={20} />
               </button>
             </div>

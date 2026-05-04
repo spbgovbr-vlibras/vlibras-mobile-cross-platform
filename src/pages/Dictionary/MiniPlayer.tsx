@@ -30,6 +30,7 @@ function formatSpeedLabel(speed: number): string {
 
 interface DictionaryMiniPlayerProps {
   gloss: string;
+  loading?: boolean;
   onClose: () => void;
 }
 
@@ -57,6 +58,7 @@ export const MINI_PLAYER_SHARE_EVENT = 'vlibras:mini-player:share';
  */
 const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   gloss,
+  loading = false,
   onClose,
 }) => {
   const history = useHistory();
@@ -330,11 +332,19 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
       <div className="dict-mini-player-canvas-area" ref={canvasHostRef}>
         {!hasCanvas && (
           <div className="dict-mini-player-loading">
-            Inicializando avatar…
-            <br />
+            <div className="dict-mini-player-spinner" />
+            <span className="dict-mini-player-loading-title">
+              Inicializando avatar…
+            </span>
             <small>
-              Volte ao Tradutor para carregar e tente novamente.
+              Abra o Tradutor para carregar o avatar antes de traduzir aqui.
             </small>
+          </div>
+        )}
+        {hasCanvas && loading && (
+          <div className="dict-mini-player-overlay">
+            <div className="dict-mini-player-spinner" />
+            <span>Traduzindo…</span>
           </div>
         )}
       </div>

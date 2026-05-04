@@ -38,7 +38,7 @@ import { useTranslation } from 'hooks/Translation';
 import { MenuLayout } from 'layouts';
 import { Words, Tag } from 'models/dictionary';
 import { DictionaryData } from 'services/types';
-import { getDictionaryData } from 'services/wiktionary';
+import { getDictionaryData, sanitizeWikiText } from 'services/wiktionary';
 import { RootState } from 'store';
 import { Creators, ErrorDictionaryRequest } from 'store/ducks/dictionary';
 
@@ -154,12 +154,21 @@ useIonViewDidEnter(() => {
   }
 
   async function translatePtBr(text: string) {
-    const gloss = await setTextPtBr(text, false, false);
+    const cleanText = sanitizeWikiText(text);
     saveDictionaryState();
     if (isDictionaryPlayerRoute) {
-      setDictMiniPlayer(true, gloss);
+      // Abre o mini player na hora com indicador de "traduzindo".
+      // O gloss real chega depois e dispara a reprodução automaticamente.
+      setDictMiniPlayer(true, '', { loading: true });
+      try {
+        const gloss = await setTextPtBr(cleanText, false, false);
+        setDictMiniPlayer(true, gloss);
+      } catch {
+        setDictMiniPlayer(false);
+      }
       return;
     }
+    const gloss = await setTextPtBr(cleanText, false, false);
     history.push(paths.HOME, { playGloss: gloss });
   }
 
@@ -195,7 +204,14 @@ useIonViewDidEnter(() => {
   }
 
   const formattedGloss = (gloss: string) => {
-    return gloss.indexOf('&') > -1 ? gloss.replace('&', '(') + ')' : gloss;
+    // O sinal vem da API com `_` separando palavras compostas
+    // (ex.: CACHORRO_QUENTE) e com `&` para desambiguação
+    // (ex.: MACACO&MICO_LEÃO_DOURADO). No display queremos espaços
+    // e parênteses, mantendo o gloss original para enviar ao avatar.
+    const withParens = gloss.indexOf('&') > -1
+      ? gloss.replace('&', '(') + ')'
+      : gloss;
+    return withParens.replace(/_/g, ' ');
   };
 
   async function toggleVerbMeaning(verbName: string) {
@@ -261,13 +277,15 @@ useIonViewDidEnter(() => {
       <div className="verb-section-header">CONTEXTO</div>
       {item.map((word, index) => {
         const [mainWord, suffix] = word.name.split('&', 2);
+        const prettyMain = (mainWord || '').replace(/_/g, ' ');
+        const prettySuffix = (suffix || '').replace(/_/g, ' ');
         return (
           <div key={`teste-${index}`} className="desambiguation-section-header">
             <IonItem key={`${suffix}-form-${index}`}
                     className="dictionary-word-item desambiguation-text"
                     onClick={(e) => { e.stopPropagation(); translate(word.name); }}>
               <div className="desambiguation-text">
-                <IonText className="dictionary-words-style">{mainWord} ({suffix})</IonText>
+                <IonText className="dictionary-words-style">{prettyMain} ({prettySuffix})</IonText>
               </div>
             </IonItem>
           </div>
@@ -810,7 +828,7 @@ useIonViewDidEnter(() => {
             detail={false}
             onClick={() => toggleVerbMeaning(verb)}
           >
-            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{verb}</IonText>
+            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{formattedGloss(verb)}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
                     slot="end"
                     className="verb-dropdown-icon"
@@ -1209,6 +1227,7 @@ useIonViewDidEnter(() => {
       {isMiniPlayerActive && (
         <DictionaryMiniPlayer
           gloss={dictMiniPlayer.gloss}
+          loading={dictMiniPlayer.loading}
           onClose={() => setDictMiniPlayer(false)}
         />
       )}
