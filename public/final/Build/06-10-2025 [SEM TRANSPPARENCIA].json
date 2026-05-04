@@ -6,7 +6,7 @@
 "wasmFrameworkUrl": "06-10-2025 [SEM TRANSPPARENCIA].wasm.framework.unityweb",
 "TOTAL_MEMORY": 268435456,
 "graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
-"webglContextAttributes": {"preserveDrawingBuffer": false},
+"webglContextAttributes": {"preserveDrawingBuffer": true},
 "splashScreenStyle": "Light",
 "backgroundColor": "#FFFFFF",
 "cacheControl": {"default": "must-revalidate"}

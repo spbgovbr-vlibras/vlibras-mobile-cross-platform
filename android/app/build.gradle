@@ -23,6 +23,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def date = new Date().format('yyyyMMdd-HHmm')
+            def type = variant.buildType.name
+            outputFileName = "vlibras-mobile-${type}-share-fix-${date}.apk"
+        }
+    }
 }
 
 repositories {

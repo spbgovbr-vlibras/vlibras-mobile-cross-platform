@@ -20,6 +20,12 @@
   display: block;
 }
 
+/* Reserva espaço quando o Unity está em GlobalPlayerCanvas (mode !== hidden) */
+.player-unity-placeholder {
+  pointer-events: none;
+  background: transparent;
+}
+
 .player-action-container {
   position: absolute;
   bottom: 0;
