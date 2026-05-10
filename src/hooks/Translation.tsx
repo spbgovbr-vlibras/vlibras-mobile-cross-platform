@@ -60,7 +60,7 @@ interface TranslationContextData {
   sentimentAnalysis: SentimentSentence[];
   selectedEmotion: string;
   setSelectedEmotion: (emotion: string) => void;
-  dictMiniPlayer: { active: boolean; gloss: string; loading: boolean };
+  dictMiniPlayer: { active: boolean; gloss: string; loading: boolean; requestId: number };
   setDictMiniPlayer: (
     active: boolean,
     gloss?: string,
@@ -117,18 +117,22 @@ const TranslationProvider: React.FC = ({ children }) => {
     active: false,
     gloss: '',
     loading: false,
+    requestId: 0,
   });
   const translateRequestIdRef = useRef(0);
+  const dictMiniRequestIdRef = useRef(0);
 
   function setDictMiniPlayer(
     active: boolean,
     gloss?: string,
     options?: { loading?: boolean }
   ) {
+    const nextRequestId = active ? ++dictMiniRequestIdRef.current : 0;
     setDictMiniPlayerState({
       active,
       gloss: active && gloss ? gloss : '',
       loading: !!(active && options?.loading),
+      requestId: nextRequestId,
     });
   }
 

@@ -8,9 +8,12 @@
   /* Fixed total height so the bar never resizes between routes. */
   height: calc(68px + var(--ion-safe-area-bottom, 0px));
   padding-bottom: var(--ion-safe-area-bottom, 0px);
-  border-top: 1px solid #ececec;
   flex-shrink: 0;
+  position: relative;
   z-index: 5;
+  /* Separação por sombra (Figma): camada acima “projeta” sobre as abas — sem linha dura */
+  border-top: none;
+  box-shadow: 0 -4px 18px -5px rgba(0, 0, 0, 0.11);
 }
 
 .bottom-tab-cell {

@@ -8,31 +8,21 @@ interface loadingBarProps {
   progressContainerRef: any;
 }
 
-const UNDEFINED_GLOSS = -1;
-const MAX_PROGRESS = 100;
-
 const LoadingBar = ({
   className,
   progressBarRef,
   progressContainerRef,
 }: loadingBarProps) => {
-  let glossLen = UNDEFINED_GLOSS;
-  let cache = UNDEFINED_GLOSS;
-
-  useOnCounterGloss((counter: number, _glossLength: number) => {
-    if (counter === cache - 1) {
-      glossLen = counter;
-    }
-    cache = counter;
-
-    const progress = (1 / glossLen) * 100;
+  useOnCounterGloss((counter: number, glossLength: number) => {
+    const progress =
+      glossLength > 0
+        ? Math.min(100, Math.max(0, (counter / glossLength) * 100))
+        : 0;
 
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
       progressBarRef.current.style.visibility = 'visible';
-      progressBarRef.current.style.width = `${
-        progress > MAX_PROGRESS ? MAX_PROGRESS : progress
-      }%`;
+      progressBarRef.current.style.width = `${progress}%`;
     }
   }, []);
 

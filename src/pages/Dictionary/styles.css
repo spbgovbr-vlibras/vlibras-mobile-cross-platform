@@ -243,6 +243,23 @@
   align-items: center;
 }
 
+.conjugation-item-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.conjugation-gloss-tech {
+  font-family: Rawline, sans-serif;
+  font-size: 11px;
+  color: #6c6c6c;
+  margin-top: 3px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
 .desambiguation-section-header {
   font-size: 12px;
   font-weight: bold;

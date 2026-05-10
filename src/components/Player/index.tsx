@@ -84,8 +84,6 @@ const X1_5 = 1.5;
 const X2 = 2;
 const X2_5 = 2.5;
 
-const UNDEFINED_GLOSS = -1;
-const MAX_PROGRESS = 100;
 
 function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
@@ -190,6 +188,35 @@ function Player() {
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+  /** Evita marcar a barra em 100% quando o usuário parou com Fechar (Unity pode avisar playing=false depois). */
+  const suppressPlaybackProgressCompleteRef = useRef(false);
+
+  /**
+   * Quando o teclado virtual abre, o Android (com `windowSoftInputMode=adjustResize`,
+   * que é o default do Capacitor) encolhe a WebView, e o `flex: 1` faz o wrapper do
+   * avatar diminuir junto. O canvas Unity acompanha esse encolhimento e o avatar
+   * "se aproxima/afasta" visualmente. Para evitar isso, fixamos a altura do wrapper
+   * na MAIOR dimensão já observada (estado sem teclado). O teclado passa a
+   * sobrepor a barra de input/tabs sem mexer no avatar.
+   */
+  const avatarWrapperRef = useRef<HTMLDivElement>(null);
+  const [lockedAvatarHeight, setLockedAvatarHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const measure = () => {
+      const node = avatarWrapperRef.current;
+      if (!node) return;
+      const h = Math.round(node.getBoundingClientRect().height);
+      if (h <= 0) return;
+      setLockedAvatarHeight((prev) => (prev === null || h > prev ? h : prev));
+    };
+    const initial = window.setTimeout(measure, 50);
+    const onOrientationChange = () => window.setTimeout(measure, 250);
+    window.addEventListener('orientationchange', onOrientationChange);
+    return () => {
+      window.clearTimeout(initial);
+      window.removeEventListener('orientationchange', onOrientationChange);
+    };
+  }, []);
 
   const [emotionMap, setEmotionMap] = useState<
     { emotion: PlayerKeys; startIndex: number; endIndex: number }[]
@@ -628,9 +655,6 @@ function Player() {
     ({ customization }: RootState) => customization.currentpants
   );
 
-  let glossLen = UNDEFINED_GLOSS;
-  let cache = UNDEFINED_GLOSS;
-
   useEffect(() => {
     const handleAppStateChange: StateChangeListener = ({ isActive }) => {
       setIsInBackground(!isActive);
@@ -746,9 +770,18 @@ function Player() {
   }, [sentimentAnalysis, selectedEmotion]);
 
   function handlePlay(gloss: string) {
-    if (progressContainerRef.current) {
+    suppressPlaybackProgressCompleteRef.current = false;
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: Date.now(),
+    };
+    if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
+      progressBarRef.current.style.visibility = 'visible';
+      progressBarRef.current.style.width = '0%';
     }
+    dispatch(CreatorsVideo.setProgress(0));
 
     if (!mediaRecorder || mediaRecorder.state === 'inactive') {
       resetRecording();
@@ -800,9 +833,21 @@ function Player() {
      * player should only stop playback and trigger the existing
      * tutorial/exit popups – the original behaviour the user relies on.
      */
+    suppressPlaybackProgressCompleteRef.current = true;
     sessionStorage.removeItem('dictionaryState');
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: 0,
+    };
+    if (progressBarRef.current && progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.width = '0%';
+    }
+    dispatch(CreatorsVideo.setProgress(0));
   }
 
   const [showModal, setShowModal] = useState(false);
@@ -866,7 +911,18 @@ function Player() {
       isPlayerBusyRef.current = newIsPlaying; // O estado do semáforo espelha o do player
 
       if (wasPlaying.current && !newIsPlaying) {
-        setHasFinished(true);
+        if (!suppressPlaybackProgressCompleteRef.current) {
+          setHasFinished(true);
+          // Faixa azul: ao terminar a frase, garante 100% se o último CounterGloss não chegou lá.
+          if (progressBarRef.current && progressContainerRef.current) {
+            progressContainerRef.current.style.visibility = 'visible';
+            progressBarRef.current.style.visibility = 'visible';
+            progressBarRef.current.style.width = '100%';
+          }
+          dispatch(CreatorsVideo.setProgress(100));
+        } else {
+          suppressPlaybackProgressCompleteRef.current = false;
+        }
         // Garante que o avatar volte ao idle (evita ficar "travado" no último sinal).
         setTimeout(() => {
           playerService.send(
@@ -907,7 +963,7 @@ function Player() {
         recording = false;
       }
     },
-    [processTranslationQueue]
+    [processTranslationQueue, dispatch]
   );
 
   useEffect(() => {
@@ -1060,10 +1116,15 @@ function Player() {
     setHasFinished(false);
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'hidden';
-      progressContainerRef.current.style.width = '0%';
       progressBarRef.current.style.visibility = 'hidden';
       progressBarRef.current.style.width = '0%';
     }
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: 0,
+    };
+    dispatch(CreatorsVideo.setProgress(0));
   }
 
   useEffect(() => {
@@ -1135,19 +1196,18 @@ function Player() {
     //   }
     // }
 
-    if (counter === cache - 1) {
-      glossLen = counter;
-    }
-    cache = counter;
-
-    const progress = (1 / glossLen) * 100;
+    const progress =
+      glossLength > 0
+        ? Math.min(
+            100,
+            Math.max(0, (counter / glossLength) * 100)
+          )
+        : 0;
 
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
       progressBarRef.current.style.visibility = 'visible';
-      progressBarRef.current.style.width = `${
-        progress > MAX_PROGRESS ? MAX_PROGRESS : progress
-      }%`;
+      progressBarRef.current.style.width = `${progress}%`;
     }
     dispatch(CreatorsVideo.setProgress(progress));
   }, [selectedEmotion, emotionMap]);
@@ -1180,6 +1240,13 @@ function Player() {
     } else {
       dispatch(Creators.storeAvatar.request('icaro'));
     }
+  }
+
+  function renderCurrentAvatarSilhouette(size = 28) {
+    const common = { width: size, height: size, 'aria-hidden': true } as const;
+    if (currentAvatar === 'hozana') return <HozanaAvatar {...common} />;
+    if (currentAvatar === 'guga') return <GugaAvatar {...common} />;
+    return <IcaroAvatar {...common} />;
   }
 
   function handleSubtitle() {
@@ -1325,8 +1392,7 @@ function Player() {
           disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
           onClick={() => {
             if (!recording) {
-              initVideoSharing();
-              handleClick();
+              void initVideoSharing();
             }
           }}>
           <IconShare color="#1447a6" size={22} />
@@ -1505,8 +1571,7 @@ function Player() {
   useEffect(() => {
     const onMiniPlayerShare = () => {
       if (recording) return;
-      initVideoSharing();
-      handleClick();
+      void initVideoSharing();
     };
     window.addEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
     return () => {
@@ -1643,10 +1708,13 @@ function Player() {
           ))}
         </div>
       </IonPopover>
-      <div className="player-avatar-wrapper"
+      <div ref={avatarWrapperRef} className="player-avatar-wrapper"
         style={{
           width: '100%',
           flexShrink: 0,
+          flexGrow: lockedAvatarHeight ? 0 : undefined,
+          flexBasis: lockedAvatarHeight ? 'auto' : undefined,
+          height: lockedAvatarHeight ? `${lockedAvatarHeight}px` : undefined,
           marginBottom: HomeTutorialSteps.INITIAL === currentStep
             ? 0
             : (isPlaying || hasFinished
@@ -1717,6 +1785,18 @@ function Player() {
             </div>
           </div>
         )}
+        {!isPlaying && !hasFinished && !isLiveListening &&
+          !TUTORIAL_PLAYING_STEPS.has(currentStep) && (
+          <button
+            type="button"
+            className="player-avatar-switch-overlay"
+            aria-label="Trocar avatar"
+            onClick={() => handleChangeAvatar()}>
+            <span className="player-avatar-switch-icon">
+              {renderCurrentAvatarSilhouette(42)}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* GenerateModal e ErrorModal para compartilhar - usados pela barra overlay */}
@@ -1756,7 +1836,13 @@ function Player() {
             </button>
           </div>
         )}
-        <div ref={progressContainerRef} className="player-progress-container">
+        <div
+          ref={progressContainerRef}
+          className={`player-progress-container${
+            !isPlaying && !hasFinished && !isLiveListening
+              ? ' player-progress-container--idle'
+              : ''
+          }`}>
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
         {renderPlayerButtons()}

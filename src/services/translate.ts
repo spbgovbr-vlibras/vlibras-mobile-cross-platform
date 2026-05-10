@@ -60,6 +60,19 @@ const defaultTranslateData = {
   pos: 'center',
 };
 
+/**
+ * Alguns termos retornam gloss-base do tradutor que não existe como sinal
+ * isolado na base, apenas em forma desambiguada (ex.: AÇAÍ&FRUTA). Sem esse
+ * ajuste, o player cai em datilologia no Tradutor/Home.
+ */
+const GLOSS_ALIAS_MAP: Record<string, string> = {
+  'AÇAÍ': 'AÇAÍ&FRUTA',
+};
+
+function normalizeReturnedGloss(gloss: string): string {
+  return GLOSS_ALIAS_MAP[gloss] || gloss;
+}
+
 const api = axios.create({
   baseURL: 'https://traducao2.vlibras.gov.br',
   timeout: 15000,
@@ -83,12 +96,12 @@ export async function translate(data: TranslateData): Promise<string> {
   const payload = response.data as unknown;
   // API may return a raw string OR a structured object.
   // Converting object directly results in "[object Object]" (avatar fingerspells "OBJECT").
-  if (typeof payload === 'string') return payload;
+  if (typeof payload === 'string') return normalizeReturnedGloss(payload);
   if (payload && typeof payload === 'object') {
     const obj = payload as Record<string, unknown>;
-    if (typeof obj.traducao === 'string') return obj.traducao;
-    if (typeof obj.gloss === 'string') return obj.gloss;
-    if (typeof obj.translation === 'string') return obj.translation;
+    if (typeof obj.traducao === 'string') return normalizeReturnedGloss(obj.traducao);
+    if (typeof obj.gloss === 'string') return normalizeReturnedGloss(obj.gloss);
+    if (typeof obj.translation === 'string') return normalizeReturnedGloss(obj.translation);
   }
   throw Error('Could not parse received gloss data.');
 }

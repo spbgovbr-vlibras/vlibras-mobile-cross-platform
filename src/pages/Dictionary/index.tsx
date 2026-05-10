@@ -49,6 +49,19 @@ import './styles.css';
 
 export type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
 
+/** Agrupamento de verbos (categoria Verbos e colapso no modo A–Z). */
+export type VerbConjugationRow = {
+  original: string;
+  prefix: string;
+  suffix: string;
+  transformed: string;
+};
+
+export type VerbGroupBuckets = Record<
+  string,
+  { conjugation: VerbConjugationRow[]; desambiguation: Words[] }
+>;
+
 const TIME_DEBOUNCE_MS = 200;
 
 function getChipClassName(
@@ -98,6 +111,10 @@ function Dictionary() {
   const allWordsList: Words[] = React.useMemo(() =>
     allCurrentWords ? allCurrentWords.map((w, i) => ({id: i, name: w})) : []
   , [allCurrentWords]);
+  const allWordsSet = React.useMemo(
+    () => new Set(allWordsList.map((w) => w.name)),
+    [allWordsList]
+  );
 
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
@@ -108,22 +125,24 @@ function Dictionary() {
   const { setTextGloss, setTextPtBr, recentTranslation, dictMiniPlayer, setDictMiniPlayer } = useTranslation();
   const isMiniPlayerActive = isDictionaryPlayerRoute && dictMiniPlayer.active;
 
-  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
+  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroupBuckets>({});
 
   const VERB_COUNT = 20;
   const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
   const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const category = queryParams.get('category');
+  /** Tag na URL pode vir como VERBOS (API) ou Verbos (rotas antigas / dados locais). */
+  const isVerbCategory = (category ?? '').toUpperCase() === 'VERBOS';
 
-useIonViewDidEnter(() => {
-  contentRef.current?.getScrollElement().then((el) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const scrollParam = queryParams.get('scroll');
-    if (scrollParam) {
-      el.scrollTop = toNumber(scrollParam);
-    }
+  useIonViewDidEnter(() => {
+    contentRef.current?.getScrollElement().then((el) => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const scrollParam = queryParams.get('scroll');
+      if (scrollParam) {
+        el.scrollTop = toNumber(scrollParam);
+      }
+    });
   });
-});
 
   useEffect(() => {
     if (!isDictionaryPlayerRoute && dictMiniPlayer.active) {
@@ -297,6 +316,10 @@ useIonViewDidEnter(() => {
 
   const renderDesambiguateWord = (item: Words[], isLast: boolean) => {
     const name = item[0].name.split('&', 1)[0];
+    // Quando não existe gloss-base isolado (ex.: só existe "AÇAÍ&FRUTA"),
+    // tocar apenas o prefixo ("AÇAÍ") cai em datilologia. Nesses casos,
+    // usamos o primeiro gloss desambiguado da lista para tocar o sinal correto.
+    const primaryGloss = allWordsSet.has(name) ? name : item[0].name;
     const id = item[0].id;
     const isExpanded = expandedWord === name;
 
@@ -309,7 +332,7 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning({name: name, id: id})}
         >
-          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(name); }}>
+          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(primaryGloss); }}>
             {formattedGloss(name)}
           </IonText>
           <IonIcon
@@ -329,8 +352,13 @@ useIonViewDidEnter(() => {
     );
   };
 
-  const renderWord = (item: Words, isLast: boolean) => {
+  const renderWord = (item: Words, isLast: boolean, azBuckets?: VerbGroupBuckets) => {
     const isExpanded = expandedWord === item.name;
+    const vbGroup = azBuckets?.[item.name];
+    const slicedConcord =
+      vbGroup?.conjugation.filter(
+        (w) => !(w.original === item.name && !w.prefix && !w.suffix)
+      ) ?? [];
 
     return (
       <div key={item.id}>
@@ -353,6 +381,35 @@ useIonViewDidEnter(() => {
         {isExpanded && (
           <div className="word-meaning-container">
             {renderMeaningContent(item)}
+            {slicedConcord.length > 0 && (
+              <>
+                <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+                <IonList lines="none" className="dictionary-words-list conjugation-list">
+                  {slicedConcord.map((w, i) => (
+                    <IonItem
+                      key={`${item.name}-az-concord-${i}`}
+                      className="dictionary-word-item conjugation-item"
+                      onClick={(e) => { e.stopPropagation(); translate(w.original); }}
+                    >
+                      <div className="conjugation-item-inner">
+                        <div className="conjugation-text-wrapper">
+                          <IonText className="dictionary-words-style conjugation-part">
+                            {formattedGloss(w.prefix)}
+                          </IonText>
+                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                          <IonText className="dictionary-words-style conjugation-part">
+                            {formattedGloss(w.suffix)}
+                          </IonText>
+                        </div>
+                        <IonText className="conjugation-gloss-tech">
+                          {formattedGloss(w.original)}
+                        </IonText>
+                      </div>
+                    </IonItem>
+                  ))}
+                </IonList>
+              </>
+            )}
           </div>
         )}
         {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
@@ -468,7 +525,7 @@ useIonViewDidEnter(() => {
 
   const renderCategoryWords = () => (
     <>
-      {category === 'VERBOS' || category === 'Verbos' ?
+      {isVerbCategory ?
         renderVerbs() : renderNoVerbsWords(allWordsList)}
     </>
   );
@@ -518,14 +575,27 @@ useIonViewDidEnter(() => {
 
     const groupedWords = groupWords(wordsToRender);
 
-    const allItems: { name: string, type: 'word' | 'desambiguation', data: any }[] = [];
+    const plainSinglesForCollapse = groupedWords.filter((g): g is Words => !Array.isArray(g));
 
-    groupedWords.forEach(item => {
-        if (Array.isArray(item)) {
-            allItems.push({ name: item[0].name.split('&', 1)[0], type: 'desambiguation', data: item });
-        } else {
-            allItems.push({ name: item.name, type: 'word', data: item });
-        }
+    /** No A–Z, colapsa glosses direcionais (1S_VERBO_2S) no lema base — igual à categoria Verbos. */
+    const azVerbBuckets = sortGroupedVerbs(groupVerbs(plainSinglesForCollapse));
+
+    const desambiguationSegments = groupedWords.filter((g): g is Words[] => Array.isArray(g));
+    const collapsedLemmaWords: Words[] = Object.keys(azVerbBuckets)
+      .sort((a, b) => a.localeCompare(b))
+      .map((lemma, idx) => ({ id: -(idx + 1), name: lemma }));
+
+    const allItems: { name: string; type: 'word' | 'desambiguation'; data: any }[] = [];
+
+    collapsedLemmaWords.forEach((w) => {
+      allItems.push({ name: w.name, type: 'word', data: w });
+    });
+    desambiguationSegments.forEach((group) => {
+      allItems.push({
+        name: group[0].name.split('&', 1)[0],
+        type: 'desambiguation',
+        data: group,
+      });
     });
 
     const groupedByLetter: { [key: string]: typeof allItems } = {};
@@ -616,7 +686,7 @@ useIonViewDidEnter(() => {
                         {itemsForLetter.map((item, index) => {
                             const isLast = index === itemsForLetter.length - 1;
                             if (item.type === 'word') {
-                                return renderWord(item.data, isLast);
+                                return renderWord(item.data, isLast, azVerbBuckets);
                             }
                             if (item.type === 'desambiguation') {
                                 return renderDesambiguateWord(item.data, isLast);
@@ -639,13 +709,6 @@ useIonViewDidEnter(() => {
     }
   }
 
-  type VerbConjugation = {
-    original: string;
-    prefix: string;
-    suffix: string;
-    transformed: string;
-  };
-  type VerbGroups = Record<string, {conjugation: VerbConjugation[], desambiguation: Words[]}>;
   const prefixMap: Record<string, string> = {
     '1S_': 'EU',
     '2S_': 'VOCÊ',
@@ -662,59 +725,68 @@ useIonViewDidEnter(() => {
     '_2P': 'VOCÊS',
     '_3P': 'ELES(AS)',
   };
-  // const verbRegex = /^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/;
-
-  const verbRegex = new RegExp(
-    '^(1S_|2S_|3S_|1P_|2P_|3P_)?'
-    +'([A-ZÇÕÂÊÍÓÚ]+(?:_(?![123][SP])[A-ZÇÕÂÊÍÓÚ]+)*)'
-    +'(_1S|_2S|_3S|_1P|_2P|_3P)?$'
-  );
-
-
-  const transformedCache: Record<string, string> = {};
-  for (const p in prefixMap) {
-    for (const s in suffixMap) {
-      transformedCache[`${p}|${s}`] = `${prefixMap[p]} PARA ${suffixMap[s]}`;
+  /**
+   * Faz parsing tolerante do gloss para suportar formas direcionais
+   * malformadas vindas da API (ex.: "1S_FARTAR1S" sem `_` antes do sufixo,
+   * "2S_ESCOLHER__1S" com `__` duplicado). Retorna prefix/base/suffix
+   * normalizados (ex.: "1S_", "FARTAR", "_1S"). Quando não há sufixo, base
+   * pode terminar com `_` extra que limpamos. Sem isso, glosses fora do
+   * padrão viram "verbos" próprios e a CONCORDÂNCIA VERBAL some.
+   */
+  function parseVerbGloss(name: string): { prefix: string; base: string; suffix: string } | null {
+    if (!name || name.includes('&')) return null;
+    let body = name;
+    let prefix = '';
+    const prefixMatch = body.match(/^(1S|2S|3S|1P|2P|3P)_(.+)$/);
+    if (prefixMatch) {
+      prefix = `${prefixMatch[1]}_`;
+      body = prefixMatch[2];
     }
+    let suffix = '';
+    const suffixMatch = body.match(/^(.+?)_*(1S|2S|3S|1P|2P|3P)$/);
+    if (suffixMatch) {
+      body = suffixMatch[1].replace(/_+$/, '');
+      suffix = `_${suffixMatch[2]}`;
+    }
+    body = body.replace(/^_+|_+$/g, '');
+    if (!body) return null;
+    return { prefix, base: body, suffix };
   }
 
-  function groupVerbs(words: Words[]): VerbGroups {
-    const acc: VerbGroups = {};
+
+  function groupVerbs(words: Words[]): VerbGroupBuckets {
+    const acc: VerbGroupBuckets = {};
 
     for (const word of words) {
-      const baseVerb = word.name.includes('&') ?
-        word.name.split('&', 1)[0] : word.name.match(verbRegex)?.[2] || word.name;
-
-      if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
-
-      if(word.name.includes('&')) {
+      if (word.name.includes('&')) {
+        const baseVerb = word.name.split('&', 1)[0];
+        if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
         acc[baseVerb].desambiguation.push(word);
-      } else {
-        const match = word.name.match(verbRegex);
-        if (match) {
-          const prefix = match[1] || '';
-          const verb = match[2];
-          const suffix = match[3] || '';
-
-          const prefixText = prefixMap[prefix] || '';
-          const suffixText = suffixMap[suffix] || '';
-
-          if (prefixText && suffixText) {
-            const transformed = `${prefixText} PARA ${suffixText}`;
-            acc[verb].conjugation.push({ original: word.name,
-                                         transformed,
-                                         prefix: prefixText,
-                                         suffix: suffixText });
-          } else {
-            acc[verb].conjugation.unshift({ original: word.name,
-                                            transformed: word.name,
-                                            prefix: prefixText,
-                                            suffix: suffixText });
-          }
-        }
+        continue;
       }
 
+      const parsed = parseVerbGloss(word.name);
+      const baseVerb = parsed?.base || word.name;
+      if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
 
+      if (!parsed) continue;
+      const { prefix, suffix } = parsed;
+
+      const prefixText = prefixMap[prefix] || '';
+      const suffixText = suffixMap[suffix] || '';
+
+      if (prefixText && suffixText) {
+        const transformed = `${prefixText} PARA ${suffixText}`;
+        acc[baseVerb].conjugation.push({ original: word.name,
+                                     transformed,
+                                     prefix: prefixText,
+                                     suffix: suffixText });
+      } else {
+        acc[baseVerb].conjugation.unshift({ original: word.name,
+                                        transformed: word.name,
+                                        prefix: prefixText,
+                                        suffix: suffixText });
+      }
     }
     const verbGroups = acc;
 
@@ -757,9 +829,20 @@ useIonViewDidEnter(() => {
       'ELES(AS) PARA ELES(AS)',
     ];
 
-    for (const verb in verbGroups) {
-      verbGroups[verb].conjugation.sort((a, b) => {
-        return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
+    const bareBaseRank = (verbKey: string, w: VerbConjugationRow) =>
+      w.original === verbKey && !w.prefix && !w.suffix ? -1 : 0;
+
+    for (const verbKey in verbGroups) {
+      verbGroups[verbKey].conjugation.sort((a, b) => {
+        const diffBare =
+          bareBaseRank(verbKey, a) - bareBaseRank(verbKey, b);
+        if (diffBare !== 0) return diffBare;
+        const ia = conjugationOrder.indexOf(a.transformed);
+        const ib = conjugationOrder.indexOf(b.transformed);
+        const ra = ia === -1 ? 999 : ia;
+        const rb = ib === -1 ? 999 : ib;
+        if (ra !== rb) return ra - rb;
+        return a.original.localeCompare(b.original);
       });
     }
 
@@ -818,7 +901,17 @@ useIonViewDidEnter(() => {
       const meaning = wordMeanings[verb];
       const isLoadingMeaning = loadingMeaning === verb;
       const isLast = i === filteredVerbList.slice(0, visibleVerbCount).length - 1;
-      const slicedWords = conjugationWords.slice(verb === conjugationWords[0]?.original ? 1 : 0);
+      /** Oculta só a linha duplicada da forma base (mesmo gloss do cabeçalho). */
+      const slicedWords = conjugationWords.filter(
+        (w) => !(w.original === verb && !w.prefix && !w.suffix)
+      );
+      const bareBaseRow = conjugationWords.find(
+        (w) => w.original === verb && !w.prefix && !w.suffix
+      );
+      const headerGloss = bareBaseRow?.original
+        ?? conjugationWords[0]?.original
+        ?? desambiguationWords[0]?.name
+        ?? verb;
       return (
         <div key={verb} className="verb-group">
           <IonItem
@@ -828,7 +921,7 @@ useIonViewDidEnter(() => {
             detail={false}
             onClick={() => toggleVerbMeaning(verb)}
           >
-            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{formattedGloss(verb)}</IonText>
+            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(headerGloss); }}>{formattedGloss(verb)}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
                     slot="end"
                     className="verb-dropdown-icon"
@@ -865,10 +958,13 @@ useIonViewDidEnter(() => {
                       <IonItem key={`${verb}-form-${i}`}
                               className="dictionary-word-item conjugation-item"
                               onClick={(e) => { e.stopPropagation(); translate(w.original); }}>
-                        <div className="conjugation-text-wrapper">
-                          <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
-                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
-                          <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                        <div className="conjugation-item-inner">
+                          <div className="conjugation-text-wrapper">
+                            <IonText className="dictionary-words-style conjugation-part">{formattedGloss(w.prefix)}</IonText>
+                            <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                            <IonText className="dictionary-words-style conjugation-part">{formattedGloss(w.suffix)}</IonText>
+                          </div>
+                          <IonText className="conjugation-gloss-tech">{formattedGloss(w.original)}</IonText>
                         </div>
                       </IonItem>
                     );
@@ -975,13 +1071,14 @@ useIonViewDidEnter(() => {
 
   // Update verbGroupsState when dictionary changes and category is verbs
   useEffect(() => {
-    if (category === 'VERBOS' || category === 'Verbos') {
-       // Use allWordsList for verbs to ensure all verbs are grouped
-       const groupedVerbs = groupVerbs(allWordsList);
-       const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
-       setVerbGroupsState(sortedGroupedVerbs);
+    if (!isVerbCategory) {
+      setVerbGroupsState({});
+      return;
     }
-  }, [allWordsList, category]);
+    const groupedVerbs = groupVerbs(allWordsList);
+    const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
+    setVerbGroupsState(sortedGroupedVerbs);
+  }, [allWordsList, isVerbCategory]);
 
 
   const fetchWords = useCallback(() => {
@@ -1013,7 +1110,7 @@ useIonViewDidEnter(() => {
     setFilter('categories');
   }
 
-  function sortGroupedVerbs(verbs: VerbGroups): VerbGroups {
+  function sortGroupedVerbs(verbs: VerbGroupBuckets): VerbGroupBuckets {
     return Object.fromEntries(
       Object.entries(verbs).sort(([a], [b])=>a.localeCompare(b))
     );
@@ -1071,7 +1168,7 @@ useIonViewDidEnter(() => {
         ).length;
       case 'categories':
         if (category) {
-          if (category === 'VERBOS' || category === 'Verbos') {
+          if (isVerbCategory) {
             return filteredVerbList.length;
           }
           return allWordsList.length; // Use allWordsList.length instead of dictionary.length
@@ -1209,7 +1306,7 @@ useIonViewDidEnter(() => {
             />
           </IonInfiniteScroll>
         )}
-        {(filter === 'categories') && (category === 'VERBOS' || category === 'Verbos')  && (
+        {(filter === 'categories') && isVerbCategory && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
@@ -1228,6 +1325,7 @@ useIonViewDidEnter(() => {
         <DictionaryMiniPlayer
           gloss={dictMiniPlayer.gloss}
           loading={dictMiniPlayer.loading}
+          playRequestId={dictMiniPlayer.requestId}
           onClose={() => setDictMiniPlayer(false)}
         />
       )}

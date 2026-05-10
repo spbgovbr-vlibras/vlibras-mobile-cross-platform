@@ -6,6 +6,7 @@
  */
 const LEXICON: Record<string, string> = {
   // Exceções / palavras em que só o dicionário resolve bem
+  acai: 'açaí',
   historia: 'história',
   musica: 'música',
   amanha: 'amanhã',
@@ -54,12 +55,18 @@ function accentWord(word: string): string {
   if (word.length < 3) return word;
   // NFC para reconhecer acentos mesmo quando vierem como base + combining (ex.: e + ́ )
   const nfc = word.normalize('NFC');
-  if (PT_DIACRITIC.test(nfc)) return word;
 
   const lower = nfc.toLowerCase();
+  // Também tenta por chave sem diacríticos para corrigir casos parcialmente
+  // acentuados, ex.: "açai" -> "açaí".
+  const canonical = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  const fromLex = LEXICON[lower];
+  const fromLex = LEXICON[lower] || LEXICON[canonical];
   if (fromLex) return matchCase(word, fromLex);
+
+  // Sem acentuar automaticamente palavras que já possuem diacríticos e não
+  // estão no léxico de exceções.
+  if (PT_DIACRITIC.test(nfc)) return word;
 
   if (lower.length < 5) return word;
 

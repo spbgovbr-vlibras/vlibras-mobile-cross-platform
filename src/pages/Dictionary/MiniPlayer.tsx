@@ -31,6 +31,7 @@ function formatSpeedLabel(speed: number): string {
 interface DictionaryMiniPlayerProps {
   gloss: string;
   loading?: boolean;
+  playRequestId?: number;
   onClose: () => void;
 }
 
@@ -59,6 +60,7 @@ export const MINI_PLAYER_SHARE_EVENT = 'vlibras:mini-player:share';
 const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   gloss,
   loading = false,
+  playRequestId = 0,
   onClose,
 }) => {
   const history = useHistory();
@@ -91,7 +93,6 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
 
-  const lastGlossRef = useRef<string>('');
   // Skip STOP_ALL on unmount when the user expands to the home: the avatar
   // must keep playing across the navigation transition.
   const skipStopOnUnmountRef = useRef(false);
@@ -193,14 +194,14 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   // the user can request a sign before Unity finishes loading.
   useEffect(() => {
     if (!gloss) return;
-    if (gloss === lastGlossRef.current) return;
-    lastGlossRef.current = gloss;
 
     let timeoutId: number;
     let cancelled = false;
     const tryPlay = () => {
       if (cancelled) return;
       if ((playerService as any).getIsReady?.()) {
+        // Garantir troca imediata de sinal quando já existe reprodução em curso.
+        playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
         playerService.send(
           PlayerKeys.PLAYER_MANAGER,
           PlayerKeys.PLAY_NOW,
@@ -216,7 +217,7 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [gloss]);
+  }, [gloss, playRequestId]);
 
   // Stop the avatar when the mini player closes so it doesn't keep playing
   // silently in the (still mounted) Home page. Skipped when the user expands
