@@ -565,17 +565,6 @@ function Customization() {
           </IonButtons>
         </IonToolbar>
       </IonHeader>
-      <IonHeader className="ion-no-border">
-        <IonToolbar>
-          <IonTitle className="menu-toolbar-title">Emoções</IonTitle>
-
-          <IonButtons slot="start" onClick={onCloseClick}>
-            <div className="arrow-left-container-start">
-              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
-            </div>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
       <div className="player-container">
         <div
           style={{

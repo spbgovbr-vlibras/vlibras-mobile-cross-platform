@@ -417,26 +417,41 @@
   border-color: #1447a6;
 }
 
+.player-translate-input::placeholder {
+  color: #888;
+  opacity: 1;
+}
+
 .player-translate-button {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  padding: 10px 18px;
-  background: #e8e8e8;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 22px;
-  font-family: Rawline, sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: #888;
+  border-radius: 50%;
   cursor: pointer;
-  white-space: nowrap;
   flex-shrink: 0;
 }
 
-.player-translate-button:active {
-  background: #d0d0d0;
+/* Estado vazio: cinza mais escuro + mãos brancas (proposta) */
+.player-translate-button--empty {
+  background: #bdbdbd;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+}
+
+.player-translate-button--empty:active {
+  background: #a8a8a8;
+}
+
+/* Com texto: branco + ícone azul */
+.player-translate-button--ready {
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.player-translate-button--ready:active {
+  background: #f0f0f0;
 }
 
 /* ===== Tab bar styles ===== */

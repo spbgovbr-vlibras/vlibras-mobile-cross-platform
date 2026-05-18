@@ -135,27 +135,39 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
       window.dispatchEvent(new Event('resize'));
     };
 
-    const initial = document.getElementById(wrapperId) as HTMLElement | null;
+    let pollTimer: ReturnType<typeof window.setInterval> | null = null;
     let observer: MutationObserver | null = null;
+
+    const tryAttachFromDom = () => {
+      if (cancelled || wrapper) return;
+      const node = document.getElementById(wrapperId) as HTMLElement | null;
+      if (!node) return;
+      transplant(node);
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      if (pollTimer !== null) {
+        window.clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    };
+
+    const initial = document.getElementById(wrapperId) as HTMLElement | null;
     if (initial) {
       transplant(initial);
     } else {
-      // The Home (and therefore the Unity wrapper) hasn't been mounted yet.
-      // Watch the DOM and transplant as soon as react-unity-webgl creates it.
-      observer = new MutationObserver(() => {
-        if (cancelled) return;
-        const node = document.getElementById(wrapperId) as HTMLElement | null;
-        if (node) {
-          transplant(node);
-          observer?.disconnect();
-          observer = null;
-        }
-      });
+      // Home pode montar depois; MutationObserver às vezes não entrega mutações
+      // já aplicadas (ex.: hidratação/atraso). Polling curto cobre esse caso.
+      observer = new MutationObserver(() => tryAttachFromDom());
       observer.observe(document.body, { childList: true, subtree: true });
+      tryAttachFromDom();
+      pollTimer = window.setInterval(tryAttachFromDom, 400);
     }
 
     return () => {
       cancelled = true;
+      if (pollTimer !== null) window.clearInterval(pollTimer);
       observer?.disconnect();
       if (wrapper && previousStyles) {
         wrapper.style.width = previousStyles.width;

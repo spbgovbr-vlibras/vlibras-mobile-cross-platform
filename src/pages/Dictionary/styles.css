@@ -83,6 +83,13 @@
   background: #f0f0f0;
 }
 
+/* Separa bloco de sinais de regionalismo do dicionário A–Z geral */
+.dictionary-regionalism-general-divider {
+  border: none;
+  border-top: 1px solid #b9b9b9;
+  margin: 14px 16px 16px;
+}
+
 .dictionary-container-ion-chips-suggestions {
   font-family: Rawline;
   font-style: normal;

@@ -41,21 +41,26 @@
   cursor: default;
 }
 
+.bottom-tab-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 12px 5px;
+  border-radius: 14px;
+  background: transparent;
+  transition: background 120ms ease;
+}
+
+.bottom-tab-inner.is-active {
+  background: #d6e5f9;
+}
+
 .bottom-tab-icon-slot {
-  /* Identical dimensions for every tab, in every state. The active state
-     only changes the background colour. */
   width: 50px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background: transparent;
-  transition: background 120ms ease;
-}
-
-.bottom-tab-icon-slot.is-active {
-  background: #d6e5f9;
 }
 
 .bottom-tab-label {

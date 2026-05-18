@@ -21,7 +21,7 @@ function Home() {
       RegionalismArray.find((item) => item.name === currentRegionalism.name)
         ?.abbreviation ?? ''
     );
-  }, []);
+  }, [currentRegionalism.name]);
 
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE}>

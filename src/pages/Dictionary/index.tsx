@@ -1266,6 +1266,13 @@ function Dictionary() {
                 ? regionalismWords.map((item) => renderOnRegionalism(item))
                 : null}
 
+              {regionalismWords.length > 0 && filter === 'alphabetical' ? (
+                <hr
+                  className="dictionary-regionalism-general-divider"
+                  aria-hidden="true"
+                />
+              ) : null}
+
               {filter === 'alphabetical'
                 ? renderAllWords()
                 : filter === 'recents'
@@ -1287,9 +1294,11 @@ function Dictionary() {
               {renderEmptyOrLoadingState()}
 
               {recentTranslation.length === 0 && filter === 'recents' ? (
-                <div key="no-recent" className="dictionary-word-item">
-                  Nenhuma pesquisa recente
-                </div>
+                <IonItem key="no-recent" lines="none" className="dictionary-word-item">
+                  <IonText className="dictionary-words-style">
+                    Nenhuma pesquisa recente
+                  </IonText>
+                </IonItem>
               ) : null}
             </IonList>
           </div>

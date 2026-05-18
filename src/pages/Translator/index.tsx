@@ -58,6 +58,10 @@ const Translator = () => {
     history.push(paths.HOME + '?live=1');
   };
 
+  const trimmedText = translatorText.trim();
+  const isValidForTranslate =
+    trimmedText.length > 0 && regex.test(translatorText);
+
   return (
     <MenuLayout title={Strings.TRANSLATOR_TITLE} mode="back">
       <IonContent>
@@ -72,6 +76,7 @@ const Translator = () => {
                 rows={5}
                 cols={5}
                 wrap="soft"
+                placeholder={Strings.TRANSLATOR_PLACEHOLDER}
                 value={translatorText}
                 required
                 onIonInput={(e) =>
@@ -89,12 +94,16 @@ const Translator = () => {
           </div>
           <div className="translator-item-button-save" style={{ display: 'flex', gap: 8 }}>
             <button
-              className="translator-button-save"
-              onClick={translate}
               type="button"
+              className={`translator-button-save ${
+                isValidForTranslate
+                  ? 'translator-button-save--ready'
+                  : 'translator-button-save--muted'
+              }`}
+              onClick={translate}
               style={{ height: 48, minWidth: 120 }}
             >
-              <IconHandsTranslate color="white" />
+              <IconHandsTranslate color="#FFFFFF" size={22} />
               <span>{Strings.TRANSLATOR_TEXT_BUTTON}</span>
             </button>
           </div>

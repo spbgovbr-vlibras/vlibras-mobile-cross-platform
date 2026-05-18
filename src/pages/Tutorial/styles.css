@@ -9,6 +9,18 @@
   margin-left: 16px;
 }
 
+.tutorial-restart-wrap {
+  padding: 8px 16px 40px;
+  box-sizing: border-box;
+}
+
+.tutorial-restart-button {
+  --background: #1447a6;
+  --background-activated: #0f3a85;
+  --color: #ffffff;
+  font-weight: bold;
+}
+
 .tutorial-header {
   display: flex;
   flex-direction: row;

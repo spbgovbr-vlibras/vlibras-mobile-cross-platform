@@ -4,7 +4,7 @@
 /* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Unity from 'react-unity-webgl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
@@ -44,6 +44,7 @@ import { useTranslation } from 'hooks/Translation';
 import { HomeTutorialSteps, useHomeTutorial } from 'hooks/HomeTutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
+import RegionalismArray from 'data/regionalism';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
@@ -181,6 +182,8 @@ function Player() {
     goNextStep,
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
+    pendingWelcomeOverlay,
+    clearPendingWelcomeOverlay,
   } = useHomeTutorial();
   const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion, setSelectedEmotion } =
     useTranslation();
@@ -239,6 +242,19 @@ function Player() {
     };
   }, [history, onCancel]);
 
+  useEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    if (!pendingWelcomeOverlay) return;
+    if (currentStep !== HomeTutorialSteps.INITIAL) return;
+    setTryShowTutorial(true);
+    clearPendingWelcomeOverlay();
+  }, [
+    location.pathname,
+    pendingWelcomeOverlay,
+    currentStep,
+    clearPendingWelcomeOverlay,
+  ]);
+
   // If another route navigated back to HOME with a pending gloss to play,
   // only trigger playback after Unity has finished loading (visiblePlayer).
   const consumedPlayRef = useRef<{ gloss: string; at?: number } | null>(null);
@@ -247,6 +263,17 @@ function Player() {
     at?: number;
     timeoutId: number;
   } | null>(null);
+
+  // Ao navegar Tradutor/Dicionário → HOME com playGloss, `hasFinished` pode continuar
+  // true (Player segue montado; reset só ocorria em useEffect, depois do paint).
+  // Um frame com overlay de "repetir" antes do autoplay — useLayoutEffect corrige antes da pintura.
+  useLayoutEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    const playGloss = (location.state as { playGloss?: unknown } | null)?.playGloss;
+    if (playGloss == null || String(playGloss).trim() === '') return;
+    setHasFinished(false);
+  }, [location.pathname, location.state]);
+
   useEffect(() => {
     if (location.pathname !== paths.HOME) return;
     if (!visiblePlayer) return;
@@ -655,6 +682,10 @@ function Player() {
     ({ customization }: RootState) => customization.currentpants
   );
 
+  const currentRegionalism = useSelector(
+    ({ regionalism }: RootState) => regionalism.current
+  );
+
   useEffect(() => {
     const handleAppStateChange: StateChangeListener = ({ isActive }) => {
       setIsInBackground(!isActive);
@@ -683,9 +714,18 @@ function Player() {
     let handled = false;
     const unity: any = playerService.getUnity();
 
+    const regionAbbrev =
+      RegionalismArray.find((item) => item.name === currentRegionalism.name)
+        ?.abbreviation ?? '';
+
     const onUnityReady = () => {
       if (handled) return;
       handled = true;
+      /**
+       * Alinha `getIsReady()` com o WebGL mesmo quando `onLoadPlayer` do Unity
+       * disparou antes de `Home.load()` registrar o listener (corrida típica).
+       */
+      playerService.initializeUnityBridge(regionAbbrev);
       dispatch(Creators.loadAvatar.request());
       dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
       setVisiblePlayer(true);
@@ -707,7 +747,7 @@ function Player() {
       unity?.removeListener?.('progress', onProgress);
       unity?.off?.('progress', onProgress);
     };
-  }, [dispatch]);
+  }, [dispatch, currentRegionalism.name]);
 
   // Adicionando de volta o "porteiro" que inicia o modo ao vivo
   useEffect(() => {
@@ -770,6 +810,7 @@ function Player() {
   }, [sentimentAnalysis, selectedEmotion]);
 
   function handlePlay(gloss: string) {
+    setHasFinished(false);
     suppressPlaybackProgressCompleteRef.current = false;
     playbackProgressRef.current = {
       counter: 0,
@@ -794,9 +835,6 @@ function Player() {
   }
   const translatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText
-  );
-  const playerCanvasMode = useSelector(
-    ({ playerCanvas }: RootState) => playerCanvas.mode
   );
 
   const [showTranslateError, setShowTranslateError] = useState(false);
@@ -1606,9 +1644,12 @@ function Player() {
           zIndex: 12,
         }}>
         <TutorialPopover
-          title="Central de ajuda"
+          title="Ajuda e informações"
           context="home"
-          description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+          description={
+            'Toque aqui para abrir a Central de ajuda (tutoriais e contato) ou Sobre o VLibras. ' +
+            'Para repetir este tour, use o botão "Refazer tour guiado" na Central de ajuda.'
+          }
           position="tr"
           floatingStyle={{ right: 0, left: 'auto', transform: 'none' }}
           isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
@@ -1820,6 +1861,7 @@ function Player() {
             <input
               className="player-translate-input"
               type="text"
+              placeholder={Strings.TRANSLATE_INPUT_PLACEHOLDER}
               value={translatorText}
               onChange={(e) => dispatch(TranslatorCreators.setTranslatorText(e.target.value))}
               onKeyDown={(e) => {
@@ -1827,12 +1869,18 @@ function Player() {
               }}
             />
             <button
-              className="player-translate-button"
+              className={`player-translate-button ${
+                translatorText.trim()
+                  ? 'player-translate-button--ready'
+                  : 'player-translate-button--empty'
+              }`}
               onClick={translateText}
               type="button"
             >
-              <IconHandsTranslate color={translatorText.trim() ? '#1447a6' : '#b0b0b0'} size={20} />
-              <span>Traduzir</span>
+              <IconHandsTranslate
+                color={translatorText.trim() ? '#1447a6' : '#ffffff'}
+                size={22}
+              />
             </button>
           </div>
         )}

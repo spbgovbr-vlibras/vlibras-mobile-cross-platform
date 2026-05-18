@@ -7,14 +7,14 @@ import {
   IonPage,
   IonMenuButton,
   IonLabel,
+  IonActionSheet,
 } from '@ionic/react';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 
 import { IconTranslate, IconArrowLeft, IconInfo } from 'assets';
 import paths from 'constants/paths';
-import { env } from 'environment/env';
 import { RootState } from 'store';
 import { Creators as CreatorText } from 'store/ducks/translator';
 import { Creators } from 'store/ducks/video';
@@ -39,14 +39,21 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
-
-  const onboardingFirstAccess = useSelector(
-    ({ video }: RootState) => video.onboardingFirstAccess
-  );
+  const [helpSheetOpen, setHelpSheetOpen] = useState(false);
 
   const isVideoScreen = useSelector(
     ({ video }: RootState) => video.isVideoScreen
   );
+
+  useEffect(() => {
+    const p = location.pathname;
+    if (p === paths.HOME || p === paths.HISTORY) {
+      dispatch(Creators.setIsVideoScreen(false));
+    } else if (p === paths.RECORDERAREA || p === paths.ONBOARDING) {
+      dispatch(Creators.setIsVideoScreen(true));
+      dispatch(Creators.setFirstAccess(false));
+    }
+  }, [location.pathname, dispatch]);
 
   function openMenu() {
     menuController.open();
@@ -56,20 +63,23 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
     switch (location.pathname) {
       case paths.HOME:
       case paths.HISTORY:
-        dispatch(Creators.setIsVideoScreen(false));
         return (
           <button
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-            onClick={() => history.push(paths.ABOUT)}
-            type="button">
+            type="button"
+            aria-label={Strings.HELP_INFO_BUTTON_LABEL}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+            }}
+            onClick={() => setHelpSheetOpen(true)}>
             <IconInfo color="#363636" size={24} />
           </button>
         );
 
       case paths.RECORDERAREA:
       case paths.ONBOARDING:
-        dispatch(Creators.setIsVideoScreen(true));
-        dispatch(Creators.setFirstAccess(false));
         return (
           <>
             <IonLabel
@@ -84,7 +94,7 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
       default:
         return null;
     }
-  }, [location, history, dispatch]);
+  }, [location.pathname, history]);
 
   const onClearText = () => dispatch(CreatorText.setTranslatorText(''));
 
@@ -114,6 +124,29 @@ const MenuLayout: React.FC<MenuLayoutProps> = ({
           </IonButtons>
         </IonToolbar>
       </IonHeader>
+      <IonActionSheet
+        isOpen={helpSheetOpen}
+        header={Strings.HELP_SHEET_HEADER}
+        onDidDismiss={() => setHelpSheetOpen(false)}
+        buttons={[
+          {
+            text: Strings.HELP_SHEET_HELP_CENTER,
+            handler: () => {
+              history.push(paths.TUTORIAL);
+            },
+          },
+          {
+            text: Strings.HELP_SHEET_ABOUT,
+            handler: () => {
+              history.push(paths.ABOUT);
+            },
+          },
+          {
+            text: Strings.HELP_SHEET_CANCEL,
+            role: 'cancel',
+          },
+        ]}
+      />
       {children}
     </IonPage>
   );

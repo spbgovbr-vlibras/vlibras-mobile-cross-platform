@@ -2,6 +2,7 @@
 /* ----------------- Exports icons -----------------------  [MA] */
 
 import IconTranslate from './icons/IconTranslate';
+import IconTranslatorTab from './icons/IconTranslatorTab';
 import IconDictionary from './icons/IconDictionary';
 import IconRegionalism from './icons/IconRegionalism';
 import IconIcaro from './icons/IconIcaro';
@@ -194,6 +195,7 @@ export {
   LogoVlibrasIcaro,
   Vlibraslogo,
   IconTranslate,
+  IconTranslatorTab,
   IconRegionalism,
   IconDictionary,
   IconInfo,

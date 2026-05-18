@@ -13,6 +13,9 @@ export default class UnityService {
 
   private isReady: boolean;
 
+  /** Evita SET_URL duplicado; `onLoadPlayer` pode disparar antes de `Home.load()` inscrever o listener. */
+  private unityBridgeInitialized = false;
+
   private constructor() {
     this.unityContent = new UnityContent(
       'final/Build/06-10-2025 [SEM TRANSPPARENCIA].json',
@@ -66,13 +69,38 @@ export default class UnityService {
     this.setBaseURL(regionAbreviation);
   }
 
+  /**
+   * Configuração pós-carregamento do WebGL (SET_URL + base do dicionário).
+   * Idempotente — deve ser chamada tanto pelo `onLoadPlayer` do Unity quanto
+   * quando `progress === 1` no Player, para não depender da ordem dos eventos.
+   */
+  initializeUnityBridge(regionAbreviation = ''): void {
+    if (!this.unityBridgeInitialized) {
+      try {
+        this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
+      } catch {
+        /* Instância ainda não aceita mensagens em alguns frames */
+      }
+      this.unityBridgeInitialized = true;
+    }
+    try {
+      this.setBaseURL(regionAbreviation);
+    } catch {
+      /* ignore */
+    }
+    this.isReady = true;
+  }
+
   load(regionAbreviation = ''): void {
+    if (this.unityBridgeInitialized) {
+      this.initializeUnityBridge(regionAbreviation);
+      return;
+    }
+
     let onLoadPlayer: () => void;
     // eslint-disable-next-line prefer-const
     onLoadPlayer = () => {
-      this.unityContent.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.SET_URL, '');
-      this.setBaseURL(regionAbreviation);
-      this.isReady = true;
+      this.initializeUnityBridge(regionAbreviation);
       UnityEventEmitter.getInstance().unsubscribe('onLoadPlayer', onLoadPlayer);
     };
     UnityEventEmitter.getInstance().subscribe('onLoadPlayer', onLoadPlayer);

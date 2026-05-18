@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router';
 
-import { IconDictionary, IconHandsTranslate, IconHistory } from 'assets';
+import { IconDictionary, IconTranslatorTab, IconHistory } from 'assets';
 import paths from 'constants/paths';
 
 import './styles.css';
@@ -52,8 +52,8 @@ const TABS: TabConfig[] = [
     id: 'translator',
     label: 'Tradutor',
     path: paths.HOME,
-    Icon: IconHandsTranslate,
-    viewBox: '0 0 24 24',
+    Icon: IconTranslatorTab,
+    viewBox: '0 0 16 16',
   },
   {
     id: 'history',
@@ -95,20 +95,20 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({
               disabled={isActive}
             >
               <span
-                className={`bottom-tab-icon-slot ${
-                  isActive ? 'is-active' : ''
-                }`}
+                className={`bottom-tab-inner ${isActive ? 'is-active' : ''}`}
               >
-                <Icon
-                  color={isActive ? '#1447a6' : '#888'}
-                  size={ICON_SIZE}
-                  viewBox={tab.viewBox}
-                />
-              </span>
-              <span
-                className={`bottom-tab-label ${isActive ? 'is-active' : ''}`}
-              >
-                {tab.label}
+                <span className="bottom-tab-icon-slot">
+                  <Icon
+                    color={isActive ? '#1447a6' : '#888'}
+                    size={ICON_SIZE}
+                    viewBox={tab.viewBox}
+                  />
+                </span>
+                <span
+                  className={`bottom-tab-label ${isActive ? 'is-active' : ''}`}
+                >
+                  {tab.label}
+                </span>
               </span>
             </button>
           </div>
