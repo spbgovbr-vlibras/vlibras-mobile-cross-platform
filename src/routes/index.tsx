@@ -37,7 +37,12 @@ function Routes() {
     <BrowserRouter>
       <IonReactRouter>
         <DrawerMenu contentId={CONTENT_ID} />
-        <IonRouterOutlet id={CONTENT_ID}>
+        {/*
+          animated={false}: troca de abas entre Dicion\u00e1rio/Tradutor/Hist\u00f3rico
+          (e demais rotas) entra direto sem o deslizamento de baixo para cima.
+          Modais, popovers e ActionSheet continuam com anima\u00e7\u00e3o pr\u00f3pria.
+        */}
+        <IonRouterOutlet id={CONTENT_ID} animated={false}>
           <Route exact component={Home} path={paths.HOME} />
           <Route component={Historic} path={paths.HISTORY} />
           <Route component={About} path={paths.ABOUT} />

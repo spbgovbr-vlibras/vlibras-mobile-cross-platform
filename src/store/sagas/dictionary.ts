@@ -40,8 +40,14 @@ function* fetchWords(
     // Filter
     let filteredWords = allWords;
     if (name) {
-      const lowerName = name.toLowerCase();
-      filteredWords = allWords.filter(w => w.toLowerCase().includes(lowerName));
+      // O componente passa `${searchText}%` (estilo SQL LIKE). Como o filtro
+      // aqui \u00e9 client-side com `.includes`, removemos os `%` para n\u00e3o
+      // tratarem como caractere literal e quebrarem a busca.
+      const cleanedName = name.replace(/%/g, '').trim();
+      if (cleanedName) {
+        const lowerName = cleanedName.toLowerCase();
+        filteredWords = allWords.filter(w => w.toLowerCase().includes(lowerName));
+      }
     }
 
     // Pagination

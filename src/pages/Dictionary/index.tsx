@@ -95,6 +95,13 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
+  /**
+   * Wrapper externo da p\u00e1gina + barra fixa s\u00e3o medidos em runtime para que o
+   * cabe\u00e7alho de cada letra fique gr\u00e1udado logo abaixo da searchbar/chips
+   * (sem precisar chutar valores em CSS).
+   */
+  const dictionaryContainerRef = useRef<HTMLDivElement>(null);
+  const stickyContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     metadata,
@@ -149,6 +156,45 @@ function Dictionary() {
       setDictMiniPlayer(false);
     }
   }, [isDictionaryPlayerRoute, dictMiniPlayer.active, setDictMiniPlayer]);
+
+  /**
+   * Atualiza a CSS var `--dict-sticky-offset` com a altura real da barra
+   * fixa (searchbar + chips + divider + cabe\u00e7alho de categoria opcional).
+   * Assim o cabe\u00e7alho de letra (sticky) gruda exatamente embaixo dela
+   * mesmo se a barra mudar de altura (ex.: chip de regionalismo aparece).
+   */
+  useEffect(() => {
+    const sticky = stickyContainerRef.current;
+    const containerEl = dictionaryContainerRef.current;
+    if (!sticky || !containerEl) return undefined;
+
+    const updateOffset = () => {
+      const h = Math.ceil(sticky.getBoundingClientRect().height);
+      containerEl.style.setProperty('--dict-sticky-offset', `${h}px`);
+    };
+
+    updateOffset();
+
+    const ResizeObserverCtor =
+      typeof window !== 'undefined' && (window as any).ResizeObserver
+        ? (window as any).ResizeObserver
+        : null;
+    if (!ResizeObserverCtor) {
+      window.addEventListener('resize', updateOffset);
+      return () => window.removeEventListener('resize', updateOffset);
+    }
+    const observer = new ResizeObserverCtor(updateOffset);
+    observer.observe(sticky);
+    return () => observer.disconnect();
+  }, [filter, category, currentRegionalism.abbreviation, searchText, regionalismWords.length]);
+
+  /**
+   * Trocar de filtro/categoria/busca limpa a letra expandida para evitar
+   * estados \u00f3rf\u00e3os entre modos (ex.: deixar `B` expandido aparecer ao voltar de Categorias).
+   */
+  useEffect(() => {
+    setExpandedLetter(null);
+  }, [filter, category, searchText]);
 
   useIonViewWillEnter(() => {
     dispatch(Creators.fetchTags.request());
@@ -534,6 +580,7 @@ function Dictionary() {
     // Use allWordsList instead of dictionary to ensure full A-Z structure
     // dictionary is only the current page slice.
     const wordsToRender = filter === 'alphabetical' && !searchText ? allWordsList : dictionary;
+    const isSearching = filter === 'alphabetical' && searchText.trim().length > 0;
 
     // Helper function to group words (handling & desambiguation)
     function groupWords(words: Words[]) {
@@ -598,6 +645,29 @@ function Dictionary() {
       });
     });
 
+    /**
+     * Durante a busca em A\u2013Z, o accordion por letra deixava os matches
+     * escondidos atr\u00e1s do cabe\u00e7alho da letra (parecia que a busca
+     * n\u00e3o estava funcionando). Quando h\u00e1 texto de busca, renderizamos
+     * uma lista plana ordenada \u2014 sem necessidade de expandir a letra.
+     */
+    if (isSearching) {
+      const flatSorted = [...allItems].sort((a, b) =>
+        a.name.localeCompare(b.name, 'pt-BR')
+      );
+      return (
+        <div className="dictionary-flat-results">
+          {flatSorted.map((item, index) => {
+            const isLast = index === flatSorted.length - 1;
+            if (item.type === 'word') {
+              return renderWord(item.data, isLast, azVerbBuckets);
+            }
+            return renderDesambiguateWord(item.data, isLast);
+          })}
+        </div>
+      );
+    }
+
     const groupedByLetter: { [key: string]: typeof allItems } = {};
 
     allItems.forEach(item => {
@@ -647,42 +717,54 @@ function Dictionary() {
         const isExpanded = expandedLetter === letter;
 
         return (
-            <div key={letter}>
-                <IonItem
-                    button
-                    detail={false}
-                    lines="none"
-                    onClick={(e) => {
-                      const isCurrentlyExpanded = expandedLetter === letter;
-                      setExpandedLetter(isCurrentlyExpanded ? null : letter);
-                      if (!isCurrentlyExpanded) {
-                        const targetElement = e.currentTarget;
-                        setTimeout(() => {
-                          contentRef.current?.getScrollElement().then(scrollElement => {
-                            if (scrollElement) {
+            <div key={letter} className="dictionary-letter-section">
+                <div
+                  className={`dictionary-letter-header${isExpanded ? ' is-sticky' : ''}`}
+                >
+                  <IonItem
+                      button
+                      detail={false}
+                      lines="none"
+                      onClick={(e) => {
+                        const isCurrentlyExpanded = expandedLetter === letter;
+                        setExpandedLetter(isCurrentlyExpanded ? null : letter);
+                        if (!isCurrentlyExpanded) {
+                          const targetElement = e.currentTarget;
+                          setTimeout(() => {
+                            contentRef.current?.getScrollElement().then(scrollElement => {
+                              if (!scrollElement) return;
                               const itemRect = targetElement.getBoundingClientRect();
                               const scrollRect = scrollElement.getBoundingClientRect();
-                              // Add offset for sticky header (roughly 120px for search bar + chips)
-                              const stickyHeaderOffset = 120;
-                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top - stickyHeaderOffset;
-                              // Ensure we don't scroll past top
+                              // Usa a altura real da barra fixa (CSS var) como offset.
+                              const stickyHeaderOffset = dictionaryContainerRef.current
+                                ? parseInt(
+                                    getComputedStyle(dictionaryContainerRef.current)
+                                      .getPropertyValue('--dict-sticky-offset') || '0',
+                                    10
+                                  ) || 100
+                                : 100;
+                              const scrollTop =
+                                scrollElement.scrollTop +
+                                itemRect.top -
+                                scrollRect.top -
+                                stickyHeaderOffset;
                               contentRef.current?.scrollToPoint(0, Math.max(0, scrollTop), 300);
-                            }
-                          });
-                        }, 100);
-                      }
-                    }}
-                    className={`dictionary-word-item ${isExpanded ? 'letter-expanded-header' : ''}`}
-                >
-                    <IonText className="dictionary-words-style">{letter === '#' ? '0..9' : letter}</IonText>
-                    <IonIcon
-                        icon={isExpanded ? chevronUp : chevronDown}
-                        slot="end"
-                        className="verb-dropdown-icon"
-                    />
-                </IonItem>
+                            });
+                          }, 100);
+                        }
+                      }}
+                      className={`dictionary-word-item ${isExpanded ? 'letter-expanded-header' : ''}`}
+                  >
+                      <IonText className="dictionary-words-style">{letter === '#' ? '0..9' : letter}</IonText>
+                      <IonIcon
+                          icon={isExpanded ? chevronUp : chevronDown}
+                          slot="end"
+                          className="verb-dropdown-icon"
+                      />
+                  </IonItem>
+                </div>
                 {isExpanded && (
-                    <div style={{ paddingLeft: '16px' }}>
+                    <div className="dictionary-letter-body">
                         {itemsForLetter.map((item, index) => {
                             const isLast = index === itemsForLetter.length - 1;
                             if (item.type === 'word') {
@@ -1209,8 +1291,8 @@ function Dictionary() {
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent ref={contentRef}>
-        <div className="dictionary-container">
-          <div className="sticky-container">
+        <div className="dictionary-container" ref={dictionaryContainerRef}>
+          <div className="sticky-container" ref={stickyContainerRef}>
           <div className="dictionary-box">
             <IonSearchbar
               className="dictionary-textarea"

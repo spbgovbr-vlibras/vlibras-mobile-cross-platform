@@ -231,6 +231,37 @@
   background: var(--ion-background-color, #fff);
 }
 
+/* ===== Letras (A-Z): cabeçalho sticky ao expandir ===== */
+.dictionary-letter-section {
+  position: relative;
+}
+
+.dictionary-letter-header {
+  background: var(--ion-background-color, #fff);
+}
+
+/*
+ * Quando a letra está expandida, o cabeçalho fica grudado logo abaixo da
+ * barra fixa (searchbar + chips). `--dict-sticky-offset` é atualizado em
+ * runtime pelo componente para acompanhar a altura real da barra.
+ * z-index < 20 para não cobrir a barra de pesquisa.
+ */
+.dictionary-letter-header.is-sticky {
+  position: sticky;
+  top: var(--dict-sticky-offset, 100px);
+  z-index: 10;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dictionary-letter-body {
+  padding-left: 16px;
+}
+
+/* Lista plana exibida durante a busca em A-Z (sem accordion) */
+.dictionary-flat-results {
+  padding-left: 16px;
+}
+
 .conjugation-list {
   background-color: transparent;
   padding: 10px 0;
