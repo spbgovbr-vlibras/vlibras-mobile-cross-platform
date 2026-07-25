@@ -51,6 +51,17 @@ import IconHealth from './images/saude.svg';
 import IconFeelings from './images/sentimentos.svg';
 import IconJobs from './images/trabalho.svg';
 import IconMachines from './images/maquinas.svg';
+import IconAdjectives from './images/adjetivos.png';
+import IconArt from './images/arte.svg';
+import IconCommunication from './images/comunicacao.png';
+import IconEconomy from './images/economia.svg';
+import IconEducation from './images/educacao.svg';
+import IconPeople from './images/pessoas.svg';
+import IconPolitics from './images/politica.png';
+import IconReligion from './images/religiao.svg';
+import IconTechnology from './images/tecnologia.svg';
+import IconClothing from './images/vestuario.png';
+import IconTodos from './images/todos.svg';
 
 /* ----------------- Exports gifs -----------------------  */
 import gifStepZero from './gifs/passo0.gif';
@@ -274,4 +285,15 @@ export {
   IconFeelings,
   IconJobs,
   IconMachines,
+  IconAdjectives,
+  IconArt,
+  IconCommunication,
+  IconEconomy,
+  IconEducation,
+  IconPeople,
+  IconPolitics,
+  IconReligion,
+  IconTechnology,
+  IconClothing,
+  IconTodos,
 };

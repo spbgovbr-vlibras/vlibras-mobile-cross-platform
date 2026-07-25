@@ -5,7 +5,6 @@
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Unity from 'react-unity-webgl';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import { App, StateChangeListener } from '@capacitor/app';
@@ -50,6 +49,8 @@ import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import { Creators as TranslatorCreators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
+import { getUnityWrapper, restoreUnityTransplant, UNITY_HOME_MOUNT_ID } from 'utils/unityCanvasDock';
+import StableUnityPlayer from './StableUnityPlayer';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -65,7 +66,10 @@ import {
 import { Strings } from './Strings';
 
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
-import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import {
+  applyAvatarCustomizationWithRetry,
+  customizationColorsToPayload,
+} from 'services/avatarCustomization';
 import IconHand from 'assets/icons/IconHand';
 import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
 import { DictionaryFilter } from 'pages/Dictionary';
@@ -173,6 +177,9 @@ function Player() {
   }>({ counter: 0, glossLength: 0, lastUpdateAt: 0 });
   const pendingShareAfterReplayRef = useRef(false);
   const autoShareRetryCountRef = useRef(0);
+  /** Só grava quando o usuário disparou handlePlay (traduziu), não na saudação/idle. */
+  const shareCapturePendingRef = useRef(false);
+  const shareCaptureActiveRef = useRef(false);
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
@@ -185,8 +192,14 @@ function Player() {
     pendingWelcomeOverlay,
     clearPendingWelcomeOverlay,
   } = useHomeTutorial();
-  const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion, setSelectedEmotion } =
-    useTranslation();
+  const {
+    textGloss,
+    setTextPtBr,
+    sentimentAnalysis,
+    selectedEmotion,
+    setSelectedEmotion,
+    dictMiniPlayer,
+  } = useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -325,6 +338,9 @@ function Player() {
 
   const tutorialHandler = (hasFinished: boolean) => {
     if (hasFinished) {
+      if (!shareCaptureActiveRef.current) {
+        resetRecording();
+      }
       setTryShowTutorial(true);
       handleStop();
     }
@@ -350,6 +366,21 @@ function Player() {
   const onBreak = () => {
     closeModal();
     isBreak = !isBreak;
+  };
+
+  const getUnityCanvas = (): HTMLCanvasElement | null => {
+    const fromWrapper = avatarWrapperRef.current?.querySelector('canvas');
+    if (fromWrapper instanceof HTMLCanvasElement) {
+      return fromWrapper;
+    }
+    const fromGlobal = getUnityWrapper()?.querySelector('canvas');
+    if (fromGlobal instanceof HTMLCanvasElement) {
+      return fromGlobal;
+    }
+    const fallback = document.querySelector(
+      '.player-content canvas, .global-player-canvas canvas, canvas'
+    );
+    return fallback instanceof HTMLCanvasElement ? fallback : null;
   };
 
   const shareBlob = async (blob: Blob) => {
@@ -397,7 +428,7 @@ function Player() {
   const startProxyLoop = () => {
     stopProxyLoop();
     if (!proxyCanvas || !proxyCtx) return;
-    const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+    const glCanvas = getUnityCanvas();
     if (!glCanvas) return;
     const drawFrame = () => {
       proxyCtx!.fillStyle = '#E5E5E5';
@@ -414,6 +445,9 @@ function Player() {
         mediaRecorder.stop();
       }
     } catch (_) { /* */ }
+    try {
+      mediaRecorder?.stream?.getTracks().forEach((track) => track.stop());
+    } catch (_) { /* */ }
     stopProxyLoop();
     mediaRecorder = null;
     recordedChunks = [];
@@ -421,6 +455,8 @@ function Player() {
     proxyCtx = null;
     recorderStoppedPromise = null;
     recording = false;
+    shareCapturePendingRef.current = false;
+    shareCaptureActiveRef.current = false;
   };
 
   const ensureRecorderStarted = (attempt = 0): boolean => {
@@ -452,7 +488,7 @@ function Player() {
         return false;
       }
 
-      const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+      const glCanvas = getUnityCanvas();
       if (!glCanvas) {
         console.warn('[VLibras Share] Canvas não encontrado');
         return false;
@@ -471,37 +507,46 @@ function Player() {
 
       const isIOS = cachedPlatform === 'ios';
       let mimeType: string;
+      let stream: MediaStream;
 
       if (isIOS) {
         mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.warn('[VLibras Share] mimeType não suportado:', mimeType);
+          return false;
+        }
+        recordedMimeType = mimeType;
+        stream = glCanvas.captureStream(30);
+        console.log('[VLibras Share] iOS: captureStream direto do WebGL');
       } else {
         mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
           ? 'video/webm;codecs=vp8'
           : MediaRecorder.isTypeSupported('video/webm')
             ? 'video/webm'
             : 'video/mp4';
-      }
 
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        console.warn('[VLibras Share] mimeType não suportado:', mimeType);
-        return false;
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.warn('[VLibras Share] mimeType não suportado:', mimeType);
+          return false;
+        }
+
+        recordedMimeType = mimeType;
+
+        proxyCanvas = document.createElement('canvas');
+        proxyCanvas.width = glCanvas.width;
+        proxyCanvas.height = glCanvas.height;
+        proxyCtx = proxyCanvas.getContext('2d');
+        if (!proxyCtx) {
+          console.warn('[VLibras Share] Falha ao criar contexto 2D');
+          return false;
+        }
+
+        startProxyLoop();
+        stream = proxyCanvas.captureStream(30);
+        console.log('[VLibras Share] Android: proxy canvas + captureStream');
       }
 
       console.log('[VLibras Share] mimeType:', mimeType);
-      recordedMimeType = mimeType;
-
-      proxyCanvas = document.createElement('canvas');
-      proxyCanvas.width = glCanvas.width;
-      proxyCanvas.height = glCanvas.height;
-      proxyCtx = proxyCanvas.getContext('2d');
-      if (!proxyCtx) {
-        console.warn('[VLibras Share] Falha ao criar contexto 2D');
-        return false;
-      }
-
-      startProxyLoop();
-
-      const stream = proxyCanvas.captureStream();
       const tracks = stream.getVideoTracks();
       console.log('[VLibras Share] Stream tracks:', tracks.length);
 
@@ -525,7 +570,7 @@ function Player() {
         console.error('[VLibras Share] MediaRecorder erro:', e);
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(250);
       console.log('[VLibras Share] Gravação iniciada. state:', mediaRecorder.state);
       return true;
     } catch (e) {
@@ -577,6 +622,9 @@ function Player() {
     isLoading = true;
 
     if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try {
+        mediaRecorder.requestData();
+      } catch (_) { /* */ }
       recorderStoppedPromise = new Promise<void>((resolve) => {
         mediaRecorder!.onstop = () => {
           console.log('[VLibras Share] onstop disparado. Chunks:', recordedChunks.length);
@@ -749,6 +797,12 @@ function Player() {
     };
   }, [dispatch, currentRegionalism.name]);
 
+  // Quando o mini player fecha, recoloca o canvas no Player (qualquer rota).
+  useLayoutEffect(() => {
+    if (dictMiniPlayer.active || !visiblePlayer) return;
+    restoreUnityTransplant();
+  }, [dictMiniPlayer.active, visiblePlayer, location.pathname]);
+
   // Adicionando de volta o "porteiro" que inicia o modo ao vivo
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -824,12 +878,10 @@ function Player() {
     }
     dispatch(CreatorsVideo.setProgress(0));
 
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-      resetRecording();
-      const success = ensureRecorderStarted();
-      if (success) recording = true;
-      console.log('[VLibras Share] Recorder iniciado via handlePlay:', success);
-    }
+    resetRecording();
+    shareCapturePendingRef.current = true;
+    shareCaptureActiveRef.current = false;
+    autoShareRetryCountRef.current = 0;
 
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
@@ -873,6 +925,9 @@ function Player() {
      */
     suppressPlaybackProgressCompleteRef.current = true;
     sessionStorage.removeItem('dictionaryState');
+    shareCapturePendingRef.current = false;
+    shareCaptureActiveRef.current = false;
+    resetRecording();
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
     playbackProgressRef.current = {
@@ -986,17 +1041,26 @@ function Player() {
 
       wasPlaying.current = newIsPlaying;
 
-      // Gravação de vídeo: gerencia o proxy loop (recorder é iniciado em handlePlay)
-      if (newIsPlaying && recording === false) {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-          startProxyLoop();
-          recording = true;
-        } else if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-          recording = ensureRecorderStarted();
-          console.log('[VLibras Share] Recorder iniciado via stateChange:', recording);
-        }
+      // Gravação: só após tradução iniciada via handlePlay (ignora saudação/idle)
+      if (newIsPlaying && shareCapturePendingRef.current) {
+        shareCapturePendingRef.current = false;
+        shareCaptureActiveRef.current = true;
+        resetRecording();
+        const started = ensureRecorderStarted();
+        recording = started;
+        console.log('[VLibras Share] Recorder iniciado no início da tradução:', started);
+      } else if (
+        newIsPlaying &&
+        shareCaptureActiveRef.current &&
+        !recording &&
+        mediaRecorder &&
+        mediaRecorder.state === 'recording'
+      ) {
+        startProxyLoop();
+        recording = true;
       }
-      if (!newIsPlaying && recording === true) {
+
+      if (!newIsPlaying && recording) {
         stopProxyLoop();
         recording = false;
       }
@@ -1429,7 +1493,7 @@ function Player() {
           type="button"
           disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
           onClick={() => {
-            if (!recording) {
+            if (!recording && !isLoading) {
               void initVideoSharing();
             }
           }}>
@@ -1586,29 +1650,34 @@ function Player() {
   };
 
   useEffect(() => {
-    const customizedAvatar = updateAvatarCustomizationProperties({
-      avatar: currentAvatar,
-      corpo: currentBody,
-      cabelo: currentHair,
-      camisa: currentShirt,
-      calca: currentPants,
-      iris: currentEye,
-    });
-    const preProcessingPreview = JSON.stringify(customizedAvatar);
+    if (!visiblePlayer || !hasLoadedAvatarOnce) return undefined;
 
-    playerService.send(
-      PlayerKeys.CUSTOMIZATION_BRIDGE,
-      PlayerKeys.APPLY_JSON,
-      preProcessingPreview
+    return applyAvatarCustomizationWithRetry(
+      customizationColorsToPayload(currentAvatar, {
+        corpo: currentBody,
+        cabelo: currentHair,
+        camisa: currentShirt,
+        calca: currentPants,
+        iris: currentEye,
+      })
     );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+  }, [
+    visiblePlayer,
+    hasLoadedAvatarOnce,
+    currentAvatar,
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+  ]);
 
   // The dictionary mini player relays its share button via this event because
   // the recorder + share state lives here in the Home Player. We handle it
   // exactly the same way as a tap on the Player's own share button.
   useEffect(() => {
     const onMiniPlayerShare = () => {
-      if (recording) return;
+      if (recording || isLoading) return;
       void initVideoSharing();
     };
     window.addEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
@@ -1749,7 +1818,9 @@ function Player() {
           ))}
         </div>
       </IonPopover>
-      <div ref={avatarWrapperRef} className="player-avatar-wrapper"
+      <div
+        ref={avatarWrapperRef}
+        className="player-avatar-wrapper"
         style={{
           width: '100%',
           flexShrink: 0,
@@ -1767,10 +1838,9 @@ function Player() {
                 : 126)),
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
         }}>
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
+        <div id={UNITY_HOME_MOUNT_ID} className="player-unity-mount">
+          <StableUnityPlayer />
+        </div>
         {(isPlaying || hasFinished) && !isLiveListening && (
           <div className="player-overlay-top-right">
             <div style={{ position: 'relative' }}>

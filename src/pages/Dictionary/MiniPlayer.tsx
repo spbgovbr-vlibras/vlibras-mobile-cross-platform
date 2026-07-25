@@ -1,6 +1,6 @@
 import { IonIcon, IonPopover } from '@ionic/react';
 import { expand } from 'ionicons/icons';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 
 import {
@@ -21,6 +21,12 @@ import { PlayerKeys } from 'constants/player';
 import { useTranslation } from 'hooks/Translation';
 import { useOnPlayingStateChangeHandler } from 'hooks/unityHooks';
 import UnityService from 'services/unity';
+import {
+  getUnityWrapper,
+  isUnityTransplanted,
+  restoreUnityTransplant,
+  transplantUnityToHost,
+} from 'utils/unityCanvasDock';
 
 const SPEED_OPTIONS = [2.5, 2, 1.5, 1, 0.5];
 
@@ -37,25 +43,12 @@ interface DictionaryMiniPlayerProps {
 
 const playerService = UnityService.getPlayerInstance();
 
-/**
- * Custom event names used to delegate work that lives in the Home Player
- * component (recording state and video sharing). The Player listens to these
- * events globally so we can keep that complex state in a single place.
- */
 export const MINI_PLAYER_SHARE_EVENT = 'vlibras:mini-player:share';
 
 /**
- * The IonRouterOutlet keeps every visited page mounted (native-like stack
- * navigation), so the Home page (and its <Unity /> with the player instance)
- * is still alive when we navigate to /dictionary-player. Mounting a second
- * <Unity /> with a separate editorInstance causes two WebGL contexts to fight
- * for GPU resources, resulting in a black canvas.
- *
- * To avoid that, we transplant the existing Unity wrapper element (the one
- * created by react-unity-webgl on the Home) into our mini player container
- * via DOM appendChild. WebGL contexts survive DOM moves, so this preserves
- * the loaded avatar without re-initialising Unity. When the mini player
- * unmounts we put the wrapper back where it was, so the Home keeps working.
+ * IonRouterOutlet oculta a Home no dicionário — CSS fixed não renderiza WebGL.
+ * Transplantamos o wrapper para o mini player (appendChild); o <Unity /> da Home
+ * continua montado. No cleanup o nó volta ao mount fixo da Home.
  */
 const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   gloss,
@@ -85,7 +78,6 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
     event?: React.MouseEvent;
   }>({ show: false });
 
-  // Evaluation modal state (mirrors the same modal used by the home Player).
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [showYesModal, setShowYesModal] = useState(false);
   const [showNoModal, setShowNoModal] = useState(false);
@@ -93,104 +85,63 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   const [showSuggestionFeedbackModal, setShowSuggestionFeedbackModal] =
     useState(false);
 
-  // Skip STOP_ALL on unmount when the user expands to the home: the avatar
-  // must keep playing across the navigation transition.
   const skipStopOnUnmountRef = useRef(false);
+  const lastPlayedRef = useRef<{ gloss: string; requestId: number } | null>(
+    null
+  );
 
-  // Move the Unity wrapper DOM node into our container while the mini player
-  // is mounted, and restore it on cleanup. We never unmount react-unity-webgl,
-  // so the Unity instance is preserved.
-  useEffect(() => {
-    const unityContent: any = playerService.getUnity();
-    const wrapperId = `__ReactUnityWebGL_${unityContent.uniqueID}__`;
+  const handleClose = useCallback(() => {
+    restoreUnityTransplant();
+    onClose();
+  }, [onClose]);
+
+  useLayoutEffect(() => {
     const host = canvasHostRef.current;
-    if (!host) return;
+    if (!host) return undefined;
 
     let cancelled = false;
-    let wrapper: HTMLElement | null = null;
-    let originalParent: HTMLElement | null = null;
-    let originalNextSibling: ChildNode | null = null;
-    let placeholder: Comment | null = null;
-    let previousStyles: { width: string; height: string; position: string } | null = null;
-
-    const transplant = (node: HTMLElement) => {
-      if (cancelled) return;
-      wrapper = node;
-      originalParent = node.parentElement;
-      originalNextSibling = node.nextSibling;
-      placeholder = document.createComment('vlibras-mini-player-anchor');
-      if (originalParent) {
-        originalParent.insertBefore(placeholder, node);
-      }
-      previousStyles = {
-        width: node.style.width,
-        height: node.style.height,
-        position: node.style.position,
-      };
-      node.style.width = '100%';
-      node.style.height = '100%';
-      node.style.position = 'relative';
-      host.appendChild(node);
-      if (!cancelled) setHasCanvas(true);
-      window.dispatchEvent(new Event('resize'));
-    };
-
-    let pollTimer: ReturnType<typeof window.setInterval> | null = null;
+    let pollTimer: number | null = null;
     let observer: MutationObserver | null = null;
 
-    const tryAttachFromDom = () => {
-      if (cancelled || wrapper) return;
-      const node = document.getElementById(wrapperId) as HTMLElement | null;
-      if (!node) return;
-      transplant(node);
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
+    const stopWaiting = () => {
       if (pollTimer !== null) {
         window.clearInterval(pollTimer);
         pollTimer = null;
       }
+      observer?.disconnect();
+      observer = null;
     };
 
-    const initial = document.getElementById(wrapperId) as HTMLElement | null;
-    if (initial) {
-      transplant(initial);
-    } else {
-      // Home pode montar depois; MutationObserver às vezes não entrega mutações
-      // já aplicadas (ex.: hidratação/atraso). Polling curto cobre esse caso.
-      observer = new MutationObserver(() => tryAttachFromDom());
+    const tryAttach = () => {
+      if (cancelled) return;
+
+      const wrapper = getUnityWrapper();
+      if (!wrapper) return;
+
+      if (isUnityTransplanted() && host.contains(wrapper)) {
+        setHasCanvas(true);
+        stopWaiting();
+        return;
+      }
+
+      if (transplantUnityToHost(host)) {
+        setHasCanvas(true);
+        stopWaiting();
+      }
+    };
+
+    tryAttach();
+    if (!getUnityWrapper() || !host.contains(getUnityWrapper()!)) {
+      observer = new MutationObserver(tryAttach);
       observer.observe(document.body, { childList: true, subtree: true });
-      tryAttachFromDom();
-      pollTimer = window.setInterval(tryAttachFromDom, 400);
+      pollTimer = window.setInterval(tryAttach, 300);
     }
 
     return () => {
       cancelled = true;
-      if (pollTimer !== null) window.clearInterval(pollTimer);
-      observer?.disconnect();
-      if (wrapper && previousStyles) {
-        wrapper.style.width = previousStyles.width;
-        wrapper.style.height = previousStyles.height;
-        wrapper.style.position = previousStyles.position;
-      }
-      if (wrapper && placeholder) {
-        const anchorParent = placeholder.parentNode;
-        if (anchorParent) {
-          anchorParent.insertBefore(wrapper, placeholder);
-          anchorParent.removeChild(placeholder);
-        } else if (originalParent) {
-          if (
-            originalNextSibling &&
-            originalNextSibling.parentNode === originalParent
-          ) {
-            originalParent.insertBefore(wrapper, originalNextSibling);
-          } else {
-            originalParent.appendChild(wrapper);
-          }
-        }
-      }
-      window.dispatchEvent(new Event('resize'));
+      stopWaiting();
+      restoreUnityTransplant();
+      setHasCanvas(false);
     };
   }, []);
 
@@ -202,17 +153,23 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
     []
   );
 
-  // Auto-play whenever a new gloss is requested. We poll readiness because
-  // the user can request a sign before Unity finishes loading.
   useEffect(() => {
     if (!gloss) return;
+
+    const playKey = { gloss, requestId: playRequestId };
+    if (
+      lastPlayedRef.current?.gloss === playKey.gloss &&
+      lastPlayedRef.current?.requestId === playKey.requestId
+    ) {
+      return;
+    }
 
     let timeoutId: number;
     let cancelled = false;
     const tryPlay = () => {
       if (cancelled) return;
       if ((playerService as any).getIsReady?.()) {
-        // Garantir troca imediata de sinal quando já existe reprodução em curso.
+        lastPlayedRef.current = playKey;
         playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
         playerService.send(
           PlayerKeys.PLAYER_MANAGER,
@@ -231,9 +188,6 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
     };
   }, [gloss, playRequestId]);
 
-  // Stop the avatar when the mini player closes so it doesn't keep playing
-  // silently in the (still mounted) Home page. Skipped when the user expands
-  // to the home, where playback should continue seamlessly.
   useEffect(() => {
     return () => {
       if (skipStopOnUnmountRef.current) return;
@@ -284,16 +238,13 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
   }, [showSubtitle]);
 
   const handleExpand = useCallback(() => {
-    // Move avatar back to home and keep playing without restarting it.
     skipStopOnUnmountRef.current = true;
+    restoreUnityTransplant();
     setDictMiniPlayer(false);
     history.push(paths.HOME);
   }, [history, setDictMiniPlayer]);
 
   const handleShare = useCallback(() => {
-    // Delegates the heavy video-sharing logic (canvas recording + native share)
-    // to the Home Player which owns the recorder state. The Player listens to
-    // this event globally and triggers `initVideoSharing`.
     window.dispatchEvent(new CustomEvent(MINI_PLAYER_SHARE_EVENT));
   }, []);
 
@@ -301,10 +252,6 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
     setShowEvaluationModal(true);
   }, []);
 
-  // The play/pause/refresh button mirrors the Home Player visually:
-  // a solid blue circle with a white icon inside (and a refresh icon when the
-  // avatar is idle). All inner icons share the same size so the button never
-  // changes its visual weight between states.
   const renderPlayPauseIcon = () => {
     if (!isPlaying) {
       return (
@@ -335,7 +282,7 @@ const DictionaryMiniPlayer: React.FC<DictionaryMiniPlayerProps> = ({
         <button
           className="dict-mini-player-close"
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Fechar"
         >
           <IconClose color="#FFFFFF" size={14} />

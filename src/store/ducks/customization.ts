@@ -5,6 +5,7 @@ import { Reducer } from 'redux';
 import { createAction, ActionType, createAsyncAction } from 'typesafe-actions';
 
 import { Avatar } from 'constants/types';
+import { DefaultAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
 
 export const Types = {
   SET_CURRENT_CUSTOMIZATION_BODY:
@@ -43,12 +44,12 @@ export interface CustomizationState {
   currentavatar: Avatar;
 }
 const INITIAL_STATE: CustomizationState = {
-  currentbody: '#b87d6c',
-  currenteye: '#000000',
-  currenthair: '#000000',
-  currentpants: '#121420',
-  currentshirt: '#202763',
-  currentavatar: 'icaro'
+  currentbody: DefaultAvatarCustomizationProperties.corpo,
+  currenteye: DefaultAvatarCustomizationProperties.iris,
+  currenthair: DefaultAvatarCustomizationProperties.cabelo,
+  currentpants: DefaultAvatarCustomizationProperties.calca,
+  currentshirt: DefaultAvatarCustomizationProperties.camisa,
+  currentavatar: 'icaro',
 };
 
 export type CustomizationColors = {

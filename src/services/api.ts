@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Tag, TagSignsResponse } from 'models/dictionary';
 
 /* =============================================================================
- * Dicionário – fonte de dados (DTH / repositorio-dth.vlibras.lavid.ufpb.br)
+ * Dicionário – fonte de dados (produção / repositorio.vlibras.gov.br)
  * -----------------------------------------------------------------------------
  * Endpoints utilizados (todas as listas voltam diretamente do backend):
  *
@@ -20,7 +20,7 @@ import { Tag, TagSignsResponse } from 'models/dictionary';
  * =========================================================================== */
 
 export const DICT_CONFIG = {
-  apiBaseUrl: 'https://repositorio-dth.vlibras.lavid.ufpb.br',
+  apiBaseUrl: 'https://repositorio.vlibras.gov.br',
   tagsPath: '/api/tags',
   tagSignsPath: '/api/tagsigns',
   allSignsPath: '/api/signs',

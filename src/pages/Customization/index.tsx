@@ -27,7 +27,10 @@ import LoadingModal from 'components/LoadingModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
-import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import {
+  DefaultAvatarCustomizationProperties,
+  updateAvatarCustomizationProperties,
+} from 'data/AvatarCustomizationProperties';
 import CustomizationBody from 'data/CustomizationArrayBody';
 import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
@@ -70,11 +73,11 @@ export interface CustomizationEye {
 }
 
 const IcaroDefault = {
-  icaroBody: '#b87d6c',
-  icaroEye: '#000000',
-  icaroHair: '#000000',
-  icaroShirt: '#202763',
-  icaroPants: '#121420',
+  icaroBody: DefaultAvatarCustomizationProperties.corpo,
+  icaroEye: DefaultAvatarCustomizationProperties.iris,
+  icaroHair: DefaultAvatarCustomizationProperties.cabelo,
+  icaroShirt: DefaultAvatarCustomizationProperties.camisa,
+  icaroPants: DefaultAvatarCustomizationProperties.calca,
 };
 
 function hasChanges(

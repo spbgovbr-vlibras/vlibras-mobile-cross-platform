@@ -17,11 +17,13 @@ import {
 import { arrowForward, chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
 import { debounce, toNumber } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { restoreUnityTransplant } from 'utils/unityCanvasDock';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
 import {
   IconHandsTranslate,
+  IconTodos,
   IconUndefined,
 } from 'assets';
 import { BottomTabBar } from 'components';
@@ -63,6 +65,136 @@ export type VerbGroupBuckets = Record<
 >;
 
 const TIME_DEBOUNCE_MS = 200;
+const ALPHABET_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+const TODOS_TAG_NAME = 'TODOS';
+const HIDDEN_CATEGORY_TAGS = new Set(['TODOS', 'INDEFINIDO', 'INDEFINIDOS']);
+
+/** Normaliza nomes da API e do CategoriesList para comparar (espaços, _, /). */
+function normalizeCategoryKey(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_/\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+type AzListItem = { name: string; type: 'word' | 'desambiguation'; data: Words | Words[] };
+
+function resolveLetterFromParam(letterParam: string | null): string | null {
+  if (!letterParam) return null;
+  return letterParam === '0-9' ? '#' : letterParam.toUpperCase();
+}
+
+function letterToParam(letter: string): string {
+  return letter === '#' ? '0-9' : letter;
+}
+
+function groupWordsForDisplay(words: Words[]): (Words | Words[])[] {
+  const groups: (Words | Words[])[] = [];
+  let i = 0;
+  while (i < words.length) {
+    const word = words[i];
+    if (word.name.includes('&')) {
+      const prefix = word.name.split('&', 1)[0];
+      const group: Words[] = [];
+      while (i < words.length && words[i].name.startsWith(prefix + '&')) {
+        group.push(words[i]);
+        i++;
+      }
+      i--;
+      groups.push(group);
+    } else if (i < words.length - 1 && words[i + 1].name.includes('&')) {
+      const prefix = words[i + 1].name.split('&', 1)[0];
+      if (prefix === word.name) {
+        const group: Words[] = [];
+        group.push(word);
+        i++;
+        while (i < words.length && words[i].name.startsWith(prefix + '&')) {
+          group.push(words[i]);
+          i++;
+        }
+        i--;
+        groups.push(group);
+      } else {
+        groups.push(word);
+      }
+    } else {
+      groups.push(word);
+    }
+    i++;
+  }
+  return groups;
+}
+
+function resolveItemFirstLetter(rawName: string): string | null {
+  let firstChar = rawName.trim().charAt(0).toUpperCase();
+
+  if (/[0-9]/.test(firstChar)) {
+    const isSingleDigit = /^[0-9]$/.test(rawName.trim());
+    if (isSingleDigit) {
+      return '#';
+    }
+    const withoutPersonPrefix = rawName.replace(/^(1S_|2S_|3S_|1P_|2P_|3P_)/, '');
+    const alphaMatch = withoutPersonPrefix.match(/[A-ZÇÕÂÊÍÓÚ]/i);
+    if (!alphaMatch) return null;
+    firstChar = alphaMatch[0].toUpperCase();
+  }
+
+  return firstChar;
+}
+
+function getAvailableLetters(words: Words[]): string[] {
+  const letters = new Set<string>();
+  for (const word of words) {
+    const letter = resolveItemFirstLetter(word.name);
+    if (letter) letters.add(letter);
+  }
+  return ALPHABET_LETTERS.filter((l) => letters.has(l));
+}
+
+function buildAzGroupedData(
+  words: Words[],
+  groupVerbsFn: (words: Words[]) => VerbGroupBuckets,
+  sortGroupedVerbsFn: (verbs: VerbGroupBuckets) => VerbGroupBuckets
+): { itemsByLetter: Record<string, AzListItem[]>; azVerbBuckets: VerbGroupBuckets } {
+  const groupedWords = groupWordsForDisplay(words);
+  const plainSinglesForCollapse = groupedWords.filter((g): g is Words => !Array.isArray(g));
+  const azVerbBuckets = sortGroupedVerbsFn(groupVerbsFn(plainSinglesForCollapse));
+  const desambiguationSegments = groupedWords.filter((g): g is Words[] => Array.isArray(g));
+  const collapsedLemmaWords: Words[] = Object.keys(azVerbBuckets)
+    .sort((a, b) => a.localeCompare(b))
+    .map((lemma, idx) => ({ id: -(idx + 1), name: lemma }));
+
+  const allItems: AzListItem[] = [];
+  collapsedLemmaWords.forEach((w) => {
+    allItems.push({ name: w.name, type: 'word', data: w });
+  });
+  desambiguationSegments.forEach((group) => {
+    allItems.push({
+      name: group[0].name.split('&', 1)[0],
+      type: 'desambiguation',
+      data: group,
+    });
+  });
+
+  const itemsByLetter: Record<string, AzListItem[]> = {};
+  allItems.forEach((item) => {
+    const letter = resolveItemFirstLetter(item.name);
+    if (!letter) return;
+    if (!itemsByLetter[letter]) {
+      itemsByLetter[letter] = [];
+    }
+    itemsByLetter[letter].push(item);
+  });
+
+  Object.keys(itemsByLetter).forEach((letter) => {
+    itemsByLetter[letter].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  });
+
+  return { itemsByLetter, azVerbBuckets };
+}
 
 function getChipClassName(
   filter: DictionaryFilter,
@@ -87,7 +219,6 @@ function Dictionary() {
   const [filter, setFilter] = useState<DictionaryFilter>(initialFilter);
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
-  const [expandedLetter, setExpandedLetter] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
@@ -112,7 +243,8 @@ function Dictionary() {
     error,
     loadingTags,
     allCurrentWords,
-    currentTag
+    currentTag,
+    allWordsCache,
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
 
   const allWordsList: Words[] = React.useMemo(() =>
@@ -138,6 +270,7 @@ function Dictionary() {
   const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
   const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const category = queryParams.get('category');
+  const selectedLetter = resolveLetterFromParam(queryParams.get('letter'));
   /** Tag na URL pode vir como VERBOS (API) ou Verbos (rotas antigas / dados locais). */
   const isVerbCategory = (category ?? '').toUpperCase() === 'VERBOS';
 
@@ -153,6 +286,7 @@ function Dictionary() {
 
   useEffect(() => {
     if (!isDictionaryPlayerRoute && dictMiniPlayer.active) {
+      restoreUnityTransplant();
       setDictMiniPlayer(false);
     }
   }, [isDictionaryPlayerRoute, dictMiniPlayer.active, setDictMiniPlayer]);
@@ -186,15 +320,23 @@ function Dictionary() {
     const observer = new ResizeObserverCtor(updateOffset);
     observer.observe(sticky);
     return () => observer.disconnect();
-  }, [filter, category, currentRegionalism.abbreviation, searchText, regionalismWords.length]);
+  }, [filter, category, selectedLetter, currentRegionalism.abbreviation, searchText, regionalismWords.length]);
 
-  /**
-   * Trocar de filtro/categoria/busca limpa a letra expandida para evitar
-   * estados \u00f3rf\u00e3os entre modos (ex.: deixar `B` expandido aparecer ao voltar de Categorias).
-   */
   useEffect(() => {
-    setExpandedLetter(null);
-  }, [filter, category, searchText]);
+    const params = new URLSearchParams(location.search);
+    const urlFilter = params.get('filter') as DictionaryFilter | null;
+    if (urlFilter === 'alphabetical') {
+      setFilter('alphabetical');
+    } else if (params.get('category')) {
+      setFilter('categories');
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (selectedLetter) {
+      contentRef.current?.scrollToTop(0);
+    }
+  }, [selectedLetter]);
 
   useIonViewWillEnter(() => {
     dispatch(Creators.fetchTags.request());
@@ -205,7 +347,24 @@ function Dictionary() {
           })
         : Creators.clearRegionalismWords()
     );
-  }, [dispatch, currentRegionalism.abbreviation]);
+    // Pré-carrega o índice A–Z em background para "Todos" abrir na hora.
+    if (allWordsCache.length === 0) {
+      dispatch(
+        Creators.fetchWords.request({
+          page: FIRST_PAGE_INDEX,
+          limit: MAX_PER_PAGE,
+          cacheOnly: true,
+        })
+      );
+    }
+  }, [dispatch, currentRegionalism.abbreviation, allWordsCache.length]);
+
+  /** Lista local embutida no app — disponível offline enquanto a API não responde. */
+  useEffect(() => {
+    if (allWordsCache.length === 0 && wordsJson.length > 0) {
+      dispatch(Creators.setAllWordsCache(wordsJson.map((w) => w.palavra)));
+    }
+  }, [dispatch, allWordsCache.length]);
 
   function translate(text: string) {
     if (text === '%') text = '%25';
@@ -301,9 +460,17 @@ function Dictionary() {
     const params = new URLSearchParams(location.search);
     params.delete('filter');
     params.delete('category');
+    params.delete('letter');
     history.replace({ search: params.toString() });
     setVisibleVerbCount(VERB_COUNT);
     // Reset scroll when clearing params (going back to main list)
+    contentRef.current?.scrollToTop(0);
+  }
+
+  function handleBackFromLetter() {
+    const params = new URLSearchParams(location.search);
+    params.delete('letter');
+    history.replace({ search: params.toString() });
     contentRef.current?.scrollToTop(0);
   }
 
@@ -492,40 +659,25 @@ function Dictionary() {
 
   // Helper to map API tag name to icon
   const getCategoryIcon = (tagName: string) => {
-    // API tags might have underscores (e.g. "Aparelho_ou_Máquina") or be mixed case.
-    // We need to match against CategoriesList which has specific names.
-    // The simplest way is to try matching case-insensitive, or normalize spaces/underscores.
-    
-    // Try exact match first (case insensitive)
-    let match = CategoriesList.find(c => c.name.toLowerCase() === tagName.toLowerCase());
-    if (match) return match.logoUrl;
-
-    // Try replacing underscores with spaces
-    const normalizedTag = tagName.replace(/_/g, ' ').toLowerCase();
-    match = CategoriesList.find(c => c.name.toLowerCase() === normalizedTag);
-    if (match) return match.logoUrl;
-
-    return IconUndefined;
+    const key = normalizeCategoryKey(tagName);
+    const match = CategoriesList.find(
+      (c) => normalizeCategoryKey(c.name) === key
+    );
+    return match ? match.logoUrl : IconUndefined;
   };
 
   // Helper to format category name for display (Title Case, remove underscores)
   const formatCategoryName = (tagName: string) => {
-    // Replace underscores with spaces
-    let formatted = tagName.replace(/_/g, ' ');
-    // Capitalize first letter of each word, lower case the rest (simple Title Case)
-    // However, some words like "e", "ou", "de" should be lowercase in Portuguese unless start of sentence.
-    // For simplicity, let's just Capitalize First Letter of each word for now, or match CategoriesList name if found.
-    
-    const match = CategoriesList.find(c => 
-      c.name.toLowerCase() === tagName.toLowerCase() || 
-      c.name.toLowerCase() === tagName.replace(/_/g, ' ').toLowerCase()
+    const key = normalizeCategoryKey(tagName);
+    const match = CategoriesList.find(
+      (c) => normalizeCategoryKey(c.name) === key
     );
-    
     if (match) {
       return match.name;
     }
 
     // Fallback formatting
+    let formatted = tagName.replace(/_/g, ' ');
     formatted = formatted.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
     return formatted;
   };
@@ -549,6 +701,59 @@ function Dictionary() {
     </>
   );
 
+  const renderLetterHeader = (letter: string) => (
+    <div className="category-header">
+      <IonItem lines="none" className="dictionary-word-item" onClick={handleBackFromLetter}>
+        <IonButton fill="clear" slot="start" onClick={handleBackFromLetter}>
+          <IonIcon icon={chevronBack} />
+        </IonButton>
+        <IonText className="dictionary-words-style" style={{ fontWeight: 'bold' }}>
+          {letter === '#' ? '0..9' : letter}
+        </IonText>
+      </IonItem>
+    </div>
+  );
+
+  const renderLetterCategory = (letter: string, isLast: boolean) => (
+    <>
+      <IonItem
+        className="dictionary-word-item category-item"
+        button
+        lines="none"
+        onClick={() => {
+          const params = new URLSearchParams();
+          params.set('filter', 'alphabetical');
+          params.set('letter', letterToParam(letter));
+          history.push({ search: params.toString() });
+          setFilter('alphabetical');
+        }}
+      >
+        <IonText className="dictionary-words-style">
+          {letter === '#' ? '0..9' : letter}
+        </IonText>
+      </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
+    </>
+  );
+
+  const renderTodosCategory = (isLast: boolean) => (
+    <>
+      <IonItem
+        className="dictionary-word-item category-item"
+        button
+        lines="none"
+        onClick={handleFilterAlpha}
+      >
+        <IonImg
+          src={IconTodos}
+          style={{ width: '25px', height: '25px', marginRight: '20px' }}
+        />
+        <IonText className="dictionary-words-style">Todos</IonText>
+      </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
+    </>
+  );
+
   const renderCategories = (item: Tag, isLast: boolean) => (
     <>
       <IonItem
@@ -556,6 +761,7 @@ function Dictionary() {
         button
         lines={'none'}
         onClick={() => {
+          setFilter('categories');
           history.push(`?category=${item.name}`);
         }}
       >
@@ -569,218 +775,69 @@ function Dictionary() {
     </>
   );
 
-  const renderCategoryWords = () => (
-    <>
-      {isVerbCategory ?
-        renderVerbs() : renderNoVerbsWords(allWordsList)}
-    </>
-  );
+  /** Só exibe palavras quando o cache Redux corresponde à categoria da URL. */
+  const isCategoryDataReady =
+    !!category && currentTag === category && allWordsList.length > 0;
+
+  const renderCategoryWords = () => {
+    if (!isCategoryDataReady) {
+      return null;
+    }
+    return (
+      <>
+        {isVerbCategory ?
+          renderVerbs() : renderNoVerbsWords(allWordsList)}
+      </>
+    );
+  };
 
   const renderAllWords = () => {
-    // Use allWordsList instead of dictionary to ensure full A-Z structure
-    // dictionary is only the current page slice.
-    const wordsToRender = filter === 'alphabetical' && !searchText ? allWordsList : dictionary;
-    const isSearching = filter === 'alphabetical' && searchText.trim().length > 0;
+    const isSearching = searchText.trim().length > 0;
 
-    // Helper function to group words (handling & desambiguation)
-    function groupWords(words: Words[]) {
-      const groups: (Words | Words[])[] = [];
-      let i = 0;
-      while(i < words.length) {
-        const word = words[i];
-        if(word.name.includes('&')) {
-          const prefix = word.name.split('&', 1)[0];
-          const group: Words[] = [];
-          while(i < words.length && words[i].name.startsWith(prefix + '&')) {
-            group.push(words[i]);
-            i++;
-          }
-          i--;
-          groups.push(group);
-        } else if(i < words.length-1 && words[i+1].name.includes('&')) {
-          const prefix = words[i+1].name.split('&', 1)[0];
-          if(prefix === word.name) {
-            const group: Words[] = [];
-            group.push(word);
-            i++;
-            while(i < words.length && words[i].name.startsWith(prefix + '&')) {
-              group.push(words[i]);
-              i++;
-            }
-            i--;
-            groups.push(group);
-          } else {
-            groups.push(word);
-          }
-        } else {
-          groups.push(word);
-        }
-        i++;
-      }
-      return groups;
+    // Índice de letras: só calcula quais letras existem (rápido, sem agrupar verbos).
+    if (!isSearching && !selectedLetter) {
+      const availableLetters = getAvailableLetters(allWordsList);
+      return availableLetters.map((letter, index) =>
+        renderLetterCategory(letter, index === availableLetters.length - 1)
+      );
     }
 
-    const groupedWords = groupWords(wordsToRender);
+    const wordsSource = isSearching ? dictionary : allWordsList;
+    const { itemsByLetter, azVerbBuckets } = buildAzGroupedData(
+      wordsSource,
+      groupVerbs,
+      sortGroupedVerbs
+    );
 
-    const plainSinglesForCollapse = groupedWords.filter((g): g is Words => !Array.isArray(g));
-
-    /** No A–Z, colapsa glosses direcionais (1S_VERBO_2S) no lema base — igual à categoria Verbos. */
-    const azVerbBuckets = sortGroupedVerbs(groupVerbs(plainSinglesForCollapse));
-
-    const desambiguationSegments = groupedWords.filter((g): g is Words[] => Array.isArray(g));
-    const collapsedLemmaWords: Words[] = Object.keys(azVerbBuckets)
-      .sort((a, b) => a.localeCompare(b))
-      .map((lemma, idx) => ({ id: -(idx + 1), name: lemma }));
-
-    const allItems: { name: string; type: 'word' | 'desambiguation'; data: any }[] = [];
-
-    collapsedLemmaWords.forEach((w) => {
-      allItems.push({ name: w.name, type: 'word', data: w });
-    });
-    desambiguationSegments.forEach((group) => {
-      allItems.push({
-        name: group[0].name.split('&', 1)[0],
-        type: 'desambiguation',
-        data: group,
-      });
-    });
-
-    /**
-     * Durante a busca em A\u2013Z, o accordion por letra deixava os matches
-     * escondidos atr\u00e1s do cabe\u00e7alho da letra (parecia que a busca
-     * n\u00e3o estava funcionando). Quando h\u00e1 texto de busca, renderizamos
-     * uma lista plana ordenada \u2014 sem necessidade de expandir a letra.
-     */
     if (isSearching) {
-      const flatSorted = [...allItems].sort((a, b) =>
-        a.name.localeCompare(b.name, 'pt-BR')
-      );
+      const flatSorted = Object.values(itemsByLetter)
+        .flat()
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
       return (
         <div className="dictionary-flat-results">
           {flatSorted.map((item, index) => {
             const isLast = index === flatSorted.length - 1;
             if (item.type === 'word') {
-              return renderWord(item.data, isLast, azVerbBuckets);
+              return renderWord(item.data as Words, isLast, azVerbBuckets);
             }
-            return renderDesambiguateWord(item.data, isLast);
+            return renderDesambiguateWord(item.data as Words[], isLast);
           })}
         </div>
       );
     }
 
-    const groupedByLetter: { [key: string]: typeof allItems } = {};
-
-    allItems.forEach(item => {
-        const rawName = item.name.trim();
-        let firstChar = rawName.charAt(0).toUpperCase();
-
-        // Grupo "0..9" (letter '#') deve mostrar apenas números puros (0–9),
-        // evitando entradas do tipo 1P_AJUDAR_2S que também começam com dígito.
-        if (/[0-9]/.test(firstChar)) {
-            const isSingleDigit = /^[0-9]$/.test(rawName);
-            if (isSingleDigit) {
-                firstChar = '#';
-            } else {
-                // Para formas com pessoa (ex.: 1P_AJUDAR_2S), agrupa pela letra do verbo/base.
-                // Remove prefixos comuns (1S_, 2P_, etc) e pega a primeira letra A-Z.
-                const withoutPersonPrefix = rawName.replace(
-                  /^(1S_|2S_|3S_|1P_|2P_|3P_)/,
-                  ''
-                );
-                const alphaMatch = withoutPersonPrefix.match(/[A-ZÇÕÂÊÍÓÚ]/i);
-                if (!alphaMatch) return;
-                firstChar = alphaMatch[0].toUpperCase();
-            }
-        }
-
-        if (!groupedByLetter[firstChar]) {
-            groupedByLetter[firstChar] = [];
-        }
-        groupedByLetter[firstChar].push(item);
-    });
-
-    // Helper to sort letters: #, A, B, ...
-    const alphabet = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
-
-    return alphabet.map(letter => {
-        const itemsForLetter = groupedByLetter[letter];
-        // If searching, we might hide letters with no items.
-        // If A-Z mode, we usually show all letters even if empty? No, original likely hid empty.
-        // But for A-Z full list, we want all available letters.
-        if (!itemsForLetter || itemsForLetter.length === 0) {
-            return null;
-        }
-
-        // Sort items within the letter group
-        itemsForLetter.sort((a, b) => a.name.localeCompare(b.name));
-
-        const isExpanded = expandedLetter === letter;
-
-        return (
-            <div key={letter} className="dictionary-letter-section">
-                <div
-                  className={`dictionary-letter-header${isExpanded ? ' is-sticky' : ''}`}
-                >
-                  <IonItem
-                      button
-                      detail={false}
-                      lines="none"
-                      onClick={(e) => {
-                        const isCurrentlyExpanded = expandedLetter === letter;
-                        setExpandedLetter(isCurrentlyExpanded ? null : letter);
-                        if (!isCurrentlyExpanded) {
-                          const targetElement = e.currentTarget;
-                          setTimeout(() => {
-                            contentRef.current?.getScrollElement().then(scrollElement => {
-                              if (!scrollElement) return;
-                              const itemRect = targetElement.getBoundingClientRect();
-                              const scrollRect = scrollElement.getBoundingClientRect();
-                              // Usa a altura real da barra fixa (CSS var) como offset.
-                              const stickyHeaderOffset = dictionaryContainerRef.current
-                                ? parseInt(
-                                    getComputedStyle(dictionaryContainerRef.current)
-                                      .getPropertyValue('--dict-sticky-offset') || '0',
-                                    10
-                                  ) || 100
-                                : 100;
-                              const scrollTop =
-                                scrollElement.scrollTop +
-                                itemRect.top -
-                                scrollRect.top -
-                                stickyHeaderOffset;
-                              contentRef.current?.scrollToPoint(0, Math.max(0, scrollTop), 300);
-                            });
-                          }, 100);
-                        }
-                      }}
-                      className={`dictionary-word-item ${isExpanded ? 'letter-expanded-header' : ''}`}
-                  >
-                      <IonText className="dictionary-words-style">{letter === '#' ? '0..9' : letter}</IonText>
-                      <IonIcon
-                          icon={isExpanded ? chevronUp : chevronDown}
-                          slot="end"
-                          className="verb-dropdown-icon"
-                      />
-                  </IonItem>
-                </div>
-                {isExpanded && (
-                    <div className="dictionary-letter-body">
-                        {itemsForLetter.map((item, index) => {
-                            const isLast = index === itemsForLetter.length - 1;
-                            if (item.type === 'word') {
-                                return renderWord(item.data, isLast, azVerbBuckets);
-                            }
-                            if (item.type === 'desambiguation') {
-                                return renderDesambiguateWord(item.data, isLast);
-                            }
-                            return null;
-                        })}
-                    </div>
-                )}
-                <div className="words-list-popover-content-divider" />
-            </div>
-        );
-    });
+    const itemsForLetter = itemsByLetter[selectedLetter!] ?? [];
+    return (
+      <div className="dictionary-letter-body">
+        {itemsForLetter.map((item, index) => {
+          const isLast = index === itemsForLetter.length - 1;
+          if (item.type === 'word') {
+            return renderWord(item.data as Words, isLast, azVerbBuckets);
+          }
+          return renderDesambiguateWord(item.data as Words[], isLast);
+        })}
+      </div>
+    );
   };
 
   function handleVerbClick(verb: string) {
@@ -1071,10 +1128,15 @@ function Dictionary() {
   };
 
   const renderEmptyOrLoadingState = () => {
+    const categoryLoading =
+      filter === 'categories' &&
+      !!category &&
+      (!isCategoryDataReady || loading);
+
     const listIsEmpty =
       (filter === 'alphabetical' && allWordsList.length === 0) ||
       (filter === 'categories' && !category && tags.length === 0) ||
-      (filter === 'categories' && category && allWordsList.length === 0);
+      categoryLoading;
 
     if (listIsEmpty) {
       if (error) {
@@ -1105,14 +1167,22 @@ function Dictionary() {
     const debouncedSearch = debounce(() => {
       if (filter === 'alphabetical' || (filter === 'categories' && category)) {
         if (filter === 'categories' && category && category === currentTag && allWordsList.length > 0) {
-          // Data already loaded for this category
           return;
+        }
+        if (filter === 'alphabetical' && !category) {
+          if (allWordsList.length > 0 && currentTag === null) {
+            return;
+          }
+          if (allWordsList.length === 0 && allWordsCache.length > 0) {
+            dispatch(Creators.setAllWords(allWordsCache));
+            return;
+          }
         }
         dispatch(
           Creators.fetchWords.request({
             page: FIRST_PAGE_INDEX,
             limit: MAX_PER_PAGE,
-            tag: category || undefined, // Pass category if present
+            tag: category || undefined,
             ...((searchText?.length || 0) > 0 && {
               name: `${searchText}%`,
             }),
@@ -1126,7 +1196,7 @@ function Dictionary() {
     return () => {
       debouncedSearch.cancel();
     };
-  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length]); // Add category dependency
+  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length, allWordsCache]);
 
   useEffect(() => {
     if (!loading) {
@@ -1136,17 +1206,16 @@ function Dictionary() {
 
   // This effect handles initial load when category changes via URL
   useEffect(() => {
+    setVerbGroupsState({});
+    setVisibleVerbCount(VERB_COUNT);
+    setExpandedVerb(null);
+
     if (category) {
       if (category === currentTag && allWordsList.length > 0) {
-        // Don't clear words if we are returning to the same category
         return;
       }
-      // Clear previous words to improve fluidity
       dispatch(Creators.clearWords());
-      // Scroll to top when entering a new category
       contentRef.current?.scrollToTop(0);
-    } else {
-      // If no category, we show tags. No fetch needed (fetchTags is in ViewWillEnter)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, dispatch]);
@@ -1177,9 +1246,33 @@ function Dictionary() {
   }, [dispatch, infiniteScrollRef, metadata, searchText, category]);
 
   function handleFilterAlpha() {
-    clearUrlParams();
-    dispatch(Creators.clearWords()); // Clear stale words immediately
+    const params = new URLSearchParams();
+    params.set('filter', 'alphabetical');
+    history.replace({ search: params.toString() });
     setFilter('alphabetical');
+    contentRef.current?.scrollToTop(0);
+
+    if (allWordsList.length > 0 && currentTag === null) {
+      return;
+    }
+
+    const wordsToShow =
+      allWordsCache.length > 0
+        ? allWordsCache
+        : wordsJson.map((w) => w.palavra);
+
+    if (wordsToShow.length > 0) {
+      dispatch(Creators.clearWords());
+      dispatch(Creators.setAllWords(wordsToShow));
+      return;
+    }
+
+    dispatch(
+      Creators.fetchWords.request({
+        page: FIRST_PAGE_INDEX,
+        limit: MAX_PER_PAGE,
+      })
+    );
   }
 
   function handleFilterRecents() {
@@ -1339,16 +1432,17 @@ function Dictionary() {
           </div>
           <div className="dictionary-words-container-divider" />
           {category && renderCategoryHeader(category)}
+          {filter === 'alphabetical' && selectedLetter && renderLetterHeader(selectedLetter)}
           </div>
 
           <div className="dictionary-words-container">
             <IonList
-            lines="none" className={`dictionary-words-list ${category ? 'has-category-header' : ''}`}>
-              {regionalismWords.length > 0 && filter === 'alphabetical'
+            lines="none" className={`dictionary-words-list ${category || selectedLetter ? 'has-category-header' : ''}`}>
+              {regionalismWords.length > 0 && filter === 'alphabetical' && !selectedLetter
                 ? regionalismWords.map((item) => renderOnRegionalism(item))
                 : null}
 
-              {regionalismWords.length > 0 && filter === 'alphabetical' ? (
+              {regionalismWords.length > 0 && filter === 'alphabetical' && !selectedLetter ? (
                 <hr
                   className="dictionary-regionalism-general-divider"
                   aria-hidden="true"
@@ -1363,14 +1457,22 @@ function Dictionary() {
                     .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
                   ? renderCategoryWords()
-                  : tags.filter(item =>
-                      item.name.toLowerCase().includes(searchText.toLowerCase())
-                    ).map((item, index, arr) => {
-                      return renderCategories(
-                        item,
-                        index === arr.length - 1
+                  : (() => {
+                      const filteredTags = tags.filter(
+                        (item) =>
+                          !HIDDEN_CATEGORY_TAGS.has(item.name.toUpperCase()) &&
+                          item.name.toLowerCase().includes(searchText.toLowerCase())
                       );
-                    })
+                      const showTodos =
+                        !searchText ||
+                        'todos'.includes(searchText.toLowerCase());
+                      return (
+                        <>
+                          {filteredTags.map((item) => renderCategories(item, false))}
+                          {showTodos && renderTodosCategory(true)}
+                        </>
+                      );
+                    })()
               }
 
               {renderEmptyOrLoadingState()}
@@ -1385,7 +1487,7 @@ function Dictionary() {
             </IonList>
           </div>
         </div>
-        {metadata.hasNextPage && (filter !== 'categories') && (
+        {metadata.hasNextPage && filter === 'alphabetical' && searchText.trim().length > 0 && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"

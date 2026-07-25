@@ -11,6 +11,8 @@ export interface MetadataParams {
   page: number;
   name?: string;
   tag?: string;
+  /** Só preenche allWordsCache (A–Z), sem alterar a lista visível. */
+  cacheOnly?: boolean;
 }
 
 export interface RegionalismParams {
@@ -151,17 +153,19 @@ const reducer: Reducer<DictionaryState, ActionTypes> = (
       break;
     }
     case Types.GET_REQUEST: {
-      if (payload.page === FIRST_PAGE_INDEX) {
-        draft.metadata = METADATA_INITIAL_STATE;
-        draft.words = [];
-        // Don't clear allCurrentWords here because we might need them if we are just filtering?
-        // Actually, if page is 1, we probably want to refresh or we rely on saga to set it.
+      const incomingTag = payload.tag ?? null;
+      if (!payload.cacheOnly) {
+        if (payload.page === FIRST_PAGE_INDEX) {
+          draft.metadata = METADATA_INITIAL_STATE;
+          draft.words = [];
+          if (incomingTag !== draft.currentTag) {
+            draft.allCurrentWords = [];
+          }
+        }
+        draft.currentTag = incomingTag;
+        draft.error = null;
+        draft.loading = true;
       }
-      if (payload.tag) {
-        draft.currentTag = payload.tag;
-      }
-      draft.error = null;
-      draft.loading = true;
       break;
     }
     case Types.GET_SUCCESS: {

@@ -127,12 +127,22 @@ const TranslationProvider: React.FC = ({ children }) => {
     gloss?: string,
     options?: { loading?: boolean }
   ) {
-    const nextRequestId = active ? ++dictMiniRequestIdRef.current : 0;
-    setDictMiniPlayerState({
-      active,
-      gloss: active && gloss ? gloss : '',
-      loading: !!(active && options?.loading),
-      requestId: nextRequestId,
+    setDictMiniPlayerState((prev) => {
+      if (!active) {
+        dictMiniRequestIdRef.current = 0;
+        return { active: false, gloss: '', loading: false, requestId: 0 };
+      }
+
+      const nextRequestId = ++dictMiniRequestIdRef.current;
+      const nextGloss =
+        gloss !== undefined && gloss !== '' ? gloss : prev.gloss;
+
+      return {
+        active: true,
+        gloss: nextGloss,
+        loading: !!options?.loading,
+        requestId: nextRequestId,
+      };
     });
   }
 
