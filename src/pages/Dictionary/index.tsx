@@ -80,6 +80,23 @@ function normalizeCategoryKey(name: string): string {
     .trim();
 }
 
+/** Busca local no gloss (ignora acentos, `_` e sufixo de desambiguação). */
+function normalizeForSearch(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/_/g, ' ')
+    .replace(/&.*$/, '')
+    .trim();
+}
+
+function filterWordsBySearch(words: Words[], query: string): Words[] {
+  const q = normalizeForSearch(query);
+  if (!q) return words;
+  return words.filter((w) => normalizeForSearch(w.name).startsWith(q));
+}
+
 type AzListItem = { name: string; type: 'word' | 'desambiguation'; data: Words | Words[] };
 
 function resolveLetterFromParam(letterParam: string | null): string | null {
@@ -783,12 +800,27 @@ function Dictionary() {
     if (!isCategoryDataReady) {
       return null;
     }
-    return (
-      <>
-        {isVerbCategory ?
-          renderVerbs() : renderNoVerbsWords(allWordsList)}
-      </>
-    );
+    if (isVerbCategory) {
+      if (searchText.trim() && filteredVerbList.length === 0) {
+        return (
+          <div className="dictionary-word-item centered">
+            {Strings.DICTIONARY_WORD_NOT_FOUND}
+          </div>
+        );
+      }
+      return renderVerbs();
+    }
+    const wordsInCategory = searchText.trim()
+      ? filterWordsBySearch(allWordsList, searchText)
+      : allWordsList;
+    if (searchText.trim() && wordsInCategory.length === 0) {
+      return (
+        <div className="dictionary-word-item centered">
+          {Strings.DICTIONARY_WORD_NOT_FOUND}
+        </div>
+      );
+    }
+    return renderNoVerbsWords(wordsInCategory);
   };
 
   const renderAllWords = () => {
@@ -802,7 +834,11 @@ function Dictionary() {
       );
     }
 
-    const wordsSource = isSearching ? dictionary : allWordsList;
+    const wordsSource = isSearching
+      ? allWordsList.length > 0
+        ? filterWordsBySearch(allWordsList, searchText)
+        : dictionary
+      : allWordsList;
     const { itemsByLetter, azVerbBuckets } = buildAzGroupedData(
       wordsSource,
       groupVerbs,
@@ -813,6 +849,13 @@ function Dictionary() {
       const flatSorted = Object.values(itemsByLetter)
         .flat()
         .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+      if (flatSorted.length === 0) {
+        return (
+          <div className="dictionary-word-item centered">
+            {Strings.DICTIONARY_WORD_NOT_FOUND}
+          </div>
+        );
+      }
       return (
         <div className="dictionary-flat-results">
           {flatSorted.map((item, index) => {
@@ -989,7 +1032,7 @@ function Dictionary() {
   }
 
   const filteredVerbList = verbList.filter(([verb]) =>
-    verb.toLowerCase().includes(searchText.toLowerCase())
+    normalizeForSearch(verb).startsWith(normalizeForSearch(searchText))
   );
 
   const renderNoVerbsWords = (words: Words[]) => {
@@ -1171,6 +1214,7 @@ function Dictionary() {
         }
         if (filter === 'alphabetical' && !category) {
           if (allWordsList.length > 0 && currentTag === null) {
+            // Lista A–Z já está no cliente; busca filtra localmente em renderAllWords.
             return;
           }
           if (allWordsList.length === 0 && allWordsCache.length > 0) {
@@ -1336,10 +1380,13 @@ function Dictionary() {
 
     switch (filter) {
       case 'alphabetical':
+        if (allWordsList.length > 0) {
+          return filterWordsBySearch(allWordsList, searchText).length;
+        }
         return metadata.total;
       case 'recents':
         return recentTranslation.filter((item) =>
-          item.toUpperCase().includes(searchText.toUpperCase())
+          normalizeForSearch(item).startsWith(normalizeForSearch(searchText))
         ).length;
       case 'categories':
         if (category) {
@@ -1357,6 +1404,11 @@ function Dictionary() {
   };
 
   const resultsCount = getResultsCount();
+
+  const searchPlaceholder =
+    filter === 'categories' && !category
+      ? Strings.TEXT_PLACEHOLDER_CATEGORY
+      : Strings.TEXT_PLACEHOLDER;
 
   const getResultsLabel = () => {
     const count = resultsCount;
@@ -1389,7 +1441,7 @@ function Dictionary() {
           <div className="dictionary-box">
             <IonSearchbar
               className="dictionary-textarea"
-              placeholder={Strings.TEXT_PLACEHOLDER}
+              placeholder={searchPlaceholder}
               onIonInput={e => setSearchText(e.detail.value!)}
               value={searchText}
               inputmode="text"
@@ -1453,7 +1505,11 @@ function Dictionary() {
                 ? renderAllWords()
                 : filter === 'recents'
                 ? recentTranslation
-                    .filter((item) => item.toUpperCase().includes(searchText.toUpperCase()))
+                    .filter((item) =>
+                      normalizeForSearch(item).startsWith(
+                        normalizeForSearch(searchText)
+                      )
+                    )
                     .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
                   ? renderCategoryWords()
@@ -1487,7 +1543,10 @@ function Dictionary() {
             </IonList>
           </div>
         </div>
-        {metadata.hasNextPage && filter === 'alphabetical' && searchText.trim().length > 0 && (
+        {metadata.hasNextPage &&
+          filter === 'alphabetical' &&
+          searchText.trim().length > 0 &&
+          allWordsList.length === 0 && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"

@@ -46,13 +46,13 @@ function* fetchWords(
     // Filter
     let filteredWords = allWords;
     if (name) {
-      // O componente passa `${searchText}%` (estilo SQL LIKE). Como o filtro
-      // aqui \u00e9 client-side com `.includes`, removemos os `%` para n\u00e3o
-      // tratarem como caractere literal e quebrarem a busca.
+      // Filtro client-side: prefixo no início do gloss (estilo `co%` / LIKE).
       const cleanedName = name.replace(/%/g, '').trim();
       if (cleanedName) {
         const lowerName = cleanedName.toLowerCase();
-        filteredWords = allWords.filter(w => w.toLowerCase().includes(lowerName));
+        filteredWords = allWords.filter((w) =>
+          w.toLowerCase().startsWith(lowerName)
+        );
       }
     }
 
