@@ -8,7 +8,7 @@ import {
   IonButtons,
   isPlatform,
 } from '@ionic/react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import Unity, { UnityContent } from 'react-unity-webgl';
@@ -27,7 +27,10 @@ import LoadingModal from 'components/LoadingModal';
 import TutorialPopover from 'components/TutorialPopover';
 import paths from 'constants/paths';
 import { PlayerKeys } from 'constants/player';
-import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import {
+  DefaultAvatarCustomizationProperties,
+  updateAvatarCustomizationProperties,
+} from 'data/AvatarCustomizationProperties';
 import CustomizationBody from 'data/CustomizationArrayBody';
 import CustomizationEye from 'data/CustomizationArrayEye';
 import CustomizationArrayHair from 'data/CustomizationArrayHair';
@@ -70,11 +73,11 @@ export interface CustomizationEye {
 }
 
 const IcaroDefault = {
-  icaroBody: '#b87d6c',
-  icaroEye: '#000000',
-  icaroHair: '#000000',
-  icaroShirt: '#202763',
-  icaroPants: '#121420',
+  icaroBody: DefaultAvatarCustomizationProperties.corpo,
+  icaroEye: DefaultAvatarCustomizationProperties.iris,
+  icaroHair: DefaultAvatarCustomizationProperties.cabelo,
+  icaroShirt: DefaultAvatarCustomizationProperties.camisa,
+  icaroPants: DefaultAvatarCustomizationProperties.calca,
 };
 
 function hasChanges(
@@ -140,6 +143,7 @@ function Customization() {
   const [showhair, setshowhair] = useState(false);
   const [showshirt, setshowshirt] = useState(false);
   const [showpants, setshowpants] = useState(false);
+  const [showSelectedBodyPart, setShowSelectedBodyPart] = useState('');
   const [showAlert, setshowAlert] = useState(false);
   const [showAlertCancel, setshowAlertCancel] = useState(false);
 
@@ -149,6 +153,46 @@ function Customization() {
 
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const bodyPartLabelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const initialPartLabelFlashedRef = useRef(false);
+
+  const flashBodyPartLabel = useCallback((label: string) => {
+    if (bodyPartLabelTimeoutRef.current) {
+      clearTimeout(bodyPartLabelTimeoutRef.current);
+    }
+    setShowSelectedBodyPart(label);
+    bodyPartLabelTimeoutRef.current = setTimeout(() => {
+      setShowSelectedBodyPart('');
+      bodyPartLabelTimeoutRef.current = null;
+    }, 3000);
+  }, []);
+
+  const resolveActiveBodyPartLabel = useCallback((): string => {
+    if (showeye) return 'Olhos';
+    if (showhair) return 'Cabelo';
+    if (showshirt) return 'Camisa';
+    if (showpants) return 'Calça';
+    return 'Corpo';
+  }, [showeye, showhair, showshirt, showpants]);
+
+  useEffect(() => {
+    return () => {
+      if (bodyPartLabelTimeoutRef.current) {
+        clearTimeout(bodyPartLabelTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!visiblePlayer || initialPartLabelFlashedRef.current) {
+      return;
+    }
+    initialPartLabelFlashedRef.current = true;
+    flashBodyPartLabel(resolveActiveBodyPartLabel());
+  }, [visiblePlayer, flashBodyPartLabel, resolveActiveBodyPartLabel]);
 
   useEffect(() => {
     unityContent.on('progress', (progression: any) => {
@@ -172,6 +216,7 @@ function Customization() {
     setshowhair(false);
     setshowshirt(false);
     setshowpants(false);
+    flashBodyPartLabel('Corpo');
   };
   const showEye = () => {
     setshowbody(false);
@@ -179,6 +224,7 @@ function Customization() {
     setshowhair(false);
     setshowshirt(false);
     setshowpants(false);
+    flashBodyPartLabel('Olhos');
   };
   const showHair = () => {
     setshowbody(false);
@@ -186,6 +232,7 @@ function Customization() {
     setshowhair(true);
     setshowshirt(false);
     setshowpants(false);
+    flashBodyPartLabel('Cabelo');
   };
 
   const showShirt = () => {
@@ -194,6 +241,7 @@ function Customization() {
     setshowhair(false);
     setshowshirt(true);
     setshowpants(false);
+    flashBodyPartLabel('Camisa');
   };
 
   const showPants = () => {
@@ -202,6 +250,7 @@ function Customization() {
     setshowhair(false);
     setshowshirt(false);
     setshowpants(true);
+    flashBodyPartLabel('Calça');
   };
 
   function popupCancel() {
@@ -468,25 +517,6 @@ function Customization() {
     return null;
   };
 
-  const [showSelectedBodyPart, setShowSelectedBodyPart] = useState('');
-
-  useEffect(() => {
-    if (showbody) {
-      setShowSelectedBodyPart('Corpo');
-    } else if (showeye) {
-      setShowSelectedBodyPart('Olhos');
-    } else if (showhair) {
-      setShowSelectedBodyPart('Cabelo');
-    } else if (showshirt) {
-      setShowSelectedBodyPart('Camisa');
-    } else if (showpants) {
-      setShowSelectedBodyPart('Calça');
-    }
-    setTimeout(() => {
-      setShowSelectedBodyPart('');
-    }, 3000);
-  }, [showbody, showeye, showhair, showshirt, showpants]);
-
   const { currentStep, presentTutorial, onCancel } = useCustomizationTutorial();
 
   // modals management ---------------------------------------------------------
@@ -557,17 +587,6 @@ function Customization() {
       <IonHeader className="ion-no-border">
         <IonToolbar>
           <IonTitle className="menu-toolbar-title">Personalização</IonTitle>
-
-          <IonButtons slot="start" onClick={onCloseClick}>
-            <div className="arrow-left-container-start">
-              <IconArrowLeft color="var(--VLibras---Light-Black-1, #363636)" />
-            </div>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonHeader className="ion-no-border">
-        <IonToolbar>
-          <IonTitle className="menu-toolbar-title">Emoções</IonTitle>
 
           <IonButtons slot="start" onClick={onCloseClick}>
             <div className="arrow-left-container-start">

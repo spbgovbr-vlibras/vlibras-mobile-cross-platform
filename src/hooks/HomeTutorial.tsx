@@ -31,6 +31,10 @@ interface HomeTutorialContextData {
   onCancel: () => void;
   currentStepIndex: number;
   hasLoadedConfigurations: boolean;
+  /** Dispara o overlay “Seja bem-vindo” ao reiniciar o tour pela Central de ajuda */
+  pendingWelcomeOverlay: boolean;
+  clearPendingWelcomeOverlay: () => void;
+  restartGuidedTour: () => void;
 }
 
 const HomeTutorialContext = createContext<HomeTutorialContextData>(
@@ -60,10 +64,16 @@ const HomeTutorialProvider: React.FC = ({ children }) => {
   );
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [hasLoadedConfigurations, setHasLoadedConfigurations] = useState(false);
+  const [pendingWelcomeOverlay, setPendingWelcomeOverlay] = useState(false);
 
-  const presentTutorial = useCallback(() => {
+  const clearPendingWelcomeOverlay = useCallback(() => {
+    setPendingWelcomeOverlay(false);
+  }, []);
+
+  const restartGuidedTour = useCallback(() => {
     setCurrentStep(HomeTutorialSteps.INITIAL);
     setCurrentStepIndex(-1);
+    setPendingWelcomeOverlay(true);
   }, []);
 
   const markTutorialAsSeen = useCallback(() => {
@@ -90,7 +100,7 @@ const HomeTutorialProvider: React.FC = ({ children }) => {
     }
 
     loadUserDefaults();
-  }, [presentTutorial, markTutorialAsSeen]);
+  }, [markTutorialAsSeen]);
 
   const onFinishTutorial = useCallback(() => {
     setCurrentStep(HomeTutorialSteps.IDLE);
@@ -124,6 +134,9 @@ const HomeTutorialProvider: React.FC = ({ children }) => {
         currentStepIndex,
         onCancel: onFinishTutorial,
         hasLoadedConfigurations: hasLoadedConfigurations,
+        pendingWelcomeOverlay,
+        clearPendingWelcomeOverlay,
+        restartGuidedTour,
       }}>
       {children}
     </HomeTutorialContext.Provider>

@@ -55,19 +55,43 @@
 
 .translator-button-save {
   border-radius: 24px;
-  background-color: #1447a6;
-  border-radius: 24px;
   padding: 8px 16px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Vazio ou sem caractere alfanumérico: mesmo critério da mensagem de erro local */
+.translator-button-save--muted {
+  background-color: #bdbdbd;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.12);
+}
+
+.translator-button-save--muted:active {
+  background-color: #a8a8a8;
+}
+
+.translator-button-save--ready {
+  background-color: #1447a6;
+  box-shadow: 0 2px 6px rgba(20, 71, 166, 0.35);
+}
+
+.translator-button-save--ready:active {
+  background-color: #0f3a85;
 }
 
 .translator-button-save:disabled {
-  background-color: grey;
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .translator-button-save span {
-  margin-left: 8px;
   font-family: Roboto;
   font-style: normal;
   font-weight: bold;
@@ -75,11 +99,7 @@
   line-height: 145%;
   /* or 26px */
   text-align: center;
-  color: white;
-}
-
-.translator-button-save svg {
-  margin-right: 8px;
+  color: #ffffff;
 }
 
 .translator-container {

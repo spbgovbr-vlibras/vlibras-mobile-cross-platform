@@ -4,8 +4,7 @@
 /* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
 import { IonPopover, isPlatform } from '@ionic/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Unity from 'react-unity-webgl';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 import { App, StateChangeListener } from '@capacitor/app';
@@ -44,11 +43,14 @@ import { useTranslation } from 'hooks/Translation';
 import { HomeTutorialSteps, useHomeTutorial } from 'hooks/HomeTutorial';
 import PlayerService from 'services/unity';
 import { RootState } from 'store';
+import RegionalismArray from 'data/regionalism';
 import { Creators } from 'store/ducks/customization';
 import { Creators as CreatorLoading } from 'store/ducks/loadingAction';
 import { Creators as CreatorsVideo } from 'store/ducks/video';
 import { Creators as TranslatorCreators } from 'store/ducks/translator';
 import { reloadHistory } from 'utils/setHistory';
+import { getUnityWrapper, restoreUnityTransplant, UNITY_HOME_MOUNT_ID } from 'utils/unityCanvasDock';
+import StableUnityPlayer from './StableUnityPlayer';
 import './styles.css';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -64,7 +66,10 @@ import {
 import { Strings } from './Strings';
 
 import { useLoadCurrentAvatar } from 'hooks/useLoadCurrentAvatar';
-import { updateAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import {
+  applyAvatarCustomizationWithRetry,
+  customizationColorsToPayload,
+} from 'services/avatarCustomization';
 import IconHand from 'assets/icons/IconHand';
 import LiveWaveIcon from 'assets/icons/LiveWaveIcon';
 import { DictionaryFilter } from 'pages/Dictionary';
@@ -84,8 +89,6 @@ const X1_5 = 1.5;
 const X2 = 2;
 const X2_5 = 2.5;
 
-const UNDEFINED_GLOSS = -1;
-const MAX_PROGRESS = 100;
 
 function toInteger(flag: boolean): number {
   return flag ? 1 : 0;
@@ -174,6 +177,9 @@ function Player() {
   }>({ counter: 0, glossLength: 0, lastUpdateAt: 0 });
   const pendingShareAfterReplayRef = useRef(false);
   const autoShareRetryCountRef = useRef(0);
+  /** Só grava quando o usuário disparou handlePlay (traduziu), não na saudação/idle. */
+  const shareCapturePendingRef = useRef(false);
+  const shareCaptureActiveRef = useRef(false);
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
@@ -183,13 +189,50 @@ function Player() {
     goNextStep,
     onCancel,
     hasLoadedConfigurations: hasLoadedTutotiralConfigurations,
+    pendingWelcomeOverlay,
+    clearPendingWelcomeOverlay,
   } = useHomeTutorial();
-  const { textGloss, setTextPtBr, sentimentAnalysis, selectedEmotion, setSelectedEmotion } =
-    useTranslation();
+  const {
+    textGloss,
+    setTextPtBr,
+    sentimentAnalysis,
+    selectedEmotion,
+    setSelectedEmotion,
+    dictMiniPlayer,
+  } = useTranslation();
 
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
+  /** Evita marcar a barra em 100% quando o usuário parou com Fechar (Unity pode avisar playing=false depois). */
+  const suppressPlaybackProgressCompleteRef = useRef(false);
+
+  /**
+   * Quando o teclado virtual abre, o Android (com `windowSoftInputMode=adjustResize`,
+   * que é o default do Capacitor) encolhe a WebView, e o `flex: 1` faz o wrapper do
+   * avatar diminuir junto. O canvas Unity acompanha esse encolhimento e o avatar
+   * "se aproxima/afasta" visualmente. Para evitar isso, fixamos a altura do wrapper
+   * na MAIOR dimensão já observada (estado sem teclado). O teclado passa a
+   * sobrepor a barra de input/tabs sem mexer no avatar.
+   */
+  const avatarWrapperRef = useRef<HTMLDivElement>(null);
+  const [lockedAvatarHeight, setLockedAvatarHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const measure = () => {
+      const node = avatarWrapperRef.current;
+      if (!node) return;
+      const h = Math.round(node.getBoundingClientRect().height);
+      if (h <= 0) return;
+      setLockedAvatarHeight((prev) => (prev === null || h > prev ? h : prev));
+    };
+    const initial = window.setTimeout(measure, 50);
+    const onOrientationChange = () => window.setTimeout(measure, 250);
+    window.addEventListener('orientationchange', onOrientationChange);
+    return () => {
+      window.clearTimeout(initial);
+      window.removeEventListener('orientationchange', onOrientationChange);
+    };
+  }, []);
 
   const [emotionMap, setEmotionMap] = useState<
     { emotion: PlayerKeys; startIndex: number; endIndex: number }[]
@@ -212,6 +255,19 @@ function Player() {
     };
   }, [history, onCancel]);
 
+  useEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    if (!pendingWelcomeOverlay) return;
+    if (currentStep !== HomeTutorialSteps.INITIAL) return;
+    setTryShowTutorial(true);
+    clearPendingWelcomeOverlay();
+  }, [
+    location.pathname,
+    pendingWelcomeOverlay,
+    currentStep,
+    clearPendingWelcomeOverlay,
+  ]);
+
   // If another route navigated back to HOME with a pending gloss to play,
   // only trigger playback after Unity has finished loading (visiblePlayer).
   const consumedPlayRef = useRef<{ gloss: string; at?: number } | null>(null);
@@ -220,6 +276,17 @@ function Player() {
     at?: number;
     timeoutId: number;
   } | null>(null);
+
+  // Ao navegar Tradutor/Dicionário → HOME com playGloss, `hasFinished` pode continuar
+  // true (Player segue montado; reset só ocorria em useEffect, depois do paint).
+  // Um frame com overlay de "repetir" antes do autoplay — useLayoutEffect corrige antes da pintura.
+  useLayoutEffect(() => {
+    if (location.pathname !== paths.HOME) return;
+    const playGloss = (location.state as { playGloss?: unknown } | null)?.playGloss;
+    if (playGloss == null || String(playGloss).trim() === '') return;
+    setHasFinished(false);
+  }, [location.pathname, location.state]);
+
   useEffect(() => {
     if (location.pathname !== paths.HOME) return;
     if (!visiblePlayer) return;
@@ -271,6 +338,9 @@ function Player() {
 
   const tutorialHandler = (hasFinished: boolean) => {
     if (hasFinished) {
+      if (!shareCaptureActiveRef.current) {
+        resetRecording();
+      }
       setTryShowTutorial(true);
       handleStop();
     }
@@ -296,6 +366,21 @@ function Player() {
   const onBreak = () => {
     closeModal();
     isBreak = !isBreak;
+  };
+
+  const getUnityCanvas = (): HTMLCanvasElement | null => {
+    const fromWrapper = avatarWrapperRef.current?.querySelector('canvas');
+    if (fromWrapper instanceof HTMLCanvasElement) {
+      return fromWrapper;
+    }
+    const fromGlobal = getUnityWrapper()?.querySelector('canvas');
+    if (fromGlobal instanceof HTMLCanvasElement) {
+      return fromGlobal;
+    }
+    const fallback = document.querySelector(
+      '.player-content canvas, .global-player-canvas canvas, canvas'
+    );
+    return fallback instanceof HTMLCanvasElement ? fallback : null;
   };
 
   const shareBlob = async (blob: Blob) => {
@@ -343,7 +428,7 @@ function Player() {
   const startProxyLoop = () => {
     stopProxyLoop();
     if (!proxyCanvas || !proxyCtx) return;
-    const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+    const glCanvas = getUnityCanvas();
     if (!glCanvas) return;
     const drawFrame = () => {
       proxyCtx!.fillStyle = '#E5E5E5';
@@ -360,6 +445,9 @@ function Player() {
         mediaRecorder.stop();
       }
     } catch (_) { /* */ }
+    try {
+      mediaRecorder?.stream?.getTracks().forEach((track) => track.stop());
+    } catch (_) { /* */ }
     stopProxyLoop();
     mediaRecorder = null;
     recordedChunks = [];
@@ -367,6 +455,8 @@ function Player() {
     proxyCtx = null;
     recorderStoppedPromise = null;
     recording = false;
+    shareCapturePendingRef.current = false;
+    shareCaptureActiveRef.current = false;
   };
 
   const ensureRecorderStarted = (attempt = 0): boolean => {
@@ -398,7 +488,7 @@ function Player() {
         return false;
       }
 
-      const glCanvas = document.querySelector('canvas') as HTMLCanvasElement | null;
+      const glCanvas = getUnityCanvas();
       if (!glCanvas) {
         console.warn('[VLibras Share] Canvas não encontrado');
         return false;
@@ -417,37 +507,46 @@ function Player() {
 
       const isIOS = cachedPlatform === 'ios';
       let mimeType: string;
+      let stream: MediaStream;
 
       if (isIOS) {
         mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.warn('[VLibras Share] mimeType não suportado:', mimeType);
+          return false;
+        }
+        recordedMimeType = mimeType;
+        stream = glCanvas.captureStream(30);
+        console.log('[VLibras Share] iOS: captureStream direto do WebGL');
       } else {
         mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
           ? 'video/webm;codecs=vp8'
           : MediaRecorder.isTypeSupported('video/webm')
             ? 'video/webm'
             : 'video/mp4';
-      }
 
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        console.warn('[VLibras Share] mimeType não suportado:', mimeType);
-        return false;
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.warn('[VLibras Share] mimeType não suportado:', mimeType);
+          return false;
+        }
+
+        recordedMimeType = mimeType;
+
+        proxyCanvas = document.createElement('canvas');
+        proxyCanvas.width = glCanvas.width;
+        proxyCanvas.height = glCanvas.height;
+        proxyCtx = proxyCanvas.getContext('2d');
+        if (!proxyCtx) {
+          console.warn('[VLibras Share] Falha ao criar contexto 2D');
+          return false;
+        }
+
+        startProxyLoop();
+        stream = proxyCanvas.captureStream(30);
+        console.log('[VLibras Share] Android: proxy canvas + captureStream');
       }
 
       console.log('[VLibras Share] mimeType:', mimeType);
-      recordedMimeType = mimeType;
-
-      proxyCanvas = document.createElement('canvas');
-      proxyCanvas.width = glCanvas.width;
-      proxyCanvas.height = glCanvas.height;
-      proxyCtx = proxyCanvas.getContext('2d');
-      if (!proxyCtx) {
-        console.warn('[VLibras Share] Falha ao criar contexto 2D');
-        return false;
-      }
-
-      startProxyLoop();
-
-      const stream = proxyCanvas.captureStream();
       const tracks = stream.getVideoTracks();
       console.log('[VLibras Share] Stream tracks:', tracks.length);
 
@@ -471,7 +570,7 @@ function Player() {
         console.error('[VLibras Share] MediaRecorder erro:', e);
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(250);
       console.log('[VLibras Share] Gravação iniciada. state:', mediaRecorder.state);
       return true;
     } catch (e) {
@@ -523,6 +622,9 @@ function Player() {
     isLoading = true;
 
     if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try {
+        mediaRecorder.requestData();
+      } catch (_) { /* */ }
       recorderStoppedPromise = new Promise<void>((resolve) => {
         mediaRecorder!.onstop = () => {
           console.log('[VLibras Share] onstop disparado. Chunks:', recordedChunks.length);
@@ -628,8 +730,9 @@ function Player() {
     ({ customization }: RootState) => customization.currentpants
   );
 
-  let glossLen = UNDEFINED_GLOSS;
-  let cache = UNDEFINED_GLOSS;
+  const currentRegionalism = useSelector(
+    ({ regionalism }: RootState) => regionalism.current
+  );
 
   useEffect(() => {
     const handleAppStateChange: StateChangeListener = ({ isActive }) => {
@@ -659,9 +762,18 @@ function Player() {
     let handled = false;
     const unity: any = playerService.getUnity();
 
+    const regionAbbrev =
+      RegionalismArray.find((item) => item.name === currentRegionalism.name)
+        ?.abbreviation ?? '';
+
     const onUnityReady = () => {
       if (handled) return;
       handled = true;
+      /**
+       * Alinha `getIsReady()` com o WebGL mesmo quando `onLoadPlayer` do Unity
+       * disparou antes de `Home.load()` registrar o listener (corrida típica).
+       */
+      playerService.initializeUnityBridge(regionAbbrev);
       dispatch(Creators.loadAvatar.request());
       dispatch(CreatorLoading.setIsLoading({ isLoading: false }));
       setVisiblePlayer(true);
@@ -683,7 +795,13 @@ function Player() {
       unity?.removeListener?.('progress', onProgress);
       unity?.off?.('progress', onProgress);
     };
-  }, [dispatch]);
+  }, [dispatch, currentRegionalism.name]);
+
+  // Quando o mini player fecha, recoloca o canvas no Player (qualquer rota).
+  useLayoutEffect(() => {
+    if (dictMiniPlayer.active || !visiblePlayer) return;
+    restoreUnityTransplant();
+  }, [dictMiniPlayer.active, visiblePlayer, location.pathname]);
 
   // Adicionando de volta o "porteiro" que inicia o modo ao vivo
   useEffect(() => {
@@ -746,24 +864,29 @@ function Player() {
   }, [sentimentAnalysis, selectedEmotion]);
 
   function handlePlay(gloss: string) {
-    if (progressContainerRef.current) {
+    setHasFinished(false);
+    suppressPlaybackProgressCompleteRef.current = false;
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: Date.now(),
+    };
+    if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
+      progressBarRef.current.style.visibility = 'visible';
+      progressBarRef.current.style.width = '0%';
     }
+    dispatch(CreatorsVideo.setProgress(0));
 
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-      resetRecording();
-      const success = ensureRecorderStarted();
-      if (success) recording = true;
-      console.log('[VLibras Share] Recorder iniciado via handlePlay:', success);
-    }
+    resetRecording();
+    shareCapturePendingRef.current = true;
+    shareCaptureActiveRef.current = false;
+    autoShareRetryCountRef.current = 0;
 
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.PLAY_NOW, gloss);
   }
   const translatorText = useSelector(
     ({ translator }: RootState) => translator.translatorText
-  );
-  const playerCanvasMode = useSelector(
-    ({ playerCanvas }: RootState) => playerCanvas.mode
   );
 
   const [showTranslateError, setShowTranslateError] = useState(false);
@@ -800,9 +923,24 @@ function Player() {
      * player should only stop playback and trigger the existing
      * tutorial/exit popups – the original behaviour the user relies on.
      */
+    suppressPlaybackProgressCompleteRef.current = true;
     sessionStorage.removeItem('dictionaryState');
+    shareCapturePendingRef.current = false;
+    shareCaptureActiveRef.current = false;
+    resetRecording();
     playerService.send(PlayerKeys.PLAYER_MANAGER, PlayerKeys.STOP_ALL);
     setHasFinished(false);
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: 0,
+    };
+    if (progressBarRef.current && progressContainerRef.current) {
+      progressContainerRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.visibility = 'hidden';
+      progressBarRef.current.style.width = '0%';
+    }
+    dispatch(CreatorsVideo.setProgress(0));
   }
 
   const [showModal, setShowModal] = useState(false);
@@ -866,7 +1004,18 @@ function Player() {
       isPlayerBusyRef.current = newIsPlaying; // O estado do semáforo espelha o do player
 
       if (wasPlaying.current && !newIsPlaying) {
-        setHasFinished(true);
+        if (!suppressPlaybackProgressCompleteRef.current) {
+          setHasFinished(true);
+          // Faixa azul: ao terminar a frase, garante 100% se o último CounterGloss não chegou lá.
+          if (progressBarRef.current && progressContainerRef.current) {
+            progressContainerRef.current.style.visibility = 'visible';
+            progressBarRef.current.style.visibility = 'visible';
+            progressBarRef.current.style.width = '100%';
+          }
+          dispatch(CreatorsVideo.setProgress(100));
+        } else {
+          suppressPlaybackProgressCompleteRef.current = false;
+        }
         // Garante que o avatar volte ao idle (evita ficar "travado" no último sinal).
         setTimeout(() => {
           playerService.send(
@@ -892,22 +1041,31 @@ function Player() {
 
       wasPlaying.current = newIsPlaying;
 
-      // Gravação de vídeo: gerencia o proxy loop (recorder é iniciado em handlePlay)
-      if (newIsPlaying && recording === false) {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-          startProxyLoop();
-          recording = true;
-        } else if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-          recording = ensureRecorderStarted();
-          console.log('[VLibras Share] Recorder iniciado via stateChange:', recording);
-        }
+      // Gravação: só após tradução iniciada via handlePlay (ignora saudação/idle)
+      if (newIsPlaying && shareCapturePendingRef.current) {
+        shareCapturePendingRef.current = false;
+        shareCaptureActiveRef.current = true;
+        resetRecording();
+        const started = ensureRecorderStarted();
+        recording = started;
+        console.log('[VLibras Share] Recorder iniciado no início da tradução:', started);
+      } else if (
+        newIsPlaying &&
+        shareCaptureActiveRef.current &&
+        !recording &&
+        mediaRecorder &&
+        mediaRecorder.state === 'recording'
+      ) {
+        startProxyLoop();
+        recording = true;
       }
-      if (!newIsPlaying && recording === true) {
+
+      if (!newIsPlaying && recording) {
         stopProxyLoop();
         recording = false;
       }
     },
-    [processTranslationQueue]
+    [processTranslationQueue, dispatch]
   );
 
   useEffect(() => {
@@ -1060,10 +1218,15 @@ function Player() {
     setHasFinished(false);
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'hidden';
-      progressContainerRef.current.style.width = '0%';
       progressBarRef.current.style.visibility = 'hidden';
       progressBarRef.current.style.width = '0%';
     }
+    playbackProgressRef.current = {
+      counter: 0,
+      glossLength: 0,
+      lastUpdateAt: 0,
+    };
+    dispatch(CreatorsVideo.setProgress(0));
   }
 
   useEffect(() => {
@@ -1135,19 +1298,18 @@ function Player() {
     //   }
     // }
 
-    if (counter === cache - 1) {
-      glossLen = counter;
-    }
-    cache = counter;
-
-    const progress = (1 / glossLen) * 100;
+    const progress =
+      glossLength > 0
+        ? Math.min(
+            100,
+            Math.max(0, (counter / glossLength) * 100)
+          )
+        : 0;
 
     if (progressBarRef.current && progressContainerRef.current) {
       progressContainerRef.current.style.visibility = 'visible';
       progressBarRef.current.style.visibility = 'visible';
-      progressBarRef.current.style.width = `${
-        progress > MAX_PROGRESS ? MAX_PROGRESS : progress
-      }%`;
+      progressBarRef.current.style.width = `${progress}%`;
     }
     dispatch(CreatorsVideo.setProgress(progress));
   }, [selectedEmotion, emotionMap]);
@@ -1180,6 +1342,13 @@ function Player() {
     } else {
       dispatch(Creators.storeAvatar.request('icaro'));
     }
+  }
+
+  function renderCurrentAvatarSilhouette(size = 28) {
+    const common = { width: size, height: size, 'aria-hidden': true } as const;
+    if (currentAvatar === 'hozana') return <HozanaAvatar {...common} />;
+    if (currentAvatar === 'guga') return <GugaAvatar {...common} />;
+    return <IcaroAvatar {...common} />;
   }
 
   function handleSubtitle() {
@@ -1324,9 +1493,8 @@ function Player() {
           type="button"
           disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
           onClick={() => {
-            if (!recording) {
-              initVideoSharing();
-              handleClick();
+            if (!recording && !isLoading) {
+              void initVideoSharing();
             }
           }}>
           <IconShare color="#1447a6" size={22} />
@@ -1482,31 +1650,35 @@ function Player() {
   };
 
   useEffect(() => {
-    const customizedAvatar = updateAvatarCustomizationProperties({
-      avatar: currentAvatar,
-      corpo: currentBody,
-      cabelo: currentHair,
-      camisa: currentShirt,
-      calca: currentPants,
-      iris: currentEye,
-    });
-    const preProcessingPreview = JSON.stringify(customizedAvatar);
+    if (!visiblePlayer || !hasLoadedAvatarOnce) return undefined;
 
-    playerService.send(
-      PlayerKeys.CUSTOMIZATION_BRIDGE,
-      PlayerKeys.APPLY_JSON,
-      preProcessingPreview
+    return applyAvatarCustomizationWithRetry(
+      customizationColorsToPayload(currentAvatar, {
+        corpo: currentBody,
+        cabelo: currentHair,
+        camisa: currentShirt,
+        calca: currentPants,
+        iris: currentEye,
+      })
     );
-  }, [currentBody, currentHair, currentShirt, currentPants, currentEye]);
+  }, [
+    visiblePlayer,
+    hasLoadedAvatarOnce,
+    currentAvatar,
+    currentBody,
+    currentHair,
+    currentShirt,
+    currentPants,
+    currentEye,
+  ]);
 
   // The dictionary mini player relays its share button via this event because
   // the recorder + share state lives here in the Home Player. We handle it
   // exactly the same way as a tap on the Player's own share button.
   useEffect(() => {
     const onMiniPlayerShare = () => {
-      if (recording) return;
-      initVideoSharing();
-      handleClick();
+      if (recording || isLoading) return;
+      void initVideoSharing();
     };
     window.addEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
     return () => {
@@ -1541,9 +1713,12 @@ function Player() {
           zIndex: 12,
         }}>
         <TutorialPopover
-          title="Central de ajuda"
+          title="Ajuda e informações"
           context="home"
-          description="Clique para abrir novamente o tour guiado. Tenha uma ótima experiência VLibras!"
+          description={
+            'Toque aqui para abrir a Central de ajuda (tutoriais e contato) ou Sobre o VLibras. ' +
+            'Para repetir este tour, use o botão "Refazer tour guiado" na Central de ajuda.'
+          }
           position="tr"
           floatingStyle={{ right: 0, left: 'auto', transform: 'none' }}
           isEnabled={currentStep === HomeTutorialSteps.TUTORIAL}
@@ -1643,10 +1818,15 @@ function Player() {
           ))}
         </div>
       </IonPopover>
-      <div className="player-avatar-wrapper"
+      <div
+        ref={avatarWrapperRef}
+        className="player-avatar-wrapper"
         style={{
           width: '100%',
           flexShrink: 0,
+          flexGrow: lockedAvatarHeight ? 0 : undefined,
+          flexBasis: lockedAvatarHeight ? 'auto' : undefined,
+          height: lockedAvatarHeight ? `${lockedAvatarHeight}px` : undefined,
           marginBottom: HomeTutorialSteps.INITIAL === currentStep
             ? 0
             : (isPlaying || hasFinished
@@ -1658,10 +1838,9 @@ function Player() {
                 : 126)),
           background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
         }}>
-        <Unity
-          unityContent={playerService.getUnity()}
-          className="player-content"
-        />
+        <div id={UNITY_HOME_MOUNT_ID} className="player-unity-mount">
+          <StableUnityPlayer />
+        </div>
         {(isPlaying || hasFinished) && !isLiveListening && (
           <div className="player-overlay-top-right">
             <div style={{ position: 'relative' }}>
@@ -1717,6 +1896,18 @@ function Player() {
             </div>
           </div>
         )}
+        {!isPlaying && !hasFinished && !isLiveListening &&
+          !TUTORIAL_PLAYING_STEPS.has(currentStep) && (
+          <button
+            type="button"
+            className="player-avatar-switch-overlay"
+            aria-label="Trocar avatar"
+            onClick={() => handleChangeAvatar()}>
+            <span className="player-avatar-switch-icon">
+              {renderCurrentAvatarSilhouette(42)}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* GenerateModal e ErrorModal para compartilhar - usados pela barra overlay */}
@@ -1740,6 +1931,7 @@ function Player() {
             <input
               className="player-translate-input"
               type="text"
+              placeholder={Strings.TRANSLATE_INPUT_PLACEHOLDER}
               value={translatorText}
               onChange={(e) => dispatch(TranslatorCreators.setTranslatorText(e.target.value))}
               onKeyDown={(e) => {
@@ -1747,16 +1939,28 @@ function Player() {
               }}
             />
             <button
-              className="player-translate-button"
+              className={`player-translate-button ${
+                translatorText.trim()
+                  ? 'player-translate-button--ready'
+                  : 'player-translate-button--empty'
+              }`}
               onClick={translateText}
               type="button"
             >
-              <IconHandsTranslate color={translatorText.trim() ? '#1447a6' : '#b0b0b0'} size={20} />
-              <span>Traduzir</span>
+              <IconHandsTranslate
+                color={translatorText.trim() ? '#1447a6' : '#ffffff'}
+                size={22}
+              />
             </button>
           </div>
         )}
-        <div ref={progressContainerRef} className="player-progress-container">
+        <div
+          ref={progressContainerRef}
+          className={`player-progress-container${
+            !isPlaying && !hasFinished && !isLiveListening
+              ? ' player-progress-container--idle'
+              : ''
+          }`}>
           <div ref={progressBarRef} className="player-progress-bar" />
         </div>
         {renderPlayerButtons()}

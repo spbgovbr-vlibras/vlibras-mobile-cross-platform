@@ -83,6 +83,13 @@
   background: #f0f0f0;
 }
 
+/* Separa bloco de sinais de regionalismo do dicionário A–Z geral */
+.dictionary-regionalism-general-divider {
+  border: none;
+  border-top: 1px solid #b9b9b9;
+  margin: 14px 16px 16px;
+}
+
 .dictionary-container-ion-chips-suggestions {
   font-family: Rawline;
   font-style: normal;
@@ -224,6 +231,37 @@
   background: var(--ion-background-color, #fff);
 }
 
+/* ===== Letras (A-Z): cabeçalho sticky ao expandir ===== */
+.dictionary-letter-section {
+  position: relative;
+}
+
+.dictionary-letter-header {
+  background: var(--ion-background-color, #fff);
+}
+
+/*
+ * Quando a letra está expandida, o cabeçalho fica grudado logo abaixo da
+ * barra fixa (searchbar + chips). `--dict-sticky-offset` é atualizado em
+ * runtime pelo componente para acompanhar a altura real da barra.
+ * z-index < 20 para não cobrir a barra de pesquisa.
+ */
+.dictionary-letter-header.is-sticky {
+  position: sticky;
+  top: var(--dict-sticky-offset, 100px);
+  z-index: 10;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dictionary-letter-body {
+  padding-left: 16px;
+}
+
+/* Lista plana exibida durante a busca em A-Z (sem accordion) */
+.dictionary-flat-results {
+  padding-left: 16px;
+}
+
 .conjugation-list {
   background-color: transparent;
   padding: 10px 0;
@@ -241,6 +279,23 @@
 .conjugation-text-wrapper {
   display: flex;
   align-items: center;
+}
+
+.conjugation-item-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.conjugation-gloss-tech {
+  font-family: Rawline, sans-serif;
+  font-size: 11px;
+  color: #6c6c6c;
+  margin-top: 3px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
 }
 
 .desambiguation-section-header {

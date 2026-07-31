@@ -8,7 +8,7 @@ import { TagSignsResponse, Tag, Words } from 'models/dictionary';
 function* fetchWords(
   action: ReturnType<typeof Creators.fetchWords.request>
 ): Generator<unknown, void, any> {
-  const { page, limit, name, tag } = action.payload;
+  const { page, limit, name, tag, cacheOnly } = action.payload;
   let allWords: string[] = [];
 
   try {
@@ -30,6 +30,12 @@ function* fetchWords(
         const response: TagSignsResponse = yield call(getSignsByTag, tag);
         allWords = response.signs || [];
       }
+      if (cacheOnly) {
+        if (!tag && allWords.length > 0) {
+          yield put(Creators.setAllWordsCache(allWords));
+        }
+        return;
+      }
       yield put(Creators.setAllWords(allWords));
     } else {
       // Get from state
@@ -40,8 +46,14 @@ function* fetchWords(
     // Filter
     let filteredWords = allWords;
     if (name) {
-      const lowerName = name.toLowerCase();
-      filteredWords = allWords.filter(w => w.toLowerCase().includes(lowerName));
+      // Filtro client-side: prefixo no início do gloss (estilo `co%` / LIKE).
+      const cleanedName = name.replace(/%/g, '').trim();
+      if (cleanedName) {
+        const lowerName = cleanedName.toLowerCase();
+        filteredWords = allWords.filter((w) =>
+          w.toLowerCase().startsWith(lowerName)
+        );
+      }
     }
 
     // Pagination
@@ -72,7 +84,9 @@ function* fetchWords(
 
     yield put(Creators.fetchWords.success({ meta, data }));
   } catch (error) {
-    yield put(Creators.fetchWords.failure(error));
+    if (!cacheOnly) {
+      yield put(Creators.fetchWords.failure(error));
+    }
   }
 }
 

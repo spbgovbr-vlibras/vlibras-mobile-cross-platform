@@ -17,11 +17,13 @@ import {
 import { arrowForward, chevronBack, chevronDown, chevronUp } from 'ionicons/icons';
 import { debounce, toNumber } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { restoreUnityTransplant } from 'utils/unityCanvasDock';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 
 import {
   IconHandsTranslate,
+  IconTodos,
   IconUndefined,
 } from 'assets';
 import { BottomTabBar } from 'components';
@@ -49,7 +51,167 @@ import './styles.css';
 
 export type DictionaryFilter = 'categories' | 'alphabetical' | 'recents';
 
+/** Agrupamento de verbos (categoria Verbos e colapso no modo A–Z). */
+export type VerbConjugationRow = {
+  original: string;
+  prefix: string;
+  suffix: string;
+  transformed: string;
+};
+
+export type VerbGroupBuckets = Record<
+  string,
+  { conjugation: VerbConjugationRow[]; desambiguation: Words[] }
+>;
+
 const TIME_DEBOUNCE_MS = 200;
+const ALPHABET_LETTERS = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+const TODOS_TAG_NAME = 'TODOS';
+const HIDDEN_CATEGORY_TAGS = new Set(['TODOS', 'INDEFINIDO', 'INDEFINIDOS']);
+
+/** Normaliza nomes da API e do CategoriesList para comparar (espaços, _, /). */
+function normalizeCategoryKey(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_/\-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Busca local no gloss (ignora acentos, `_` e sufixo de desambiguação). */
+function normalizeForSearch(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/_/g, ' ')
+    .replace(/&.*$/, '')
+    .trim();
+}
+
+function filterWordsBySearch(words: Words[], query: string): Words[] {
+  const q = normalizeForSearch(query);
+  if (!q) return words;
+  return words.filter((w) => normalizeForSearch(w.name).startsWith(q));
+}
+
+type AzListItem = { name: string; type: 'word' | 'desambiguation'; data: Words | Words[] };
+
+function resolveLetterFromParam(letterParam: string | null): string | null {
+  if (!letterParam) return null;
+  return letterParam === '0-9' ? '#' : letterParam.toUpperCase();
+}
+
+function letterToParam(letter: string): string {
+  return letter === '#' ? '0-9' : letter;
+}
+
+function groupWordsForDisplay(words: Words[]): (Words | Words[])[] {
+  const groups: (Words | Words[])[] = [];
+  let i = 0;
+  while (i < words.length) {
+    const word = words[i];
+    if (word.name.includes('&')) {
+      const prefix = word.name.split('&', 1)[0];
+      const group: Words[] = [];
+      while (i < words.length && words[i].name.startsWith(prefix + '&')) {
+        group.push(words[i]);
+        i++;
+      }
+      i--;
+      groups.push(group);
+    } else if (i < words.length - 1 && words[i + 1].name.includes('&')) {
+      const prefix = words[i + 1].name.split('&', 1)[0];
+      if (prefix === word.name) {
+        const group: Words[] = [];
+        group.push(word);
+        i++;
+        while (i < words.length && words[i].name.startsWith(prefix + '&')) {
+          group.push(words[i]);
+          i++;
+        }
+        i--;
+        groups.push(group);
+      } else {
+        groups.push(word);
+      }
+    } else {
+      groups.push(word);
+    }
+    i++;
+  }
+  return groups;
+}
+
+function resolveItemFirstLetter(rawName: string): string | null {
+  let firstChar = rawName.trim().charAt(0).toUpperCase();
+
+  if (/[0-9]/.test(firstChar)) {
+    const isSingleDigit = /^[0-9]$/.test(rawName.trim());
+    if (isSingleDigit) {
+      return '#';
+    }
+    const withoutPersonPrefix = rawName.replace(/^(1S_|2S_|3S_|1P_|2P_|3P_)/, '');
+    const alphaMatch = withoutPersonPrefix.match(/[A-ZÇÕÂÊÍÓÚ]/i);
+    if (!alphaMatch) return null;
+    firstChar = alphaMatch[0].toUpperCase();
+  }
+
+  return firstChar;
+}
+
+function getAvailableLetters(words: Words[]): string[] {
+  const letters = new Set<string>();
+  for (const word of words) {
+    const letter = resolveItemFirstLetter(word.name);
+    if (letter) letters.add(letter);
+  }
+  return ALPHABET_LETTERS.filter((l) => letters.has(l));
+}
+
+function buildAzGroupedData(
+  words: Words[],
+  groupVerbsFn: (words: Words[]) => VerbGroupBuckets,
+  sortGroupedVerbsFn: (verbs: VerbGroupBuckets) => VerbGroupBuckets
+): { itemsByLetter: Record<string, AzListItem[]>; azVerbBuckets: VerbGroupBuckets } {
+  const groupedWords = groupWordsForDisplay(words);
+  const plainSinglesForCollapse = groupedWords.filter((g): g is Words => !Array.isArray(g));
+  const azVerbBuckets = sortGroupedVerbsFn(groupVerbsFn(plainSinglesForCollapse));
+  const desambiguationSegments = groupedWords.filter((g): g is Words[] => Array.isArray(g));
+  const collapsedLemmaWords: Words[] = Object.keys(azVerbBuckets)
+    .sort((a, b) => a.localeCompare(b))
+    .map((lemma, idx) => ({ id: -(idx + 1), name: lemma }));
+
+  const allItems: AzListItem[] = [];
+  collapsedLemmaWords.forEach((w) => {
+    allItems.push({ name: w.name, type: 'word', data: w });
+  });
+  desambiguationSegments.forEach((group) => {
+    allItems.push({
+      name: group[0].name.split('&', 1)[0],
+      type: 'desambiguation',
+      data: group,
+    });
+  });
+
+  const itemsByLetter: Record<string, AzListItem[]> = {};
+  allItems.forEach((item) => {
+    const letter = resolveItemFirstLetter(item.name);
+    if (!letter) return;
+    if (!itemsByLetter[letter]) {
+      itemsByLetter[letter] = [];
+    }
+    itemsByLetter[letter].push(item);
+  });
+
+  Object.keys(itemsByLetter).forEach((letter) => {
+    itemsByLetter[letter].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  });
+
+  return { itemsByLetter, azVerbBuckets };
+}
 
 function getChipClassName(
   filter: DictionaryFilter,
@@ -74,7 +236,6 @@ function Dictionary() {
   const [filter, setFilter] = useState<DictionaryFilter>(initialFilter);
   const [expandedVerb, setExpandedVerb] = useState<string | null>(null);
   const [expandedWord, setExpandedWord] = useState<string | null>(null);
-  const [expandedLetter, setExpandedLetter] = useState<string | null>(null);
   const [wordMeanings, setWordMeanings] = useState<Record<string, Partial<DictionaryData> | null>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [sortedJson, setSortedJson] = useState<{ palavra: string; categorias: string[] }[]>([]);
@@ -82,6 +243,13 @@ function Dictionary() {
 
   const infiniteScrollRef = useRef<HTMLIonInfiniteScrollElement>(null);
   const contentRef = useRef<HTMLIonContentElement>(null);
+  /**
+   * Wrapper externo da p\u00e1gina + barra fixa s\u00e3o medidos em runtime para que o
+   * cabe\u00e7alho de cada letra fique gr\u00e1udado logo abaixo da searchbar/chips
+   * (sem precisar chutar valores em CSS).
+   */
+  const dictionaryContainerRef = useRef<HTMLDivElement>(null);
+  const stickyContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     metadata,
@@ -92,12 +260,17 @@ function Dictionary() {
     error,
     loadingTags,
     allCurrentWords,
-    currentTag
+    currentTag,
+    allWordsCache,
   } = useSelector(({ dictionaryReducer }: RootState) => dictionaryReducer);
 
   const allWordsList: Words[] = React.useMemo(() =>
     allCurrentWords ? allCurrentWords.map((w, i) => ({id: i, name: w})) : []
   , [allCurrentWords]);
+  const allWordsSet = React.useMemo(
+    () => new Set(allWordsList.map((w) => w.name)),
+    [allWordsList]
+  );
 
   const currentRegionalism = useSelector(
     ({ regionalism }: RootState) => regionalism.current
@@ -108,28 +281,79 @@ function Dictionary() {
   const { setTextGloss, setTextPtBr, recentTranslation, dictMiniPlayer, setDictMiniPlayer } = useTranslation();
   const isMiniPlayerActive = isDictionaryPlayerRoute && dictMiniPlayer.active;
 
-  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroups>({});
+  const [verbGroupsState, setVerbGroupsState] = useState<VerbGroupBuckets>({});
 
   const VERB_COUNT = 20;
   const [visibleVerbCount, setVisibleVerbCount] = useState(VERB_COUNT);
   const verbList = React.useMemo(() => Object.entries(verbGroupsState), [verbGroupsState]);
   const category = queryParams.get('category');
+  const selectedLetter = resolveLetterFromParam(queryParams.get('letter'));
+  /** Tag na URL pode vir como VERBOS (API) ou Verbos (rotas antigas / dados locais). */
+  const isVerbCategory = (category ?? '').toUpperCase() === 'VERBOS';
 
-useIonViewDidEnter(() => {
-  contentRef.current?.getScrollElement().then((el) => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const scrollParam = queryParams.get('scroll');
-    if (scrollParam) {
-      el.scrollTop = toNumber(scrollParam);
-    }
+  useIonViewDidEnter(() => {
+    contentRef.current?.getScrollElement().then((el) => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const scrollParam = queryParams.get('scroll');
+      if (scrollParam) {
+        el.scrollTop = toNumber(scrollParam);
+      }
+    });
   });
-});
 
   useEffect(() => {
     if (!isDictionaryPlayerRoute && dictMiniPlayer.active) {
+      restoreUnityTransplant();
       setDictMiniPlayer(false);
     }
   }, [isDictionaryPlayerRoute, dictMiniPlayer.active, setDictMiniPlayer]);
+
+  /**
+   * Atualiza a CSS var `--dict-sticky-offset` com a altura real da barra
+   * fixa (searchbar + chips + divider + cabe\u00e7alho de categoria opcional).
+   * Assim o cabe\u00e7alho de letra (sticky) gruda exatamente embaixo dela
+   * mesmo se a barra mudar de altura (ex.: chip de regionalismo aparece).
+   */
+  useEffect(() => {
+    const sticky = stickyContainerRef.current;
+    const containerEl = dictionaryContainerRef.current;
+    if (!sticky || !containerEl) return undefined;
+
+    const updateOffset = () => {
+      const h = Math.ceil(sticky.getBoundingClientRect().height);
+      containerEl.style.setProperty('--dict-sticky-offset', `${h}px`);
+    };
+
+    updateOffset();
+
+    const ResizeObserverCtor =
+      typeof window !== 'undefined' && (window as any).ResizeObserver
+        ? (window as any).ResizeObserver
+        : null;
+    if (!ResizeObserverCtor) {
+      window.addEventListener('resize', updateOffset);
+      return () => window.removeEventListener('resize', updateOffset);
+    }
+    const observer = new ResizeObserverCtor(updateOffset);
+    observer.observe(sticky);
+    return () => observer.disconnect();
+  }, [filter, category, selectedLetter, currentRegionalism.abbreviation, searchText, regionalismWords.length]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlFilter = params.get('filter') as DictionaryFilter | null;
+    if (urlFilter === 'alphabetical') {
+      setFilter('alphabetical');
+    } else if (params.get('category')) {
+      setFilter('categories');
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (selectedLetter) {
+      contentRef.current?.scrollToTop(0);
+    }
+  }, [selectedLetter]);
 
   useIonViewWillEnter(() => {
     dispatch(Creators.fetchTags.request());
@@ -140,7 +364,24 @@ useIonViewDidEnter(() => {
           })
         : Creators.clearRegionalismWords()
     );
-  }, [dispatch, currentRegionalism.abbreviation]);
+    // Pré-carrega o índice A–Z em background para "Todos" abrir na hora.
+    if (allWordsCache.length === 0) {
+      dispatch(
+        Creators.fetchWords.request({
+          page: FIRST_PAGE_INDEX,
+          limit: MAX_PER_PAGE,
+          cacheOnly: true,
+        })
+      );
+    }
+  }, [dispatch, currentRegionalism.abbreviation, allWordsCache.length]);
+
+  /** Lista local embutida no app — disponível offline enquanto a API não responde. */
+  useEffect(() => {
+    if (allWordsCache.length === 0 && wordsJson.length > 0) {
+      dispatch(Creators.setAllWordsCache(wordsJson.map((w) => w.palavra)));
+    }
+  }, [dispatch, allWordsCache.length]);
 
   function translate(text: string) {
     if (text === '%') text = '%25';
@@ -236,9 +477,17 @@ useIonViewDidEnter(() => {
     const params = new URLSearchParams(location.search);
     params.delete('filter');
     params.delete('category');
+    params.delete('letter');
     history.replace({ search: params.toString() });
     setVisibleVerbCount(VERB_COUNT);
     // Reset scroll when clearing params (going back to main list)
+    contentRef.current?.scrollToTop(0);
+  }
+
+  function handleBackFromLetter() {
+    const params = new URLSearchParams(location.search);
+    params.delete('letter');
+    history.replace({ search: params.toString() });
     contentRef.current?.scrollToTop(0);
   }
 
@@ -297,6 +546,10 @@ useIonViewDidEnter(() => {
 
   const renderDesambiguateWord = (item: Words[], isLast: boolean) => {
     const name = item[0].name.split('&', 1)[0];
+    // Quando não existe gloss-base isolado (ex.: só existe "AÇAÍ&FRUTA"),
+    // tocar apenas o prefixo ("AÇAÍ") cai em datilologia. Nesses casos,
+    // usamos o primeiro gloss desambiguado da lista para tocar o sinal correto.
+    const primaryGloss = allWordsSet.has(name) ? name : item[0].name;
     const id = item[0].id;
     const isExpanded = expandedWord === name;
 
@@ -309,7 +562,7 @@ useIonViewDidEnter(() => {
           lines={'none'}
           onClick={() => toggleWordMeaning({name: name, id: id})}
         >
-          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(name); }}>
+          <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(primaryGloss); }}>
             {formattedGloss(name)}
           </IonText>
           <IonIcon
@@ -329,8 +582,13 @@ useIonViewDidEnter(() => {
     );
   };
 
-  const renderWord = (item: Words, isLast: boolean) => {
+  const renderWord = (item: Words, isLast: boolean, azBuckets?: VerbGroupBuckets) => {
     const isExpanded = expandedWord === item.name;
+    const vbGroup = azBuckets?.[item.name];
+    const slicedConcord =
+      vbGroup?.conjugation.filter(
+        (w) => !(w.original === item.name && !w.prefix && !w.suffix)
+      ) ?? [];
 
     return (
       <div key={item.id}>
@@ -353,6 +611,35 @@ useIonViewDidEnter(() => {
         {isExpanded && (
           <div className="word-meaning-container">
             {renderMeaningContent(item)}
+            {slicedConcord.length > 0 && (
+              <>
+                <div className="verb-section-header">CONCORDÂNCIA VERBAL</div>
+                <IonList lines="none" className="dictionary-words-list conjugation-list">
+                  {slicedConcord.map((w, i) => (
+                    <IonItem
+                      key={`${item.name}-az-concord-${i}`}
+                      className="dictionary-word-item conjugation-item"
+                      onClick={(e) => { e.stopPropagation(); translate(w.original); }}
+                    >
+                      <div className="conjugation-item-inner">
+                        <div className="conjugation-text-wrapper">
+                          <IonText className="dictionary-words-style conjugation-part">
+                            {formattedGloss(w.prefix)}
+                          </IonText>
+                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                          <IonText className="dictionary-words-style conjugation-part">
+                            {formattedGloss(w.suffix)}
+                          </IonText>
+                        </div>
+                        <IonText className="conjugation-gloss-tech">
+                          {formattedGloss(w.original)}
+                        </IonText>
+                      </div>
+                    </IonItem>
+                  ))}
+                </IonList>
+              </>
+            )}
           </div>
         )}
         {!isExpanded && !isLast && <div className="words-list-popover-content-divider" />}
@@ -389,40 +676,25 @@ useIonViewDidEnter(() => {
 
   // Helper to map API tag name to icon
   const getCategoryIcon = (tagName: string) => {
-    // API tags might have underscores (e.g. "Aparelho_ou_Máquina") or be mixed case.
-    // We need to match against CategoriesList which has specific names.
-    // The simplest way is to try matching case-insensitive, or normalize spaces/underscores.
-    
-    // Try exact match first (case insensitive)
-    let match = CategoriesList.find(c => c.name.toLowerCase() === tagName.toLowerCase());
-    if (match) return match.logoUrl;
-
-    // Try replacing underscores with spaces
-    const normalizedTag = tagName.replace(/_/g, ' ').toLowerCase();
-    match = CategoriesList.find(c => c.name.toLowerCase() === normalizedTag);
-    if (match) return match.logoUrl;
-
-    return IconUndefined;
+    const key = normalizeCategoryKey(tagName);
+    const match = CategoriesList.find(
+      (c) => normalizeCategoryKey(c.name) === key
+    );
+    return match ? match.logoUrl : IconUndefined;
   };
 
   // Helper to format category name for display (Title Case, remove underscores)
   const formatCategoryName = (tagName: string) => {
-    // Replace underscores with spaces
-    let formatted = tagName.replace(/_/g, ' ');
-    // Capitalize first letter of each word, lower case the rest (simple Title Case)
-    // However, some words like "e", "ou", "de" should be lowercase in Portuguese unless start of sentence.
-    // For simplicity, let's just Capitalize First Letter of each word for now, or match CategoriesList name if found.
-    
-    const match = CategoriesList.find(c => 
-      c.name.toLowerCase() === tagName.toLowerCase() || 
-      c.name.toLowerCase() === tagName.replace(/_/g, ' ').toLowerCase()
+    const key = normalizeCategoryKey(tagName);
+    const match = CategoriesList.find(
+      (c) => normalizeCategoryKey(c.name) === key
     );
-    
     if (match) {
       return match.name;
     }
 
     // Fallback formatting
+    let formatted = tagName.replace(/_/g, ' ');
     formatted = formatted.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
     return formatted;
   };
@@ -446,6 +718,59 @@ useIonViewDidEnter(() => {
     </>
   );
 
+  const renderLetterHeader = (letter: string) => (
+    <div className="category-header">
+      <IonItem lines="none" className="dictionary-word-item" onClick={handleBackFromLetter}>
+        <IonButton fill="clear" slot="start" onClick={handleBackFromLetter}>
+          <IonIcon icon={chevronBack} />
+        </IonButton>
+        <IonText className="dictionary-words-style" style={{ fontWeight: 'bold' }}>
+          {letter === '#' ? '0..9' : letter}
+        </IonText>
+      </IonItem>
+    </div>
+  );
+
+  const renderLetterCategory = (letter: string, isLast: boolean) => (
+    <>
+      <IonItem
+        className="dictionary-word-item category-item"
+        button
+        lines="none"
+        onClick={() => {
+          const params = new URLSearchParams();
+          params.set('filter', 'alphabetical');
+          params.set('letter', letterToParam(letter));
+          history.push({ search: params.toString() });
+          setFilter('alphabetical');
+        }}
+      >
+        <IonText className="dictionary-words-style">
+          {letter === '#' ? '0..9' : letter}
+        </IonText>
+      </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
+    </>
+  );
+
+  const renderTodosCategory = (isLast: boolean) => (
+    <>
+      <IonItem
+        className="dictionary-word-item category-item"
+        button
+        lines="none"
+        onClick={handleFilterAlpha}
+      >
+        <IonImg
+          src={IconTodos}
+          style={{ width: '25px', height: '25px', marginRight: '20px' }}
+        />
+        <IonText className="dictionary-words-style">Todos</IonText>
+      </IonItem>
+      {!isLast && <div className="words-list-popover-content-divider" />}
+    </>
+  );
+
   const renderCategories = (item: Tag, isLast: boolean) => (
     <>
       <IonItem
@@ -453,6 +778,7 @@ useIonViewDidEnter(() => {
         button
         lines={'none'}
         onClick={() => {
+          setFilter('categories');
           history.push(`?category=${item.name}`);
         }}
       >
@@ -466,169 +792,95 @@ useIonViewDidEnter(() => {
     </>
   );
 
-  const renderCategoryWords = () => (
-    <>
-      {category === 'VERBOS' || category === 'Verbos' ?
-        renderVerbs() : renderNoVerbsWords(allWordsList)}
-    </>
-  );
+  /** Só exibe palavras quando o cache Redux corresponde à categoria da URL. */
+  const isCategoryDataReady =
+    !!category && currentTag === category && allWordsList.length > 0;
+
+  const renderCategoryWords = () => {
+    if (!isCategoryDataReady) {
+      return null;
+    }
+    if (isVerbCategory) {
+      if (searchText.trim() && filteredVerbList.length === 0) {
+        return (
+          <div className="dictionary-word-item centered">
+            {Strings.DICTIONARY_WORD_NOT_FOUND}
+          </div>
+        );
+      }
+      return renderVerbs();
+    }
+    const wordsInCategory = searchText.trim()
+      ? filterWordsBySearch(allWordsList, searchText)
+      : allWordsList;
+    if (searchText.trim() && wordsInCategory.length === 0) {
+      return (
+        <div className="dictionary-word-item centered">
+          {Strings.DICTIONARY_WORD_NOT_FOUND}
+        </div>
+      );
+    }
+    return renderNoVerbsWords(wordsInCategory);
+  };
 
   const renderAllWords = () => {
-    // Use allWordsList instead of dictionary to ensure full A-Z structure
-    // dictionary is only the current page slice.
-    const wordsToRender = filter === 'alphabetical' && !searchText ? allWordsList : dictionary;
+    const isSearching = searchText.trim().length > 0;
 
-    // Helper function to group words (handling & desambiguation)
-    function groupWords(words: Words[]) {
-      const groups: (Words | Words[])[] = [];
-      let i = 0;
-      while(i < words.length) {
-        const word = words[i];
-        if(word.name.includes('&')) {
-          const prefix = word.name.split('&', 1)[0];
-          const group: Words[] = [];
-          while(i < words.length && words[i].name.startsWith(prefix + '&')) {
-            group.push(words[i]);
-            i++;
-          }
-          i--;
-          groups.push(group);
-        } else if(i < words.length-1 && words[i+1].name.includes('&')) {
-          const prefix = words[i+1].name.split('&', 1)[0];
-          if(prefix === word.name) {
-            const group: Words[] = [];
-            group.push(word);
-            i++;
-            while(i < words.length && words[i].name.startsWith(prefix + '&')) {
-              group.push(words[i]);
-              i++;
-            }
-            i--;
-            groups.push(group);
-          } else {
-            groups.push(word);
-          }
-        } else {
-          groups.push(word);
-        }
-        i++;
-      }
-      return groups;
+    // Índice de letras: só calcula quais letras existem (rápido, sem agrupar verbos).
+    if (!isSearching && !selectedLetter) {
+      const availableLetters = getAvailableLetters(allWordsList);
+      return availableLetters.map((letter, index) =>
+        renderLetterCategory(letter, index === availableLetters.length - 1)
+      );
     }
 
-    const groupedWords = groupWords(wordsToRender);
+    const wordsSource = isSearching
+      ? allWordsList.length > 0
+        ? filterWordsBySearch(allWordsList, searchText)
+        : dictionary
+      : allWordsList;
+    const { itemsByLetter, azVerbBuckets } = buildAzGroupedData(
+      wordsSource,
+      groupVerbs,
+      sortGroupedVerbs
+    );
 
-    const allItems: { name: string, type: 'word' | 'desambiguation', data: any }[] = [];
-
-    groupedWords.forEach(item => {
-        if (Array.isArray(item)) {
-            allItems.push({ name: item[0].name.split('&', 1)[0], type: 'desambiguation', data: item });
-        } else {
-            allItems.push({ name: item.name, type: 'word', data: item });
-        }
-    });
-
-    const groupedByLetter: { [key: string]: typeof allItems } = {};
-
-    allItems.forEach(item => {
-        const rawName = item.name.trim();
-        let firstChar = rawName.charAt(0).toUpperCase();
-
-        // Grupo "0..9" (letter '#') deve mostrar apenas números puros (0–9),
-        // evitando entradas do tipo 1P_AJUDAR_2S que também começam com dígito.
-        if (/[0-9]/.test(firstChar)) {
-            const isSingleDigit = /^[0-9]$/.test(rawName);
-            if (isSingleDigit) {
-                firstChar = '#';
-            } else {
-                // Para formas com pessoa (ex.: 1P_AJUDAR_2S), agrupa pela letra do verbo/base.
-                // Remove prefixos comuns (1S_, 2P_, etc) e pega a primeira letra A-Z.
-                const withoutPersonPrefix = rawName.replace(
-                  /^(1S_|2S_|3S_|1P_|2P_|3P_)/,
-                  ''
-                );
-                const alphaMatch = withoutPersonPrefix.match(/[A-ZÇÕÂÊÍÓÚ]/i);
-                if (!alphaMatch) return;
-                firstChar = alphaMatch[0].toUpperCase();
-            }
-        }
-
-        if (!groupedByLetter[firstChar]) {
-            groupedByLetter[firstChar] = [];
-        }
-        groupedByLetter[firstChar].push(item);
-    });
-
-    // Helper to sort letters: #, A, B, ...
-    const alphabet = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
-
-    return alphabet.map(letter => {
-        const itemsForLetter = groupedByLetter[letter];
-        // If searching, we might hide letters with no items.
-        // If A-Z mode, we usually show all letters even if empty? No, original likely hid empty.
-        // But for A-Z full list, we want all available letters.
-        if (!itemsForLetter || itemsForLetter.length === 0) {
-            return null;
-        }
-
-        // Sort items within the letter group
-        itemsForLetter.sort((a, b) => a.name.localeCompare(b.name));
-
-        const isExpanded = expandedLetter === letter;
-
+    if (isSearching) {
+      const flatSorted = Object.values(itemsByLetter)
+        .flat()
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+      if (flatSorted.length === 0) {
         return (
-            <div key={letter}>
-                <IonItem
-                    button
-                    detail={false}
-                    lines="none"
-                    onClick={(e) => {
-                      const isCurrentlyExpanded = expandedLetter === letter;
-                      setExpandedLetter(isCurrentlyExpanded ? null : letter);
-                      if (!isCurrentlyExpanded) {
-                        const targetElement = e.currentTarget;
-                        setTimeout(() => {
-                          contentRef.current?.getScrollElement().then(scrollElement => {
-                            if (scrollElement) {
-                              const itemRect = targetElement.getBoundingClientRect();
-                              const scrollRect = scrollElement.getBoundingClientRect();
-                              // Add offset for sticky header (roughly 120px for search bar + chips)
-                              const stickyHeaderOffset = 120;
-                              const scrollTop = scrollElement.scrollTop + itemRect.top - scrollRect.top - stickyHeaderOffset;
-                              // Ensure we don't scroll past top
-                              contentRef.current?.scrollToPoint(0, Math.max(0, scrollTop), 300);
-                            }
-                          });
-                        }, 100);
-                      }
-                    }}
-                    className={`dictionary-word-item ${isExpanded ? 'letter-expanded-header' : ''}`}
-                >
-                    <IonText className="dictionary-words-style">{letter === '#' ? '0..9' : letter}</IonText>
-                    <IonIcon
-                        icon={isExpanded ? chevronUp : chevronDown}
-                        slot="end"
-                        className="verb-dropdown-icon"
-                    />
-                </IonItem>
-                {isExpanded && (
-                    <div style={{ paddingLeft: '16px' }}>
-                        {itemsForLetter.map((item, index) => {
-                            const isLast = index === itemsForLetter.length - 1;
-                            if (item.type === 'word') {
-                                return renderWord(item.data, isLast);
-                            }
-                            if (item.type === 'desambiguation') {
-                                return renderDesambiguateWord(item.data, isLast);
-                            }
-                            return null;
-                        })}
-                    </div>
-                )}
-                <div className="words-list-popover-content-divider" />
-            </div>
+          <div className="dictionary-word-item centered">
+            {Strings.DICTIONARY_WORD_NOT_FOUND}
+          </div>
         );
-    });
+      }
+      return (
+        <div className="dictionary-flat-results">
+          {flatSorted.map((item, index) => {
+            const isLast = index === flatSorted.length - 1;
+            if (item.type === 'word') {
+              return renderWord(item.data as Words, isLast, azVerbBuckets);
+            }
+            return renderDesambiguateWord(item.data as Words[], isLast);
+          })}
+        </div>
+      );
+    }
+
+    const itemsForLetter = itemsByLetter[selectedLetter!] ?? [];
+    return (
+      <div className="dictionary-letter-body">
+        {itemsForLetter.map((item, index) => {
+          const isLast = index === itemsForLetter.length - 1;
+          if (item.type === 'word') {
+            return renderWord(item.data as Words, isLast, azVerbBuckets);
+          }
+          return renderDesambiguateWord(item.data as Words[], isLast);
+        })}
+      </div>
+    );
   };
 
   function handleVerbClick(verb: string) {
@@ -639,13 +891,6 @@ useIonViewDidEnter(() => {
     }
   }
 
-  type VerbConjugation = {
-    original: string;
-    prefix: string;
-    suffix: string;
-    transformed: string;
-  };
-  type VerbGroups = Record<string, {conjugation: VerbConjugation[], desambiguation: Words[]}>;
   const prefixMap: Record<string, string> = {
     '1S_': 'EU',
     '2S_': 'VOCÊ',
@@ -662,59 +907,68 @@ useIonViewDidEnter(() => {
     '_2P': 'VOCÊS',
     '_3P': 'ELES(AS)',
   };
-  // const verbRegex = /^(1S_|2S_|3S_|1P_|2P_|3P_)?([A-ZÇÕÂÊÍÓÚ]+)(_1S|_2S|_3S|_1P|_2P|_3P)?$/;
-
-  const verbRegex = new RegExp(
-    '^(1S_|2S_|3S_|1P_|2P_|3P_)?'
-    +'([A-ZÇÕÂÊÍÓÚ]+(?:_(?![123][SP])[A-ZÇÕÂÊÍÓÚ]+)*)'
-    +'(_1S|_2S|_3S|_1P|_2P|_3P)?$'
-  );
-
-
-  const transformedCache: Record<string, string> = {};
-  for (const p in prefixMap) {
-    for (const s in suffixMap) {
-      transformedCache[`${p}|${s}`] = `${prefixMap[p]} PARA ${suffixMap[s]}`;
+  /**
+   * Faz parsing tolerante do gloss para suportar formas direcionais
+   * malformadas vindas da API (ex.: "1S_FARTAR1S" sem `_` antes do sufixo,
+   * "2S_ESCOLHER__1S" com `__` duplicado). Retorna prefix/base/suffix
+   * normalizados (ex.: "1S_", "FARTAR", "_1S"). Quando não há sufixo, base
+   * pode terminar com `_` extra que limpamos. Sem isso, glosses fora do
+   * padrão viram "verbos" próprios e a CONCORDÂNCIA VERBAL some.
+   */
+  function parseVerbGloss(name: string): { prefix: string; base: string; suffix: string } | null {
+    if (!name || name.includes('&')) return null;
+    let body = name;
+    let prefix = '';
+    const prefixMatch = body.match(/^(1S|2S|3S|1P|2P|3P)_(.+)$/);
+    if (prefixMatch) {
+      prefix = `${prefixMatch[1]}_`;
+      body = prefixMatch[2];
     }
+    let suffix = '';
+    const suffixMatch = body.match(/^(.+?)_*(1S|2S|3S|1P|2P|3P)$/);
+    if (suffixMatch) {
+      body = suffixMatch[1].replace(/_+$/, '');
+      suffix = `_${suffixMatch[2]}`;
+    }
+    body = body.replace(/^_+|_+$/g, '');
+    if (!body) return null;
+    return { prefix, base: body, suffix };
   }
 
-  function groupVerbs(words: Words[]): VerbGroups {
-    const acc: VerbGroups = {};
+
+  function groupVerbs(words: Words[]): VerbGroupBuckets {
+    const acc: VerbGroupBuckets = {};
 
     for (const word of words) {
-      const baseVerb = word.name.includes('&') ?
-        word.name.split('&', 1)[0] : word.name.match(verbRegex)?.[2] || word.name;
-
-      if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
-
-      if(word.name.includes('&')) {
+      if (word.name.includes('&')) {
+        const baseVerb = word.name.split('&', 1)[0];
+        if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
         acc[baseVerb].desambiguation.push(word);
-      } else {
-        const match = word.name.match(verbRegex);
-        if (match) {
-          const prefix = match[1] || '';
-          const verb = match[2];
-          const suffix = match[3] || '';
-
-          const prefixText = prefixMap[prefix] || '';
-          const suffixText = suffixMap[suffix] || '';
-
-          if (prefixText && suffixText) {
-            const transformed = `${prefixText} PARA ${suffixText}`;
-            acc[verb].conjugation.push({ original: word.name,
-                                         transformed,
-                                         prefix: prefixText,
-                                         suffix: suffixText });
-          } else {
-            acc[verb].conjugation.unshift({ original: word.name,
-                                            transformed: word.name,
-                                            prefix: prefixText,
-                                            suffix: suffixText });
-          }
-        }
+        continue;
       }
 
+      const parsed = parseVerbGloss(word.name);
+      const baseVerb = parsed?.base || word.name;
+      if(!acc[baseVerb]) acc[baseVerb] = {conjugation: [], desambiguation: []};
 
+      if (!parsed) continue;
+      const { prefix, suffix } = parsed;
+
+      const prefixText = prefixMap[prefix] || '';
+      const suffixText = suffixMap[suffix] || '';
+
+      if (prefixText && suffixText) {
+        const transformed = `${prefixText} PARA ${suffixText}`;
+        acc[baseVerb].conjugation.push({ original: word.name,
+                                     transformed,
+                                     prefix: prefixText,
+                                     suffix: suffixText });
+      } else {
+        acc[baseVerb].conjugation.unshift({ original: word.name,
+                                        transformed: word.name,
+                                        prefix: prefixText,
+                                        suffix: suffixText });
+      }
     }
     const verbGroups = acc;
 
@@ -757,9 +1011,20 @@ useIonViewDidEnter(() => {
       'ELES(AS) PARA ELES(AS)',
     ];
 
-    for (const verb in verbGroups) {
-      verbGroups[verb].conjugation.sort((a, b) => {
-        return conjugationOrder.indexOf(a.transformed) - conjugationOrder.indexOf(b.transformed);
+    const bareBaseRank = (verbKey: string, w: VerbConjugationRow) =>
+      w.original === verbKey && !w.prefix && !w.suffix ? -1 : 0;
+
+    for (const verbKey in verbGroups) {
+      verbGroups[verbKey].conjugation.sort((a, b) => {
+        const diffBare =
+          bareBaseRank(verbKey, a) - bareBaseRank(verbKey, b);
+        if (diffBare !== 0) return diffBare;
+        const ia = conjugationOrder.indexOf(a.transformed);
+        const ib = conjugationOrder.indexOf(b.transformed);
+        const ra = ia === -1 ? 999 : ia;
+        const rb = ib === -1 ? 999 : ib;
+        if (ra !== rb) return ra - rb;
+        return a.original.localeCompare(b.original);
       });
     }
 
@@ -767,7 +1032,7 @@ useIonViewDidEnter(() => {
   }
 
   const filteredVerbList = verbList.filter(([verb]) =>
-    verb.toLowerCase().includes(searchText.toLowerCase())
+    normalizeForSearch(verb).startsWith(normalizeForSearch(searchText))
   );
 
   const renderNoVerbsWords = (words: Words[]) => {
@@ -818,7 +1083,17 @@ useIonViewDidEnter(() => {
       const meaning = wordMeanings[verb];
       const isLoadingMeaning = loadingMeaning === verb;
       const isLast = i === filteredVerbList.slice(0, visibleVerbCount).length - 1;
-      const slicedWords = conjugationWords.slice(verb === conjugationWords[0]?.original ? 1 : 0);
+      /** Oculta só a linha duplicada da forma base (mesmo gloss do cabeçalho). */
+      const slicedWords = conjugationWords.filter(
+        (w) => !(w.original === verb && !w.prefix && !w.suffix)
+      );
+      const bareBaseRow = conjugationWords.find(
+        (w) => w.original === verb && !w.prefix && !w.suffix
+      );
+      const headerGloss = bareBaseRow?.original
+        ?? conjugationWords[0]?.original
+        ?? desambiguationWords[0]?.name
+        ?? verb;
       return (
         <div key={verb} className="verb-group">
           <IonItem
@@ -828,7 +1103,7 @@ useIonViewDidEnter(() => {
             detail={false}
             onClick={() => toggleVerbMeaning(verb)}
           >
-            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(conjugationWords[0].original); }}>{formattedGloss(verb)}</IonText>
+            <IonText className="dictionary-words-style" onClick={(e) => { e.stopPropagation(); translate(headerGloss); }}>{formattedGloss(verb)}</IonText>
             <IonIcon icon={isExpanded ? chevronUp : chevronDown}
                     slot="end"
                     className="verb-dropdown-icon"
@@ -865,10 +1140,13 @@ useIonViewDidEnter(() => {
                       <IonItem key={`${verb}-form-${i}`}
                               className="dictionary-word-item conjugation-item"
                               onClick={(e) => { e.stopPropagation(); translate(w.original); }}>
-                        <div className="conjugation-text-wrapper">
-                          <IonText className="dictionary-words-style conjugation-part">{w.prefix}</IonText>
-                          <IonIcon icon={arrowForward} className="conjugation-arrow" />
-                          <IonText className="dictionary-words-style conjugation-part">{w.suffix}</IonText>
+                        <div className="conjugation-item-inner">
+                          <div className="conjugation-text-wrapper">
+                            <IonText className="dictionary-words-style conjugation-part">{formattedGloss(w.prefix)}</IonText>
+                            <IonIcon icon={arrowForward} className="conjugation-arrow" />
+                            <IonText className="dictionary-words-style conjugation-part">{formattedGloss(w.suffix)}</IonText>
+                          </div>
+                          <IonText className="conjugation-gloss-tech">{formattedGloss(w.original)}</IonText>
                         </div>
                       </IonItem>
                     );
@@ -893,10 +1171,15 @@ useIonViewDidEnter(() => {
   };
 
   const renderEmptyOrLoadingState = () => {
+    const categoryLoading =
+      filter === 'categories' &&
+      !!category &&
+      (!isCategoryDataReady || loading);
+
     const listIsEmpty =
       (filter === 'alphabetical' && allWordsList.length === 0) ||
       (filter === 'categories' && !category && tags.length === 0) ||
-      (filter === 'categories' && category && allWordsList.length === 0);
+      categoryLoading;
 
     if (listIsEmpty) {
       if (error) {
@@ -927,14 +1210,23 @@ useIonViewDidEnter(() => {
     const debouncedSearch = debounce(() => {
       if (filter === 'alphabetical' || (filter === 'categories' && category)) {
         if (filter === 'categories' && category && category === currentTag && allWordsList.length > 0) {
-          // Data already loaded for this category
           return;
+        }
+        if (filter === 'alphabetical' && !category) {
+          if (allWordsList.length > 0 && currentTag === null) {
+            // Lista A–Z já está no cliente; busca filtra localmente em renderAllWords.
+            return;
+          }
+          if (allWordsList.length === 0 && allWordsCache.length > 0) {
+            dispatch(Creators.setAllWords(allWordsCache));
+            return;
+          }
         }
         dispatch(
           Creators.fetchWords.request({
             page: FIRST_PAGE_INDEX,
             limit: MAX_PER_PAGE,
-            tag: category || undefined, // Pass category if present
+            tag: category || undefined,
             ...((searchText?.length || 0) > 0 && {
               name: `${searchText}%`,
             }),
@@ -948,7 +1240,7 @@ useIonViewDidEnter(() => {
     return () => {
       debouncedSearch.cancel();
     };
-  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length]); // Add category dependency
+  }, [searchText, filter, category, dispatch, currentTag, allWordsList.length, allWordsCache]);
 
   useEffect(() => {
     if (!loading) {
@@ -958,30 +1250,30 @@ useIonViewDidEnter(() => {
 
   // This effect handles initial load when category changes via URL
   useEffect(() => {
+    setVerbGroupsState({});
+    setVisibleVerbCount(VERB_COUNT);
+    setExpandedVerb(null);
+
     if (category) {
       if (category === currentTag && allWordsList.length > 0) {
-        // Don't clear words if we are returning to the same category
         return;
       }
-      // Clear previous words to improve fluidity
       dispatch(Creators.clearWords());
-      // Scroll to top when entering a new category
       contentRef.current?.scrollToTop(0);
-    } else {
-      // If no category, we show tags. No fetch needed (fetchTags is in ViewWillEnter)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, dispatch]);
 
   // Update verbGroupsState when dictionary changes and category is verbs
   useEffect(() => {
-    if (category === 'VERBOS' || category === 'Verbos') {
-       // Use allWordsList for verbs to ensure all verbs are grouped
-       const groupedVerbs = groupVerbs(allWordsList);
-       const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
-       setVerbGroupsState(sortedGroupedVerbs);
+    if (!isVerbCategory) {
+      setVerbGroupsState({});
+      return;
     }
-  }, [allWordsList, category]);
+    const groupedVerbs = groupVerbs(allWordsList);
+    const sortedGroupedVerbs = sortGroupedVerbs(groupedVerbs);
+    setVerbGroupsState(sortedGroupedVerbs);
+  }, [allWordsList, isVerbCategory]);
 
 
   const fetchWords = useCallback(() => {
@@ -998,9 +1290,33 @@ useIonViewDidEnter(() => {
   }, [dispatch, infiniteScrollRef, metadata, searchText, category]);
 
   function handleFilterAlpha() {
-    clearUrlParams();
-    dispatch(Creators.clearWords()); // Clear stale words immediately
+    const params = new URLSearchParams();
+    params.set('filter', 'alphabetical');
+    history.replace({ search: params.toString() });
     setFilter('alphabetical');
+    contentRef.current?.scrollToTop(0);
+
+    if (allWordsList.length > 0 && currentTag === null) {
+      return;
+    }
+
+    const wordsToShow =
+      allWordsCache.length > 0
+        ? allWordsCache
+        : wordsJson.map((w) => w.palavra);
+
+    if (wordsToShow.length > 0) {
+      dispatch(Creators.clearWords());
+      dispatch(Creators.setAllWords(wordsToShow));
+      return;
+    }
+
+    dispatch(
+      Creators.fetchWords.request({
+        page: FIRST_PAGE_INDEX,
+        limit: MAX_PER_PAGE,
+      })
+    );
   }
 
   function handleFilterRecents() {
@@ -1013,7 +1329,7 @@ useIonViewDidEnter(() => {
     setFilter('categories');
   }
 
-  function sortGroupedVerbs(verbs: VerbGroups): VerbGroups {
+  function sortGroupedVerbs(verbs: VerbGroupBuckets): VerbGroupBuckets {
     return Object.fromEntries(
       Object.entries(verbs).sort(([a], [b])=>a.localeCompare(b))
     );
@@ -1064,14 +1380,17 @@ useIonViewDidEnter(() => {
 
     switch (filter) {
       case 'alphabetical':
+        if (allWordsList.length > 0) {
+          return filterWordsBySearch(allWordsList, searchText).length;
+        }
         return metadata.total;
       case 'recents':
         return recentTranslation.filter((item) =>
-          item.toUpperCase().includes(searchText.toUpperCase())
+          normalizeForSearch(item).startsWith(normalizeForSearch(searchText))
         ).length;
       case 'categories':
         if (category) {
-          if (category === 'VERBOS' || category === 'Verbos') {
+          if (isVerbCategory) {
             return filteredVerbList.length;
           }
           return allWordsList.length; // Use allWordsList.length instead of dictionary.length
@@ -1085,6 +1404,11 @@ useIonViewDidEnter(() => {
   };
 
   const resultsCount = getResultsCount();
+
+  const searchPlaceholder =
+    filter === 'categories' && !category
+      ? Strings.TEXT_PLACEHOLDER_CATEGORY
+      : Strings.TEXT_PLACEHOLDER;
 
   const getResultsLabel = () => {
     const count = resultsCount;
@@ -1112,12 +1436,12 @@ useIonViewDidEnter(() => {
   return (
     <MenuLayout title={Strings.TOOLBAR_TITLE} mode={'back'}>
       <IonContent ref={contentRef}>
-        <div className="dictionary-container">
-          <div className="sticky-container">
+        <div className="dictionary-container" ref={dictionaryContainerRef}>
+          <div className="sticky-container" ref={stickyContainerRef}>
           <div className="dictionary-box">
             <IonSearchbar
               className="dictionary-textarea"
-              placeholder={Strings.TEXT_PLACEHOLDER}
+              placeholder={searchPlaceholder}
               onIonInput={e => setSearchText(e.detail.value!)}
               value={searchText}
               inputmode="text"
@@ -1160,44 +1484,69 @@ useIonViewDidEnter(() => {
           </div>
           <div className="dictionary-words-container-divider" />
           {category && renderCategoryHeader(category)}
+          {filter === 'alphabetical' && selectedLetter && renderLetterHeader(selectedLetter)}
           </div>
 
           <div className="dictionary-words-container">
             <IonList
-            lines="none" className={`dictionary-words-list ${category ? 'has-category-header' : ''}`}>
-              {regionalismWords.length > 0 && filter === 'alphabetical'
+            lines="none" className={`dictionary-words-list ${category || selectedLetter ? 'has-category-header' : ''}`}>
+              {regionalismWords.length > 0 && filter === 'alphabetical' && !selectedLetter
                 ? regionalismWords.map((item) => renderOnRegionalism(item))
                 : null}
+
+              {regionalismWords.length > 0 && filter === 'alphabetical' && !selectedLetter ? (
+                <hr
+                  className="dictionary-regionalism-general-divider"
+                  aria-hidden="true"
+                />
+              ) : null}
 
               {filter === 'alphabetical'
                 ? renderAllWords()
                 : filter === 'recents'
                 ? recentTranslation
-                    .filter((item) => item.toUpperCase().includes(searchText.toUpperCase()))
+                    .filter((item) =>
+                      normalizeForSearch(item).startsWith(
+                        normalizeForSearch(searchText)
+                      )
+                    )
                     .map((item, i, arr) => renderRecents(item, i === arr.length - 1))
                 : category
                   ? renderCategoryWords()
-                  : tags.filter(item =>
-                      item.name.toLowerCase().includes(searchText.toLowerCase())
-                    ).map((item, index, arr) => {
-                      return renderCategories(
-                        item,
-                        index === arr.length - 1
+                  : (() => {
+                      const filteredTags = tags.filter(
+                        (item) =>
+                          !HIDDEN_CATEGORY_TAGS.has(item.name.toUpperCase()) &&
+                          item.name.toLowerCase().includes(searchText.toLowerCase())
                       );
-                    })
+                      const showTodos =
+                        !searchText ||
+                        'todos'.includes(searchText.toLowerCase());
+                      return (
+                        <>
+                          {filteredTags.map((item) => renderCategories(item, false))}
+                          {showTodos && renderTodosCategory(true)}
+                        </>
+                      );
+                    })()
               }
 
               {renderEmptyOrLoadingState()}
 
               {recentTranslation.length === 0 && filter === 'recents' ? (
-                <div key="no-recent" className="dictionary-word-item">
-                  Nenhuma pesquisa recente
-                </div>
+                <IonItem key="no-recent" lines="none" className="dictionary-word-item">
+                  <IonText className="dictionary-words-style">
+                    Nenhuma pesquisa recente
+                  </IonText>
+                </IonItem>
               ) : null}
             </IonList>
           </div>
         </div>
-        {metadata.hasNextPage && (filter !== 'categories') && (
+        {metadata.hasNextPage &&
+          filter === 'alphabetical' &&
+          searchText.trim().length > 0 &&
+          allWordsList.length === 0 && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
@@ -1209,7 +1558,7 @@ useIonViewDidEnter(() => {
             />
           </IonInfiniteScroll>
         )}
-        {(filter === 'categories') && (category === 'VERBOS' || category === 'Verbos')  && (
+        {(filter === 'categories') && isVerbCategory && (
           <IonInfiniteScroll
             ref={infiniteScrollRef}
             threshold="100px"
@@ -1228,6 +1577,7 @@ useIonViewDidEnter(() => {
         <DictionaryMiniPlayer
           gloss={dictMiniPlayer.gloss}
           loading={dictMiniPlayer.loading}
+          playRequestId={dictMiniPlayer.requestId}
           onClose={() => setDictMiniPlayer(false)}
         />
       )}

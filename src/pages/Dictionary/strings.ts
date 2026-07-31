@@ -10,6 +10,7 @@ export const Strings = {
   DICTIONARY_TEXT_4: 'ABANDONAR',
   DICTIONARY_TEXT_5: 'AFILIAR',
   TEXT_PLACEHOLDER: 'Digite um sinal para pesquisar',
+  TEXT_PLACEHOLDER_CATEGORY: 'Digite uma categoria para pesquisar',
   CHIP_TEXT_SUGGESTIONS_1: 'A-Z',
   CHIP_TEXT_SUGGESTIONS_2: 'Recentes',
   CHIP_TEXT_SUGGESTIONS_3: 'Categorias',

@@ -3,6 +3,10 @@ import { all, takeLatest, put } from 'redux-saga/effects';
 
 import { PLAYER_AVATAR_KEY_STORE, PLAYER_CUSTOMIZATION_KEY_STORE } from 'constants/keys';
 import { Avatar } from 'constants/types';
+import {
+  camaraCustomizationColors,
+  isLegacyCustomizationColors,
+} from 'services/avatarCustomization';
 import { AvatarCustomization, Creators } from 'store/ducks/customization';
 
 function* storeCustomization(
@@ -28,7 +32,20 @@ function* loadCustomization(
     const response = yield NativeStorage.getItem(
       `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`
     );
-    yield put(Creators.loadCustomization.success(response));
+
+    let customization = response as AvatarCustomization;
+    if (isLegacyCustomizationColors(customization.customizationColors)) {
+      customization = {
+        avatar: customization.avatar,
+        customizationColors: camaraCustomizationColors(),
+      };
+      yield NativeStorage.setItem(
+        `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`,
+        customization
+      );
+    }
+
+    yield put(Creators.loadCustomization.success(customization));
     console.log(`[DEBUG] ${response}`);
   } catch (error) {
     yield put(Creators.loadCustomization.failure({}));

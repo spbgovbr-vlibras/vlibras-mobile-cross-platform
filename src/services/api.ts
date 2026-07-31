@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Tag, TagSignsResponse } from 'models/dictionary';
 
 /* =============================================================================
- * Dicionário – fonte de dados (DTH / repositorio-dth.vlibras.lavid.ufpb.br)
+ * Dicionário – fonte de dados (produção / repositorio.vlibras.gov.br)
  * -----------------------------------------------------------------------------
  * Endpoints utilizados (todas as listas voltam diretamente do backend):
  *
@@ -20,7 +20,7 @@ import { Tag, TagSignsResponse } from 'models/dictionary';
  * =========================================================================== */
 
 export const DICT_CONFIG = {
-  apiBaseUrl: 'https://repositorio-dth.vlibras.lavid.ufpb.br',
+  apiBaseUrl: 'https://repositorio.vlibras.gov.br',
   tagsPath: '/api/tags',
   tagSignsPath: '/api/tagsigns',
   allSignsPath: '/api/signs',
@@ -46,15 +46,30 @@ export async function getTags(): Promise<Tag[]> {
 }
 
 /**
- * Regex usada para identificar verbos com sinais direcionais
- * (ex.: 1S_AJUDAR_2S → base "AJUDAR"). Mantida idêntica à do
- * `Dictionary/index.tsx`, que faz o agrupamento.
+ * Faz parsing tolerante para identificar a forma base de um verbo a partir
+ * do gloss direcional (ex.: 1S_AJUDAR_2S → "AJUDAR"). Aceita também glosses
+ * malformados ("1S_AJUDAR2S" sem `_`, "2S_AJUDAR__2S" com `__`).
  */
-const VERB_DIRECTIONAL_REGEX = new RegExp(
-  '^(1S_|2S_|3S_|1P_|2P_|3P_)?'
-  + '([A-ZÇÕÂÊÍÓÚ]+(?:_(?![123][SP])[A-ZÇÕÂÊÍÓÚ]+)*)'
-  + '(_1S|_2S|_3S|_1P|_2P|_3P)?$'
-);
+function extractVerbBase(gloss: string): string | null {
+  if (!gloss || gloss.includes('&')) return null;
+  let body = gloss;
+  let hadPrefix = false;
+  let hadSuffix = false;
+  const prefixMatch = body.match(/^(1S|2S|3S|1P|2P|3P)_(.+)$/);
+  if (prefixMatch) {
+    hadPrefix = true;
+    body = prefixMatch[2];
+  }
+  const suffixMatch = body.match(/^(.+?)_*(1S|2S|3S|1P|2P|3P)$/);
+  if (suffixMatch) {
+    hadSuffix = true;
+    body = suffixMatch[1].replace(/_+$/, '');
+  }
+  body = body.replace(/^_+|_+$/g, '');
+  if (!body) return null;
+  if (!hadPrefix && !hadSuffix) return null;
+  return body;
+}
 
 /**
  * Recupera, para a categoria VERBOS, a forma base de cada verbo
@@ -65,10 +80,8 @@ const VERB_DIRECTIONAL_REGEX = new RegExp(
 async function enrichVerbsWithBaseForms(signs: string[]): Promise<string[]> {
   const directionalBases = new Set<string>();
   for (const sign of signs) {
-    const match = sign.match(VERB_DIRECTIONAL_REGEX);
-    if (match && (match[1] || match[3]) && match[2]) {
-      directionalBases.add(match[2]);
-    }
+    const base = extractVerbBase(sign);
+    if (base) directionalBases.add(base);
   }
   if (!directionalBases.size) return signs;
 

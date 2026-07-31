@@ -1,5 +1,6 @@
 export const Strings = {
   TOOLBAR_TITLE: 'Central de ajuda',
+  RESTART_GUIDED_TOUR: 'Refazer tour guiado',
   DICAS_APP: 'Ver dicas no app',
   SEND_MESSAGE_1: 'Você tem alguma dúvida ou sugestão?',
   SEND_MESSAGE_2: 'Envie uma mensagem para a equipe do Vlibras',
