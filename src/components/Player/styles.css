@@ -334,12 +334,8 @@
 .player-avatar-switch-overlay {
   position: absolute;
   right: 16px;
-  /* Entre “muito embaixo” e “muito em cima”: acima do input, sem encostar no Traduzir */
-  bottom: clamp(
-    148px,
-    calc(36vmin + env(safe-area-inset-bottom, 0px)),
-    235px
-  );
+  /* Acima do input, alinhado ao Figma; 36vmin sem safe-area = mesma posição Android/iOS */
+  bottom: clamp(148px, 36vmin, 235px);
   width: 56px;
   height: 56px;
   border-radius: 50%;
