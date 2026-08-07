@@ -13,17 +13,17 @@ export type AvatarCustomizationProperties = {
   avatar: Avatar;
 };
 
-/** Valores oficiais do widget VLibras (camara.json). */
+/** Defaults do app mobile (sem logo/branding da Câmara no player). */
 export const DefaultAvatarCustomizationProperties: AvatarCustomizationProperties = {
   cabelo: '#000000',
-  calca: '#1F265F',
-  camisa: '#005B38',
+  calca: '#363636',
+  camisa: '#1447a6',
   corpo: '#C18471',
   iris: '#000000',
   olhos: '#FFFFFF',
   sombrancelhas: '#000000',
-  pos: 'left',
-  logo: 'https://vlibras.gov.br/config/img/camara.png',
+  pos: 'center',
+  logo: '',
   avatar: 'icaro',
 };
 

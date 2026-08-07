@@ -6,7 +6,6 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
-  isPlatform,
 } from '@ionic/react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -603,8 +602,7 @@ function Customization() {
             flexShrink: 1,
             flex: 1,
             display: 'flex',
-            background:
-              isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
+            background: '#E5E5E5',
           }}>
           <Unity unityContent={unityContent} className="player-content" />
         </div>

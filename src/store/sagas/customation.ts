@@ -3,11 +3,24 @@ import { all, takeLatest, put } from 'redux-saga/effects';
 
 import { PLAYER_AVATAR_KEY_STORE, PLAYER_CUSTOMIZATION_KEY_STORE } from 'constants/keys';
 import { Avatar } from 'constants/types';
-import {
-  camaraCustomizationColors,
-  isLegacyCustomizationColors,
-} from 'services/avatarCustomization';
-import { AvatarCustomization, Creators } from 'store/ducks/customization';
+import { DefaultAvatarCustomizationProperties } from 'data/AvatarCustomizationProperties';
+import { AvatarCustomization, Creators, CustomizationColors } from 'store/ducks/customization';
+
+const LEGACY_DARK_SHIRTS = new Set(['#202763', '#1c204f', '#005b38']);
+const LEGACY_DARK_PANTS = new Set(['#121420', '#0e0f18', '#1f265f']);
+
+function normalizeLegacyAvatarColors(colors: CustomizationColors): CustomizationColors {
+  const shirt = colors.camisa.trim().toLowerCase();
+  const pants = colors.calca.trim().toLowerCase();
+  const camisa = LEGACY_DARK_SHIRTS.has(shirt)
+    ? DefaultAvatarCustomizationProperties.camisa
+    : colors.camisa;
+  const calca = LEGACY_DARK_PANTS.has(pants)
+    ? DefaultAvatarCustomizationProperties.calca
+    : colors.calca;
+  if (camisa === colors.camisa && calca === colors.calca) return colors;
+  return { ...colors, camisa, calca };
+}
 
 function* storeCustomization(
   action: ReturnType<typeof Creators.storeCustomization.request>
@@ -33,12 +46,14 @@ function* loadCustomization(
       `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`
     );
 
-    let customization = response as AvatarCustomization;
-    if (isLegacyCustomizationColors(customization.customizationColors)) {
-      customization = {
-        avatar: customization.avatar,
-        customizationColors: camaraCustomizationColors(),
-      };
+    const stored = response as AvatarCustomization;
+    const normalizedColors = normalizeLegacyAvatarColors(stored.customizationColors);
+    const customization: AvatarCustomization =
+      normalizedColors === stored.customizationColors
+        ? stored
+        : { avatar: stored.avatar, customizationColors: normalizedColors };
+
+    if (customization !== stored) {
       yield NativeStorage.setItem(
         `${PLAYER_CUSTOMIZATION_KEY_STORE}_${action.payload}`,
         customization
