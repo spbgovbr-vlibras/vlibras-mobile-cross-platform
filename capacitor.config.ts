@@ -9,11 +9,17 @@ const config: CapacitorConfig = {
   server: {
     iosScheme: 'https',
     androidScheme: 'http',
-    allowNavigation: ['lavid.nsa.root.sx'],
+    allowNavigation: [
+      'lavid.nsa.root.sx',
+      'transcodificador.vlibras.gov.br',
+    ],
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
+    },
+    CapacitorHttp: {
+      enabled: true,
     },
   },
 };

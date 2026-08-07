@@ -8,12 +8,16 @@
 		"iosScheme": "https",
 		"androidScheme": "http",
 		"allowNavigation": [
-			"lavid.nsa.root.sx"
+			"lavid.nsa.root.sx",
+			"transcodificador.vlibras.gov.br"
 		]
 	},
 	"plugins": {
 		"SplashScreen": {
 			"launchShowDuration": 0
+		},
+		"CapacitorHttp": {
+			"enabled": true
 		}
 	}
 }

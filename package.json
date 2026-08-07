@@ -66,9 +66,17 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:lan": "HOST=0.0.0.0 DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "build": "react-scripts build",
+    "android:emu": "bash scripts/android-emulator.sh meu_emulador",
+    "android:emu:list": "$HOME/Library/Android/sdk/emulator/emulator -list-avds",
+    "android:live": "npx cap run android -l --port=3000 --forwardPorts 3000:3000",
+    "android:live:emu": "bash scripts/android-emulator.sh meu_emulador && npx cap run android -l --port=3000 --forwardPorts 3000:3000",
+    "android:run": "npx cap run android",
+    "android:log": "adb logcat | grep -E 'VLibras Share|TranscoderHttpError|Capacitor/Console'",
     "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
     "eject": "react-scripts eject",
+    "doctor:transcoder": "node scripts/transcoder-doctor.js",
     "lint": "eslint src/**/*.{ts,tsx}",
     "lint:fix": "eslint --fix 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx,css,md}' --config ./.prettierrc"

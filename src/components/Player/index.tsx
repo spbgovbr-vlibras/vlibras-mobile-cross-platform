@@ -3,7 +3,7 @@
 /* eslint-disable quotes */
 /* eslint-disable import/order */
 /* eslint-disable react/button-has-type */
-import { IonPopover, isPlatform } from '@ionic/react';
+import { IonPopover } from '@ionic/react';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
@@ -52,9 +52,8 @@ import { reloadHistory } from 'utils/setHistory';
 import { getUnityWrapper, restoreUnityTransplant, UNITY_HOME_MOUNT_ID } from 'utils/unityCanvasDock';
 import StableUnityPlayer from './StableUnityPlayer';
 import './styles.css';
-import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
-import { getVideo, postVideo } from 'services/shareVideo';
+import { getConversion, postVideo, TranscoderHttpError } from 'services/shareVideo';
+import { deliverShareableVideo } from 'services/shareVideoDelivery';
 import GenerateModal from 'components/GenerateModal';
 import { Device } from '@capacitor/device';
 import ErrorModal from 'components/ErrorModal';
@@ -128,7 +127,11 @@ const TUTORIAL_PLAYING_STEPS = new Set([
 ]);
 
 function Player() {
-  const errorMessage = 'Erro ao compartilhar o vídeo. Tente novamente.';
+  const errorMessageBase = 'Erro ao compartilhar o vídeo. Tente novamente.';
+  const [shareErrorDetail, setShareErrorDetail] = useState('');
+  const errorMessage = shareErrorDetail
+    ? `${errorMessageBase} (${shareErrorDetail})`
+    : errorMessageBase;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
@@ -180,6 +183,9 @@ function Player() {
   /** Só grava quando o usuário disparou handlePlay (traduziu), não na saudação/idle. */
   const shareCapturePendingRef = useRef(false);
   const shareCaptureActiveRef = useRef(false);
+  /** Mini player do dicionário toca via PLAY_NOW sem passar por handlePlay — refs espelham o estado. */
+  const dictMiniActiveRef = useRef(false);
+  const dictMiniGlossRef = useRef('');
   // --- End of Live Translation Refs ---
 
   const history = useHistory();
@@ -201,6 +207,11 @@ function Player() {
     dictMiniPlayer,
   } = useTranslation();
 
+  useEffect(() => {
+    dictMiniActiveRef.current = dictMiniPlayer.active;
+    dictMiniGlossRef.current = dictMiniPlayer.gloss || '';
+  }, [dictMiniPlayer.active, dictMiniPlayer.gloss]);
+
   const wasPlaying = useRef<boolean>(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const progressContainerRef = useRef<HTMLDivElement>(null);
@@ -211,25 +222,35 @@ function Player() {
    * Quando o teclado virtual abre, o Android (com `windowSoftInputMode=adjustResize`,
    * que é o default do Capacitor) encolhe a WebView, e o `flex: 1` faz o wrapper do
    * avatar diminuir junto. O canvas Unity acompanha esse encolhimento e o avatar
-   * "se aproxima/afasta" visualmente. Para evitar isso, fixamos a altura do wrapper
-   * na MAIOR dimensão já observada (estado sem teclado). O teclado passa a
-   * sobrepor a barra de input/tabs sem mexer no avatar.
+   * "se aproxima/afasta" visualmente.
+   *
+   * Para evitar isso, travamos a MAIOR altura já observada do CONTAINER do player
+   * (`.player-container`, pai do wrapper). Esse valor é estável e independe da
+   * margem inferior do wrapper (que muda por estado: idle/tradução/tutorial).
+   * A altura do avatar é derivada por estado: `containerLockado - margem`.
+   *
+   * IMPORTANTE: só travamos quando a medição do container é > 0. No iOS o layout
+   * (safe-area/tab bar) só resolve depois da 1ª pintura; medir cedo dava altura 0
+   * e, com a fórmula anterior, o wrapper colapsava (canvas 0 → avatar sumia).
    */
   const avatarWrapperRef = useRef<HTMLDivElement>(null);
-  const [lockedAvatarHeight, setLockedAvatarHeight] = useState<number | null>(null);
+  const [lockedContainerHeight, setLockedContainerHeight] = useState<number | null>(null);
   useEffect(() => {
     const measure = () => {
-      const node = avatarWrapperRef.current;
-      if (!node) return;
-      const h = Math.round(node.getBoundingClientRect().height);
-      if (h <= 0) return;
-      setLockedAvatarHeight((prev) => (prev === null || h > prev ? h : prev));
+      const container = avatarWrapperRef.current?.parentElement;
+      if (!container) return;
+      const height = Math.round(container.getBoundingClientRect().height);
+      if (height <= 0) return;
+      setLockedContainerHeight((prev) =>
+        prev === null || height > prev ? height : prev
+      );
     };
-    const initial = window.setTimeout(measure, 50);
+    /** iOS aplica safe-area/tab bar depois da primeira pintura; remede algumas vezes. */
+    const timers = [50, 250, 600, 1200].map((ms) => window.setTimeout(measure, ms));
     const onOrientationChange = () => window.setTimeout(measure, 250);
     window.addEventListener('orientationchange', onOrientationChange);
     return () => {
-      window.clearTimeout(initial);
+      timers.forEach((id) => window.clearTimeout(id));
       window.removeEventListener('orientationchange', onOrientationChange);
     };
   }, []);
@@ -346,13 +367,20 @@ function Player() {
     }
   };
 
-  const openErrorModal = () => {
+  const openErrorModal = (detail?: string) => {
+    if (detail) {
+      console.error('[VLibras Share] Etapa com falha:', detail);
+      setShareErrorDetail(detail);
+    } else {
+      setShareErrorDetail('');
+    }
     setErrorModalOpen(true);
     closeModal();
   };
 
   const closeErrorModal = () => {
     setErrorModalOpen(false);
+    setShareErrorDetail('');
   };
 
   const openModal = () => {
@@ -385,32 +413,15 @@ function Player() {
 
   const shareBlob = async (blob: Blob) => {
     try {
-      const base64data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error('FileReader falhou'));
-        reader.readAsDataURL(blob);
-      });
-
-      const uri = await Filesystem.writeFile({
-        path: Strings.VIDEO_SHARE_FILENAME,
-        data: base64data,
-        directory: Directory.Cache,
-        recursive: true,
-      });
-
-      try {
-        await Share.share({
-          dialogTitle: Strings.VIDEO_SHARE_TITLE_DIALOG,
-          title: Strings.VIDEO_SHARE_TITLE_DIALOG,
-          url: uri.uri,
-        });
-      } catch (_) {
-        /** usuário cancelou o share */
-      }
+      await deliverShareableVideo(blob);
     } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/cancel|canceled|abort/i.test(msg)) {
+        console.log('[VLibras Share] Compartilhamento cancelado pelo usuário');
+        return;
+      }
       console.error('[VLibras Share] Erro em shareBlob:', e);
-      openErrorModal();
+      openErrorModal('abrir compartilhamento');
     } finally {
       closeModal();
       isLoading = false;
@@ -431,6 +442,13 @@ function Player() {
     const glCanvas = getUnityCanvas();
     if (!glCanvas) return;
     const drawFrame = () => {
+      if (
+        proxyCanvas!.width !== glCanvas.width ||
+        proxyCanvas!.height !== glCanvas.height
+      ) {
+        proxyCanvas!.width = glCanvas.width;
+        proxyCanvas!.height = glCanvas.height;
+      }
       proxyCtx!.fillStyle = '#E5E5E5';
       proxyCtx!.fillRect(0, 0, proxyCanvas!.width, proxyCanvas!.height);
       try { proxyCtx!.drawImage(glCanvas, 0, 0); } catch (_) { /* */ }
@@ -556,7 +574,10 @@ function Player() {
         return false;
       }
 
-      mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: 2_500_000,
+      });
       recordedChunks = [];
 
       mediaRecorder.ondataavailable = (e) => {
@@ -588,25 +609,38 @@ function Player() {
       }
 
       try {
-        const blob = await getVideo(id);
-        console.log('[VLibras Share] checkBlob tentativa', 60 - count, '- blob:', blob.size, 'bytes');
-        if (blob.size > 24) {
+        const result = await getConversion(id);
+
+        if (result.kind === 'ready') {
           console.log('[VLibras Share] Vídeo convertido pronto, compartilhando...');
-          await shareBlob(blob);
+          await shareBlob(result.blob);
           return;
         }
+
+        if (result.kind === 'failed') {
+          console.error('[VLibras Share] Conversão falhou no servidor:', result.status);
+          isLoading = false;
+          resetRecording();
+          openErrorModal('conversão no servidor');
+          return;
+        }
+
+        console.log(
+          '[VLibras Share] checkBlob tentativa', 60 - count, '- status:', result.status
+        );
       } catch (err) {
-        console.warn('[VLibras Share] checkBlob erro:', err);
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        console.warn('[VLibras Share] checkBlob erro:', status ?? '', err);
         if (count <= 0) {
           isLoading = false;
-          openErrorModal();
+          openErrorModal('consultar transcodificador');
           return;
         }
       }
 
       if (count <= 0) {
         isLoading = false;
-        openErrorModal();
+        openErrorModal('tempo esgotado conversão');
         return;
       }
 
@@ -619,7 +653,20 @@ function Player() {
   };
 
   const initVideoSharing = async () => {
+    if (isLoading) return;
     isLoading = true;
+    console.log('[VLibras Share] Início compartilhamento');
+
+    if (
+      recordedChunks.length === 0 &&
+      mediaRecorder &&
+      mediaRecorder.state === 'recording'
+    ) {
+      shareCaptureActiveRef.current = true;
+      if (!proxyAnimFrameId) {
+        startProxyLoop();
+      }
+    }
 
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       try {
@@ -627,12 +674,12 @@ function Player() {
       } catch (_) { /* */ }
       recorderStoppedPromise = new Promise<void>((resolve) => {
         mediaRecorder!.onstop = () => {
+          stopProxyLoop();
           console.log('[VLibras Share] onstop disparado. Chunks:', recordedChunks.length);
           resolve();
         };
       });
       mediaRecorder.stop();
-      stopProxyLoop();
       recording = false;
       console.log('[VLibras Share] Recorder parado, aguardando dados...');
     }
@@ -640,26 +687,34 @@ function Player() {
     if (recorderStoppedPromise) {
       await recorderStoppedPromise;
       recorderStoppedPromise = null;
+      /** Android WebView: últimos ondataavailable podem chegar após onstop. */
+      await new Promise((r) => window.setTimeout(r, 350));
     }
 
     console.log('[VLibras Share] Chunks:', recordedChunks.length, 'mimeType:', recordedMimeType);
 
     if (recordedChunks.length === 0) {
-      const canAutoReplay = Boolean(textGloss) && !isPlaying && autoShareRetryCountRef.current === 0;
+      const glossForShare =
+        textGloss ||
+        (dictMiniActiveRef.current ? dictMiniGlossRef.current : '');
+      const canAutoReplay =
+        Boolean(glossForShare) && !isPlaying && autoShareRetryCountRef.current === 0;
       if (canAutoReplay) {
-        console.warn('[VLibras Share] Nenhum dado gravado. Iniciando replay automático antes do share.');
+        console.warn(
+          '[VLibras Share] Nenhum dado gravado. Replay automático (tradutor ou dicionário)...'
+        );
         autoShareRetryCountRef.current = 1;
         pendingShareAfterReplayRef.current = true;
         isLoading = false;
         closeModal();
-        handlePlay(textGloss);
+        handlePlay(glossForShare);
         return;
       }
       console.error('[VLibras Share] Nenhum dado gravado');
       autoShareRetryCountRef.current = 0;
       isLoading = false;
       resetRecording();
-      openErrorModal();
+      openErrorModal('gravação vazia');
       return;
     }
 
@@ -674,7 +729,7 @@ function Player() {
       autoShareRetryCountRef.current = 0;
       isLoading = false;
       resetRecording();
-      openErrorModal();
+      openErrorModal('vídeo gravado vazio');
       return;
     }
 
@@ -694,16 +749,50 @@ function Player() {
       } else {
         console.error('[VLibras Share] ID vazio na resposta');
         isLoading = false;
-        openErrorModal();
+        openErrorModal('resposta transcodificador');
       }
     } catch (err: unknown) {
-      const detail = err instanceof Error
-        ? { name: err.name, message: err.message }
-        : { raw: String(err) };
+      if (err instanceof TranscoderHttpError) {
+        console.error(
+          '[VLibras Share] Erro no postVideo:',
+          err.status,
+          err.bodySnippet
+        );
+        autoShareRetryCountRef.current = 0;
+        isLoading = false;
+        openErrorModal(
+          err.status > 0
+            ? `enviar transcodificador HTTP ${err.status}`
+            : err.bodySnippet.includes('EBML')
+              ? 'gravação WebM inválida'
+              : err.bodySnippet.trim()
+                ? `enviar transcodificador (${err.bodySnippet.slice(0, 100)})`
+                : 'enviar transcodificador sem rede'
+        );
+        return;
+      }
+      const ax = err as {
+        response?: { status?: number; data?: unknown };
+        message?: string;
+      };
+      const detail = {
+        status: ax.response?.status,
+        message: ax.message,
+        body:
+          typeof ax.response?.data === 'string'
+            ? ax.response.data.slice(0, 200)
+            : ax.response?.data,
+      };
       console.error('[VLibras Share] Erro no postVideo:', JSON.stringify(detail));
       autoShareRetryCountRef.current = 0;
       isLoading = false;
-      openErrorModal();
+      const msg =
+        typeof ax.message === 'string' && ax.message.trim()
+          ? ax.message.slice(0, 100)
+          : '';
+      openErrorModal(
+        msg ? `enviar transcodificador (${msg})` : 'enviar transcodificador'
+      );
     }
   };
 
@@ -1041,14 +1130,19 @@ function Player() {
 
       wasPlaying.current = newIsPlaying;
 
-      // Gravação: só após tradução iniciada via handlePlay (ignora saudação/idle)
-      if (newIsPlaying && shareCapturePendingRef.current) {
+      // Gravação: tradutor (handlePlay) ou mini player do dicionário (PLAY_NOW direto)
+      if (newIsPlaying && (shareCapturePendingRef.current || dictMiniActiveRef.current)) {
         shareCapturePendingRef.current = false;
         shareCaptureActiveRef.current = true;
         resetRecording();
         const started = ensureRecorderStarted();
         recording = started;
-        console.log('[VLibras Share] Recorder iniciado no início da tradução:', started);
+        console.log(
+          '[VLibras Share] Recorder iniciado:',
+          started,
+          'origem:',
+          dictMiniActiveRef.current ? 'dicionário' : 'tradutor'
+        );
       } else if (
         newIsPlaying &&
         shareCaptureActiveRef.current &&
@@ -1061,7 +1155,11 @@ function Player() {
       }
 
       if (!newIsPlaying && recording) {
-        stopProxyLoop();
+        /*
+         * Só libera o botão de compartilhar; NÃO paramos o proxy loop aqui.
+         * No Android, parar drawImage antes do MediaRecorder.stop() deixa o
+         * webm vazio ou inválido e o transcodificador falha depois.
+         */
         recording = false;
       }
     },
@@ -1493,9 +1591,8 @@ function Player() {
           type="button"
           disabled={TUTORIAL_PLAYING_STEPS.has(currentStep)}
           onClick={() => {
-            if (!recording && !isLoading) {
-              void initVideoSharing();
-            }
+            if (isLoading) return;
+            void initVideoSharing();
           }}>
           <IconShare color="#1447a6" size={22} />
         </button>
@@ -1677,7 +1774,7 @@ function Player() {
   // exactly the same way as a tap on the Player's own share button.
   useEffect(() => {
     const onMiniPlayerShare = () => {
-      if (recording || isLoading) return;
+      if (isLoading) return;
       void initVideoSharing();
     };
     window.addEventListener(MINI_PLAYER_SHARE_EVENT, onMiniPlayerShare);
@@ -1686,6 +1783,31 @@ function Player() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * INITIAL (estado de partida, antes de virar IDLE) usa a MESMA margem do idle.
+   * Antes usava 0, o que fazia o avatar ocupar o container inteiro na abertura e
+   * aparecer "grande/para frente" até reenquadrar. Agora o enquadramento é
+   * consistente desde a primeira pintura.
+   */
+  const avatarMarginBottom =
+    isPlaying || hasFinished
+      ? 138
+      : currentStep === HomeTutorialSteps.DICTIONARY ||
+        currentStep === HomeTutorialSteps.TRANSLATION ||
+        currentStep === HomeTutorialSteps.HISTORY
+        ? 270
+        : 126;
+
+  /**
+   * Enquanto o container não foi medido (ou mediu 0), deixamos o wrapper em
+   * `flex: 1` (comportamento idêntico à web). Depois de travado, a altura do
+   * avatar é a faixa do container menos a margem do estado atual.
+   */
+  const avatarHeight =
+    lockedContainerHeight === null
+      ? undefined
+      : Math.max(0, lockedContainerHeight - avatarMarginBottom);
 
   return (
     <div className="player-container">
@@ -1824,19 +1946,11 @@ function Player() {
         style={{
           width: '100%',
           flexShrink: 0,
-          flexGrow: lockedAvatarHeight ? 0 : undefined,
-          flexBasis: lockedAvatarHeight ? 'auto' : undefined,
-          height: lockedAvatarHeight ? `${lockedAvatarHeight}px` : undefined,
-          marginBottom: HomeTutorialSteps.INITIAL === currentStep
-            ? 0
-            : (isPlaying || hasFinished
-              ? 138
-              : (currentStep === HomeTutorialSteps.DICTIONARY ||
-                 currentStep === HomeTutorialSteps.TRANSLATION ||
-                 currentStep === HomeTutorialSteps.HISTORY
-                ? 270
-                : 126)),
-          background: isPlatform('ios') && visiblePlayer ? 'black' : '#E5E5E5',
+          flexGrow: avatarHeight === undefined ? undefined : 0,
+          flexBasis: avatarHeight === undefined ? undefined : 'auto',
+          height: avatarHeight === undefined ? undefined : `${avatarHeight}px`,
+          marginBottom: avatarMarginBottom,
+          background: '#E5E5E5',
         }}>
         <div id={UNITY_HOME_MOUNT_ID} className="player-unity-mount">
           <StableUnityPlayer />
